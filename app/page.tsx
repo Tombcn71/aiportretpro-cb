@@ -547,7 +547,7 @@ export default function HomePage() {
               <Link href="/over-ons" className="text-gray-300 hover:text-white transition-colors duration-200 text-sm">
                 Over Ons
               </Link>
-              <Link href="/prijzen" className="text-gray-300 hover:text-white transition-colors duration-200 text-sm">
+              <Link href="/pricing" className="text-gray-300 hover:text-white transition-colors duration-200 text-sm">
                 Prijzen
               </Link>
               <Link href="/contact" className="text-gray-300 hover:text-white transition-colors duration-200 text-sm">
@@ -586,7 +586,7 @@ export default function HomePage() {
                 <Linkedin size={20} />
               </Link>
               <Link
-                href="https://facebook.com"
+                href="https://www.facebook.com/profile.php?id=61578343760041"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-gray-300 hover:text-white transition-colors duration-200"
@@ -595,7 +595,7 @@ export default function HomePage() {
                 <Facebook size={20} />
               </Link>
               <Link
-                href="https://instagram.com"
+                href="https://www.instagram.com/aiportretpro.nl"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-gray-300 hover:text-white transition-colors duration-200"
