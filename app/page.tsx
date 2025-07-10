@@ -561,7 +561,7 @@ export default function HomePage() {
             <h4 className="text-white font-semibold text-sm uppercase tracking-wide">Juridisch</h4>
             <div className="flex flex-col space-y-2">
               <Link
-                href="/privacy-policy"
+                href="/privacy"
                 className="text-gray-300 hover:text-white transition-colors duration-200 text-sm"
               >
                 Privacy Policy

@@ -5,12 +5,12 @@ export default function TermsPage() {
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
           <div className="border-b border-gray-200 pb-6 mb-8">
             <h1 className="text-3xl font-semibold text-gray-900 mb-2">Algemene Voorwaarden</h1>
-            <p className="text-gray-600">De regels en voorwaarden voor het gebruik van AI Portrait Pro</p>
+            <p className="text-gray-600">De regels en voorwaarden voor het gebruik van AI Portret Pro</p>
           </div>
 
           <div className="space-y-8">
             <section className="bg-blue-50 rounded-lg p-6 border-l-4 border-blue-500">
-              <h2 className="text-xl font-semibold text-gray-900 mb-3">Welkom bij AI Portrait Pro</h2>
+              <h2 className="text-xl font-semibold text-gray-900 mb-3">Welkom bij AI Portret Pro</h2>
               <p className="text-gray-700">
                 Door onze service te gebruiken, gaat u akkoord met deze voorwaarden. Lees ze zorgvuldig door voordat u
                 begint met het creëren van uw AI-portretten.
@@ -22,13 +22,13 @@ export default function TermsPage() {
                 <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3">
                   <span className="text-blue-600 font-semibold text-sm">1</span>
                 </div>
-                Wat is AI Portrait Pro?
+                Wat is AI Portret Pro?
               </h2>
 
               <div className="ml-11">
                 <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-6 border border-blue-200">
                   <p className="text-gray-700 mb-4">
-                    AI Portrait Pro is een geavanceerde service die kunstmatige intelligentie gebruikt om professionele
+                    AI Portret Pro is een geavanceerde service die kunstmatige intelligentie gebruikt om professionele
                     portretten te genereren uit uw foto's.
                   </p>
                   <div className="grid md:grid-cols-3 gap-4">
@@ -259,7 +259,7 @@ export default function TermsPage() {
               <div className="flex flex-col sm:flex-row gap-4">
                 <div className="flex items-center space-x-2">
                   <span className="text-blue-600">📧</span>
-                  <span className="text-gray-700">support@aiportraitpro.com</span>
+                  <span className="text-gray-700">support@aiportretpro.com</span>
                 </div>
                 <div className="flex items-center space-x-2">
                   <span className="text-blue-600">📍</span>
@@ -278,7 +278,7 @@ export default function TermsPage() {
                     day: "numeric",
                   })}
                 </span>
-                <span>AI Portrait Pro • Nederlands recht van toepassing</span>
+                <span>AI Portret Pro • Nederlands recht van toepassing</span>
               </div>
             </div>
           </div>

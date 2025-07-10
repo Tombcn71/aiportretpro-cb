@@ -12,7 +12,7 @@ export default function PrivacyPage() {
             <section className="bg-blue-50 rounded-lg p-6 border-l-4 border-blue-500">
               <h2 className="text-xl font-semibold text-gray-900 mb-3">Samenvatting</h2>
               <p className="text-gray-700">
-                Bij AI Portrait Pro respecteren wij uw privacy. Wij verzamelen alleen de gegevens die nodig zijn om onze
+                Bij AI Portret Pro respecteren wij uw privacy. Wij verzamelen alleen de gegevens die nodig zijn om onze
                 AI-portretservice te leveren en beschermen deze met de hoogste beveiligingsstandaarden.
               </p>
             </section>
@@ -213,11 +213,11 @@ export default function PrivacyPage() {
                     <tbody className="bg-white divide-y divide-gray-200">
                       <tr>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Geüploade foto's</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">30 dagen</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">1 dag</td>
                       </tr>
                       <tr className="bg-gray-50">
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Gegenereerde portretten</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">1 jaar</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">Tot download</td>
                       </tr>
                       <tr>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Accountgegevens</td>
@@ -241,7 +241,7 @@ export default function PrivacyPage() {
               <div className="flex flex-col sm:flex-row gap-4">
                 <div className="flex items-center space-x-2">
                   <span className="text-blue-600">📧</span>
-                  <span className="text-gray-700">privacy@aiportraitpro.com</span>
+                  <span className="text-gray-700">privacy@aiportretpro.com</span>
                 </div>
                 <div className="flex items-center space-x-2">
                   <span className="text-blue-600">📍</span>
@@ -260,7 +260,7 @@ export default function PrivacyPage() {
                     day: "numeric",
                   })}
                 </span>
-                <span>AI Portrait Pro</span>
+                <span>AI Portret Pro</span>
               </div>
             </div>
           </div>
