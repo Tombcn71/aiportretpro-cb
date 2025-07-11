@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { ArrowRight, X, ChevronDown, ChevronUp, Star, Upload, Zap, Download } from "lucide-react"
 import { Header } from "@/components/header"
-import { LightningLogo } from "@/components/logo"
 import { Facebook, Instagram, Linkedin } from "lucide-react"
 
 const testimonials = [
@@ -59,53 +58,53 @@ const testimonials = [
 const carouselPhotos = [
   {
     id: 1,
-    photo: "/images/man1.jpg",
+    photo: "/images/carousel1.jpg",
     name: "Professional Man Portrait",
   },
   {
     id: 2,
-    photo: "/images/woman1.jpg",
+    photo: "/images/carousel2.jpg",
     name: "Professional Woman Portrait",
   },
   {
     id: 3,
-    photo: "/images/man2.jpg",
+    photo: "/images/carousel3.jpg",
     name: "Professional Man Portrait",
   },
   {
     id: 4,
-    photo: "/images/woman2.jpg",
+    photo: "/images/carousel4.jpg",
     name: "Professional Woman Portrait",
   },
   {
     id: 5,
-    photo: "/images/man3.jpg",
+    photo: "/images/carousel5.jpg",
     name: "Professional Man Portrait",
   },
   {
     id: 6,
-    photo: "/images/woman3.jpg",
+    photo: "/images/carousel6.jpg",
     name: "Professional Woman Portrait",
   },
   {
     id: 7,
-    photo: "/images/man4.jpg",
+    photo: "/images/carousel7.jpg",
     name: "Professional Man Portrait",
   },
   {
     id: 8,
-    photo: "/images/woman4.jpg",
+    photo: "/images/carousel8.jpg",
     name: "Professional Woman Portrait",
   },
   {
     id: 9,
-    photo: "/images/man5.jpg",
+    photo: "/images/carousel9.jpg",
     name: "Professional Man Portrait",
   },
   {
     id: 10,
-    photo: "/images/man6.jpg",
-    name: "Professional Man Portrait",
+    photo: "/images/carousel10.jpg",
+    name: "Professional Woman Portrait",
   },
 ]
 
@@ -245,6 +244,7 @@ export default function HomePage() {
                       width={256}
                       height={320}
                       className="w-full h-full object-cover brightness-110 contrast-105"
+                      priority={index < 10}
                     />
                   </div>
                 </div>
@@ -324,7 +324,9 @@ export default function HomePage() {
               <CardContent className="p-6 text-center">
                 <Upload className="h-12 w-12 text-[#0077B5] mx-auto mb-4" />
                 <h3 className="text-xl font-semibold mb-2">Supersnel</h3>
-                <p className="text-gray-600">Resultaten binnen 15 minuten. Makkelijk vanuit thuis, geen reistijd geen studio..</p>
+                <p className="text-gray-600">
+                  Resultaten binnen 15 minuten. Makkelijk vanuit thuis, geen reistijd geen studio..
+                </p>
               </CardContent>
             </Card>
 
@@ -394,7 +396,9 @@ export default function HomePage() {
       {/* CTA Section */}
       <section className="py-16">
         <div className="max-w-4xl mx-auto text-center px-4">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Klaar voor je professionele portretfoto's?</h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            Klaar voor je professionele portretfoto's?
+          </h2>
           <p className="text-xl text-gray-600 mb-8">
             Join duizenden professionals die al hun LinkedIn profiel hebben geüpgraded
           </p>
@@ -504,8 +508,7 @@ export default function HomePage() {
         </div>
       )}
 
-     
- {/* CTA Section */}
+      {/* CTA Section */}
       <section className="py-16">
         <div className="max-w-4xl mx-auto text-center px-4">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Klaar voor je professionele headshots?</h2>
@@ -519,102 +522,100 @@ export default function HomePage() {
           </Link>
         </div>
       </section>
- {/* Footer */}
-     <footer className="bg-black text-white py-8 px-6">
-      <div className="container mx-auto">
-        <div className="flex flex-col lg:flex-row lg:justify-between space-y-8 lg:space-y-0">
-          {/* Logo and Company Info */}
-          <div className="flex flex-col space-y-4">
-            <div className="flex items-center space-x-3">
-              <Image
-                src="/images/logo.png"
-                alt="AI Portrait Pro Logo"
-                width={30}
-                height={30}
-                className="rounded-lg"
-              />
-              <h3 className="text-xl font-bold text-white">aiportretpro</h3>
+      {/* Footer */}
+      <footer className="bg-black text-white py-8 px-6">
+        <div className="container mx-auto">
+          <div className="flex flex-col lg:flex-row lg:justify-between space-y-8 lg:space-y-0">
+            {/* Logo and Company Info */}
+            <div className="flex flex-col space-y-4">
+              <div className="flex items-center space-x-3">
+                <Image
+                  src="/images/logo.png"
+                  alt="AI Portrait Pro Logo"
+                  width={30}
+                  height={30}
+                  className="rounded-lg"
+                />
+                <h3 className="text-xl font-bold text-white">aiportretpro</h3>
+              </div>
+              <p className="text-gray-300 text-sm leading-relaxed max-w-xs">
+                Professionele AI zakelijke portretten in minuten.
+              </p>
             </div>
-            <p className="text-gray-300 text-sm leading-relaxed max-w-xs">
-              Professionele AI zakelijke portretten in minuten.
-            </p>
+
+            {/* Navigation Links */}
+            <div className="flex flex-col space-y-4">
+              <h4 className="text-white font-semibold text-sm uppercase tracking-wide">Navigatie</h4>
+              <div className="flex flex-col space-y-2">
+                <Link
+                  href="/over-ons"
+                  className="text-gray-300 hover:text-white transition-colors duration-200 text-sm"
+                >
+                  Over Ons
+                </Link>
+                <Link href="/pricing" className="text-gray-300 hover:text-white transition-colors duration-200 text-sm">
+                  Prijzen
+                </Link>
+                <Link href="/contact" className="text-gray-300 hover:text-white transition-colors duration-200 text-sm">
+                  Contact
+                </Link>
+              </div>
+            </div>
+
+            {/* Legal Links */}
+            <div className="flex flex-col space-y-4">
+              <h4 className="text-white font-semibold text-sm uppercase tracking-wide">Juridisch</h4>
+              <div className="flex flex-col space-y-2">
+                <Link href="/privacy" className="text-gray-300 hover:text-white transition-colors duration-200 text-sm">
+                  Privacy Policy
+                </Link>
+                <Link href="/terms" className="text-gray-300 hover:text-white transition-colors duration-200 text-sm">
+                  Terms
+                </Link>
+              </div>
+            </div>
+
+            {/* Social Media */}
+            <div className="flex flex-col space-y-4">
+              <h4 className="text-white font-semibold text-sm uppercase tracking-wide">Volg Ons</h4>
+              <div className="flex space-x-4">
+                <Link
+                  href="https://linkedin.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-300 hover:text-white transition-colors duration-200"
+                  aria-label="LinkedIn"
+                >
+                  <Linkedin size={20} />
+                </Link>
+                <Link
+                  href="https://www.facebook.com/profile.php?id=61578343760041"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-300 hover:text-white transition-colors duration-200"
+                  aria-label="Facebook"
+                >
+                  <Facebook size={20} />
+                </Link>
+                <Link
+                  href="https://www.instagram.com/aiportretpro.nl"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-300 hover:text-white transition-colors duration-200"
+                  aria-label="Instagram"
+                >
+                  <Instagram size={20} />
+                </Link>
+              </div>
+            </div>
           </div>
 
-          {/* Navigation Links */}
-          <div className="flex flex-col space-y-4">
-            <h4 className="text-white font-semibold text-sm uppercase tracking-wide">Navigatie</h4>
-            <div className="flex flex-col space-y-2">
-              <Link href="/over-ons" className="text-gray-300 hover:text-white transition-colors duration-200 text-sm">
-                Over Ons
-              </Link>
-              <Link href="/pricing" className="text-gray-300 hover:text-white transition-colors duration-200 text-sm">
-                Prijzen
-              </Link>
-              <Link href="/contact" className="text-gray-300 hover:text-white transition-colors duration-200 text-sm">
-                Contact
-              </Link>
-            </div>
-          </div>
-
-          {/* Legal Links */}
-          <div className="flex flex-col space-y-4">
-            <h4 className="text-white font-semibold text-sm uppercase tracking-wide">Juridisch</h4>
-            <div className="flex flex-col space-y-2">
-              <Link
-                href="/privacy"
-                className="text-gray-300 hover:text-white transition-colors duration-200 text-sm"
-              >
-                Privacy Policy
-              </Link>
-              <Link href="/terms" className="text-gray-300 hover:text-white transition-colors duration-200 text-sm">
-                Terms
-              </Link>
-            </div>
-          </div>
-
-          {/* Social Media */}
-          <div className="flex flex-col space-y-4">
-            <h4 className="text-white font-semibold text-sm uppercase tracking-wide">Volg Ons</h4>
-            <div className="flex space-x-4">
-              <Link
-                href="https://linkedin.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-gray-300 hover:text-white transition-colors duration-200"
-                aria-label="LinkedIn"
-              >
-                <Linkedin size={20} />
-              </Link>
-              <Link
-                href="https://www.facebook.com/profile.php?id=61578343760041"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-gray-300 hover:text-white transition-colors duration-200"
-                aria-label="Facebook"
-              >
-                <Facebook size={20} />
-              </Link>
-              <Link
-                href="https://www.instagram.com/aiportretpro.nl"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-gray-300 hover:text-white transition-colors duration-200"
-                aria-label="Instagram"
-              >
-                <Instagram size={20} />
-              </Link>
-            </div>
+          {/* Bottom Border */}
+          <div className="border-t border-gray-800 mt-8 pt-6">
+            <p className="text-gray-400 text-xs text-center">© 2025 aiportretpro. Alle rechten voorbehouden.</p>
           </div>
         </div>
-
-        {/* Bottom Border */}
-        <div className="border-t border-gray-800 mt-8 pt-6">
-          <p className="text-gray-400 text-xs text-center">© 2025 aiportretpro. Alle rechten voorbehouden.</p>
-        </div>
-      </div>
-    </footer>
-
-
+      </footer>
 
       <style jsx>{`
         @keyframes scroll {
