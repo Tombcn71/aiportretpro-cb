@@ -8,8 +8,8 @@ import FacebookPixel from "@/components/facebook-pixel"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Ai Portret Pro - Professionele AI Portetfotos",
-  description: "Maak professionele portetfotos met AI technologie",
+  title: "Ai Portret Pro - Professionele AI Portretfotos",
+  description: "Maak professionele portretfotos met AI technologie",
     generator: 'v0.dev'
 }
 
