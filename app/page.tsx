@@ -109,22 +109,22 @@ const carouselPhotos = [
 ]
 
 const galleryPhotos = [
-  "/images/man1.jpg",
-  "/images/woman1.jpg",
-  "/images/man2.jpg",
-  "/images/woman2.jpg",
-  "/images/man3.jpg",
-  "/images/woman3.jpg",
-  "/images/man4.jpg",
-  "/images/woman4.jpg",
-  "/images/man5.jpg",
-  "/images/man6.jpg",
-  "/images/man1.jpg",
-  "/images/woman1.jpg",
-  "/images/man2.jpg",
-  "/images/woman2.jpg",
-  "/images/man3.jpg",
-  "/images/woman3.jpg",
+  "/images/gallery1.jpg", // Man met bril
+  "/images/gallery2.jpg", // Vrouw in grijs pak
+  "/images/gallery3.jpg", // Man lachend
+  "/images/gallery4.jpg", // Vrouw wit shirt
+  "/images/gallery5.jpg", // Man donker pak
+  "/images/gallery6.jpg", // Vrouw blauw shirt
+  "/images/gallery7.jpg", // Man blauw shirt
+  "/images/gallery8.jpg", // Vrouw donker pak
+  "/images/gallery9.jpg", // Man met bril blauw shirt
+  "/images/gallery10.jpg", // Vrouw donker pak blauw shirt
+  "/images/gallery11.jpg", // Man wit shirt (nieuw)
+  "/images/gallery12.jpg", // Vrouw blauw shirt (nieuw)
+  "/images/gallery1.jpg", // Man met bril (herhaling)
+  "/images/gallery2.jpg", // Vrouw in grijs pak (herhaling)
+  "/images/gallery3.jpg", // Man lachend (herhaling)
+  "/images/gallery4.jpg", // Vrouw wit shirt (herhaling)
 ]
 
 const companies = [
