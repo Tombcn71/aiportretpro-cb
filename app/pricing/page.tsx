@@ -57,7 +57,7 @@ export default function PricingPage() {
     }
   }
 
-  const features = [
+  const features = ["1 fotoshoot
     "40 professionele portetfotos",
     "Portetfotos m/v pack (automatisch)",
     "Verschillende poses en achtergronden",
@@ -77,12 +77,7 @@ export default function PricingPage() {
 
         <div className="max-w-md mx-auto">
           <Card className="relative border-2 border-[#0077B5] shadow-xl">
-            <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-              <div className="bg-[#0077B5] text-white px-6 py-2 rounded-full text-sm font-medium flex items-center space-x-1">
-                <Star className="h-4 w-4 fill-current" />
-                <span>Meest populair</span>
-              </div>
-            </div>
+            
 
             <CardHeader className="text-center pt-8">
               <CardTitle className="text-3xl font-bold">Professional</CardTitle>
