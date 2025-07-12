@@ -109,10 +109,10 @@ const carouselPhotos = [
 ]
 
 const galleryPhotos = [
-  "/images/gallery1.jpg", // Man met bril
-  "/images/gallery2.jpg", // Vrouw in grijs pak
-  "/images/gallery3.jpg", // Man lachend
-  "/images/gallery4.jpg", // Vrouw wit shirt
+  "/images/gallery1.jpg", // Man met bril (nieuw)
+  "/images/gallery2.jpg", // Vrouw in grijs pak (nieuw)
+  "/images/gallery3.jpg", // Man met bril (nieuw)
+  "/images/gallery4.jpg", // Vrouw donker pak (nieuw)
   "/images/gallery5.jpg", // Man donker pak
   "/images/gallery6.jpg", // Vrouw blauw shirt
   "/images/gallery7.jpg", // Man blauw shirt
