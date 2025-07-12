@@ -57,13 +57,13 @@ export default function PricingPage() {
     }
   }
 
-  const features = ["1 fotoshoot
+  const features = ["1 fotoshoot,
     "40 professionele portetfotos",
-    "Portetfotos m/v pack (automatisch)",
-    "Verschillende poses en achtergronden",
+    "Verschillende outfits",
+    "Verschillende achtergronden",
     "HD kwaliteit downloads",
-    "Klaar binnen 30 minuten",
-    "Perfecte LinkedIn foto's",
+    "Klaar binnen 15 minuten",
+    
   ]
 
   return (
