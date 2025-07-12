@@ -57,7 +57,7 @@ export default function PricingPage() {
     }
   }
 
-  const features = ["1 fotoshoot,
+  const features = ["1 fotoshoot",
     "40 professionele portetfotos",
     "Verschillende outfits",
     "Verschillende achtergronden",
