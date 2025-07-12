@@ -1,7 +1,7 @@
 import type React from "react"
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
-import Script from "next/script"
+import dynamic from "next/dynamic"
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Providers } from "./providers"
@@ -9,6 +9,8 @@ import { Toaster } from "@/components/ui/toaster"
 import FacebookPixel from "@/components/facebook-pixel"
 
 const inter = Inter({ subsets: ["latin"] })
+
+const CrispWithNoSSR = dynamic(() => import("../components/crisp"))
 
 export const metadata: Metadata = {
   title: "AI Portrait Pro - Professional AI Headshots",
@@ -38,6 +40,7 @@ export default function RootLayout({
         <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
         <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
       </head>
+      <CrispWithNoSSR />
       <body className={inter.className}>
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
           <Providers>
@@ -46,15 +49,6 @@ export default function RootLayout({
             <FacebookPixel />
           </Providers>
         </ThemeProvider>
-
-        <Script id="crisp-config" strategy="beforeInteractive">
-          {`
-            window.$crisp=[];
-            window.CRISP_WEBSITE_ID="9bdd6a78-a829-4220-bfe4-5ad9336aca6b";
-          `}
-        </Script>
-
-        <Script src="https://client.crisp.chat/l.js" strategy="afterInteractive" />
       </body>
     </html>
   )
