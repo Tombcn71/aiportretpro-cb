@@ -2,23 +2,26 @@ import type React from "react"
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
+import { ThemeProvider } from "@/components/theme-provider"
 import { Providers } from "./providers"
+import { Toaster } from "@/components/ui/toaster"
 import FacebookPixel from "@/components/facebook-pixel"
 
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Ai Portret Pro - Professionele AI Portretfotos",
-  description: "Maak professionele portretfotos met AI technologie",
-  generator: "v0.dev",
+  title: "AI Portrait Pro - Professional AI Headshots",
+  description:
+    "Generate professional AI headshots in minutes. Perfect for LinkedIn, business profiles, and professional use.",
   icons: {
     icon: [
+      { url: "/favicon.ico" },
       { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
       { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
-      { url: "/favicon.ico", sizes: "any" },
     ],
     apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
   },
+    generator: 'v0.dev'
 }
 
 export default function RootLayout({
@@ -27,10 +30,21 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="nl">
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <link rel="icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+      </head>
       <body className={inter.className}>
-        <FacebookPixel />
-        <Providers>{children}</Providers>
+        <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
+          <Providers>
+            {children}
+            <Toaster />
+            <FacebookPixel />
+          </Providers>
+        </ThemeProvider>
       </body>
     </html>
   )

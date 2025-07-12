@@ -305,7 +305,7 @@ export default function HomePage() {
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-2">Gefeliciteerd! Je portretfoto's zijn klaar</h3>
               <p className="text-gray-600">
-                Download je 40+ professionele portretfoto's en gebruik ze direct voor LinkedIn, CV en meer
+                Download je 40 professionele portretfoto's en gebruik ze direct voor LinkedIn, CV en meer
               </p>
             </div>
           </div>
