@@ -109,10 +109,10 @@ const carouselPhotos = [
 ]
 
 const galleryPhotos = [
-  "/images/gallery1.jpg", // Man met bril (nieuw)
-  "/images/gallery2.jpg", // Vrouw in grijs pak (nieuw)
-  "/images/gallery3.jpg", // Man met bril (nieuw)
-  "/images/gallery4.jpg", // Vrouw donker pak (nieuw)
+  "/images/gallery1.jpg", // Man met bril
+  "/images/gallery2.jpg", // Vrouw in grijs pak
+  "/images/gallery3.jpg", // Man lachend
+  "/images/gallery4.jpg", // Vrouw wit shirt
   "/images/gallery5.jpg", // Man donker pak
   "/images/gallery6.jpg", // Vrouw blauw shirt
   "/images/gallery7.jpg", // Man blauw shirt
@@ -305,7 +305,7 @@ export default function HomePage() {
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-2">Gefeliciteerd! Je portretfoto's zijn klaar</h3>
               <p className="text-gray-600">
-                Download je 40 professionele portretfoto's en gebruik ze direct voor LinkedIn, CV en meer
+                Download je 40+ professionele portretfoto's en gebruik ze direct voor LinkedIn, CV en meer
               </p>
             </div>
           </div>
