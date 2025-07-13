@@ -42,11 +42,11 @@ export async function POST(request: NextRequest) {
 
       console.log("📝 Purchase update result:", purchaseResult)
 
-      if (purchaseResult[0]) {
+      if (purchaseResult.length > 0) {
         const userId = purchaseResult[0].user_id
-        console.log(`👤 Adding credit for user ${userId}`)
+        console.log(`👤 Adding credit for user ID: ${userId}`)
 
-        // Add 1 credit using the correct table structure
+        // Add 1 credit
         const creditResult = await sql`
           INSERT INTO credits (user_id, credits, created_at, updated_at)
           VALUES (${userId}, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
