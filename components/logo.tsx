@@ -101,13 +101,13 @@ export function LightningLogo({ size = "md" }: { size?: "sm" | "md" | "lg" }) {
   }
 
   const iconSizes = {
-    sm: "w-4 h-4",
-    md: "w-5 h-6",
-    lg: "w-9 h-9",
+    sm: "w-8 h-8",
+    md: "w-8 h-8",
+    lg: "w-10 h-10",
   }
 
   const textSizes = {
-    sm: "text-xs",
+    sm: "text-lg",
     md: "text-xl",
     lg: "text-2xl",
   }
@@ -130,7 +130,7 @@ export function LightningLogo({ size = "md" }: { size?: "sm" | "md" | "lg" }) {
 
       {/* Logo Text - Now in black */}
       <div className="flex flex-col">
-        <span className={`${textSizes[size]}  text-black leading-tight`}>AiPortretPro</span>
+        <span className={`${textSizes[size]} font-bold text-black leading-tight`}>Aiportret Pro</span>
         {size === "lg" && (
           <span className="text-xs text-gray-500 font-medium tracking-wide">PROFESSIONELE HEADSHOTS</span>
         )}

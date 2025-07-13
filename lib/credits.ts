@@ -1,35 +1,37 @@
-import { sql } from "@vercel/postgres"
+import { neon } from "@neondatabase/serverless"
+
+const sql = neon(process.env.DATABASE_URL!)
 
 export interface Credit {
   id: number
-  userId: number
+  userId: string
   amount: number
   createdAt: Date
   updatedAt: Date
 }
 
 export class CreditManager {
-  static async getUserCredits(userId: number): Promise<number> {
+  static async getUserCredits(userId: string): Promise<number> {
     try {
       const result = await sql`
-        SELECT amount FROM credits WHERE user_id = ${userId}
+        SELECT credits FROM credits WHERE user_id = ${userId}
       `
-      return result.rows[0]?.amount || 0
+      return result.length > 0 ? result[0].credits : 0
     } catch (error) {
       console.error("Error getting user credits:", error)
       return 0
     }
   }
 
-  static async addCredits(userId: number, amount: number): Promise<boolean> {
+  static async addCredits(userId: string, amount: number): Promise<boolean> {
     try {
       await sql`
-        INSERT INTO credits (user_id, amount, created_at, updated_at)
-        VALUES (${userId}, ${amount}, NOW(), NOW())
+        INSERT INTO credits (user_id, credits)
+        VALUES (${userId}, ${amount})
         ON CONFLICT (user_id) 
         DO UPDATE SET 
-          amount = credits.amount + ${amount},
-          updated_at = NOW()
+          credits = credits + ${amount},
+          updated_at = CURRENT_TIMESTAMP
       `
       return true
     } catch (error) {
@@ -38,30 +40,30 @@ export class CreditManager {
     }
   }
 
-  static async useCredit(userId: number): Promise<boolean> {
+  static async useCredit(userId: string): Promise<boolean> {
     try {
       const result = await sql`
         UPDATE credits 
-        SET amount = amount - 1, updated_at = NOW()
-        WHERE user_id = ${userId} AND amount > 0
-        RETURNING amount
+        SET credits = credits - 1, updated_at = CURRENT_TIMESTAMP
+        WHERE user_id = ${userId} AND credits > 0
+        RETURNING credits
       `
-      return result.rowCount > 0
+      return result.length > 0
     } catch (error) {
       console.error("Error using credit:", error)
       return false
     }
   }
 
-  static async setCredits(userId: number, amount: number): Promise<boolean> {
+  static async setCredits(userId: string, amount: number): Promise<boolean> {
     try {
       await sql`
-        INSERT INTO credits (user_id, amount, created_at, updated_at)
-        VALUES (${userId}, ${amount}, NOW(), NOW())
+        INSERT INTO credits (user_id, credits)
+        VALUES (${userId}, ${amount})
         ON CONFLICT (user_id) 
         DO UPDATE SET 
-          amount = ${amount},
-          updated_at = NOW()
+          credits = ${amount},
+          updated_at = CURRENT_TIMESTAMP
       `
       return true
     } catch (error) {
@@ -71,18 +73,18 @@ export class CreditManager {
   }
 }
 
-export async function getUserCredits(userId: number): Promise<number> {
+export async function getUserCredits(userId: string): Promise<number> {
   return CreditManager.getUserCredits(userId)
 }
 
-export async function addCredits(userId: number, amount: number): Promise<boolean> {
+export async function addCredits(userId: string, amount: number): Promise<boolean> {
   return CreditManager.addCredits(userId, amount)
 }
 
-export async function useCredit(userId: number): Promise<boolean> {
+export async function useCredit(userId: string): Promise<boolean> {
   return CreditManager.useCredit(userId)
 }
 
-export async function setCredits(userId: number, amount: number): Promise<boolean> {
+export async function setCredits(userId: string, amount: number): Promise<boolean> {
   return CreditManager.setCredits(userId, amount)
 }

@@ -18,9 +18,9 @@ export default function FacebookPixel() {
             t.src=v;s=b.getElementsByTagName(e)[0];
             s.parentNode.insertBefore(t,s)}(window, document,'script',
             'https://connect.facebook.net/en_US/fbevents.js');
-            fbq('init', '8110588262372718');
+            fbq('init', '1508299057002595');
             fbq('track', 'PageView');
-            console.log('✅ Facebook Pixel loaded with ID: 8110588262372718');
+            console.log('✅ Facebook Pixel loaded with ID: 1508299057002595');
           `,
         }}
       />
@@ -29,7 +29,7 @@ export default function FacebookPixel() {
           height="1"
           width="1"
           style={{ display: "none" }}
-          src="https://www.facebook.com/tr?id=8110588262372718&ev=PageView&noscript=1"
+          src="https://www.facebook.com/tr?id=1508299057002595&ev=PageView&noscript=1"
         />
       </noscript>
     </>
