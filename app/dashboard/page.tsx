@@ -5,7 +5,7 @@ import { Header } from "@/components/header"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Download, Camera, CreditCard, Clock, CheckCircle } from "lucide-react"
+import { Download, Camera, CreditCard, Clock, CheckCircle } from 'lucide-react'
 import Link from "next/link"
 import Image from "next/image"
 
@@ -29,11 +29,16 @@ export default function DashboardPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        console.log("🔄 Fetching dashboard data...")
+        
         // Fetch projects and credits in parallel
         const [projectsResponse, creditsResponse] = await Promise.all([
           fetch("/api/projects"),
           fetch("/api/credits/balance"),
         ])
+
+        console.log("📊 Projects response status:", projectsResponse.status)
+        console.log("💰 Credits response status:", creditsResponse.status)
 
         if (!projectsResponse.ok || !creditsResponse.ok) {
           throw new Error("Failed to fetch data")
@@ -42,10 +47,13 @@ export default function DashboardPage() {
         const projectsData = await projectsResponse.json()
         const creditsData = await creditsResponse.json()
 
+        console.log("📊 Projects data:", projectsData)
+        console.log("💰 Credits data:", creditsData)
+
         setProjects(projectsData)
         setCredits(creditsData)
       } catch (error) {
-        console.error("Error fetching data:", error)
+        console.error("❌ Error fetching data:", error)
         // Set default values on error
         setCredits({ credits: 0 })
       } finally {
@@ -113,6 +121,8 @@ export default function DashboardPage() {
       </div>
     )
   }
+
+  console.log("🎨 Rendering dashboard with credits:", credits.credits)
 
   return (
     <div className="min-h-screen bg-gray-50">

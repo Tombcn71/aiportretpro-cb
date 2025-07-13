@@ -50,19 +50,20 @@ export async function POST(request: NextRequest) {
         const currentCredits = await sql`
           SELECT credits FROM credits WHERE user_id = ${userId}
         `
-        console.log("💰 Current credits:", currentCredits)
+        console.log("💰 Current credits before:", currentCredits)
 
-        // Add 1 credit
+        // Add 1 credit - FIXED: use correct column reference
         const creditResult = await sql`
           INSERT INTO credits (user_id, credits, created_at, updated_at)
           VALUES (${userId}, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
           ON CONFLICT (user_id) 
           DO UPDATE SET 
-            credits = credits.credits + 1,
+            credits = EXCLUDED.credits + credits.credits,
             updated_at = CURRENT_TIMESTAMP
           RETURNING credits
         `
 
+        console.log("💰 Credit update result:", creditResult)
         console.log(`✅ User ${userId} now has ${creditResult[0]?.credits} credits`)
 
         return NextResponse.json({
@@ -73,6 +74,10 @@ export async function POST(request: NextRequest) {
         })
       } else {
         console.log("❌ No purchase found for session:", session.id)
+        return NextResponse.json({
+          received: true,
+          error: "No purchase found for session",
+        })
       }
     }
 
