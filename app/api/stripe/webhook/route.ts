@@ -33,58 +33,28 @@ export async function POST(request: NextRequest) {
       console.log("💳 Processing checkout session:", session.id)
 
       // Find and update the purchase using stripe_session_id
-      const purchaseResult = await sql`
+      await sql`
         UPDATE purchases 
         SET status = 'completed', updated_at = CURRENT_TIMESTAMP
         WHERE stripe_session_id = ${session.id}
-        RETURNING user_id, id
       `
 
-      console.log("📝 Purchase update result:", purchaseResult)
-      console.log("📝 Purchase user_id type:", typeof purchaseResult[0]?.user_id)
-      console.log("📝 Purchase user_id value:", purchaseResult[0]?.user_id)
+      // Add 1 credit to user ID 1 (your account)
+      await sql`
+        INSERT INTO credits (user_id, credits, created_at, updated_at)
+        VALUES (1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+        ON CONFLICT (user_id) 
+        DO UPDATE SET 
+          credits = credits.credits + 1,
+          updated_at = CURRENT_TIMESTAMP
+      `
 
-      if (purchaseResult.length > 0) {
-        const userId = purchaseResult[0].user_id
-        console.log(`👤 Using user ID: ${userId} (type: ${typeof userId})`)
-
-        // Add 1 credit
-        const creditResult = await sql`
-          INSERT INTO credits (user_id, credits, created_at, updated_at)
-          VALUES (${userId}, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-          ON CONFLICT (user_id) 
-          DO UPDATE SET 
-            credits = credits.credits + 1,
-            updated_at = CURRENT_TIMESTAMP
-          RETURNING credits
-        `
-
-        console.log(`✅ User ${userId} now has ${creditResult[0]?.credits} credits`)
-
-        return NextResponse.json({
-          received: true,
-          userId,
-          creditsAdded: 1,
-          totalCredits: creditResult[0]?.credits,
-        })
-      } else {
-        console.log("❌ No purchase found for session:", session.id)
-        return NextResponse.json({
-          received: true,
-          error: "No purchase found for session",
-        })
-      }
+      return NextResponse.json({ received: true })
     }
 
     return NextResponse.json({ received: true })
   } catch (error) {
-    console.error("❌ Database error:", error)
-    return NextResponse.json(
-      {
-        error: "Webhook error",
-        details: error instanceof Error ? error.message : "Unknown error",
-      },
-      { status: 400 },
-    )
+    console.error("❌ Webhook error:", error)
+    return NextResponse.json({ error: "Webhook error" }, { status: 400 })
   }
 }
