@@ -75,7 +75,8 @@ export async function POST(request: NextRequest) {
 
     console.log("Stripe session created:", checkoutSession.id)
 
-    // Create purchase record
+    // Create purchase record BEFORE redirecting to Stripe
+    console.log("Creating purchase record for session:", checkoutSession.id)
     const purchase = await createPurchase({
       userId: user.id,
       stripeSessionId: checkoutSession.id,
