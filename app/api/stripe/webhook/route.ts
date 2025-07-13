@@ -41,12 +41,14 @@ export async function POST(request: NextRequest) {
       `
 
       console.log("📝 Purchase update result:", purchaseResult)
+      console.log("📝 Purchase user_id type:", typeof purchaseResult[0]?.user_id)
+      console.log("📝 Purchase user_id value:", purchaseResult[0]?.user_id)
 
       if (purchaseResult.length > 0) {
-        const userId = purchaseResult[0].user_id // Dit is al een integer uit de database
-        console.log(`👤 Adding credit for user ID: ${userId} (type: ${typeof userId})`)
+        const userId = purchaseResult[0].user_id
+        console.log(`👤 Using user ID: ${userId} (type: ${typeof userId})`)
 
-        // Add 1 credit - userId is already an integer from the database
+        // Add 1 credit
         const creditResult = await sql`
           INSERT INTO credits (user_id, credits, created_at, updated_at)
           VALUES (${userId}, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
@@ -76,7 +78,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ received: true })
   } catch (error) {
-    console.error("❌ Webhook error:", error)
+    console.error("❌ Database error:", error)
     return NextResponse.json(
       {
         error: "Webhook error",
