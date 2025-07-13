@@ -50,6 +50,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Failed to create user" }, { status: 500 })
     }
 
+    console.log("User ID for purchase:", user.id, "type:", typeof user.id)
+
     // Initialize Stripe
     const { stripe } = await import("@/lib/stripe")
     console.log("Creating Stripe checkout session...")
