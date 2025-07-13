@@ -40,9 +40,17 @@ export async function POST(request: NextRequest) {
         RETURNING user_id, id
       `
 
+      console.log("📝 Purchase result:", purchaseResult)
+
       if (purchaseResult[0]) {
         const userId = purchaseResult[0].user_id
         console.log(`👤 Adding credit for user ${userId}`)
+
+        // Check current credits first
+        const currentCredits = await sql`
+          SELECT credits FROM credits WHERE user_id = ${userId}
+        `
+        console.log("💰 Current credits:", currentCredits)
 
         // Add 1 credit
         const creditResult = await sql`
@@ -63,6 +71,8 @@ export async function POST(request: NextRequest) {
           creditsAdded: 1,
           totalCredits: creditResult[0]?.credits,
         })
+      } else {
+        console.log("❌ No purchase found for session:", session.id)
       }
     }
 
