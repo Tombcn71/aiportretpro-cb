@@ -43,44 +43,28 @@ export async function POST(request: NextRequest) {
       console.log("📝 Purchase update result:", purchaseResult)
 
       if (purchaseResult.length > 0) {
-        const userIdentifier = purchaseResult[0].user_id
-        console.log(`🔍 User identifier from purchase: ${userIdentifier}`)
+        const userId = purchaseResult[0].user_id // Dit is al een integer uit de database
+        console.log(`👤 Adding credit for user ID: ${userId} (type: ${typeof userId})`)
 
-        // Get the actual numeric user ID from the users table
-        const userResult = await sql`
-          SELECT id FROM users WHERE email = ${userIdentifier}
+        // Add 1 credit - userId is already an integer from the database
+        const creditResult = await sql`
+          INSERT INTO credits (user_id, credits, created_at, updated_at)
+          VALUES (${userId}, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+          ON CONFLICT (user_id) 
+          DO UPDATE SET 
+            credits = credits.credits + 1,
+            updated_at = CURRENT_TIMESTAMP
+          RETURNING credits
         `
 
-        if (userResult.length > 0) {
-          const actualUserId = userResult[0].id
-          console.log(`👤 Found numeric user ID: ${actualUserId}`)
+        console.log(`✅ User ${userId} now has ${creditResult[0]?.credits} credits`)
 
-          // Add 1 credit using the numeric user ID
-          const creditResult = await sql`
-            INSERT INTO credits (user_id, credits, created_at, updated_at)
-            VALUES (${actualUserId}, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-            ON CONFLICT (user_id) 
-            DO UPDATE SET 
-              credits = credits.credits + 1,
-              updated_at = CURRENT_TIMESTAMP
-            RETURNING credits
-          `
-
-          console.log(`✅ User ${actualUserId} now has ${creditResult[0]?.credits} credits`)
-
-          return NextResponse.json({
-            received: true,
-            userId: actualUserId,
-            creditsAdded: 1,
-            totalCredits: creditResult[0]?.credits,
-          })
-        } else {
-          console.warn(`❌ User not found with email: ${userIdentifier}`)
-          return NextResponse.json({
-            received: true,
-            error: "User not found",
-          })
-        }
+        return NextResponse.json({
+          received: true,
+          userId,
+          creditsAdded: 1,
+          totalCredits: creditResult[0]?.credits,
+        })
       } else {
         console.log("❌ No purchase found for session:", session.id)
         return NextResponse.json({
