@@ -31,8 +31,6 @@ export async function POST(request: NextRequest) {
     if (event.type === "checkout.session.completed") {
       const session = event.data.object
       console.log("💳 Processing checkout session:", session.id)
-      console.log("💳 Session metadata:", session.metadata)
-      console.log("💳 Customer email:", session.customer_email)
 
       // Find and update the purchase using stripe_session_id
       const purchaseResult = await sql`
@@ -42,13 +40,13 @@ export async function POST(request: NextRequest) {
         RETURNING user_id, id
       `
 
-      console.log("📝 Purchase result:", purchaseResult)
+      console.log("📝 Purchase update result:", purchaseResult)
 
       if (purchaseResult[0]) {
         const userId = purchaseResult[0].user_id
         console.log(`👤 Adding credit for user ${userId}`)
 
-        // Add 1 credit
+        // Add 1 credit using the correct table structure
         const creditResult = await sql`
           INSERT INTO credits (user_id, credits, created_at, updated_at)
           VALUES (${userId}, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
