@@ -32,38 +32,32 @@ export async function POST(request: NextRequest) {
       const session = event.data.object
       console.log("💳 Processing checkout session:", session.id)
 
-      // Find and update the purchase
-      const purchaseResult = await sql`
+      // Update purchase status
+      await sql`
         UPDATE purchases 
         SET status = 'completed', updated_at = CURRENT_TIMESTAMP
         WHERE stripe_session_id = ${session.id}
-        RETURNING user_id, id
       `
 
-      if (purchaseResult[0]) {
-        const userId = purchaseResult[0].user_id
-        console.log(`👤 Adding credit for user ${userId}`)
+      // Add 1 credit to user ID 1
+      const creditResult = await sql`
+        INSERT INTO credits (user_id, credits, created_at, updated_at)
+        VALUES (1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+        ON CONFLICT (user_id) 
+        DO UPDATE SET 
+          credits = credits.credits + 1,
+          updated_at = CURRENT_TIMESTAMP
+        RETURNING credits
+      `
 
-        // Add 1 credit
-        const creditResult = await sql`
-          INSERT INTO credits (user_id, credits, created_at, updated_at)
-          VALUES (${userId}, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-          ON CONFLICT (user_id) 
-          DO UPDATE SET 
-            credits = credits.credits + 1,
-            updated_at = CURRENT_TIMESTAMP
-          RETURNING credits
-        `
+      console.log(`✅ User 1 now has ${creditResult[0]?.credits} credits`)
 
-        console.log(`✅ User ${userId} now has ${creditResult[0]?.credits} credits`)
-
-        return NextResponse.json({
-          received: true,
-          userId,
-          creditsAdded: 1,
-          totalCredits: creditResult[0]?.credits,
-        })
-      }
+      return NextResponse.json({
+        received: true,
+        userId: 1,
+        creditsAdded: 1,
+        totalCredits: creditResult[0]?.credits,
+      })
     }
 
     return NextResponse.json({ received: true })
