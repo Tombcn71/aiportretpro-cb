@@ -33,28 +33,48 @@ export async function POST(request: NextRequest) {
       console.log("💳 Processing checkout session:", session.id)
 
       // Find and update the purchase using stripe_session_id
-      await sql`
+      const purchaseResult = await sql`
         UPDATE purchases 
         SET status = 'completed', updated_at = CURRENT_TIMESTAMP
         WHERE stripe_session_id = ${session.id}
+        RETURNING user_id, id
       `
 
-      // Add 1 credit to user ID 1 (your account)
-      await sql`
-        INSERT INTO credits (user_id, credits, created_at, updated_at)
-        VALUES (1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-        ON CONFLICT (user_id) 
-        DO UPDATE SET 
-          credits = credits.credits + 1,
-          updated_at = CURRENT_TIMESTAMP
-      `
+      if (purchaseResult[0]) {
+        const userId = Number.parseInt(purchaseResult[0].user_id.toString())
+        console.log(`👤 Adding credit for user ${userId}`)
 
-      return NextResponse.json({ received: true })
+        // Add 1 credit
+        const creditResult = await sql`
+          INSERT INTO credits (user_id, credits, created_at, updated_at)
+          VALUES (${userId}, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+          ON CONFLICT (user_id) 
+          DO UPDATE SET 
+            credits = credits.credits + 1,
+            updated_at = CURRENT_TIMESTAMP
+          RETURNING credits
+        `
+
+        console.log(`✅ User ${userId} now has ${creditResult[0]?.credits} credits`)
+
+        return NextResponse.json({
+          received: true,
+          userId,
+          creditsAdded: 1,
+          totalCredits: creditResult[0]?.credits,
+        })
+      }
     }
 
     return NextResponse.json({ received: true })
   } catch (error) {
     console.error("❌ Webhook error:", error)
-    return NextResponse.json({ error: "Webhook error" }, { status: 400 })
+    return NextResponse.json(
+      {
+        error: "Webhook error",
+        details: error instanceof Error ? error.message : "Unknown error",
+      },
+      { status: 400 },
+    )
   }
 }
