@@ -48,7 +48,6 @@ export async function createPurchase(data: {
   headshotsIncluded: number
 }) {
   try {
-    console.log("Creating purchase with userId:", data.userId, "type:", typeof data.userId)
     const result = await sql`
       INSERT INTO purchases (user_id, stripe_session_id, plan_type, amount, headshots_included)
       VALUES (${data.userId}, ${data.stripeSessionId}, ${data.planType}, ${data.amount}, ${data.headshotsIncluded})
