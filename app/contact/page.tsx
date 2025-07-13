@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -70,6 +69,20 @@ export default function Contact() {
                   Email
                 </label>
                 <Input type="email" id="email" name="email" required className="w-full" placeholder="je@email.com" />
+              </div>
+
+              <div>
+                <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-2">
+                  Onderwerp
+                </label>
+                <Input
+                  type="text"
+                  id="subject"
+                  name="subject"
+                  required
+                  className="w-full"
+                  placeholder="Onderwerp van je bericht"
+                />
               </div>
 
               <div>
