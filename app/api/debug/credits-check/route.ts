@@ -1,44 +1,39 @@
 import { NextResponse } from "next/server"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
 import { sql } from "@/lib/db"
 
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions)
+    console.log("🔍 Checking credits and purchases...")
 
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
-
-    // Get user
-    const userResult = await sql`
-      SELECT id, email FROM users WHERE email = ${session.user.email}
-    `
-
-    if (!userResult[0]) {
-      return NextResponse.json({ error: "User not found" })
-    }
-
-    const userId = userResult[0].id
-
-    // Check credits table structure and data
+    // Check credits table
     const creditsResult = await sql`
-      SELECT * FROM credits WHERE user_id = ${userId}
+      SELECT user_id, credits, created_at, updated_at FROM credits ORDER BY user_id
     `
 
     // Check recent purchases
     const purchasesResult = await sql`
-      SELECT * FROM purchases WHERE user_id = ${userId} ORDER BY created_at DESC LIMIT 5
+      SELECT id, user_id, stripe_session_id, status, created_at, updated_at 
+      FROM purchases 
+      ORDER BY created_at DESC 
+      LIMIT 10
+    `
+
+    // Check users table
+    const usersResult = await sql`
+      SELECT id, email, created_at FROM users ORDER BY id
     `
 
     return NextResponse.json({
-      user: userResult[0],
       credits: creditsResult,
       recentPurchases: purchasesResult,
+      users: usersResult,
+      timestamp: new Date().toISOString(),
     })
   } catch (error) {
-    console.error("Debug error:", error)
-    return NextResponse.json({ error: error.message })
+    console.error("❌ Error checking credits:", error)
+    return NextResponse.json({
+      error: "Database error",
+      details: error instanceof Error ? error.message : "Unknown error",
+    })
   }
 }
