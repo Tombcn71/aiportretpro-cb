@@ -32,21 +32,13 @@ export async function POST(request: NextRequest) {
       const session = event.data.object
       console.log("💳 Processing checkout session:", session.id)
 
-      // First check if purchase exists
-      const checkPurchase = await sql`
-        SELECT * FROM purchases WHERE stripe_session_id = ${session.id}
-      `
-      console.log("🔍 Found purchase:", checkPurchase)
-
       // Find and update the purchase
       const purchaseResult = await sql`
-        UPDATE purchases 
-        SET status = 'completed', updated_at = CURRENT_TIMESTAMP
-        WHERE stripe_session_id = ${session.id}
-        RETURNING user_id, id
-      `
-
-      console.log("📝 Purchase update result:", purchaseResult)
+      UPDATE purchases 
+      SET status = 'completed', updated_at = CURRENT_TIMESTAMP
+      WHERE stripe_session_id = ${session.id}
+      RETURNING user_id, id
+    `
 
       if (purchaseResult[0]) {
         const userId = purchaseResult[0].user_id
@@ -54,14 +46,14 @@ export async function POST(request: NextRequest) {
 
         // Add 1 credit
         const creditResult = await sql`
-          INSERT INTO credits (user_id, credits, created_at, updated_at)
-          VALUES (${userId}, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-          ON CONFLICT (user_id) 
-          DO UPDATE SET 
-            credits = credits.credits + 1,
-            updated_at = CURRENT_TIMESTAMP
-          RETURNING credits
-        `
+        INSERT INTO credits (user_id, credits, created_at, updated_at)
+        VALUES (${userId}, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+        ON CONFLICT (user_id) 
+        DO UPDATE SET 
+          credits = credits.credits + 1,
+          updated_at = CURRENT_TIMESTAMP
+        RETURNING credits
+      `
 
         console.log(`✅ User ${userId} now has ${creditResult[0]?.credits} credits`)
 
@@ -70,12 +62,6 @@ export async function POST(request: NextRequest) {
           userId,
           creditsAdded: 1,
           totalCredits: creditResult[0]?.credits,
-        })
-      } else {
-        console.log("❌ No purchase found for session:", session.id)
-        return NextResponse.json({
-          received: true,
-          error: "No purchase found for session",
         })
       }
     }
