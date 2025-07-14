@@ -58,83 +58,52 @@ const testimonials = [
 const carouselPhotos = [
   {
     id: 1,
-    photo: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/tom4.jpg-NLtbqmqOYNsMIU3xPNWZj8MMUqijVQ.jpeg",
+    photo: "/images/carousel1.jpg",
     name: "Professional Man Portrait",
   },
   {
     id: 2,
-    photo: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/27695045-1.jpg-KeFMrIDpLDhdxSpfY5FdEzFX0cxHJx.jpeg",
+    photo: "/images/carousel2.jpg",
     name: "Professional Woman Portrait",
   },
   {
     id: 3,
-    photo: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/27692972-0.jpg-z2VqXf1F3y7cJiwxEpWzDzhwIYfLOb.jpeg",
+    photo: "/images/carousel3.jpg",
     name: "Professional Man Portrait",
   },
   {
     id: 4,
-    photo: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/tina5.jpg-ZV9CK5hpWaQkbnGhmbYjddalpcBjcq.jpeg",
+    photo: "/images/carousel4.jpg",
     name: "Professional Woman Portrait",
   },
   {
     id: 5,
-    photo: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/27691283-3.jpg-KjWSJjvstj3odWsATX8nKMlIUPNL43.jpeg",
+    photo: "/images/carousel5.jpg",
     name: "Professional Man Portrait",
   },
   {
     id: 6,
-    photo: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/27694199-3.jpg-sXcwPrJABMjm9witVwdxnMEF2JVk3k.jpeg",
+    photo: "/images/carousel6.jpg",
     name: "Professional Woman Portrait",
   },
   {
     id: 7,
-    photo: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/27693112-0.jpg-bXHSluYjMIyWdz1i4DbLoocaL7mOIz.jpeg",
+    photo: "/images/carousel7.jpg",
     name: "Professional Man Portrait",
   },
   {
     id: 8,
-    photo: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/27694689-0.jpg-LKqdfQavPAmGZsiRPb39KVl4jHsypI.jpeg",
+    photo: "/images/carousel8.jpg",
     name: "Professional Woman Portrait",
   },
   {
     id: 9,
-    photo: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/27691728-7.jpg-MJIZdM1HE9Mka9r6wOzr34Y7o3A2up.jpeg",
+    photo: "/images/carousel9.jpg",
     name: "Professional Man Portrait",
   },
   {
     id: 10,
-    photo: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/27693786-0.jpg-9Ap1rnz8RAGK0JkF2NuP3i5CRpp4Jx.jpeg",
-    name: "Professional Woman Portrait",
-  },
-  {
-    id: 11,
-    photo: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/tom2.jpg-svp0qoKAa13YmLNNioPmblnRFwx2EK.jpeg",
-    name: "Professional Man Portrait",
-  },
-  {
-    id: 12,
-    photo: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/tina2.jpg-9bJNGhWbRwH3XLpIeX8VqCYHdrSreM.jpeg",
-    name: "Professional Woman Portrait",
-  },
-  {
-    id: 13,
-    photo: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/tom3.jpg-nY593meIQgLV21MzFzhyDnAUvFYXgL.jpeg",
-    name: "Professional Man Portrait",
-  },
-  {
-    id: 14,
-    photo: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/tina4.jpg-VlRbMHcd4KZ6cBUtpRUCIKrqhevoqE.jpeg",
-    name: "Professional Woman Portrait",
-  },
-  {
-    id: 15,
-    photo:
-      "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/f8d2a738-b0bc-4a4f-9c9c-57dbd0af6bf0.jpg-G7ExcJMSnDKoufgif6EklTUdrg1hbo.jpeg",
-    name: "Professional Man Portrait",
-  },
-  {
-    id: 16,
-    photo: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/tina1.jpg-kivWgSSUfqrZpREF7XExFiB7UJXRqu.jpeg",
+    photo: "/images/carousel10.jpg",
     name: "Professional Woman Portrait",
   },
 ]
@@ -433,11 +402,11 @@ export default function HomePage() {
           <p className="text-xl text-gray-600 mb-8">
             Join duizenden professionals die al hun LinkedIn profiel hebben geüpgraded
           </p>
-          <Button size="lg" className="bg-[#0077B5] hover:bg-[#005885] text-white px-8 py-4 text-lg">
-            <Link href="/pricing">
+          <Link href="/pricing">
+            <Button size="lg" className="bg-[#0077B5] hover:bg-[#005885] text-white px-8 py-4 text-lg">
               Start nu voor €29 <ArrowRight className="ml-2 h-5 w-5" />
-            </Link>
-          </Button>
+            </Button>
+          </Link>
         </div>
       </section>
 
@@ -470,7 +439,7 @@ export default function HomePage() {
         </div>
         <div className="text-center mt-6 md:mt-8">
           <p className="text-gray-600 mb-4 text-sm md:text-base">Klik op een foto om te vergroten</p>
-          <Button size="lg" className="bg-[#0077B5] hover:bg-[#004182] text-white px-8 py-4 text-lg">
+          <Button asChild className="bg-[#0077B5] hover:bg-[#004182] text-white">
             <Link href="/pricing">
               Maak jouw portretten <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
@@ -546,11 +515,11 @@ export default function HomePage() {
           <p className="text-xl text-gray-600 mb-8">
             Join duizenden professionals die al hun LinkedIn profiel hebben geüpgraded
           </p>
-          <Button size="lg" className="bg-[#0077B5] hover:bg-[#005885] text-white px-8 py-4 text-lg">
-            <Link href="/pricing">
+          <Link href="/pricing">
+            <Button size="lg" className="bg-[#0077B5] hover:bg-[#005885] text-white px-8 py-4 text-lg">
               Start nu voor €29 <ArrowRight className="ml-2 h-5 w-5" />
-            </Link>
-          </Button>
+            </Button>
+          </Link>
         </div>
       </section>
       {/* Footer */}
