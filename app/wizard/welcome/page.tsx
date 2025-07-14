@@ -5,7 +5,6 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { ArrowRight, CheckCircle } from "lucide-react"
-import { ProgressBar } from "@/components/ui/progress-bar"
 import Image from "next/image"
 
 export default function WelcomePage() {
