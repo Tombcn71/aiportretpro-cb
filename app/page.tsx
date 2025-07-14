@@ -659,28 +659,65 @@ export default function HomePage() {
         </div>
       </footer>
 
-      <style jsx>{`
-        @keyframes scroll {
-          0% {
-            transform: translateX(0);
-          }
-          100% {
-            transform: translateX(-50%);
-          }
-        }
-        .animate-scroll {
-          animation: scroll 15s linear infinite;
-        }
-        .animate-scroll:hover {
-          animation-play-state: paused;
-        }
-        
-        @media (max-width: 768px) {
-          .animate-scroll {
-            animation: scroll 10s linear infinite;
-          }
-        }
-      `}</style>
+     <style jsx>{`
+  /* Animatie voor de fotocarrousel */
+  @keyframes scroll-photos {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      /* Scroll precies over de breedte van de originele set van 16 foto's */
+      /* Elk item heeft een breedte (w-40/w-64) plus een marge (mx-1/mx-2).
+         Je moet de totale breedte van 16 van deze items berekenen.
+         De -50% werkt als je een exacte kopie hebt en de container past.
+         Echter, als het niet perfect uitlijnt, kan de overgang schokken.
+         Een betere benadering is om het te baseren op het aantal items. */
+      transform: translateX(calc(-100% / 2)); /* Dit verplaatst de content met de breedte van de originele (ongedupliceerde) set */
+    }
+  }
+
+  .animate-scroll-photos {
+    animation: scroll-photos 30s linear infinite; /* Langere duur voor 16*2 foto's */
+    white-space: nowrap; /* Zorg ervoor dat de items op één regel blijven */
+  }
+
+  .animate-scroll-photos:hover {
+    animation-play-state: paused;
+  }
+
+  /* Responsive aanpassing voor kleinere schermen voor fotocarrousel */
+  @media (max-width: 768px) {
+    .animate-scroll-photos {
+      animation: scroll-photos 20s linear infinite; /* Iets sneller op mobiel */
+    }
+  }
+
+  /* Animatie voor de testimonial carrousel (onveranderd, maar hier ter referentie) */
+  @keyframes scroll-testimonials {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(calc(-50% - 1.5rem)); /* Dit blijft hetzelfde */
+    }
+  }
+
+  .animate-scroll-testimonials {
+    animation: scroll-testimonials 25s linear infinite;
+    white-space: nowrap;
+  }
+
+  .animate-scroll-testimonials:hover {
+    animation-play-state: paused;
+  }
+
+  /* Responsive aanpassing voor kleinere schermen voor testimonial carrousel */
+  @media (max-width: 768px) {
+    .animate-scroll-testimonials {
+      animation: scroll-testimonials 15s linear infinite;
+    }
+  }
+`}</style>
     </div>
   )
 }
