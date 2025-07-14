@@ -5,7 +5,7 @@ import { Header } from "@/components/header"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Download, Camera, CreditCard, Clock, CheckCircle } from "lucide-react"
+import { Download, Camera, CreditCard, Clock, CheckCircle, AlertCircle } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
 
@@ -25,6 +25,7 @@ export default function DashboardPage() {
   const [projects, setProjects] = useState<Project[]>([])
   const [credits, setCredits] = useState<UserCredits>({ credits: 0 })
   const [loading, setLoading] = useState(true)
+  const [imageErrors, setImageErrors] = useState<Set<string>>(new Set())
 
   useEffect(() => {
     const fetchData = async () => {
@@ -42,6 +43,8 @@ export default function DashboardPage() {
         const projectsData = await projectsResponse.json()
         const creditsData = await creditsResponse.json()
 
+        console.log("Dashboard data:", { projectsData, creditsData })
+
         setProjects(projectsData)
         setCredits(creditsData)
       } catch (error) {
@@ -58,12 +61,20 @@ export default function DashboardPage() {
 
   // Get all photos from all projects
   const allPhotos = projects.flatMap((project) =>
-    (project.generated_photos || []).map((photo) => ({
+    (project.generated_photos || []).map((photo, index) => ({
       url: photo,
       projectName: project.name,
       projectId: project.id,
+      index: index,
+      key: `${project.id}-${index}`,
     })),
   )
+
+  console.log("All photos:", allPhotos.length, allPhotos.slice(0, 5))
+
+  const handleImageError = (photoKey: string) => {
+    setImageErrors((prev) => new Set([...prev, photoKey]))
+  }
 
   const downloadPhoto = (photoUrl: string, projectName: string, index: number) => {
     const link = document.createElement("a")
@@ -96,6 +107,20 @@ export default function DashboardPage() {
           <Badge className="bg-yellow-100 text-yellow-800">
             <Clock className="w-3 h-3 mr-1" />
             Wachtend
+          </Badge>
+        )
+      case "training":
+        return (
+          <Badge className="bg-purple-100 text-purple-800">
+            <AlertCircle className="w-3 h-3 mr-1" />
+            Training
+          </Badge>
+        )
+      case "failed":
+        return (
+          <Badge className="bg-red-100 text-red-800">
+            <AlertCircle className="w-3 h-3 mr-1" />
+            Mislukt
           </Badge>
         )
       default:
@@ -172,7 +197,12 @@ export default function DashboardPage() {
                   </CardHeader>
                   <CardContent>
                     <div className="flex items-center justify-between">
-                      <p className="text-sm">{project.generated_photos?.length || 0} foto's gegenereerd</p>
+                      <p className="text-sm">
+                        {project.generated_photos?.length || 0} foto's gegenereerd
+                        {project.status === "completed" && project.generated_photos?.length !== 40 && (
+                          <span className="text-orange-600 ml-2">(verwacht: 40)</span>
+                        )}
+                      </p>
                       {project.status === "completed" && project.generated_photos?.length > 0 && (
                         <Link href={`/generate/${project.id}`}>
                           <Button size="sm" variant="outline">
@@ -190,7 +220,7 @@ export default function DashboardPage() {
 
         {/* Photos Gallery */}
         <div>
-          <h2 className="text-2xl font-semibold mb-6">Alle Portetfotos</h2>
+          <h2 className="text-2xl font-semibold mb-6">Alle Portetfotos ({allPhotos.length} foto's)</h2>
 
           {allPhotos.length === 0 ? (
             <div className="text-center py-20">
@@ -213,22 +243,34 @@ export default function DashboardPage() {
             </div>
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-              {allPhotos.map((photo, index) => (
-                <div key={index} className="group">
+              {allPhotos.map((photo) => (
+                <div key={photo.key} className="group">
                   <div className="aspect-[3/4] rounded-lg overflow-hidden bg-gray-100 shadow-md hover:shadow-lg transition-shadow">
-                    <Image
-                      src={photo.url || "/placeholder.svg"}
-                      alt={`Portretfoto ${index + 1}`}
-                      width={300}
-                      height={300}
-                      className="w-full h-full object-cover"
-                    />
+                    {!imageErrors.has(photo.key) ? (
+                      <Image
+                        src={photo.url || "/placeholder.svg"}
+                        alt={`Portretfoto ${photo.index + 1} van ${photo.projectName}`}
+                        width={300}
+                        height={400}
+                        className="w-full h-full object-cover"
+                        onError={() => handleImageError(photo.key)}
+                        unoptimized
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-gray-200">
+                        <div className="text-center text-gray-500">
+                          <AlertCircle className="h-8 w-8 mx-auto mb-2" />
+                          <p className="text-xs">Foto niet beschikbaar</p>
+                        </div>
+                      </div>
+                    )}
                   </div>
                   <Button
-                    onClick={() => downloadPhoto(photo.url, photo.projectName, index)}
+                    onClick={() => downloadPhoto(photo.url, photo.projectName, photo.index)}
                     size="sm"
                     variant="outline"
                     className="w-full mt-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                    disabled={imageErrors.has(photo.key)}
                   >
                     <Download className="h-4 w-4 mr-2" />
                     Download
@@ -238,6 +280,21 @@ export default function DashboardPage() {
             </div>
           )}
         </div>
+
+        {/* Debug Info */}
+        {process.env.NODE_ENV === "development" && (
+          <div className="mt-8 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+            <h3 className="font-semibold mb-2">Debug Info:</h3>
+            <p className="text-sm">Total projects: {projects.length}</p>
+            <p className="text-sm">Total photos: {allPhotos.length}</p>
+            <p className="text-sm">Image errors: {imageErrors.size}</p>
+            <Link href="/debug-astria">
+              <Button size="sm" variant="outline" className="mt-2 bg-transparent">
+                Open Debug Dashboard
+              </Button>
+            </Link>
+          </div>
+        )}
       </div>
     </div>
   )

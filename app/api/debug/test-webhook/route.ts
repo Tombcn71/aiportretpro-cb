@@ -1,77 +1,28 @@
-import { type NextRequest, NextResponse } from "next/server"
-import { sql } from "@/lib/db"
+import { NextResponse } from "next/server"
 
-export async function POST(request: NextRequest) {
+export async function GET() {
   try {
-    const body = await request.json()
-
-    console.log("🧪 Simple webhook test received:", body)
-
-    // Log the test webhook to database
-    try {
-      await sql`
-        INSERT INTO webhook_logs (
-          project_id, 
-          webhook_type, 
-          method, 
-          headers, 
-          body, 
-          query_params, 
-          processed,
-          status
-        ) VALUES (
-          999, 
-          'test-webhook', 
-          'POST', 
-          ${JSON.stringify(Object.fromEntries(request.headers.entries()))}, 
-          ${JSON.stringify(body)}, 
-          ${JSON.stringify(Object.fromEntries(request.nextUrl.searchParams.entries()))}, 
-          true,
-          'success'
-        )
-      `
-    } catch (dbError) {
-      console.error("Failed to log test webhook to database:", dbError)
-    }
-
+    // Simple test endpoint
     return NextResponse.json({
-      received: true,
+      status: "success",
+      message: "Webhook endpoint is working",
       timestamp: new Date().toISOString(),
-      body,
-      message: "Simple webhook test successful",
     })
   } catch (error) {
-    console.error("Error in simple webhook test:", error)
+    console.error("Test webhook error:", error)
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+  }
+}
 
-    // Log error to database
-    try {
-      await sql`
-        INSERT INTO webhook_logs (
-          project_id, 
-          webhook_type, 
-          method, 
-          status,
-          error_message,
-          processed
-        ) VALUES (
-          999, 
-          'test-webhook', 
-          'POST', 
-          'error',
-          ${error.message},
-          false
-        )
-      `
-    } catch (dbError) {
-      console.error("Failed to log error to database:", dbError)
-    }
-
-    return NextResponse.json(
-      {
-        error: "Internal server error",
-        details: error.message,
-      },
-      { status: 500 },
-    )
+export async function POST() {
+  try {
+    return NextResponse.json({
+      status: "success",
+      message: "POST webhook test successful",
+      timestamp: new Date().toISOString(),
+    })
+  } catch (error) {
+    console.error("Test webhook POST error:", error)
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }
