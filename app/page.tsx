@@ -56,101 +56,117 @@ const testimonials = [
 ]
 
 const carouselPhotos = [
+  // Round 1: Tom (man), Tina (vrouw), Man met bril (man), Professionele vrouw (vrouw) - Photo 1 van elk
   {
     id: 1,
-    photo: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/27693112-0.jpg-XFvF2mnZk0e3vyAZBgYBJwEgW7ekzJ.jpeg",
-    name: "Professional Man Portrait",
+    photo: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/tom4.jpg-mgmypdcq0X97yxAns6kFe4xxpnwvqG.jpeg",
+    name: "Tom - Professional Portrait 1",
   },
   {
     id: 2,
-    photo: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/tina5.jpg-MG3wlniYHfXtxrkhHd398p59VCXPvC.jpeg",
-    name: "Professional Woman Portrait",
+    photo: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/tina5.jpg-ZV9CK5hpWaQkbnGhmbYjddalpcBjcq.jpeg",
+    name: "Tina - Professional Portrait 1",
   },
   {
     id: 3,
-    photo: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/27691283-3.jpg-o42jpJEtVlDKQSo87N8ke0mV4DH659.jpeg",
-    name: "Professional Man Portrait",
+    photo: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/27692972-0.jpg-z2VqXf1F3y7cJiwxEpWzDzhwIYfLOb.jpeg",
+    name: "Professional Man - Portrait 1",
   },
   {
     id: 4,
-    photo: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/tina.jpg-6tENXn8j1FIFy44VGFRqGuA8AK3aZn.jpeg",
-    name: "Professional Woman Portrait",
+    photo: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/27695045-1.jpg-KeFMrIDpLDhdxSpfY5FdEzFX0cxHJx.jpeg",
+    name: "Professional Woman - Portrait 1",
   },
+  // Round 2: Tom (man), Tina (vrouw), Man met bril (man), Professionele vrouw (vrouw) - Photo 2 van elk
   {
     id: 5,
-    photo: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/27691728-7.jpg-ljkdwNkJUh080Da4xpo9yxtXScZlwU.jpeg",
-    name: "Professional Man Portrait",
+    photo: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/tom2.jpg-37vydo8MeTF1rouq3T9kywWBsDZYOo.jpeg",
+    name: "Tom - Professional Portrait 2",
   },
   {
     id: 6,
-    photo: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/27693786-0.jpg-uqX9N5LaqHqB7bbbQPMG5Tspuu85d5.jpeg",
-    name: "Professional Woman Portrait",
+    photo: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/tina2.jpg-9bJNGhWbRwH3XLpIeX8VqCYHdrSreM.jpeg",
+    name: "Tina - Professional Portrait 2",
   },
   {
     id: 7,
-    photo: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/27692972-0.jpg-BKMXChGLh1nKiS04jpJuR2spK2MtMS.jpeg",
-    name: "Professional Man Portrait",
+    photo: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/27691283-3.jpg-KjWSJjvstj3odWsATX8nKMlIUPNL43.jpeg",
+    name: "Professional Man - Portrait 2",
   },
   {
     id: 8,
-    photo: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/27694689-0.jpg-rinLGBry4JFTuGmpT0T5lEyxuG6NIC.jpeg",
-    name: "Professional Woman Portrait",
+    photo: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/27694199-3.jpg-sXcwPrJABMjm9witVwdxnMEF2JVk3k.jpeg",
+    name: "Professional Woman - Portrait 2",
   },
+  // Round 3: Tom (man), Tina (vrouw), Man met bril (man), Professionele vrouw (vrouw) - Photo 3 van elk
   {
     id: 9,
-    photo: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/tom4.jpg-LDoo7oxRS7FtRFyn0ViKz3w1AMx6nS.jpeg",
-    name: "Professional Man Portrait",
+    photo: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/tom3.jpg-48UE4t6NHCScOsH5o4AATafHBpm82v.jpeg",
+    name: "Tom - Professional Portrait 3",
   },
   {
     id: 10,
-    photo: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/tina2.jpg-JmLfmZqKD3gQGbxEhfp1rdIYfcQqUk.jpeg",
-    name: "Professional Woman Portrait",
+    photo: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/tina4.jpg-VT7DFhrP9lFDQlsVKx6JgEmF6xxQ7e.jpeg",
+    name: "Tina - Professional Portrait 3",
   },
   {
     id: 11,
-    photo: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/tom2.jpg-75Ga3OHoyMkLDbihmTESJEq5UI0CPQ.jpeg",
-    name: "Professional Man Portrait",
+    photo: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/27693112-0.jpg-bXHSluYjMIyWdz1i4DbLoocaL7mOIz.jpeg",
+    name: "Professional Man - Portrait 3",
   },
   {
     id: 12,
-    photo: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/tina4.jpg-Q65UYAWURSQ7QgRv6uWmjJxn4PBWdK.jpeg",
-    name: "Professional Woman Portrait",
+    photo: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/27694689-0.jpg-LKqdfQavPAmGZsiRPb39KVl4jHsypI.jpeg",
+    name: "Professional Woman - Portrait 3",
   },
+  // Round 4: Tom (man), Tina (vrouw), Man met bril (man), Professionele vrouw (vrouw) - Photo 4 van elk
   {
     id: 13,
-    photo: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/tom3.jpg-8GBrNhaQHvPP2gi0mWUbVHbccPXwk8.jpeg",
-    name: "Professional Man Portrait",
+    photo:
+      "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/f8d2a738-b0bc-4a4f-9c9c-57dbd0af6bf0.jpg-599T41RPoWTGCpccOkUkgds8SaQVZ9.jpeg",
+    name: "Tom - Professional Portrait 4",
   },
   {
     id: 14,
-    photo: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/tina1.jpg-BKAe2TB3CEtkqhVaW0K6ILS3cHgEc9.jpeg",
-    name: "Professional Woman Portrait",
+    photo: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/tina1.jpg-kivWgSSUfqrZpREF7XExFiB7UJXRqu.jpeg",
+    name: "Tina - Professional Portrait 4",
   },
   {
     id: 15,
-    photo:
-      "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/f8d2a738-b0bc-4a4f-9c9c-57dbd0af6bf0.jpg-H0C5Ulu0NP6oCzNiqzv2lr06pU8eNj.jpeg",
-    name: "Professional Man Portrait",
+    photo: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/27691728-7.jpg-MJIZdM1HE9Mka9r6wOzr34Y7o3A2up.jpeg",
+    name: "Professional Man - Portrait 4",
+  },
+  {
+    id: 16,
+    photo: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/27693786-0.jpg-9Ap1rnz8RAGK0JkF2NuP3i5CRpp4Jx.jpeg",
+    name: "Professional Woman - Portrait 4",
   },
 ]
 
 const galleryPhotos = [
-  "/images/gallery1.jpg", // Man met bril (nieuw)
-  "/images/gallery2.jpg", // Vrouw in grijs pak (nieuw)
-  "/images/gallery3.jpg", // Man met bril (nieuw)
-  "/images/gallery4.jpg", // Vrouw donker pak (nieuw)
-  "/images/gallery5.jpg", // Man donker pak
-  "/images/gallery6.jpg", // Vrouw blauw shirt
-  "/images/gallery7.jpg", // Man blauw shirt
-  "/images/gallery8.jpg", // Vrouw donker pak
-  "/images/gallery9.jpg", // Man met bril blauw shirt
-  "/images/gallery10.jpg", // Vrouw donker pak blauw shirt
-  "/images/gallery11.jpg", // Man wit shirt (nieuw)
-  "/images/gallery12.jpg", // Vrouw blauw shirt (nieuw)
-  "/images/gallery1.jpg", // Man met bril (herhaling)
-  "/images/gallery2.jpg", // Vrouw in grijs pak (herhaling)
-  "/images/gallery3.jpg", // Man lachend (herhaling)
-  "/images/gallery4.jpg", // Vrouw wit shirt (herhaling)
+  // Round 1: Tom (man), Tina (vrouw), Man met bril (man), Professionele vrouw (vrouw) - Photo 1 van elk
+  "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/tom4.jpg-mgmypdcq0X97yxAns6kFe4xxpnwvqG.jpeg",
+  "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/tina5.jpg-ZV9CK5hpWaQkbnGhmbYjddalpcBjcq.jpeg",
+  "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/27692972-0.jpg-z2VqXf1F3y7cJiwxEpWzDzhwIYfLOb.jpeg",
+  "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/27695045-1.jpg-KeFMrIDpLDhdxSpfY5FdEzFX0cxHJx.jpeg",
+
+  // Round 2: Tom (man), Tina (vrouw), Man met bril (man), Professionele vrouw (vrouw) - Photo 2 van elk
+  "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/tom2.jpg-37vydo8MeTF1rouq3T9kywWBsDZYOo.jpeg",
+  "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/tina2.jpg-9bJNGhWbRwH3XLpIeX8VqCYHdrSreM.jpeg",
+  "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/27691283-3.jpg-KjWSJjvstj3odWsATX8nKMlIUPNL43.jpeg",
+  "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/27694199-3.jpg-sXcwPrJABMjm9witVwdxnMEF2JVk3k.jpeg",
+
+  // Round 3: Tom (man), Tina (vrouw), Man met bril (man), Professionele vrouw (vrouw) - Photo 3 van elk
+  "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/tom3.jpg-48UE4t6NHCScOsH5o4AATafHBpm82v.jpeg",
+  "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/tina4.jpg-VT7DFhrP9lFDQlsVKx6JgEmF6xxQ7e.jpeg",
+  "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/27693112-0.jpg-bXHSluYjMIyWdz1i4DbLoocaL7mOIz.jpeg",
+  "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/27694689-0.jpg-LKqdfQavPAmGZsiRPb39KVl4jHsypI.jpeg",
+
+  // Round 4: Tom (man), Tina (vrouw), Man met bril (man), Professionele vrouw (vrouw) - Photo 4 van elk
+  "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/f8d2a738-b0bc-4a4f-9c9c-57dbd0af6bf0.jpg-599T41RPoWTGCpccOkUkgds8SaQVZ9.jpeg",
+  "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/tina1.jpg-kivWgSSUfqrZpREF7XExFiB7UJXRqu.jpeg",
+  "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/27691728-7.jpg-MJIZdM1HE9Mka9r6wOzr34Y7o3A2up.jpeg",
+  "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/27693786-0.jpg-9Ap1rnz8RAGK0JkF2NuP3i5CRpp4Jx.jpeg",
 ]
 
 const companies = [
@@ -428,11 +444,11 @@ export default function HomePage() {
           <p className="text-xl text-gray-600 mb-8">
             Join duizenden professionals die al hun LinkedIn profiel hebben geüpgraded
           </p>
-          <Link href="/pricing">
-            <Button size="lg" className="bg-[#0077B5] hover:bg-[#005885] text-white px-8 py-4 text-lg">
+          <Button size="lg" className="bg-[#0077B5] hover:bg-[#005885] text-white px-8 py-4 text-lg">
+            <Link href="/pricing">
               Start nu voor €29 <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         </div>
       </section>
 
@@ -465,7 +481,7 @@ export default function HomePage() {
         </div>
         <div className="text-center mt-6 md:mt-8">
           <p className="text-gray-600 mb-4 text-sm md:text-base">Klik op een foto om te vergroten</p>
-          <Button asChild className="bg-[#0077B5] hover:bg-[#004182] text-white">
+          <Button size="lg" className="bg-[#0077B5] hover:bg-[#004182] text-white px-8 py-4 text-lg">
             <Link href="/pricing">
               Maak jouw portretten <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
@@ -541,11 +557,11 @@ export default function HomePage() {
           <p className="text-xl text-gray-600 mb-8">
             Join duizenden professionals die al hun LinkedIn profiel hebben geüpgraded
           </p>
-          <Link href="/pricing">
-            <Button size="lg" className="bg-[#0077B5] hover:bg-[#005885] text-white px-8 py-4 text-lg">
+          <Button size="lg" className="bg-[#0077B5] hover:bg-[#005885] text-white px-8 py-4 text-lg">
+            <Link href="/pricing">
               Start nu voor €29 <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         </div>
       </section>
       {/* Footer */}

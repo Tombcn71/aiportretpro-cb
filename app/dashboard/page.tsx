@@ -6,21 +6,14 @@ import { redirect } from "next/navigation"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Download, Trash2, CreditCard } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
+import { Download, Trash2, AlertCircle } from "lucide-react"
 import { Header } from "@/components/header"
 
 interface Photo {
   id: string
   url: string
   project_name?: string
-}
-
-interface Project {
-  id: number
-  name: string
-  status: string
-  generated_photos: string[]
-  created_at: string
 }
 
 export default function Dashboard() {
@@ -32,39 +25,34 @@ export default function Dashboard() {
   const [deletingPhoto, setDeletingPhoto] = useState<string | null>(null)
 
   useEffect(() => {
-    if (status === "loading") return
-    if (!session) {
+    if (status === "unauthenticated") {
       redirect("/login")
     }
-    fetchData()
-  }, [session, status])
+  }, [status])
 
-  const fetchData = async () => {
+  useEffect(() => {
+    if (session?.user?.email) {
+      fetchPhotos()
+      fetchCredits()
+    }
+  }, [session])
+
+  const fetchPhotos = async () => {
     try {
-      setLoading(true)
-
-      // Fetch credits
-      const creditsResponse = await fetch("/api/credits/balance")
-      if (creditsResponse.ok) {
-        const creditsData = await creditsResponse.json()
-        setCredits(creditsData.balance || 0)
-      }
-
-      // Fetch all photos from all projects
-      const projectsResponse = await fetch("/api/projects")
-      if (projectsResponse.ok) {
-        const projectsData = await projectsResponse.json()
+      const response = await fetch("/api/projects")
+      if (response.ok) {
+        const data = await response.json()
 
         // Extract all photos from all projects
         const allPhotos: Photo[] = []
-        projectsData.forEach((project: Project) => {
+        data.projects.forEach((project: any) => {
           if (project.generated_photos && Array.isArray(project.generated_photos)) {
             project.generated_photos.forEach((photoUrl: string, index: number) => {
               if (photoUrl && photoUrl.includes("astria.ai")) {
                 allPhotos.push({
                   id: `${project.id}-${index}`,
                   url: photoUrl,
-                  project_name: project.name,
+                  project_name: project.project_name,
                 })
               }
             })
@@ -79,9 +67,21 @@ export default function Dashboard() {
         setPhotos(uniquePhotos)
       }
     } catch (error) {
-      console.error("Error fetching data:", error)
+      console.error("Error fetching photos:", error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const fetchCredits = async () => {
+    try {
+      const response = await fetch("/api/credits/balance")
+      if (response.ok) {
+        const data = await response.json()
+        setCredits(data.credits || 0)
+      }
+    } catch (error) {
+      console.error("Error fetching credits:", error)
     }
   }
 
@@ -91,7 +91,6 @@ export default function Dashboard() {
     }
 
     setDeletingPhoto(photoId)
-
     try {
       const response = await fetch("/api/photos/delete", {
         method: "POST",
@@ -102,7 +101,6 @@ export default function Dashboard() {
       })
 
       if (response.ok) {
-        // Remove photo from local state
         setPhotos(photos.filter((photo) => photo.id !== photoId))
       } else {
         alert("Er ging iets mis bij het verwijderen van de foto")
@@ -128,18 +126,20 @@ export default function Dashboard() {
       document.body.removeChild(link)
       window.URL.revokeObjectURL(downloadUrl)
     } catch (error) {
-      console.error("Download failed:", error)
+      console.error("Error downloading photo:", error)
     }
   }
 
-  if (loading) {
+  if (status === "loading" || loading) {
     return (
       <div className="min-h-screen bg-gray-50">
         <Header />
         <div className="container mx-auto px-4 py-8">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#0077B5] mx-auto"></div>
-            <p className="mt-4 text-gray-600">Dashboard laden...</p>
+          <div className="flex items-center justify-center min-h-[400px]">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#0077B5] mx-auto mb-4"></div>
+              <p className="text-gray-600">Dashboard laden...</p>
+            </div>
           </div>
         </div>
       </div>
@@ -155,45 +155,47 @@ export default function Dashboard() {
         <div className="mb-8">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <CreditCard className="h-5 w-5" />
-                Jouw Credits
+              <CardTitle className="flex items-center justify-between">
+                <span>Jouw Credits</span>
+                <Badge variant="secondary" className="text-lg px-3 py-1">
+                  {credits} credits
+                </Badge>
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-2xl font-bold text-[#0077B5]">{credits}</p>
-                  <p className="text-gray-600">Credits beschikbaar</p>
-                </div>
-                <Button asChild>
-                  <a href="/pricing">Credits Kopen</a>
-                </Button>
-              </div>
+              <p className="text-gray-600">
+                {credits > 0
+                  ? `Je hebt nog ${credits} credits beschikbaar voor nieuwe portretten.`
+                  : "Je hebt geen credits meer. Koop nieuwe credits om meer portretten te maken."}
+              </p>
             </CardContent>
           </Card>
         </div>
 
-        {/* Photos Gallery */}
+        {/* Photos Section */}
         <div className="mb-8">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold">Jouw Portetfotos</h2>
-            <Button
-              onClick={() => setDeleteMode(!deleteMode)}
-              variant={deleteMode ? "destructive" : "outline"}
-              className="flex items-center gap-2"
-            >
-              <Trash2 className="h-4 w-4" />
-              {deleteMode ? "Annuleren" : "Foto's Verwijderen"}
-            </Button>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold text-gray-900">Jouw Portetfotos</h2>
+            {photos.length > 0 && (
+              <Button
+                onClick={() => setDeleteMode(!deleteMode)}
+                variant={deleteMode ? "destructive" : "outline"}
+                className="flex items-center gap-2"
+              >
+                <Trash2 className="h-4 w-4" />
+                {deleteMode ? "Annuleren" : "Foto's Verwijderen"}
+              </Button>
+            )}
           </div>
 
           {photos.length === 0 ? (
             <Card>
               <CardContent className="text-center py-12">
-                <p className="text-gray-600 mb-4">Je hebt nog geen foto's gegenereerd.</p>
-                <Button asChild>
-                  <a href="/pricing">Start je eerste fotoshoot</a>
+                <AlertCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Geen foto's gevonden</h3>
+                <p className="text-gray-600 mb-4">Je hebt nog geen portretten gemaakt. Start je eerste fotoshoot!</p>
+                <Button asChild className="bg-[#0077B5] hover:bg-[#005885]">
+                  <a href="/pricing">Maak je eerste portretten</a>
                 </Button>
               </CardContent>
             </Card>
@@ -204,13 +206,13 @@ export default function Dashboard() {
                   <div className="aspect-[3/4] rounded-lg overflow-hidden bg-gray-100 shadow-md hover:shadow-lg transition-shadow">
                     <Image
                       src={photo.url || "/placeholder.svg"}
-                      alt="Generated portrait"
+                      alt="AI Portret"
                       width={300}
                       height={400}
                       className="w-full h-full object-cover"
                       onError={(e) => {
                         const target = e.target as HTMLImageElement
-                        target.style.display = "none"
+                        target.src = "/placeholder.svg?height=400&width=300&text=Foto+niet+beschikbaar"
                       }}
                     />
                   </div>
@@ -223,21 +225,23 @@ export default function Dashboard() {
                   >
                     {deleteMode ? (
                       <Button
-                        size="sm"
-                        variant="destructive"
                         onClick={() => handleDeletePhoto(photo.id, photo.url)}
                         disabled={deletingPhoto === photo.id}
-                        className="text-xs"
+                        variant="destructive"
+                        size="sm"
+                        className="flex items-center gap-1"
                       >
+                        <Trash2 className="h-4 w-4" />
                         {deletingPhoto === photo.id ? "Verwijderen..." : "Verwijder"}
                       </Button>
                     ) : (
                       <Button
+                        onClick={() => downloadPhoto(photo.url, `portret-${photo.id}.jpg`)}
+                        variant="secondary"
                         size="sm"
-                        onClick={() => downloadPhoto(photo.url, `portrait-${photo.id}.jpg`)}
-                        className="text-xs"
+                        className="flex items-center gap-1"
                       >
-                        <Download className="h-3 w-3 mr-1" />
+                        <Download className="h-4 w-4" />
                         Download
                       </Button>
                     )}
