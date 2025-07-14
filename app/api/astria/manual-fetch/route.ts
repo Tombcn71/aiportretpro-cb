@@ -27,6 +27,8 @@ export async function POST(request: NextRequest) {
 
     console.log(`📁 Found project: ${project.name}`)
     console.log(`🎯 Tune ID: ${tuneId} (from ${project.tune_id ? "tune_id" : "prediction_id"})`)
+    console.log(`📊 Current status: ${project.status}`)
+    console.log(`📸 Current photos: ${project.generated_photos ? JSON.parse(project.generated_photos).length : 0}`)
 
     if (!tuneId) {
       return NextResponse.json(
@@ -44,7 +46,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Fetch from Astria API
+    // Fetch tune status from Astria API
     console.log(`📡 Fetching tune status from Astria API...`)
     const astriaResponse = await fetch(`https://api.astria.ai/tunes/${tuneId}`, {
       headers: {
@@ -61,6 +63,7 @@ export async function POST(request: NextRequest) {
           error: `Astria API error: ${astriaResponse.status}`,
           details: errorText,
           tuneId: tuneId,
+          message: "Could not connect to Astria API. Check if tune exists.",
         },
         { status: 500 },
       )
@@ -68,9 +71,10 @@ export async function POST(request: NextRequest) {
 
     const astriaData = await astriaResponse.json()
     console.log(`📊 Astria tune status: ${astriaData.status}`)
+    console.log(`🔍 Astria tune data:`, JSON.stringify(astriaData, null, 2))
 
     // Fetch prompts for this tune
-    console.log(`📸 Fetching prompts...`)
+    console.log(`📸 Fetching prompts from Astria...`)
     const promptsResponse = await fetch(`https://api.astria.ai/tunes/${tuneId}/prompts`, {
       headers: {
         Authorization: `Bearer ${process.env.ASTRIA_API_KEY}`,
@@ -86,6 +90,7 @@ export async function POST(request: NextRequest) {
           error: `Prompts API error: ${promptsResponse.status}`,
           details: errorText,
           tuneStatus: astriaData.status,
+          message: "Could not fetch prompts from Astria API.",
         },
         { status: 500 },
       )
@@ -95,7 +100,7 @@ export async function POST(request: NextRequest) {
     console.log(`📋 Found ${promptsData.length} prompts`)
 
     // Collect all images from all prompts
-    let allImages: string[] = []
+    const allImages: string[] = []
     let completedPrompts = 0
     const promptDetails = []
 
@@ -104,26 +109,31 @@ export async function POST(request: NextRequest) {
         id: prompt.id,
         status: prompt.status,
         imageCount: prompt.images ? prompt.images.length : 0,
+        images: prompt.images || [],
       }
       promptDetails.push(promptInfo)
 
-      if (prompt.status === "succeeded" && prompt.images && Array.isArray(prompt.images)) {
-        completedPrompts++
-        const imageUrls = prompt.images
-          .filter((img: any) => img.url && typeof img.url === "string")
-          .map((img: any) => img.url)
+      console.log(`🔍 Prompt ${prompt.id}: status=${prompt.status}, images=${promptInfo.imageCount}`)
 
-        allImages = [...allImages, ...imageUrls]
-        console.log(`✅ Prompt ${prompt.id}: ${imageUrls.length} images`)
-      } else {
-        console.log(`⏳ Prompt ${prompt.id}: status ${prompt.status}`)
+      if (prompt.images && Array.isArray(prompt.images)) {
+        for (const image of prompt.images) {
+          if (image.url && typeof image.url === "string") {
+            allImages.push(image.url)
+            console.log(`✅ Added image: ${image.url}`)
+          }
+        }
+        if (prompt.status === "succeeded") {
+          completedPrompts++
+        }
       }
     }
 
-    console.log(`📊 Total images found: ${allImages.length}`)
+    console.log(`📊 Total images collected: ${allImages.length}`)
+    console.log(`📊 Completed prompts: ${completedPrompts}/${promptsData.length}`)
 
+    // Always update database with whatever we found
     if (allImages.length > 0) {
-      // Update database with photos
+      // Save photos to database
       await sql`
         UPDATE projects 
         SET 
@@ -133,37 +143,39 @@ export async function POST(request: NextRequest) {
         WHERE id = ${projectId}
       `
 
-      console.log(`✅ Updated project ${projectId} with ${allImages.length} photos`)
+      console.log(`✅ SAVED ${allImages.length} photos to database for project ${projectId}`)
 
       return NextResponse.json({
         success: true,
-        message: `Successfully fetched ${allImages.length} photos!`,
+        message: `🎉 SUCCESS! Saved ${allImages.length} photos to database!`,
         project: {
           id: project.id,
           name: project.name,
           tuneId: tuneId,
         },
         photosFound: allImages.length,
+        photosSaved: allImages.length,
         completedPrompts,
         totalPrompts: promptsData.length,
         tuneStatus: astriaData.status,
         promptDetails,
-        samplePhotos: allImages.slice(0, 3), // First 3 for preview
+        samplePhotos: allImages.slice(0, 5), // First 5 for preview
+        allPhotos: allImages, // All photos for verification
+        databaseUpdate: "Photos saved to generated_photos column",
       })
     } else {
-      // Update status but no photos yet
-      const newStatus = astriaData.status === "trained" ? "processing" : astriaData.status
+      // Update status but no photos found
       await sql`
         UPDATE projects 
         SET 
-          status = ${newStatus},
+          status = ${astriaData.status || "no_photos"},
           updated_at = CURRENT_TIMESTAMP
         WHERE id = ${projectId}
       `
 
       return NextResponse.json({
         success: false,
-        message: `No photos found yet. Tune status: ${astriaData.status}`,
+        message: `No photos found in Astria API for tune ${tuneId}`,
         project: {
           id: project.id,
           name: project.name,
@@ -174,10 +186,8 @@ export async function POST(request: NextRequest) {
         totalPrompts: promptsData.length,
         tuneStatus: astriaData.status,
         promptDetails,
-        explanation:
-          astriaData.status === "trained"
-            ? "Tune is trained but no completed prompts yet. Photos may still be generating."
-            : `Tune status is '${astriaData.status}'. Need 'trained' status for photos.`,
+        explanation: "No images found in any prompts. Check if generation completed successfully.",
+        rawPromptsData: promptsData, // For debugging
       })
     }
   } catch (error) {
@@ -186,6 +196,7 @@ export async function POST(request: NextRequest) {
       {
         error: "Manual fetch failed",
         details: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
       },
       { status: 500 },
     )
