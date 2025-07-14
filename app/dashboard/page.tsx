@@ -59,7 +59,7 @@ export default function DashboardPage() {
     fetchData()
   }, [])
 
-  // Parse generated photos properly - handle both JSON strings and arrays
+  // Parse generated photos and filter out invalid ones
   const allPhotos = projects.flatMap((project) => {
     let photos: string[] = []
 
@@ -83,15 +83,16 @@ export default function DashboardPage() {
       }
     }
 
-    // Only filter out obviously invalid URLs - be much more lenient
+    // Strict filtering - only valid Astria URLs
     const validPhotos = photos.filter(
       (photo) =>
         photo &&
         typeof photo === "string" &&
-        photo.length > 10 && // Must be reasonable length
-        (photo.startsWith("http://") || photo.startsWith("https://")) && // Must be a URL
+        photo.length > 20 && // Must be reasonable length
+        (photo.includes("astria.ai") || photo.includes("mp.astria.ai")) && // Must be Astria URL
         !photo.includes("example.com") && // Not example URLs
-        !photo.includes("placeholder"), // Not placeholder URLs
+        !photo.includes("placeholder") && // Not placeholder URLs
+        !photo.includes("/placeholder.svg"), // Not our placeholder
     )
 
     return validPhotos.map((photo: string, index: number) => ({
@@ -103,7 +104,37 @@ export default function DashboardPage() {
     }))
   })
 
-  console.log("All photos:", allPhotos.length, allPhotos.slice(0, 5))
+  // Filter out projects without valid photos for the projects section
+  const projectsWithPhotos = projects.filter((project) => {
+    let photoCount = 0
+    try {
+      if (project.generated_photos) {
+        if (typeof project.generated_photos === "string") {
+          if (project.generated_photos.startsWith("[")) {
+            const parsed = JSON.parse(project.generated_photos)
+            if (Array.isArray(parsed)) {
+              photoCount = parsed.filter(
+                (photo) =>
+                  photo && typeof photo === "string" && (photo.includes("astria.ai") || photo.includes("mp.astria.ai")),
+              ).length
+            }
+          } else if (project.generated_photos.includes("astria.ai")) {
+            photoCount = 1
+          }
+        } else if (Array.isArray(project.generated_photos)) {
+          photoCount = project.generated_photos.filter(
+            (photo) =>
+              photo && typeof photo === "string" && (photo.includes("astria.ai") || photo.includes("mp.astria.ai")),
+          ).length
+        }
+      }
+    } catch (e) {
+      photoCount = 0
+    }
+    return photoCount > 0 || project.status === "processing" || project.status === "training"
+  })
+
+  console.log("Valid photos:", allPhotos.length, "Projects with photos:", projectsWithPhotos.length)
 
   const handleImageError = (photoKey: string) => {
     console.log("Image error for:", photoKey)
@@ -215,24 +246,36 @@ export default function DashboardPage() {
           </Card>
         </div>
 
-        {/* Projects Overview */}
-        {projects.length > 0 && (
+        {/* Projects Overview - Only show projects with photos or in progress */}
+        {projectsWithPhotos.length > 0 && (
           <div className="mb-8">
             <h2 className="text-2xl font-semibold mb-4">Jouw Projecten</h2>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {projects.map((project) => {
+              {projectsWithPhotos.map((project) => {
                 let photoCount = 0
                 try {
                   if (project.generated_photos) {
                     if (typeof project.generated_photos === "string") {
                       if (project.generated_photos.startsWith("[")) {
                         const parsed = JSON.parse(project.generated_photos)
-                        photoCount = Array.isArray(parsed) ? parsed.length : 0
-                      } else {
+                        if (Array.isArray(parsed)) {
+                          photoCount = parsed.filter(
+                            (photo) =>
+                              photo &&
+                              typeof photo === "string" &&
+                              (photo.includes("astria.ai") || photo.includes("mp.astria.ai")),
+                          ).length
+                        }
+                      } else if (project.generated_photos.includes("astria.ai")) {
                         photoCount = 1
                       }
                     } else if (Array.isArray(project.generated_photos)) {
-                      photoCount = project.generated_photos.length
+                      photoCount = project.generated_photos.filter(
+                        (photo) =>
+                          photo &&
+                          typeof photo === "string" &&
+                          (photo.includes("astria.ai") || photo.includes("mp.astria.ai")),
+                      ).length
                     }
                   }
                 } catch (e) {
@@ -252,12 +295,7 @@ export default function DashboardPage() {
                     </CardHeader>
                     <CardContent>
                       <div className="flex items-center justify-between">
-                        <p className="text-sm">
-                          {photoCount} foto's gegenereerd
-                          {project.status === "completed" && photoCount !== 40 && photoCount > 0 && (
-                            <span className="text-orange-600 ml-2">(verwacht: 40)</span>
-                          )}
-                        </p>
+                        <p className="text-sm">{photoCount} foto's gegenereerd</p>
                         {project.status === "completed" && photoCount > 0 && (
                           <Link href={`/generate/${project.id}`}>
                             <Button size="sm" variant="outline">
@@ -274,7 +312,7 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* Photos Gallery */}
+        {/* Photos Gallery - Only show if there are valid photos */}
         <div>
           <h2 className="text-2xl font-semibold mb-6">Alle Portetfotos ({allPhotos.length} foto's)</h2>
 
@@ -299,10 +337,11 @@ export default function DashboardPage() {
             </div>
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-              {allPhotos.map((photo) => (
-                <div key={photo.key} className="group">
-                  <div className="aspect-[3/4] rounded-lg overflow-hidden bg-gray-100 shadow-md hover:shadow-lg transition-shadow">
-                    {!imageErrors.has(photo.key) ? (
+              {allPhotos
+                .filter((photo) => !imageErrors.has(photo.key)) // Only show photos that haven't errored
+                .map((photo) => (
+                  <div key={photo.key} className="group">
+                    <div className="aspect-[3/4] rounded-lg overflow-hidden bg-gray-100 shadow-md hover:shadow-lg transition-shadow">
                       <Image
                         src={photo.url || "/placeholder.svg"}
                         alt={`Portretfoto ${photo.index + 1} van ${photo.projectName}`}
@@ -313,39 +352,31 @@ export default function DashboardPage() {
                         unoptimized
                         crossOrigin="anonymous"
                       />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-gray-200">
-                        <div className="text-center text-gray-500">
-                          <AlertCircle className="h-8 w-8 mx-auto mb-2" />
-                          <p className="text-xs">Foto niet beschikbaar</p>
-                        </div>
-                      </div>
-                    )}
+                    </div>
+                    <Button
+                      onClick={() => downloadPhoto(photo.url, photo.projectName, photo.index)}
+                      size="sm"
+                      variant="outline"
+                      className="w-full mt-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <Download className="h-4 w-4 mr-2" />
+                      Download
+                    </Button>
                   </div>
-                  <Button
-                    onClick={() => downloadPhoto(photo.url, photo.projectName, photo.index)}
-                    size="sm"
-                    variant="outline"
-                    className="w-full mt-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                    disabled={imageErrors.has(photo.key)}
-                  >
-                    <Download className="h-4 w-4 mr-2" />
-                    Download
-                  </Button>
-                </div>
-              ))}
+                ))}
             </div>
           )}
         </div>
 
-        {/* Debug Info */}
-        {process.env.NODE_ENV === "development" && (
-          <div className="mt-8 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-            <h3 className="font-semibold mb-2">Debug Info:</h3>
-            <p className="text-sm">Total projects: {projects.length}</p>
-            <p className="text-sm">Total photos: {allPhotos.length}</p>
-            <p className="text-sm">Image errors: {imageErrors.size}</p>
-            <p className="text-sm">Projects with photos: {projects.filter((p) => p.generated_photos).length}</p>
+        {/* Success message if photos are found */}
+        {allPhotos.length > 0 && (
+          <div className="mt-8 p-4 bg-green-50 border border-green-200 rounded-lg">
+            <div className="flex items-center">
+              <CheckCircle className="h-5 w-5 text-green-600 mr-2" />
+              <p className="text-green-800 font-medium">
+                Geweldig! Je hebt {allPhotos.length} professionele portetfotos klaar voor download.
+              </p>
+            </div>
           </div>
         )}
       </div>
