@@ -4,16 +4,28 @@ export async function POST(request: NextRequest) {
   try {
     const { projectId, testData } = await request.json()
 
-    // Use the correct webhook secret from environment
-    const webhookSecret = process.env.APP_WEBHOOK_SECRET
-    const baseUrl = process.env.NEXTAUTH_URL || "https://www.aiportretpro.nl"
+    if (!process.env.APP_WEBHOOK_SECRET) {
+      return NextResponse.json({ error: "APP_WEBHOOK_SECRET not configured" }, { status: 500 })
+    }
 
-    const webhookUrl = `${baseUrl}/api/astria/prompt-webhook?user_id=1&model_id=${projectId}&webhook_secret=${webhookSecret}`
+    if (!process.env.NEXTAUTH_URL) {
+      return NextResponse.json({ error: "NEXTAUTH_URL not configured" }, { status: 500 })
+    }
 
-    // Call the actual webhook endpoint with correct secret
+    const baseUrl = process.env.NEXTAUTH_URL.startsWith("http")
+      ? process.env.NEXTAUTH_URL
+      : `https://${process.env.NEXTAUTH_URL}`
+
+    const webhookUrl = `${baseUrl}/api/astria/prompt-webhook?user_id=1&model_id=${projectId}&webhook_secret=${process.env.APP_WEBHOOK_SECRET}`
+
+    console.log("🧪 Testing webhook with URL:", webhookUrl.replace(process.env.APP_WEBHOOK_SECRET, "***SECRET***"))
+
+    // Call our own webhook endpoint with the correct secret
     const response = await fetch(webhookUrl, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify(testData),
     })
 
@@ -22,10 +34,16 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       status: response.status,
       data: responseData,
-      webhookUrl: webhookUrl.replace(webhookSecret, "***SECRET***"), // Hide secret in response
+      webhookUrl: webhookUrl.replace(process.env.APP_WEBHOOK_SECRET, "***SECRET***"),
     })
   } catch (error) {
-    console.error("Test Astria webhook error:", error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    console.error("Error testing Astria webhook:", error)
+    return NextResponse.json(
+      {
+        error: "Failed to test webhook",
+        details: error.message,
+      },
+      { status: 500 },
+    )
   }
 }

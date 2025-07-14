@@ -36,6 +36,11 @@ export async function generateWithSelectedPack(data: {
     const promptWebhook = `${baseUrl}/api/astria/prompt-webhook`
     const promptWebhookWithParams = `${promptWebhook}?user_id=1&model_id=${data.projectId}&webhook_secret=${process.env.APP_WEBHOOK_SECRET}`
 
+    console.log(
+      "🔗 Webhook URL being sent to Astria:",
+      promptWebhookWithParams.replace(process.env.APP_WEBHOOK_SECRET, "***SECRET***"),
+    )
+
     // Map gender to Astria format
     const astriaGender = data.gender === "man" ? "man" : data.gender === "woman" ? "woman" : "person"
 
@@ -59,6 +64,7 @@ export async function generateWithSelectedPack(data: {
       }
 
       console.log(`🎯 Sending prompt to pack ${data.packId}`)
+      console.log("📤 Request body:", JSON.stringify(promptBody, null, 2))
 
       const response = await axios.post(`${ASTRIA_DOMAIN}/tunes/${data.packId}/prompts`, promptBody, {
         headers: {
@@ -69,6 +75,7 @@ export async function generateWithSelectedPack(data: {
       })
 
       console.log("✅ Prompt sent successfully!")
+      console.log("📥 Astria response:", response.data)
       results.push(response.data)
     }
 
