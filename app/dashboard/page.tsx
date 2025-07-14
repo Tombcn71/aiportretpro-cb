@@ -5,7 +5,7 @@ import { Header } from "@/components/header"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Download, Camera, CreditCard, Clock, CheckCircle, AlertCircle } from "lucide-react"
+import { Download, Camera, CreditCard, Clock, CheckCircle, AlertCircle, Trash2, X } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
 
@@ -21,11 +21,21 @@ interface UserCredits {
   credits: number
 }
 
+interface PhotoItem {
+  url: string
+  projectName: string
+  projectId: number
+  index: number
+  key: string
+}
+
 export default function DashboardPage() {
   const [projects, setProjects] = useState<Project[]>([])
   const [credits, setCredits] = useState<UserCredits>({ credits: 0 })
   const [loading, setLoading] = useState(true)
   const [imageErrors, setImageErrors] = useState<Set<string>>(new Set())
+  const [deletingPhotos, setDeletingPhotos] = useState<Set<string>>(new Set())
+  const [showDeleteMode, setShowDeleteMode] = useState(false)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -156,6 +166,77 @@ export default function DashboardPage() {
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
+  }
+
+  const deletePhoto = async (photo: PhotoItem) => {
+    if (!confirm(`Weet je zeker dat je deze foto wilt verwijderen? Dit kan niet ongedaan worden gemaakt.`)) {
+      return
+    }
+
+    setDeletingPhotos((prev) => new Set([...prev, photo.key]))
+
+    try {
+      const response = await fetch("/api/photos/delete", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          photoUrl: photo.url,
+          projectId: photo.projectId,
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error("Failed to delete photo")
+      }
+
+      const result = await response.json()
+
+      // Update the projects state to reflect the deletion
+      setProjects((prevProjects) =>
+        prevProjects.map((project) => {
+          if (project.id === photo.projectId) {
+            let currentPhotos: string[] = []
+
+            if (project.generated_photos) {
+              try {
+                if (typeof project.generated_photos === "string") {
+                  if (project.generated_photos.startsWith("[")) {
+                    currentPhotos = JSON.parse(project.generated_photos)
+                  } else {
+                    currentPhotos = [project.generated_photos]
+                  }
+                } else if (Array.isArray(project.generated_photos)) {
+                  currentPhotos = project.generated_photos
+                }
+              } catch (e) {
+                currentPhotos = []
+              }
+            }
+
+            const updatedPhotos = currentPhotos.filter((p) => p !== photo.url)
+
+            return {
+              ...project,
+              generated_photos: JSON.stringify(updatedPhotos),
+            }
+          }
+          return project
+        }),
+      )
+
+      console.log("Photo deleted successfully")
+    } catch (error) {
+      console.error("Error deleting photo:", error)
+      alert("Er ging iets mis bij het verwijderen van de foto. Probeer het opnieuw.")
+    } finally {
+      setDeletingPhotos((prev) => {
+        const newSet = new Set(prev)
+        newSet.delete(photo.key)
+        return newSet
+      })
+    }
   }
 
   const getStatusBadge = (status: string) => {
@@ -295,7 +376,36 @@ export default function DashboardPage() {
 
         {/* Photos Gallery */}
         <div>
-          <h2 className="text-2xl font-semibold mb-6">Alle Portetfotos ({allPhotos.length} foto's)</h2>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-semibold">Alle Portetfotos ({allPhotos.length} foto's)</h2>
+            {allPhotos.length > 0 && (
+              <Button
+                onClick={() => setShowDeleteMode(!showDeleteMode)}
+                variant={showDeleteMode ? "destructive" : "outline"}
+                className="flex items-center gap-2"
+              >
+                {showDeleteMode ? (
+                  <>
+                    <X className="h-4 w-4" />
+                    Annuleren
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="h-4 w-4" />
+                    Foto's Verwijderen
+                  </>
+                )}
+              </Button>
+            )}
+          </div>
+
+          {showDeleteMode && (
+            <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-red-800 font-medium">
+                ⚠️ Verwijder modus actief - Klik op een foto om deze permanent te verwijderen
+              </p>
+            </div>
+          )}
 
           {allPhotos.length === 0 ? (
             <div className="text-center py-20">
@@ -321,8 +431,13 @@ export default function DashboardPage() {
               {allPhotos
                 .filter((photo) => !imageErrors.has(photo.key))
                 .map((photo) => (
-                  <div key={photo.key} className="group">
-                    <div className="aspect-[3/4] rounded-lg overflow-hidden bg-gray-100 shadow-md hover:shadow-lg transition-shadow">
+                  <div key={photo.key} className="group relative">
+                    <div
+                      className={`aspect-[3/4] rounded-lg overflow-hidden bg-gray-100 shadow-md hover:shadow-lg transition-all ${
+                        showDeleteMode ? "cursor-pointer hover:ring-2 hover:ring-red-500" : ""
+                      } ${deletingPhotos.has(photo.key) ? "opacity-50" : ""}`}
+                      onClick={showDeleteMode ? () => deletePhoto(photo) : undefined}
+                    >
                       <Image
                         src={photo.url || "/placeholder.svg"}
                         alt={`Portretfoto ${photo.index + 1} van ${photo.projectName}`}
@@ -333,16 +448,34 @@ export default function DashboardPage() {
                         unoptimized
                         crossOrigin="anonymous"
                       />
+
+                      {/* Delete overlay */}
+                      {showDeleteMode && (
+                        <div className="absolute inset-0 bg-red-500 bg-opacity-0 hover:bg-opacity-20 transition-all flex items-center justify-center">
+                          <Trash2 className="h-8 w-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </div>
+                      )}
+
+                      {/* Loading overlay */}
+                      {deletingPhotos.has(photo.key) && (
+                        <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+                        </div>
+                      )}
                     </div>
-                    <Button
-                      onClick={() => downloadPhoto(photo.url, photo.projectName, photo.index)}
-                      size="sm"
-                      variant="outline"
-                      className="w-full mt-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                    >
-                      <Download className="h-4 w-4 mr-2" />
-                      Download
-                    </Button>
+
+                    {!showDeleteMode && (
+                      <Button
+                        onClick={() => downloadPhoto(photo.url, photo.projectName, photo.index)}
+                        size="sm"
+                        variant="outline"
+                        className="w-full mt-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                        disabled={deletingPhotos.has(photo.key)}
+                      >
+                        <Download className="h-4 w-4 mr-2" />
+                        Download
+                      </Button>
+                    )}
                   </div>
                 ))}
             </div>
@@ -350,7 +483,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Success message */}
-        {allPhotos.length > 0 && (
+        {allPhotos.length > 0 && !showDeleteMode && (
           <div className="mt-8 p-4 bg-green-50 border border-green-200 rounded-lg">
             <div className="flex items-center">
               <CheckCircle className="h-5 w-5 text-green-600 mr-2" />
