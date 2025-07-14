@@ -33,16 +33,15 @@ export async function POST(request: NextRequest) {
     const promptsData = await response.json()
     console.log(`📋 Found ${promptsData.length} prompts`)
 
-    // Extract ALL image URLs
+    // Extract ALL image URLs - FIXED VERSION!
     const allImages: string[] = []
 
     for (const prompt of promptsData) {
       if (prompt.images && Array.isArray(prompt.images)) {
-        for (const image of prompt.images) {
-          if (image.url) {
-            allImages.push(image.url)
-            console.log(`✅ Found image: ${image.url}`)
-          }
+        // Images are direct strings in the array!
+        for (const imageUrl of prompt.images) {
+          allImages.push(imageUrl)
+          console.log(`✅ Found image: ${imageUrl}`)
         }
       }
     }
