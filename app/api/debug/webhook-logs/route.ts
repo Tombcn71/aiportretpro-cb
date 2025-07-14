@@ -1,27 +1,37 @@
-import { NextResponse } from "next/server"
+import { type NextRequest, NextResponse } from "next/server"
 import { sql } from "@/lib/db"
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const purchases = await sql`
-      SELECT 
-        p.id,
-        p.user_id,
-        p.stripe_session_id,
-        p.status,
-        p.created_at,
-        u.email,
-        c.credits
-      FROM purchases p
-      LEFT JOIN users u ON p.user_id = u.id
-      LEFT JOIN credits c ON p.user_id = c.user_id
-      ORDER BY p.created_at DESC
-      LIMIT 10
-    `
+    const url = new URL(request.url)
+    const projectId = url.searchParams.get("projectId")
+    const limit = Number.parseInt(url.searchParams.get("limit") || "50")
 
-    return NextResponse.json({ purchases })
+    let logs
+    if (projectId) {
+      logs = await sql`
+        SELECT * FROM webhook_logs 
+        WHERE project_id = ${Number.parseInt(projectId)}
+        ORDER BY created_at DESC 
+        LIMIT ${limit}
+      `
+    } else {
+      logs = await sql`
+        SELECT * FROM webhook_logs 
+        ORDER BY created_at DESC 
+        LIMIT ${limit}
+      `
+    }
+
+    return NextResponse.json({ logs })
   } catch (error) {
     console.error("Error fetching webhook logs:", error)
-    return NextResponse.json({ error: "Failed to fetch logs" }, { status: 500 })
+    return NextResponse.json(
+      {
+        error: "Failed to fetch webhook logs",
+        details: error.message,
+      },
+      { status: 500 },
+    )
   }
 }
