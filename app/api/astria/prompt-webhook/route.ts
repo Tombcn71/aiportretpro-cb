@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Project not found" }, { status: 404 })
     }
 
-    // Parse existing photos
+    // Parse existing photos - your database stores as JSON string
     let existingPhotos = []
     const currentPhotos = currentProject[0].generated_photos
 
@@ -95,7 +95,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Update database with all photos as JSON string
+    // Update database with all photos as JSON string (matching your schema)
     await sql`
       UPDATE projects 
       SET 

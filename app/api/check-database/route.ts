@@ -1,7 +1,5 @@
 import { NextResponse } from "next/server"
-import { neon } from "@neondatabase/serverless"
-
-const sql = neon(process.env.DATABASE_URL!)
+import { sql } from "@/lib/db"
 
 export async function GET() {
   try {
@@ -20,7 +18,7 @@ export async function GET() {
     `
     console.log("📋 Projects table structure:", tableInfo)
 
-    // Check projects data with JSON string parsing
+    // Check projects data - handle JSON strings safely
     const projectsData = await sql`
       SELECT 
         id, 
@@ -31,13 +29,10 @@ export async function GET() {
           WHEN generated_photos IS NULL THEN 0
           WHEN generated_photos = '' THEN 0
           WHEN generated_photos = '[]' THEN 0
-          ELSE (
-            CASE 
-              WHEN generated_photos::text ~ '^\[.*\]$' THEN 
-                (SELECT array_length(array(SELECT json_array_elements_text(generated_photos::json)), 1))
-              ELSE 0
-            END
-          )
+          WHEN generated_photos::text ~ '^\[.*\]$' THEN 
+            (LENGTH(generated_photos) - LENGTH(REPLACE(generated_photos, ',', '')) + 
+             CASE WHEN generated_photos = '[]' THEN 0 ELSE 1 END)
+          ELSE 0
         END as photo_count,
         created_at,
         updated_at,
@@ -48,7 +43,7 @@ export async function GET() {
     `
     console.log("📊 Recent projects:", projectsData)
 
-    // Count total projects and photos
+    // Count total projects and photos safely
     const stats = await sql`
       SELECT 
         COUNT(*) as total_projects,
@@ -71,6 +66,7 @@ export async function GET() {
       WHERE generated_photos IS NOT NULL 
         AND generated_photos != '' 
         AND generated_photos != '[]'
+      ORDER BY id DESC
       LIMIT 1
     `
 
