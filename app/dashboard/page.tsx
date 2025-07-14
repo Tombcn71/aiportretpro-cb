@@ -59,6 +59,42 @@ export default function DashboardPage() {
     fetchData()
   }, [])
 
+  // Helper function to count valid photos in a project
+  const getValidPhotoCount = (project: Project): number => {
+    let photoCount = 0
+    try {
+      if (project.generated_photos) {
+        if (typeof project.generated_photos === "string") {
+          if (project.generated_photos.startsWith("[")) {
+            const parsed = JSON.parse(project.generated_photos)
+            if (Array.isArray(parsed)) {
+              photoCount = parsed.filter(
+                (photo) =>
+                  photo &&
+                  typeof photo === "string" &&
+                  photo.length > 20 &&
+                  (photo.includes("astria.ai") || photo.includes("mp.astria.ai")),
+              ).length
+            }
+          } else if (project.generated_photos.includes("astria.ai")) {
+            photoCount = 1
+          }
+        } else if (Array.isArray(project.generated_photos)) {
+          photoCount = project.generated_photos.filter(
+            (photo) =>
+              photo &&
+              typeof photo === "string" &&
+              photo.length > 20 &&
+              (photo.includes("astria.ai") || photo.includes("mp.astria.ai")),
+          ).length
+        }
+      }
+    } catch (e) {
+      photoCount = 0
+    }
+    return photoCount
+  }
+
   // Parse generated photos and filter out invalid ones
   const allPhotos = projects.flatMap((project) => {
     let photos: string[] = []
@@ -104,37 +140,16 @@ export default function DashboardPage() {
     }))
   })
 
-  // Filter out projects without valid photos for the projects section
-  const projectsWithPhotos = projects.filter((project) => {
-    let photoCount = 0
-    try {
-      if (project.generated_photos) {
-        if (typeof project.generated_photos === "string") {
-          if (project.generated_photos.startsWith("[")) {
-            const parsed = JSON.parse(project.generated_photos)
-            if (Array.isArray(parsed)) {
-              photoCount = parsed.filter(
-                (photo) =>
-                  photo && typeof photo === "string" && (photo.includes("astria.ai") || photo.includes("mp.astria.ai")),
-              ).length
-            }
-          } else if (project.generated_photos.includes("astria.ai")) {
-            photoCount = 1
-          }
-        } else if (Array.isArray(project.generated_photos)) {
-          photoCount = project.generated_photos.filter(
-            (photo) =>
-              photo && typeof photo === "string" && (photo.includes("astria.ai") || photo.includes("mp.astria.ai")),
-          ).length
-        }
-      }
-    } catch (e) {
-      photoCount = 0
-    }
-    return photoCount > 0 || project.status === "processing" || project.status === "training"
+  // Filter projects: only show if they have photos OR are currently processing/training
+  const projectsToShow = projects.filter((project) => {
+    const photoCount = getValidPhotoCount(project)
+    const isActivelyProcessing = project.status === "processing" || project.status === "training"
+
+    // Show project if it has photos OR is actively being processed
+    return photoCount > 0 || isActivelyProcessing
   })
 
-  console.log("Valid photos:", allPhotos.length, "Projects with photos:", projectsWithPhotos.length)
+  console.log("Valid photos:", allPhotos.length, "Projects to show:", projectsToShow.length)
 
   const handleImageError = (photoKey: string) => {
     console.log("Image error for:", photoKey)
@@ -246,41 +261,13 @@ export default function DashboardPage() {
           </Card>
         </div>
 
-        {/* Projects Overview - Only show projects with photos or in progress */}
-        {projectsWithPhotos.length > 0 && (
+        {/* Projects Overview - Only show projects with photos or actively processing */}
+        {projectsToShow.length > 0 && (
           <div className="mb-8">
             <h2 className="text-2xl font-semibold mb-4">Jouw Projecten</h2>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {projectsWithPhotos.map((project) => {
-                let photoCount = 0
-                try {
-                  if (project.generated_photos) {
-                    if (typeof project.generated_photos === "string") {
-                      if (project.generated_photos.startsWith("[")) {
-                        const parsed = JSON.parse(project.generated_photos)
-                        if (Array.isArray(parsed)) {
-                          photoCount = parsed.filter(
-                            (photo) =>
-                              photo &&
-                              typeof photo === "string" &&
-                              (photo.includes("astria.ai") || photo.includes("mp.astria.ai")),
-                          ).length
-                        }
-                      } else if (project.generated_photos.includes("astria.ai")) {
-                        photoCount = 1
-                      }
-                    } else if (Array.isArray(project.generated_photos)) {
-                      photoCount = project.generated_photos.filter(
-                        (photo) =>
-                          photo &&
-                          typeof photo === "string" &&
-                          (photo.includes("astria.ai") || photo.includes("mp.astria.ai")),
-                      ).length
-                    }
-                  }
-                } catch (e) {
-                  photoCount = 0
-                }
+              {projectsToShow.map((project) => {
+                const photoCount = getValidPhotoCount(project)
 
                 return (
                   <Card key={project.id}>
@@ -295,7 +282,9 @@ export default function DashboardPage() {
                     </CardHeader>
                     <CardContent>
                       <div className="flex items-center justify-between">
-                        <p className="text-sm">{photoCount} foto's gegenereerd</p>
+                        <p className="text-sm">
+                          {photoCount > 0 ? `${photoCount} foto's gegenereerd` : "Wordt verwerkt..."}
+                        </p>
                         {project.status === "completed" && photoCount > 0 && (
                           <Link href={`/generate/${project.id}`}>
                             <Button size="sm" variant="outline">
