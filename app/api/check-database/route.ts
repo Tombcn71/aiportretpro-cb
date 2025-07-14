@@ -5,75 +5,91 @@ const sql = neon(process.env.DATABASE_URL!)
 
 export async function GET() {
   try {
-    console.log("🔍 Checking database connection and schema...")
+    console.log("🔍 Checking database connection and data...")
 
     // Test basic connection
     const connectionTest = await sql`SELECT NOW() as current_time`
     console.log("✅ Database connection successful:", connectionTest[0])
 
-    // Check if projects table exists and get structure
-    const tableCheck = await sql`
-      SELECT column_name, data_type, is_nullable
+    // Check projects table structure
+    const tableInfo = await sql`
+      SELECT column_name, data_type, is_nullable, column_default
       FROM information_schema.columns 
-      WHERE table_name = 'projects'
+      WHERE table_name = 'projects' 
       ORDER BY ordinal_position
     `
+    console.log("📋 Projects table structure:", tableInfo)
 
-    if (tableCheck.length === 0) {
-      return NextResponse.json({
-        success: false,
-        error: "Projects table does not exist",
-      })
-    }
-
-    console.log("📋 Projects table structure:", tableCheck)
-
-    // Check for projects with potential array issues
-    const projectsWithArrays = await sql`
+    // Check projects data with JSON string parsing
+    const projectsData = await sql`
       SELECT 
         id, 
-        name,
+        name, 
+        status,
+        generated_photos,
         CASE 
-          WHEN generated_photos IS NULL THEN 'null'
-          WHEN generated_photos::text = '[]' THEN 'empty_array'
-          WHEN generated_photos::text = '"[]"' THEN 'malformed_string'
-          ELSE 'has_data'
-        END as photo_status,
-        generated_photos::text as raw_photos
+          WHEN generated_photos IS NULL THEN 0
+          WHEN generated_photos = '' THEN 0
+          WHEN generated_photos = '[]' THEN 0
+          ELSE (
+            CASE 
+              WHEN generated_photos::text ~ '^\[.*\]$' THEN 
+                (SELECT array_length(array(SELECT json_array_elements_text(generated_photos::json)), 1))
+              ELSE 0
+            END
+          )
+        END as photo_count,
+        created_at,
+        updated_at,
+        prediction_id
       FROM projects 
-      WHERE generated_photos IS NOT NULL
+      ORDER BY id DESC 
       LIMIT 10
     `
+    console.log("📊 Recent projects:", projectsData)
 
-    console.log("📸 Projects with photo data:", projectsWithArrays)
-
-    // Count projects by status
-    const statusCounts = await sql`
+    // Count total projects and photos
+    const stats = await sql`
       SELECT 
-        status,
-        COUNT(*) as count
-      FROM projects 
-      GROUP BY status
+        COUNT(*) as total_projects,
+        COUNT(CASE WHEN generated_photos IS NOT NULL AND generated_photos != '' AND generated_photos != '[]' THEN 1 END) as projects_with_photos,
+        COUNT(CASE WHEN status = 'completed' THEN 1 END) as completed_projects,
+        COUNT(CASE WHEN status = 'pending' THEN 1 END) as pending_projects,
+        COUNT(CASE WHEN status = 'processing' THEN 1 END) as processing_projects
+      FROM projects
     `
+    console.log("📈 Database stats:", stats[0])
 
-    console.log("📊 Project status counts:", statusCounts)
+    // Sample a project with photos to show the format
+    const sampleWithPhotos = await sql`
+      SELECT 
+        id, 
+        name, 
+        generated_photos,
+        LENGTH(generated_photos) as json_length
+      FROM projects 
+      WHERE generated_photos IS NOT NULL 
+        AND generated_photos != '' 
+        AND generated_photos != '[]'
+      LIMIT 1
+    `
 
     return NextResponse.json({
       success: true,
       connection: connectionTest[0],
-      tableStructure: tableCheck,
-      sampleProjects: projectsWithArrays,
-      statusCounts: statusCounts,
+      tableStructure: tableInfo,
+      recentProjects: projectsData,
+      stats: stats[0],
+      sampleWithPhotos: sampleWithPhotos[0] || null,
       message: "Database check completed successfully",
     })
   } catch (error) {
     console.error("❌ Database check error:", error)
-
     return NextResponse.json(
       {
         success: false,
-        error: error instanceof Error ? error.message : "Unknown database error",
-        details: error,
+        error: error instanceof Error ? error.message : "Unknown error",
+        details: "Database check failed",
       },
       { status: 500 },
     )

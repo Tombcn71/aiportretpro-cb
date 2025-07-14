@@ -42,11 +42,11 @@ export async function POST(request: Request) {
     const updateResult = await sql`
       UPDATE projects 
       SET 
-        astria_tune_id = ${tune.id.toString()},
+        prediction_id = ${tune.id.toString()},
         status = 'completed',
-        updated_at = NOW()
+        updated_at = CURRENT_TIMESTAMP
       WHERE id = ${Number.parseInt(modelId)}
-      RETURNING id, name, status, astria_tune_id
+      RETURNING id, name, status, prediction_id
     `
 
     if (updateResult.length === 0) {
@@ -83,13 +83,13 @@ export async function POST(request: Request) {
         }
 
         if (imageUrls.length > 0) {
-          // Store images in database as JSONB
+          // Store images in database as JSON string (matching your schema)
           await sql`
             UPDATE projects 
-            SET generated_photos = ${JSON.stringify(imageUrls)}::jsonb
+            SET generated_photos = ${JSON.stringify(imageUrls)}
             WHERE id = ${Number.parseInt(modelId)}
           `
-          console.log("✅ Stored", imageUrls.length, "images in database")
+          console.log("✅ Stored", imageUrls.length, "images in database as JSON string")
         }
       }
     } catch (imageError) {

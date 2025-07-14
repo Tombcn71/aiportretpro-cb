@@ -30,16 +30,18 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Missing parameters" }, { status: 400 })
     }
 
-    const prompt = body.prompt
-    if (!prompt || !prompt.images || !Array.isArray(prompt.images)) {
+    // Handle different webhook formats - Astria sends different structures
+    const images = body.images || (body.prompt && body.prompt.images) || []
+
+    if (!Array.isArray(images) || images.length === 0) {
       console.error("❌ No images in prompt data")
       return NextResponse.json({ error: "No images found" }, { status: 400 })
     }
 
-    console.log("📸 Received", prompt.images.length, "images from prompt")
+    console.log("📸 Received", images.length, "images from prompt")
 
     // Extract image URLs
-    const newImageUrls = prompt.images.filter((img: any) => img.url).map((img: any) => img.url)
+    const newImageUrls = images.filter((img: any) => img.url).map((img: any) => img.url)
 
     if (newImageUrls.length === 0) {
       console.error("❌ No valid image URLs found")
@@ -58,18 +60,22 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Project not found" }, { status: 404 })
     }
 
-    // Merge with existing images
+    // Parse existing images from JSON string
     let existingImages: string[] = []
-    try {
-      const currentPhotos = currentProject[0].generated_photos
-      if (currentPhotos && typeof currentPhotos === "object" && Array.isArray(currentPhotos)) {
-        existingImages = currentPhotos
-      } else if (typeof currentPhotos === "string") {
-        existingImages = JSON.parse(currentPhotos)
+    const currentPhotos = currentProject[0].generated_photos
+
+    if (currentPhotos) {
+      try {
+        // Your database stores as JSON string, so parse it
+        if (typeof currentPhotos === "string") {
+          existingImages = JSON.parse(currentPhotos)
+        } else if (Array.isArray(currentPhotos)) {
+          existingImages = currentPhotos
+        }
+      } catch (parseError) {
+        console.warn("⚠️ Could not parse existing images, starting fresh:", parseError)
+        existingImages = []
       }
-    } catch (parseError) {
-      console.warn("⚠️ Could not parse existing images, starting fresh")
-      existingImages = []
     }
 
     // Add new images (avoid duplicates)
@@ -80,12 +86,12 @@ export async function POST(request: Request) {
       }
     }
 
-    // Update database with all images
+    // Update database with all images as JSON string (matching your schema)
     await sql`
       UPDATE projects 
       SET 
-        generated_photos = ${JSON.stringify(allImages)}::jsonb,
-        updated_at = NOW()
+        generated_photos = ${JSON.stringify(allImages)},
+        updated_at = CURRENT_TIMESTAMP
       WHERE id = ${Number.parseInt(modelId)}
     `
 

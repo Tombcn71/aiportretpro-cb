@@ -1,8 +1,147 @@
-const ASTRIA_API_KEY = process.env.ASTRIA_API_KEY
 const ASTRIA_API_URL = process.env.ASTRIA_API_URL || "https://api.astria.ai"
+const ASTRIA_API_KEY = process.env.ASTRIA_API_KEY
 
 if (!ASTRIA_API_KEY) {
-  throw new Error("ASTRIA_API_KEY is not set")
+  throw new Error("ASTRIA_API_KEY is required")
+}
+
+export async function testAstriaConnection() {
+  try {
+    const response = await fetch(`${ASTRIA_API_URL}/tunes`, {
+      headers: {
+        Authorization: `Bearer ${ASTRIA_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+    })
+
+    if (!response.ok) {
+      throw new Error(`Astria API error: ${response.status} ${response.statusText}`)
+    }
+
+    const data = await response.json()
+    return {
+      success: true,
+      data,
+      message: "Successfully connected to Astria API",
+    }
+  } catch (error) {
+    console.error("Astria connection test failed:", error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error",
+    }
+  }
+}
+
+export async function generateWithExistingModel(modelId: string, prompts: string[]) {
+  try {
+    const results = []
+
+    for (const prompt of prompts) {
+      const response = await fetch(`${ASTRIA_API_URL}/tunes/${modelId}/prompts`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${ASTRIA_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          prompt: {
+            text: prompt,
+            num_images: 4,
+            callback: `${process.env.NEXTAUTH_URL}/api/astria/prompt-webhook?user_id=1&model_id=${modelId}&webhook_secret=${process.env.APP_WEBHOOK_SECRET}`,
+          },
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error(`Failed to generate with prompt: ${response.status} ${response.statusText}`)
+      }
+
+      const result = await response.json()
+      results.push(result)
+    }
+
+    return {
+      success: true,
+      results,
+      message: `Generated ${results.length} prompts successfully`,
+    }
+  } catch (error) {
+    console.error("Generation with existing model failed:", error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error",
+    }
+  }
+}
+
+export async function getAstriaModelStatus(tuneId: string) {
+  try {
+    const response = await fetch(`${ASTRIA_API_URL}/tunes/${tuneId}`, {
+      headers: {
+        Authorization: `Bearer ${ASTRIA_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+    })
+
+    if (!response.ok) {
+      throw new Error(`Failed to get model status: ${response.status} ${response.statusText}`)
+    }
+
+    const data = await response.json()
+    return {
+      success: true,
+      data,
+      status: data.status || "unknown",
+    }
+  } catch (error) {
+    console.error("Get model status failed:", error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error",
+    }
+  }
+}
+
+export async function generateWithSelectedPack(packId: string, userId: string, projectId: string) {
+  try {
+    // Create tune with pack
+    const response = await fetch(`${ASTRIA_API_URL}/p/${packId}/tunes`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${ASTRIA_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        tune: {
+          title: `Project ${projectId}`,
+          name: `project_${projectId}_${Date.now()}`,
+          callback: `${process.env.NEXTAUTH_URL}/api/astria/train-webhook?user_id=${userId}&model_id=${projectId}&webhook_secret=${process.env.APP_WEBHOOK_SECRET}`,
+          prompt_attributes: {
+            callback: `${process.env.NEXTAUTH_URL}/api/astria/prompt-webhook?user_id=${userId}&model_id=${projectId}&webhook_secret=${process.env.APP_WEBHOOK_SECRET}`,
+          },
+        },
+      }),
+    })
+
+    if (!response.ok) {
+      throw new Error(`Failed to create tune with pack: ${response.status} ${response.statusText}`)
+    }
+
+    const tuneData = await response.json()
+
+    return {
+      success: true,
+      tuneId: tuneData.id,
+      message: "Successfully started generation with selected pack",
+    }
+  } catch (error) {
+    console.error("Generate with selected pack failed:", error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error",
+    }
+  }
 }
 
 export async function createTuneWithPack(
@@ -95,123 +234,4 @@ export async function getPromptStatus(promptId: string) {
   }
 
   return response.json()
-}
-
-export async function testAstriaConnection() {
-  try {
-    const response = await fetch(`${ASTRIA_API_URL}/tunes`, {
-      headers: {
-        Authorization: `Bearer ${ASTRIA_API_KEY}`,
-      },
-    })
-
-    if (!response.ok) {
-      throw new Error(`Astria API connection failed: ${response.statusText}`)
-    }
-
-    return { success: true, message: "Astria connection successful" }
-  } catch (error) {
-    console.error("Astria connection test failed:", error)
-    return { success: false, error: error instanceof Error ? error.message : "Unknown error" }
-  }
-}
-
-export async function generateWithExistingModel(tuneId: string, prompts: string[]) {
-  const results = []
-
-  for (const prompt of prompts) {
-    try {
-      const response = await fetch(`${ASTRIA_API_URL}/tunes/${tuneId}/prompts`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${ASTRIA_API_KEY}`,
-        },
-        body: JSON.stringify({
-          prompt: {
-            text: prompt,
-            num_images: 1,
-          },
-        }),
-      })
-
-      if (!response.ok) {
-        throw new Error(`Failed to generate with existing model: ${response.statusText}`)
-      }
-
-      const result = await response.json()
-      results.push(result)
-    } catch (error) {
-      console.error(`Error generating with prompt "${prompt}":`, error)
-      results.push({ error: error instanceof Error ? error.message : "Unknown error" })
-    }
-  }
-
-  return results
-}
-
-export async function getAstriaModelStatus(tuneId: string) {
-  try {
-    const response = await fetch(`${ASTRIA_API_URL}/tunes/${tuneId}`, {
-      headers: {
-        Authorization: `Bearer ${ASTRIA_API_KEY}`,
-      },
-    })
-
-    if (!response.ok) {
-      throw new Error(`Failed to get model status: ${response.statusText}`)
-    }
-
-    const data = await response.json()
-    return {
-      success: true,
-      status: data.status,
-      data: data,
-    }
-  } catch (error) {
-    console.error("Error getting Astria model status:", error)
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Unknown error",
-    }
-  }
-}
-
-export async function generateWithSelectedPack(
-  packId: string,
-  prompts: string[],
-  projectData: {
-    title: string
-    name: string
-    imageUrls: string[]
-    projectId: number
-    userId: number
-  },
-) {
-  try {
-    // First create the tune with the pack
-    const tuneResult = await createTuneWithPack(packId, projectData)
-
-    if (!tuneResult.id) {
-      throw new Error("Failed to create tune - no ID returned")
-    }
-
-    // Wait a moment for the tune to be ready
-    await new Promise((resolve) => setTimeout(resolve, 2000))
-
-    // Generate images with the prompts
-    const generateResults = await generateWithExistingModel(tuneResult.id.toString(), prompts)
-
-    return {
-      success: true,
-      tuneId: tuneResult.id,
-      generateResults: generateResults,
-    }
-  } catch (error) {
-    console.error("Error generating with selected pack:", error)
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Unknown error",
-    }
-  }
 }
