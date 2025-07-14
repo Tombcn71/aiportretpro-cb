@@ -4,8 +4,7 @@ import { useEffect, useState } from "react"
 import { Header } from "@/components/header"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Download, Camera, CreditCard, Clock, CheckCircle, AlertCircle, Trash2, X } from "lucide-react"
+import { Download, Camera, CreditCard, Trash2, X, CheckCircle } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
 
@@ -67,42 +66,6 @@ export default function DashboardPage() {
     fetchData()
   }, [])
 
-  // Helper function to count valid photos in a project
-  const getValidPhotoCount = (project: Project): number => {
-    let photoCount = 0
-    try {
-      if (project.generated_photos) {
-        if (typeof project.generated_photos === "string") {
-          if (project.generated_photos.startsWith("[")) {
-            const parsed = JSON.parse(project.generated_photos)
-            if (Array.isArray(parsed)) {
-              photoCount = parsed.filter(
-                (photo) =>
-                  photo &&
-                  typeof photo === "string" &&
-                  photo.length > 20 &&
-                  (photo.includes("astria.ai") || photo.includes("mp.astria.ai")),
-              ).length
-            }
-          } else if (project.generated_photos.includes("astria.ai")) {
-            photoCount = 1
-          }
-        } else if (Array.isArray(project.generated_photos)) {
-          photoCount = project.generated_photos.filter(
-            (photo) =>
-              photo &&
-              typeof photo === "string" &&
-              photo.length > 20 &&
-              (photo.includes("astria.ai") || photo.includes("mp.astria.ai")),
-          ).length
-        }
-      }
-    } catch (e) {
-      photoCount = 0
-    }
-    return photoCount
-  }
-
   // Parse generated photos and filter out invalid ones
   const allPhotos = projects.flatMap((project) => {
     let photos: string[] = []
@@ -144,14 +107,7 @@ export default function DashboardPage() {
     }))
   })
 
-  // Filter projects: only show if they have photos OR are currently processing/training
-  const projectsToShow = projects.filter((project) => {
-    const photoCount = getValidPhotoCount(project)
-    const isActivelyProcessing = project.status === "processing" || project.status === "training"
-    return photoCount > 0 || isActivelyProcessing
-  })
-
-  console.log("Valid photos:", allPhotos.length, "Projects to show:", projectsToShow.length)
+  console.log("Valid photos:", allPhotos.length)
 
   const handleImageError = (photoKey: string) => {
     console.log("Image error for:", photoKey)
@@ -239,48 +195,6 @@ export default function DashboardPage() {
     }
   }
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "completed":
-        return (
-          <Badge className="bg-green-100 text-green-800">
-            <CheckCircle className="w-3 h-3 mr-1" />
-            Voltooid
-          </Badge>
-        )
-      case "processing":
-        return (
-          <Badge className="bg-blue-100 text-blue-800">
-            <Clock className="w-3 h-3 mr-1" />
-            Bezig...
-          </Badge>
-        )
-      case "pending":
-        return (
-          <Badge className="bg-yellow-100 text-yellow-800">
-            <Clock className="w-3 h-3 mr-1" />
-            Wachtend
-          </Badge>
-        )
-      case "training":
-        return (
-          <Badge className="bg-purple-100 text-purple-800">
-            <AlertCircle className="w-3 h-3 mr-1" />
-            Training
-          </Badge>
-        )
-      case "failed":
-        return (
-          <Badge className="bg-red-100 text-red-800">
-            <AlertCircle className="w-3 h-3 mr-1" />
-            Mislukt
-          </Badge>
-        )
-      default:
-        return <Badge variant="secondary">{status}</Badge>
-    }
-  }
-
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -334,50 +248,10 @@ export default function DashboardPage() {
           </Card>
         </div>
 
-        {/* Projects Overview */}
-        {projectsToShow.length > 0 && (
-          <div className="mb-8">
-            <h2 className="text-2xl font-semibold mb-4">Jouw Projecten</h2>
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {projectsToShow.map((project) => {
-                const photoCount = getValidPhotoCount(project)
-
-                return (
-                  <Card key={project.id}>
-                    <CardHeader>
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="text-lg">{project.name}</CardTitle>
-                        {getStatusBadge(project.status)}
-                      </div>
-                      <p className="text-sm text-gray-500">
-                        {new Date(project.created_at).toLocaleDateString("nl-NL")}
-                      </p>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="flex items-center justify-between">
-                        <p className="text-sm">
-                          {photoCount > 0 ? `${photoCount} foto's gegenereerd` : "Wordt verwerkt..."}
-                        </p>
-                        {project.status === "completed" && photoCount > 0 && (
-                          <Link href={`/generate/${project.id}`}>
-                            <Button size="sm" variant="outline">
-                              Bekijk Foto's
-                            </Button>
-                          </Link>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                )
-              })}
-            </div>
-          </div>
-        )}
-
         {/* Photos Gallery */}
         <div>
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-semibold">Alle Portetfotos ({allPhotos.length} foto's)</h2>
+            <h2 className="text-2xl font-semibold">Jouw Portetfotos ({allPhotos.length} foto's)</h2>
             {allPhotos.length > 0 && (
               <Button
                 onClick={() => setShowDeleteMode(!showDeleteMode)}
