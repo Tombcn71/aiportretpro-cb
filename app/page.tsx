@@ -56,117 +56,106 @@ const testimonials = [
 ]
 
 const carouselPhotos = [
-  // Round 1: Tom (man), Tina (vrouw), Man met bril (man), Professionele vrouw (vrouw) - Photo 1 van elk
   {
     id: 1,
-    photo: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/tom4.jpg-mgmypdcq0X97yxAns6kFe4xxpnwvqG.jpeg",
-    name: "Tom - Professional Portrait 1",
+    photo: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/tom4.jpg-NLtbqmqOYNsMIU3xPNWZj8MMUqijVQ.jpeg",
+    name: "Professional Man Portrait",
   },
   {
     id: 2,
-    photo: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/tina5.jpg-ZV9CK5hpWaQkbnGhmbYjddalpcBjcq.jpeg",
-    name: "Tina - Professional Portrait 1",
+    photo: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/27695045-1.jpg-KeFMrIDpLDhdxSpfY5FdEzFX0cxHJx.jpeg",
+    name: "Professional Woman Portrait",
   },
   {
     id: 3,
     photo: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/27692972-0.jpg-z2VqXf1F3y7cJiwxEpWzDzhwIYfLOb.jpeg",
-    name: "Professional Man - Portrait 1",
+    name: "Professional Man Portrait",
   },
   {
     id: 4,
-    photo: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/27695045-1.jpg-KeFMrIDpLDhdxSpfY5FdEzFX0cxHJx.jpeg",
-    name: "Professional Woman - Portrait 1",
+    photo: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/tina5.jpg-ZV9CK5hpWaQkbnGhmbYjddalpcBjcq.jpeg",
+    name: "Professional Woman Portrait",
   },
-  // Round 2: Tom (man), Tina (vrouw), Man met bril (man), Professionele vrouw (vrouw) - Photo 2 van elk
   {
     id: 5,
-    photo: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/tom2.jpg-37vydo8MeTF1rouq3T9kywWBsDZYOo.jpeg",
-    name: "Tom - Professional Portrait 2",
+    photo: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/27691283-3.jpg-KjWSJjvstj3odWsATX8nKMlIUPNL43.jpeg",
+    name: "Professional Man Portrait",
   },
   {
     id: 6,
-    photo: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/tina2.jpg-9bJNGhWbRwH3XLpIeX8VqCYHdrSreM.jpeg",
-    name: "Tina - Professional Portrait 2",
+    photo: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/27694199-3.jpg-sXcwPrJABMjm9witVwdxnMEF2JVk3k.jpeg",
+    name: "Professional Woman Portrait",
   },
   {
     id: 7,
-    photo: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/27691283-3.jpg-KjWSJjvstj3odWsATX8nKMlIUPNL43.jpeg",
-    name: "Professional Man - Portrait 2",
+    photo: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/27693112-0.jpg-bXHSluYjMIyWdz1i4DbLoocaL7mOIz.jpeg",
+    name: "Professional Man Portrait",
   },
   {
     id: 8,
-    photo: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/27694199-3.jpg-sXcwPrJABMjm9witVwdxnMEF2JVk3k.jpeg",
-    name: "Professional Woman - Portrait 2",
+    photo: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/27694689-0.jpg-LKqdfQavPAmGZsiRPb39KVl4jHsypI.jpeg",
+    name: "Professional Woman Portrait",
   },
-  // Round 3: Tom (man), Tina (vrouw), Man met bril (man), Professionele vrouw (vrouw) - Photo 3 van elk
   {
     id: 9,
-    photo: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/tom3.jpg-48UE4t6NHCScOsH5o4AATafHBpm82v.jpeg",
-    name: "Tom - Professional Portrait 3",
+    photo: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/27691728-7.jpg-MJIZdM1HE9Mka9r6wOzr34Y7o3A2up.jpeg",
+    name: "Professional Man Portrait",
   },
   {
     id: 10,
-    photo: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/tina4.jpg-VT7DFhrP9lFDQlsVKx6JgEmF6xxQ7e.jpeg",
-    name: "Tina - Professional Portrait 3",
+    photo: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/27693786-0.jpg-9Ap1rnz8RAGK0JkF2NuP3i5CRpp4Jx.jpeg",
+    name: "Professional Woman Portrait",
   },
   {
     id: 11,
-    photo: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/27693112-0.jpg-bXHSluYjMIyWdz1i4DbLoocaL7mOIz.jpeg",
-    name: "Professional Man - Portrait 3",
+    photo: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/tom2.jpg-svp0qoKAa13YmLNNioPmblnRFwx2EK.jpeg",
+    name: "Professional Man Portrait",
   },
   {
     id: 12,
-    photo: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/27694689-0.jpg-LKqdfQavPAmGZsiRPb39KVl4jHsypI.jpeg",
-    name: "Professional Woman - Portrait 3",
+    photo: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/tina2.jpg-9bJNGhWbRwH3XLpIeX8VqCYHdrSreM.jpeg",
+    name: "Professional Woman Portrait",
   },
-  // Round 4: Tom (man), Tina (vrouw), Man met bril (man), Professionele vrouw (vrouw) - Photo 4 van elk
   {
     id: 13,
-    photo:
-      "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/f8d2a738-b0bc-4a4f-9c9c-57dbd0af6bf0.jpg-599T41RPoWTGCpccOkUkgds8SaQVZ9.jpeg",
-    name: "Tom - Professional Portrait 4",
+    photo: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/tom3.jpg-nY593meIQgLV21MzFzhyDnAUvFYXgL.jpeg",
+    name: "Professional Man Portrait",
   },
   {
     id: 14,
-    photo: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/tina1.jpg-kivWgSSUfqrZpREF7XExFiB7UJXRqu.jpeg",
-    name: "Tina - Professional Portrait 4",
+    photo: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/tina4.jpg-VlRbMHcd4KZ6cBUtpRUCIKrqhevoqE.jpeg",
+    name: "Professional Woman Portrait",
   },
   {
     id: 15,
-    photo: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/27691728-7.jpg-MJIZdM1HE9Mka9r6wOzr34Y7o3A2up.jpeg",
-    name: "Professional Man - Portrait 4",
+    photo:
+      "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/f8d2a738-b0bc-4a4f-9c9c-57dbd0af6bf0.jpg-G7ExcJMSnDKoufgif6EklTUdrg1hbo.jpeg",
+    name: "Professional Man Portrait",
   },
   {
     id: 16,
-    photo: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/27693786-0.jpg-9Ap1rnz8RAGK0JkF2NuP3i5CRpp4Jx.jpeg",
-    name: "Professional Woman - Portrait 4",
+    photo: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/tina1.jpg-kivWgSSUfqrZpREF7XExFiB7UJXRqu.jpeg",
+    name: "Professional Woman Portrait",
   },
 ]
 
 const galleryPhotos = [
-  // Round 1: Tom (man), Tina (vrouw), Man met bril (man), Professionele vrouw (vrouw) - Photo 1 van elk
-  "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/tom4.jpg-mgmypdcq0X97yxAns6kFe4xxpnwvqG.jpeg",
-  "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/tina5.jpg-ZV9CK5hpWaQkbnGhmbYjddalpcBjcq.jpeg",
-  "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/27692972-0.jpg-z2VqXf1F3y7cJiwxEpWzDzhwIYfLOb.jpeg",
-  "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/27695045-1.jpg-KeFMrIDpLDhdxSpfY5FdEzFX0cxHJx.jpeg",
-
-  // Round 2: Tom (man), Tina (vrouw), Man met bril (man), Professionele vrouw (vrouw) - Photo 2 van elk
-  "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/tom2.jpg-37vydo8MeTF1rouq3T9kywWBsDZYOo.jpeg",
-  "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/tina2.jpg-9bJNGhWbRwH3XLpIeX8VqCYHdrSreM.jpeg",
-  "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/27691283-3.jpg-KjWSJjvstj3odWsATX8nKMlIUPNL43.jpeg",
-  "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/27694199-3.jpg-sXcwPrJABMjm9witVwdxnMEF2JVk3k.jpeg",
-
-  // Round 3: Tom (man), Tina (vrouw), Man met bril (man), Professionele vrouw (vrouw) - Photo 3 van elk
-  "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/tom3.jpg-48UE4t6NHCScOsH5o4AATafHBpm82v.jpeg",
-  "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/tina4.jpg-VT7DFhrP9lFDQlsVKx6JgEmF6xxQ7e.jpeg",
-  "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/27693112-0.jpg-bXHSluYjMIyWdz1i4DbLoocaL7mOIz.jpeg",
-  "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/27694689-0.jpg-LKqdfQavPAmGZsiRPb39KVl4jHsypI.jpeg",
-
-  // Round 4: Tom (man), Tina (vrouw), Man met bril (man), Professionele vrouw (vrouw) - Photo 4 van elk
-  "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/f8d2a738-b0bc-4a4f-9c9c-57dbd0af6bf0.jpg-599T41RPoWTGCpccOkUkgds8SaQVZ9.jpeg",
-  "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/tina1.jpg-kivWgSSUfqrZpREF7XExFiB7UJXRqu.jpeg",
-  "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/27691728-7.jpg-MJIZdM1HE9Mka9r6wOzr34Y7o3A2up.jpeg",
-  "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/27693786-0.jpg-9Ap1rnz8RAGK0JkF2NuP3i5CRpp4Jx.jpeg",
+  "/images/gallery1.jpg", // Man met bril (nieuw)
+  "/images/gallery2.jpg", // Vrouw in grijs pak (nieuw)
+  "/images/gallery3.jpg", // Man met bril (nieuw)
+  "/images/gallery4.jpg", // Vrouw donker pak (nieuw)
+  "/images/gallery5.jpg", // Man donker pak
+  "/images/gallery6.jpg", // Vrouw blauw shirt
+  "/images/gallery7.jpg", // Man blauw shirt
+  "/images/gallery8.jpg", // Vrouw donker pak
+  "/images/gallery9.jpg", // Man met bril blauw shirt
+  "/images/gallery10.jpg", // Vrouw donker pak blauw shirt
+  "/images/gallery11.jpg", // Man wit shirt (nieuw)
+  "/images/gallery12.jpg", // Vrouw blauw shirt (nieuw)
+  "/images/gallery1.jpg", // Man met bril (herhaling)
+  "/images/gallery2.jpg", // Vrouw in grijs pak (herhaling)
+  "/images/gallery3.jpg", // Man lachend (herhaling)
+  "/images/gallery4.jpg", // Vrouw wit shirt (herhaling)
 ]
 
 const companies = [
@@ -275,7 +264,8 @@ export default function HomePage() {
       {/* Photo Carousel */}
       <section className="w-full overflow-hidden mb-16 md:mb-24 bg-gradient-to-r from-blue-50 via-white to-blue-50">
         <div className="relative">
-<div className="flex animate-scroll-photos whitespace-nowrap">            {carouselPhotos.concat(carouselPhotos).map((item, index) => (
+          <div className="flex animate-scroll">
+            {carouselPhotos.concat(carouselPhotos).map((item, index) => (
               <div key={`${item.id}-${index}`} className="flex-shrink-0 mx-1 md:mx-2">
                 <div className="relative">
                   <div className="w-40 h-52 md:w-64 md:h-80 rounded-xl md:rounded-2xl overflow-hidden bg-gray-100 shadow-md md:shadow-lg">
@@ -658,40 +648,28 @@ export default function HomePage() {
         </div>
       </footer>
 
-
-
-
-<style jsx>{`
-  /* Animatie voor de fotocarrousel */
-  @keyframes scroll-photos {
-    0% {
-      transform: translateX(0);
-    }
-    100% {
-      /* Deze lijn is essentieel: het schuift de inhoud precies de helft van de totale breedte.
-         Omdat je in je JavaScript de lijst met foto's verdubbelt (16 + 16 = 32),
-         betekent 'de helft van de totale breedte' precies de lengte van de eerste 16 unieke foto's.
-         Dit zorgt voor een perfect naadloze, eindeloze loop van al je 16 foto's. */
-      transform: translateX(calc(-100% / 2));
-    }
-  }
-
-  .animate-scroll-photos {
-    animation: scroll-photos 30s linear infinite; /* De animatie duurt 30 seconden en herhaalt zich eindeloos */
-    white-space: nowrap; /* Zorgt ervoor dat alle foto's op één lange rij blijven en niet naar de volgende regel springen */
-  }
-
-  .animate-scroll-photos:hover {
-    animation-play-state: paused; /* Pauzeert de animatie als de muis over de carrousel beweegt */
-  }
-
-  /* Aanpassing voor kleinere schermen (bijv. mobiel) */
-  @media (max-width: 768px) {
-    .animate-scroll-photos {
-      animation: scroll-photos 20s linear infinite; /* Op mobiel gaat de carrousel iets sneller (20 seconden) */
-    }
-  }
-`}</style>
+      <style jsx>{`
+        @keyframes scroll {
+          0% {
+            transform: translateX(0);
+          }
+          100% {
+            transform: translateX(-50%);
+          }
+        }
+        .animate-scroll {
+          animation: scroll 15s linear infinite;
+        }
+        .animate-scroll:hover {
+          animation-play-state: paused;
+        }
+        
+        @media (max-width: 768px) {
+          .animate-scroll {
+            animation: scroll 10s linear infinite;
+          }
+        }
+      `}</style>
     </div>
   )
 }
