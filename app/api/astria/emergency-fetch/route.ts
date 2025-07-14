@@ -54,13 +54,13 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    // Update database with the images
+    // Update database with the images - FIXED: Use PostgreSQL array format
     console.log(`💾 Updating project ${projectId} in database...`)
 
     const result = await sql`
       UPDATE projects 
       SET 
-        generated_photos = ${JSON.stringify(allImages)},
+        generated_photos = ${allImages},
         status = 'completed',
         updated_at = CURRENT_TIMESTAMP
       WHERE id = ${projectId}
