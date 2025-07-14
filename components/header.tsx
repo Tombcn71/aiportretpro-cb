@@ -4,19 +4,15 @@ import { useState } from "react"
 import { useSession, signIn, signOut } from "next-auth/react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { Menu, X, User, LogOut } from "lucide-react"
+import { Menu, X, LogOut } from "lucide-react"
 import { Logo } from "./logo"
 
 export function Header() {
-  const { data: session, status } = useSession()
+  const { data: session } = useSession()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   const handleSignIn = () => {
     signIn("google", { callbackUrl: "/dashboard" })
-  }
-
-  const handleSignOut = () => {
-    signOut({ callbackUrl: "/" })
   }
 
   return (
@@ -39,34 +35,14 @@ export function Header() {
               Contact
             </Link>
 
-            {status === "loading" ? (
-              <div className="w-20 h-9 bg-gray-200 animate-pulse rounded"></div>
-            ) : session ? (
-              <div className="flex items-center space-x-4">
-                <Link href="/dashboard">
-                  <Button variant="outline" size="sm">
-                    Dashboard
-                  </Button>
-                </Link>
-                <div className="flex items-center space-x-2">
-                  <div className="w-8 h-8 bg-[#0077B5] rounded-full flex items-center justify-center">
-                    <User className="w-4 h-4 text-white" />
-                  </div>
-                  <span className="text-sm text-gray-700">{session.user?.name}</span>
-                  <Button
-                    onClick={handleSignOut}
-                    variant="ghost"
-                    size="sm"
-                    className="text-gray-600 hover:text-red-600"
-                  >
-                    <LogOut className="w-4 h-4" />
-                  </Button>
-                </div>
-              </div>
-            ) : (
-              <Button onClick={handleSignIn} className="bg-[#0077B5] hover:bg-[#004182] text-white">
-                Inloggen
+            {session ? (
+              <Button onClick={() => signOut({ callbackUrl: "/" })} variant="outline">
+                Uitloggen
               </Button>
+            ) : (
+              <Link href="/login">
+                <Button className="bg-[#0077B5] hover:bg-[#004182] text-white">Inloggen</Button>
+              </Link>
             )}
           </nav>
 
@@ -97,26 +73,11 @@ export function Header() {
                 Contact
               </Link>
 
-              {status === "loading" ? (
-                <div className="px-3 py-2">
-                  <div className="w-20 h-9 bg-gray-200 animate-pulse rounded"></div>
-                </div>
-              ) : session ? (
+              {session ? (
                 <div className="px-3 py-2 space-y-2">
-                  <div className="flex items-center space-x-2 mb-2">
-                    <div className="w-8 h-8 bg-[#0077B5] rounded-full flex items-center justify-center">
-                      <User className="w-4 h-4 text-white" />
-                    </div>
-                    <span className="text-sm text-gray-700">{session.user?.name}</span>
-                  </div>
-                  <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)}>
-                    <Button variant="outline" size="sm" className="w-full mb-2 bg-transparent">
-                      Dashboard
-                    </Button>
-                  </Link>
                   <Button
                     onClick={() => {
-                      handleSignOut()
+                      signOut({ callbackUrl: "/" })
                       setMobileMenuOpen(false)
                     }}
                     variant="ghost"
@@ -129,15 +90,14 @@ export function Header() {
                 </div>
               ) : (
                 <div className="px-3 py-2">
-                  <Button
-                    onClick={() => {
-                      handleSignIn()
-                      setMobileMenuOpen(false)
-                    }}
-                    className="w-full bg-[#0077B5] hover:bg-[#004182] text-white"
-                  >
-                    Inloggen
-                  </Button>
+                  <Link href="/login">
+                    <Button
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="w-full bg-[#0077B5] hover:bg-[#004182] text-white"
+                    >
+                      Inloggen
+                    </Button>
+                  </Link>
                 </div>
               )}
             </div>
