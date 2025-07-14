@@ -3,42 +3,17 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { AlertCircle, CheckCircle, Loader2, Camera } from "lucide-react"
-import { Header } from "@/components/header"
-
-interface FetchResult {
-  success: boolean
-  project?: {
-    id: number
-    name: string
-    tuneId: string
-  }
-  tuneStatus?: string
-  promptsFound?: number
-  imagesFound?: number
-  promptDetails?: Array<{
-    id: string
-    status: string
-    imageCount: number
-  }>
-  sampleImages?: string[]
-  message?: string
-  error?: string
-  details?: string
-}
+import { Loader2, CheckCircle, XCircle, Camera, Database } from "lucide-react"
 
 export default function ManualFetchPage() {
   const [projectId, setProjectId] = useState("40") // Default to Tina's project
   const [loading, setLoading] = useState(false)
-  const [result, setResult] = useState<FetchResult | null>(null)
+  const [result, setResult] = useState<any>(null)
 
   const handleFetch = async () => {
-    if (!projectId.trim()) {
-      alert("Voer een project ID in")
-      return
-    }
+    if (!projectId) return
 
     setLoading(true)
     setResult(null)
@@ -49,7 +24,7 @@ export default function ManualFetchPage() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ projectId: projectId.trim() }),
+        body: JSON.stringify({ projectId: Number.parseInt(projectId) }),
       })
 
       const data = await response.json()
@@ -58,42 +33,61 @@ export default function ManualFetchPage() {
       setResult({
         success: false,
         error: "Network error",
-        details: error instanceof Error ? error.message : "Unknown error",
+        details: error instanceof Error ? error.message : String(error),
       })
     } finally {
       setLoading(false)
     }
   }
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <Header />
+  const getStatusIcon = (success: boolean) => {
+    if (success) return <CheckCircle className="h-5 w-5 text-green-500" />
+    return <XCircle className="h-5 w-5 text-red-500" />
+  }
 
-      <div className="max-w-4xl mx-auto px-4 py-8">
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "trained":
+        return "bg-green-100 text-green-800"
+      case "training":
+        return "bg-yellow-100 text-yellow-800"
+      case "failed":
+        return "bg-red-100 text-red-800"
+      default:
+        return "bg-gray-100 text-gray-800"
+    }
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="max-w-4xl mx-auto px-4">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-center mb-4">🚨 Noodoplossing: Foto's Ophalen</h1>
-          <p className="text-center text-gray-600">Haal direct foto's op van Astria API als webhooks niet werken</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">🚨 Noodoplossing: Foto's Handmatig Ophalen</h1>
+          <p className="text-gray-600">Haal foto's direct op van Astria API en sla ze op in de database</p>
         </div>
 
-        {/* Input Section */}
-        <Card className="mb-8">
+        <Card className="mb-6">
           <CardHeader>
-            <CardTitle>Project Foto's Ophalen</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <Database className="h-5 w-5" />
+              Project Ophalen
+            </CardTitle>
+            <CardDescription>Voer het project ID in om foto's op te halen (Tina = 40)</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex gap-4">
               <Input
                 type="number"
-                placeholder="Project ID (bijv. 40 voor Tina)"
+                placeholder="Project ID (bijv. 40)"
                 value={projectId}
                 onChange={(e) => setProjectId(e.target.value)}
                 className="flex-1"
               />
-              <Button onClick={handleFetch} disabled={loading} className="bg-[#0077B5] hover:bg-[#004182]">
+              <Button onClick={handleFetch} disabled={loading || !projectId} className="min-w-[140px]">
                 {loading ? (
                   <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Bezig...
+                    Ophalen...
                   </>
                 ) : (
                   <>
@@ -103,156 +97,131 @@ export default function ManualFetchPage() {
                 )}
               </Button>
             </div>
-            <p className="text-sm text-gray-500 mt-2">💡 Tip: Project ID 40 is voor "Tina" - probeer die eerst</p>
           </CardContent>
         </Card>
 
-        {/* Results Section */}
         {result && (
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                {result.success ? (
-                  <CheckCircle className="h-5 w-5 text-green-500" />
-                ) : (
-                  <AlertCircle className="h-5 w-5 text-red-500" />
-                )}
+                {getStatusIcon(result.success)}
                 Resultaat
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-4">
               {result.success ? (
                 <div className="space-y-4">
-                  {/* Success Info */}
                   <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                    <h3 className="font-semibold text-green-800 mb-2">✅ Succesvol!</h3>
+                    <h3 className="font-semibold text-green-800 mb-2">✅ Succes!</h3>
                     <p className="text-green-700">{result.message}</p>
                   </div>
 
-                  {/* Project Details */}
-                  {result.project && (
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                      <div>
-                        <p className="text-sm font-medium text-gray-500">Project</p>
-                        <p className="font-semibold">{result.project.name}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-gray-500">Tune Status</p>
-                        <Badge variant={result.tuneStatus === "succeeded" ? "default" : "secondary"}>
-                          {result.tuneStatus}
-                        </Badge>
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-gray-500">Prompts</p>
-                        <p className="font-semibold">{result.promptsFound}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-gray-500">Foto's</p>
-                        <p className="font-semibold text-green-600">{result.imagesFound}</p>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="bg-blue-50 p-3 rounded-lg">
+                      <div className="text-2xl font-bold text-blue-600">{result.photosFound}</div>
+                      <div className="text-sm text-blue-800">Foto's Gevonden</div>
+                    </div>
+                    <div className="bg-green-50 p-3 rounded-lg">
+                      <div className="text-2xl font-bold text-green-600">{result.completedPrompts}</div>
+                      <div className="text-sm text-green-800">Klaar</div>
+                    </div>
+                    <div className="bg-gray-50 p-3 rounded-lg">
+                      <div className="text-2xl font-bold text-gray-600">{result.totalPrompts}</div>
+                      <div className="text-sm text-gray-800">Totaal Prompts</div>
+                    </div>
+                    <div className="bg-purple-50 p-3 rounded-lg">
+                      <Badge className={getStatusColor(result.tuneStatus)}>{result.tuneStatus}</Badge>
+                      <div className="text-sm text-purple-800 mt-1">Tune Status</div>
+                    </div>
+                  </div>
+
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <h4 className="font-semibold text-blue-800 mb-2">🎯 Volgende Stappen:</h4>
+                    <ol className="list-decimal list-inside text-blue-700 space-y-1">
+                      <li>
+                        Ga naar je{" "}
+                        <a href="/dashboard" className="underline font-medium">
+                          dashboard
+                        </a>
+                      </li>
+                      <li>Controleer of de foto's nu zichtbaar zijn</li>
+                      <li>Als het werkt, kunnen we de webhooks repareren</li>
+                    </ol>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                    <h3 className="font-semibold text-red-800 mb-2">❌ Probleem</h3>
+                    <p className="text-red-700">{result.message || result.error}</p>
+                  </div>
+
+                  {result.tuneStatus && (
+                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                      <h4 className="font-semibold text-yellow-800 mb-2">📊 Status Info:</h4>
+                      <div className="space-y-2">
+                        <div>
+                          <span className="font-medium">Tune Status: </span>
+                          <Badge className={getStatusColor(result.tuneStatus)}>{result.tuneStatus}</Badge>
+                        </div>
+                        {result.completedPrompts !== undefined && (
+                          <div>
+                            <span className="font-medium">Prompts: </span>
+                            {result.completedPrompts} van {result.totalPrompts} klaar
+                          </div>
+                        )}
                       </div>
                     </div>
                   )}
 
-                  {/* Prompt Details */}
-                  {result.promptDetails && result.promptDetails.length > 0 && (
-                    <div>
-                      <h4 className="font-semibold mb-2">Prompt Details:</h4>
-                      <div className="grid gap-2">
-                        {result.promptDetails.map((prompt, index) => (
-                          <div key={index} className="flex justify-between items-center bg-gray-50 p-2 rounded">
-                            <span className="text-sm">Prompt {prompt.id}</span>
-                            <div className="flex gap-2">
-                              <Badge variant="outline">{prompt.status}</Badge>
-                              <Badge variant="secondary">{prompt.imageCount} foto's</Badge>
-                            </div>
+                  {result.promptsData && (
+                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                      <h4 className="font-semibold text-gray-800 mb-2">🔍 Prompt Details:</h4>
+                      <div className="space-y-1 text-sm">
+                        {result.promptsData.map((prompt: any, index: number) => (
+                          <div key={index} className="flex justify-between">
+                            <span>Prompt {prompt.id}:</span>
+                            <span className="flex items-center gap-2">
+                              <Badge className={getStatusColor(prompt.status)}>{prompt.status}</Badge>
+                              <span>{prompt.imageCount} foto's</span>
+                            </span>
                           </div>
                         ))}
                       </div>
                     </div>
                   )}
 
-                  {/* Sample Images */}
-                  {result.sampleImages && result.sampleImages.length > 0 && (
-                    <div>
-                      <h4 className="font-semibold mb-2">Voorbeeld Foto's:</h4>
-                      <div className="grid grid-cols-3 gap-2">
-                        {result.sampleImages.map((imageUrl, index) => (
-                          <img
-                            key={index}
-                            src={imageUrl || "/placeholder.svg"}
-                            alt={`Sample ${index + 1}`}
-                            className="w-full h-24 object-cover rounded border"
-                            onError={(e) => {
-                              const target = e.target as HTMLImageElement
-                              target.style.display = "none"
-                            }}
-                          />
-                        ))}
-                      </div>
-                    </div>
+                  {result.details && (
+                    <details className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                      <summary className="font-semibold text-gray-800 cursor-pointer">🔧 Technische Details</summary>
+                      <pre className="mt-2 text-xs text-gray-600 overflow-auto">
+                        {typeof result.details === "string" ? result.details : JSON.stringify(result.details, null, 2)}
+                      </pre>
+                    </details>
                   )}
-
-                  {/* Next Steps */}
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                    <h4 className="font-semibold text-blue-800 mb-2">📋 Volgende Stappen:</h4>
-                    <ol className="list-decimal list-inside text-blue-700 space-y-1">
-                      <li>Ga terug naar je dashboard</li>
-                      <li>Ververs de pagina (F5)</li>
-                      <li>Je foto's zouden nu zichtbaar moeten zijn!</li>
-                    </ol>
-                  </div>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {/* Error Info */}
-                  <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                    <h3 className="font-semibold text-red-800 mb-2">❌ Fout</h3>
-                    <p className="text-red-700">{result.error}</p>
-                    {result.details && <p className="text-red-600 text-sm mt-2">{result.details}</p>}
-                  </div>
-
-                  {/* Troubleshooting */}
-                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                    <h4 className="font-semibold text-yellow-800 mb-2">🔧 Mogelijke Oplossingen:</h4>
-                    <ul className="list-disc list-inside text-yellow-700 space-y-1">
-                      <li>Controleer of het project ID correct is</li>
-                      <li>Het project moet een Astria tune_id hebben</li>
-                      <li>De training moet zijn gestart in Astria</li>
-                      <li>Probeer het over een paar minuten opnieuw</li>
-                    </ul>
-                  </div>
                 </div>
               )}
             </CardContent>
           </Card>
         )}
 
-        {/* Instructions */}
-        <Card className="mt-8">
-          <CardHeader>
-            <CardTitle>📖 Instructies</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div>
-                <h4 className="font-semibold mb-2">Voor Project "Tina" (ID: 40):</h4>
-                <ol className="list-decimal list-inside space-y-1 text-sm">
-                  <li>Laat "40" staan in het veld</li>
-                  <li>Klik op "Haal Foto's Op"</li>
-                  <li>Wacht op het resultaat</li>
-                  <li>Ga terug naar dashboard als succesvol</li>
-                </ol>
-              </div>
-
-              <div>
-                <h4 className="font-semibold mb-2">Voor Andere Projecten:</h4>
-                <p className="text-sm text-gray-600">
-                  Voer het project ID in dat je wilt controleren. Je kunt project IDs vinden in je dashboard.
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-6">
+          <h3 className="font-semibold text-blue-800 mb-3">💡 Hoe dit werkt:</h3>
+          <ul className="text-blue-700 space-y-2">
+            <li>
+              • <strong>Stap 1:</strong> Controleert Astria API direct (geen webhooks)
+            </li>
+            <li>
+              • <strong>Stap 2:</strong> Haalt alle beschikbare foto's op
+            </li>
+            <li>
+              • <strong>Stap 3:</strong> Slaat ze op in database zoals project 23
+            </li>
+            <li>
+              • <strong>Stap 4:</strong> Toont resultaat en volgende stappen
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
   )

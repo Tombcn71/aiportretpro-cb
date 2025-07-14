@@ -1,7 +1,7 @@
-import { NextResponse } from "next/server"
+import { type NextRequest, NextResponse } from "next/server"
 import { sql } from "@/lib/db"
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
     const { projectId } = await request.json()
 
@@ -13,7 +13,7 @@ export async function POST(request: Request) {
 
     // Get project from database
     const projects = await sql`
-      SELECT * FROM projects WHERE id = ${Number.parseInt(projectId)}
+      SELECT * FROM projects WHERE id = ${projectId}
     `
 
     if (projects.length === 0) {
@@ -21,127 +21,130 @@ export async function POST(request: Request) {
     }
 
     const project = projects[0]
-    console.log(`📁 Found project: ${project.name} (tune_id: ${project.prediction_id})`)
+    console.log(`📁 Found project: ${project.name} (tune_id: ${project.tune_id})`)
 
-    if (!project.prediction_id) {
-      return NextResponse.json({ error: "No Astria tune ID found for this project" }, { status: 400 })
+    if (!project.tune_id) {
+      return NextResponse.json({ error: "No tune_id found for this project" }, { status: 400 })
     }
 
-    // Check tune status first
-    console.log(`🔍 Checking tune status for ${project.prediction_id}`)
-    const tuneResponse = await fetch(`https://api.astria.ai/tunes/${project.prediction_id}`, {
+    // Fetch from Astria API
+    const astriaResponse = await fetch(`https://api.astria.ai/tunes/${project.tune_id}`, {
       headers: {
         Authorization: `Bearer ${process.env.ASTRIA_API_KEY}`,
+        "Content-Type": "application/json",
       },
     })
 
-    if (!tuneResponse.ok) {
-      console.error(`❌ Failed to get tune status: ${tuneResponse.status}`)
+    if (!astriaResponse.ok) {
+      const errorText = await astriaResponse.text()
+      console.error(`❌ Astria API error: ${astriaResponse.status} - ${errorText}`)
       return NextResponse.json(
         {
-          error: `Failed to get tune status: ${tuneResponse.status}`,
-          details: `Tune ${project.prediction_id} may not exist or API error`,
+          error: `Astria API error: ${astriaResponse.status}`,
+          details: errorText,
         },
         { status: 500 },
       )
     }
 
-    const tuneData = await tuneResponse.json()
-    console.log(`🎯 Tune status: ${tuneData.status}`)
+    const astriaData = await astriaResponse.json()
+    console.log(`📊 Astria data:`, JSON.stringify(astriaData, null, 2))
 
-    // Fetch prompts/images
-    console.log(`📸 Fetching prompts for tune ${project.prediction_id}`)
-    const promptsResponse = await fetch(`https://api.astria.ai/tunes/${project.prediction_id}/prompts`, {
+    // Check if tune is trained and get prompts
+    if (astriaData.status !== "trained") {
+      return NextResponse.json({
+        success: false,
+        message: `Tune status is: ${astriaData.status}. Need 'trained' status to fetch photos.`,
+        tuneStatus: astriaData.status,
+        tuneData: astriaData,
+      })
+    }
+
+    // Fetch prompts for this tune
+    const promptsResponse = await fetch(`https://api.astria.ai/tunes/${project.tune_id}/prompts`, {
       headers: {
         Authorization: `Bearer ${process.env.ASTRIA_API_KEY}`,
+        "Content-Type": "application/json",
       },
     })
 
     if (!promptsResponse.ok) {
-      console.error(`❌ Failed to get prompts: ${promptsResponse.status}`)
+      const errorText = await promptsResponse.text()
+      console.error(`❌ Prompts API error: ${promptsResponse.status} - ${errorText}`)
       return NextResponse.json(
         {
-          error: `Failed to get prompts: ${promptsResponse.status}`,
-          tuneStatus: tuneData.status,
-          tuneData: tuneData,
+          error: `Prompts API error: ${promptsResponse.status}`,
+          details: errorText,
         },
         { status: 500 },
       )
     }
 
     const promptsData = await promptsResponse.json()
-    console.log(`📋 Found ${promptsData.length} prompts`)
+    console.log(`📸 Found ${promptsData.length} prompts`)
 
-    // Collect all image URLs
-    const allImageUrls: string[] = []
-    const promptDetails = []
+    // Collect all images from all prompts
+    let allImages: string[] = []
+    let completedPrompts = 0
 
     for (const prompt of promptsData) {
-      const promptInfo = {
-        id: prompt.id,
-        status: prompt.status,
-        imageCount: prompt.images ? prompt.images.length : 0,
-      }
-      promptDetails.push(promptInfo)
+      if (prompt.status === "succeeded" && prompt.images && Array.isArray(prompt.images)) {
+        completedPrompts++
+        const imageUrls = prompt.images
+          .filter((img: any) => img.url && typeof img.url === "string")
+          .map((img: any) => img.url)
 
-      if (prompt.images && Array.isArray(prompt.images)) {
-        for (const image of prompt.images) {
-          if (image.url && typeof image.url === "string") {
-            allImageUrls.push(image.url)
-          }
-        }
+        allImages = [...allImages, ...imageUrls]
+        console.log(`✅ Prompt ${prompt.id}: ${imageUrls.length} images`)
+      } else {
+        console.log(`⏳ Prompt ${prompt.id}: status ${prompt.status}`)
       }
     }
 
-    console.log(`🖼️ Total images found: ${allImageUrls.length}`)
+    console.log(`📊 Total images found: ${allImages.length}`)
 
-    // Update database if we found images
-    if (allImageUrls.length > 0) {
+    if (allImages.length > 0) {
+      // Update database
       await sql`
         UPDATE projects 
         SET 
-          generated_photos = ${JSON.stringify(allImageUrls)},
-          status = 'completed',
+          generated_photos = ${JSON.stringify(allImages)},
+          status = ${allImages.length >= 40 ? "completed" : "processing"},
           updated_at = CURRENT_TIMESTAMP
-        WHERE id = ${project.id}
+        WHERE id = ${projectId}
       `
-      console.log(`✅ Updated project ${project.id} with ${allImageUrls.length} photos`)
+
+      console.log(`✅ Updated project ${projectId} with ${allImages.length} photos`)
+
+      return NextResponse.json({
+        success: true,
+        message: `Successfully fetched ${allImages.length} photos!`,
+        photosFound: allImages.length,
+        completedPrompts,
+        totalPrompts: promptsData.length,
+        tuneStatus: astriaData.status,
+        photos: allImages,
+      })
     } else {
-      // Update status based on tune status
-      const newStatus = tuneData.status === "succeeded" ? "completed" : tuneData.status
-      await sql`
-        UPDATE projects 
-        SET 
-          status = ${newStatus},
-          updated_at = CURRENT_TIMESTAMP
-        WHERE id = ${project.id}
-      `
-      console.log(`📝 Updated project ${project.id} status to ${newStatus}`)
+      return NextResponse.json({
+        success: false,
+        message: "No completed photos found yet",
+        completedPrompts,
+        totalPrompts: promptsData.length,
+        tuneStatus: astriaData.status,
+        promptsData: promptsData.map((p) => ({
+          id: p.id,
+          status: p.status,
+          imageCount: p.images ? p.images.length : 0,
+        })),
+      })
     }
-
-    return NextResponse.json({
-      success: true,
-      project: {
-        id: project.id,
-        name: project.name,
-        tuneId: project.prediction_id,
-      },
-      tuneStatus: tuneData.status,
-      promptsFound: promptsData.length,
-      imagesFound: allImageUrls.length,
-      promptDetails: promptDetails,
-      sampleImages: allImageUrls.slice(0, 3),
-      message:
-        allImageUrls.length > 0
-          ? `Successfully recovered ${allImageUrls.length} photos!`
-          : `No photos found yet. Tune status: ${tuneData.status}`,
-    })
   } catch (error) {
     console.error("❌ Manual fetch error:", error)
     return NextResponse.json(
       {
         error: "Manual fetch failed",
-        details: error instanceof Error ? error.message : "Unknown error",
+        details: error instanceof Error ? error.message : String(error),
       },
       { status: 500 },
     )
