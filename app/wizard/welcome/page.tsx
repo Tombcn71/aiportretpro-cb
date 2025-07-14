@@ -1,9 +1,3 @@
-wizard welcome page
-
-
-
-
-
 "use client"
 
 import { useState } from "react"
