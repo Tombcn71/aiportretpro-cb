@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { getServerSession } from "next-auth"
+import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/lib/auth"
 import { neon } from "@neondatabase/serverless"
 
@@ -19,18 +19,17 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: "Missing photoUrl or projectId" }, { status: 400 })
     }
 
-    // First, verify that the project belongs to the user
-    const projectCheck = await sql`
-      SELECT id, generated_photos, user_email 
-      FROM projects 
+    // Get the project to verify ownership
+    const projects = await sql`
+      SELECT * FROM projects 
       WHERE id = ${projectId} AND user_email = ${session.user.email}
     `
 
-    if (projectCheck.length === 0) {
+    if (projects.length === 0) {
       return NextResponse.json({ error: "Project not found or unauthorized" }, { status: 404 })
     }
 
-    const project = projectCheck[0]
+    const project = projects[0]
     let currentPhotos: string[] = []
 
     // Parse current photos
@@ -51,7 +50,7 @@ export async function DELETE(request: NextRequest) {
       }
     }
 
-    // Remove the specific photo URL
+    // Remove the photo from the array
     const updatedPhotos = currentPhotos.filter((photo) => photo !== photoUrl)
 
     // Update the database
