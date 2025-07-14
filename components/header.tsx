@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { useSession, signOut } from "next-auth/react"
+import { useSession, signIn, signOut } from "next-auth/react"
 import { Button } from "@/components/ui/button"
 
 export function Header() {
@@ -29,13 +29,13 @@ export function Header() {
           {status === "loading" ? (
             <div className="h-8 w-8 rounded-full bg-gray-200 animate-pulse" />
           ) : session ? (
-            <Button onClick={() => signOut()} variant="outline">
+            <Button onClick={() => signOut({ callbackUrl: "/" })} variant="outline">
               Uitloggen
             </Button>
           ) : (
             <div className="flex items-center space-x-2">
-              <Button variant="ghost" asChild>
-                <Link href="/login">Sign In</Link>
+              <Button onClick={() => signIn("google", { callbackUrl: "/dashboard" })} variant="ghost">
+                Inloggen
               </Button>
               <Button asChild>
                 <Link href="/pricing">Get Started</Link>
