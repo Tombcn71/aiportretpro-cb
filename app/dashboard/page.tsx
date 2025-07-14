@@ -42,29 +42,37 @@ export default function Dashboard() {
       const response = await fetch("/api/projects")
       if (response.ok) {
         const data = await response.json()
+        console.log("Projects data:", data) // Debug log
 
         // Extract all photos from all projects
         const allPhotos: Photo[] = []
         data.projects.forEach((project: any) => {
+          console.log("Project:", project) // Debug log
           if (project.generated_photos && Array.isArray(project.generated_photos)) {
             project.generated_photos.forEach((photoUrl: string, index: number) => {
-              if (photoUrl && photoUrl.includes("astria.ai")) {
+              // Accept any photo URL, not just astria.ai
+              if (photoUrl && photoUrl.trim() !== "") {
                 allPhotos.push({
                   id: `${project.id}-${index}`,
                   url: photoUrl,
-                  project_name: project.project_name,
+                  project_name: project.project_name || project.name,
                 })
               }
             })
           }
         })
 
+        console.log("All photos found:", allPhotos) // Debug log
+
         // Remove duplicates based on URL
         const uniquePhotos = allPhotos.filter(
           (photo, index, self) => index === self.findIndex((p) => p.url === photo.url),
         )
 
+        console.log("Unique photos:", uniquePhotos) // Debug log
         setPhotos(uniquePhotos)
+      } else {
+        console.error("Failed to fetch projects:", response.status)
       }
     } catch (error) {
       console.error("Error fetching photos:", error)
@@ -151,6 +159,12 @@ export default function Dashboard() {
       <Header />
 
       <div className="container mx-auto px-4 py-8">
+        {/* Debug info */}
+        <div className="mb-4 p-4 bg-yellow-100 rounded">
+          <p>Debug: Gevonden {photos.length} foto's</p>
+          <p>Session: {session?.user?.email}</p>
+        </div>
+
         {/* Credits Overview */}
         <div className="mb-8">
           <Card>
