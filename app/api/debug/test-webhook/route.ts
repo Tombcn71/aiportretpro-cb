@@ -8,7 +8,6 @@ export async function POST(request: NextRequest) {
       method: request.method,
       headers: Object.fromEntries(request.headers.entries()),
       body: body,
-      timestamp: new Date().toISOString(),
     })
 
     return NextResponse.json({

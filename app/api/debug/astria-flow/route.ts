@@ -8,17 +8,10 @@ export async function GET(request: NextRequest) {
 
     // Get environment info
     const envInfo = {
-      webhookSecret: process.env.APP_WEBHOOK_SECRET ? "Set" : "Missing",
-      nextAuthUrl: process.env.NEXTAUTH_URL ? "Set" : "Missing",
-      astriaApiKey: process.env.ASTRIA_API_KEY ? "Set" : "Missing",
+      webhookSecret: process.env.APP_WEBHOOK_SECRET ? "present" : "missing",
+      nextAuthUrl: process.env.NEXTAUTH_URL || "missing",
+      astriaApiKey: process.env.ASTRIA_API_KEY ? "present" : "missing",
     }
-
-    // Get recent webhook logs
-    const webhookLogs = await sql`
-      SELECT * FROM webhook_logs 
-      ORDER BY created_at DESC 
-      LIMIT 20
-    `
 
     // Get project info if projectId provided
     let projectInfo = null
@@ -31,9 +24,30 @@ export async function GET(request: NextRequest) {
       projectInfo = project[0] || null
     }
 
-    // Get all projects with their status
-    const allProjects = await sql`
-      SELECT id, name, status, created_at, updated_at,
+    // Get recent webhook logs
+    let webhookLogs = []
+    try {
+      if (projectId) {
+        webhookLogs = await sql`
+          SELECT * FROM webhook_logs 
+          WHERE project_id = ${Number.parseInt(projectId)}
+          ORDER BY created_at DESC 
+          LIMIT 10
+        `
+      } else {
+        webhookLogs = await sql`
+          SELECT * FROM webhook_logs 
+          ORDER BY created_at DESC 
+          LIMIT 20
+        `
+      }
+    } catch (error) {
+      console.log("Webhook logs table might not exist:", error.message)
+    }
+
+    // Get recent projects
+    const recentProjects = await sql`
+      SELECT id, name, status, created_at, 
              CASE 
                WHEN generated_photos IS NULL THEN 0
                ELSE array_length(generated_photos, 1)
@@ -44,10 +58,10 @@ export async function GET(request: NextRequest) {
     `
 
     return NextResponse.json({
-      environment: envInfo,
-      webhookLogs: webhookLogs,
-      projectInfo: projectInfo,
-      recentProjects: allProjects,
+      envInfo,
+      projectInfo,
+      webhookLogs,
+      recentProjects,
       timestamp: new Date().toISOString(),
     })
   } catch (error) {
