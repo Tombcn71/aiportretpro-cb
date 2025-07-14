@@ -5,7 +5,7 @@ import { Header } from "@/components/header"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Download, Camera, CreditCard, CheckCircle } from "lucide-react"
+import { Download, Camera, CreditCard, CheckCircle, AlertTriangle } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
 
@@ -42,6 +42,8 @@ export default function DashboardPage() {
         const projectsData = await projectsResponse.json()
         const creditsData = await creditsResponse.json()
 
+        console.log("Raw projects data:", projectsData)
+
         setProjects(projectsData)
         setCredits(creditsData)
       } catch (error) {
@@ -55,67 +57,65 @@ export default function DashboardPage() {
     fetchData()
   }, [])
 
-  // Helper function to count valid photos in a project
-  const getValidPhotoCount = (project: Project): number => {
-    if (!project.generated_photos) return 0
+  // ULTRA STRICT photo validation
+  const isValidAstriaPhoto = (photo: any): boolean => {
+    if (!photo || typeof photo !== "string") return false
+    if (photo.length < 30) return false // Astria URLs are long
+    if (!photo.startsWith("http")) return false
+    if (!photo.includes("astria.ai") && !photo.includes("mp.astria.ai")) return false
+    if (photo.includes("placeholder")) return false
+    if (photo.includes("example.com")) return false
+    if (photo.includes("/placeholder.svg")) return false
 
-    let photos: string[] = []
+    // Must end with image extension
+    const hasImageExtension = /\.(jpg|jpeg|png|webp)(\?|$)/i.test(photo)
+    if (!hasImageExtension) return false
+
+    return true
+  }
+
+  // Get REAL valid photos from a project
+  const getRealValidPhotos = (project: Project): string[] => {
+    if (!project.generated_photos) return []
+
+    let photos: any[] = []
+
     try {
       if (typeof project.generated_photos === "string") {
         if (project.generated_photos.startsWith("[")) {
           photos = JSON.parse(project.generated_photos)
-        } else if (project.generated_photos.includes("astria.ai")) {
+        } else {
           photos = [project.generated_photos]
         }
       } else if (Array.isArray(project.generated_photos)) {
         photos = project.generated_photos
       }
     } catch (e) {
-      return 0
+      console.warn(`Failed to parse photos for project ${project.id}:`, e)
+      return []
     }
 
-    return photos.filter(
-      (photo) =>
-        photo &&
-        typeof photo === "string" &&
-        photo.length > 20 &&
-        (photo.includes("astria.ai") || photo.includes("mp.astria.ai")),
-    ).length
+    const validPhotos = photos.filter(isValidAstriaPhoto)
+    console.log(
+      `Project ${project.name} (${project.id}): ${validPhotos.length} valid photos out of ${photos.length} total`,
+    )
+
+    return validPhotos
   }
 
-  // STRICT filtering: only show projects with actual photos
-  const projectsWithPhotos = projects.filter((project) => {
-    const photoCount = getValidPhotoCount(project)
-    return photoCount > 0
+  // ONLY show projects that have REAL photos
+  const projectsWithRealPhotos = projects.filter((project) => {
+    const validPhotos = getRealValidPhotos(project)
+    const hasRealPhotos = validPhotos.length > 0
+
+    console.log(`Project ${project.name}: ${hasRealPhotos ? "SHOWING" : "HIDING"} (${validPhotos.length} photos)`)
+
+    return hasRealPhotos
   })
 
-  // Parse all valid photos for gallery
-  const allPhotos = projectsWithPhotos.flatMap((project) => {
-    let photos: string[] = []
-
-    if (project.generated_photos) {
-      try {
-        if (typeof project.generated_photos === "string") {
-          if (project.generated_photos.startsWith("[")) {
-            photos = JSON.parse(project.generated_photos)
-          } else {
-            photos = [project.generated_photos]
-          }
-        } else if (Array.isArray(project.generated_photos)) {
-          photos = project.generated_photos
-        }
-      } catch (e) {
-        photos = []
-      }
-    }
-
-    const validPhotos = photos.filter(
-      (photo) =>
-        photo &&
-        typeof photo === "string" &&
-        photo.length > 20 &&
-        (photo.includes("astria.ai") || photo.includes("mp.astria.ai")),
-    )
+  // Get all valid photos for gallery
+  const allValidPhotos = projectsWithRealPhotos.flatMap((project) => {
+    const validPhotos = getRealValidPhotos(project)
 
     return validPhotos.map((photo: string, index: number) => ({
       url: photo,
@@ -126,7 +126,13 @@ export default function DashboardPage() {
     }))
   })
 
+  console.log(`Dashboard summary:`)
+  console.log(`- Total projects: ${projects.length}`)
+  console.log(`- Projects with real photos: ${projectsWithRealPhotos.length}`)
+  console.log(`- Total valid photos: ${allValidPhotos.length}`)
+
   const handleImageError = (photoKey: string) => {
+    console.log("Image failed to load:", photoKey)
     setImageErrors((prev) => new Set([...prev, photoKey]))
   }
 
@@ -157,6 +163,24 @@ export default function DashboardPage() {
 
       <div className="max-w-7xl mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold text-center mb-8">Dashboard</h1>
+
+        {/* Debug info - remove in production */}
+        <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <AlertTriangle className="h-4 w-4 text-yellow-600 mr-2" />
+              <span className="text-sm text-yellow-800">
+                Debug: {projects.length} totaal, {projectsWithRealPhotos.length} met foto's, {allValidPhotos.length}{" "}
+                foto's
+              </span>
+            </div>
+            <Link href="/debug-database">
+              <Button size="sm" variant="outline">
+                Database Debug
+              </Button>
+            </Link>
+          </div>
+        </div>
 
         {/* Credits Overview */}
         <div className="mb-8">
@@ -193,13 +217,13 @@ export default function DashboardPage() {
           </Card>
         </div>
 
-        {/* Projects Overview - ONLY projects with photos */}
-        {projectsWithPhotos.length > 0 && (
+        {/* Projects Overview - ONLY projects with REAL photos */}
+        {projectsWithRealPhotos.length > 0 && (
           <div className="mb-8">
             <h2 className="text-2xl font-semibold mb-4">Jouw Projecten</h2>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {projectsWithPhotos.map((project) => {
-                const photoCount = getValidPhotoCount(project)
+              {projectsWithRealPhotos.map((project) => {
+                const validPhotos = getRealValidPhotos(project)
 
                 return (
                   <Card key={project.id}>
@@ -217,7 +241,7 @@ export default function DashboardPage() {
                     </CardHeader>
                     <CardContent>
                       <div className="flex items-center justify-between">
-                        <p className="text-sm">{photoCount} foto's gegenereerd</p>
+                        <p className="text-sm">{validPhotos.length} foto's gegenereerd</p>
                         <Link href={`/generate/${project.id}`}>
                           <Button size="sm" variant="outline">
                             Bekijk Foto's
@@ -234,9 +258,9 @@ export default function DashboardPage() {
 
         {/* Photos Gallery */}
         <div>
-          <h2 className="text-2xl font-semibold mb-6">Alle Portetfotos ({allPhotos.length} foto's)</h2>
+          <h2 className="text-2xl font-semibold mb-6">Alle Portetfotos ({allValidPhotos.length} foto's)</h2>
 
-          {allPhotos.length === 0 ? (
+          {allValidPhotos.length === 0 ? (
             <div className="text-center py-20">
               <Camera className="h-16 w-16 text-gray-400 mx-auto mb-6" />
               <h3 className="text-xl font-semibold mb-4">Nog geen portetfotos</h3>
@@ -257,7 +281,7 @@ export default function DashboardPage() {
             </div>
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-              {allPhotos
+              {allValidPhotos
                 .filter((photo) => !imageErrors.has(photo.key))
                 .map((photo) => (
                   <div key={photo.key} className="group">
@@ -289,12 +313,12 @@ export default function DashboardPage() {
         </div>
 
         {/* Success message */}
-        {allPhotos.length > 0 && (
+        {allValidPhotos.length > 0 && (
           <div className="mt-8 p-4 bg-green-50 border border-green-200 rounded-lg">
             <div className="flex items-center">
               <CheckCircle className="h-5 w-5 text-green-600 mr-2" />
               <p className="text-green-800 font-medium">
-                Geweldig! Je hebt {allPhotos.length} professionele portetfotos klaar voor download.
+                Geweldig! Je hebt {allValidPhotos.length} professionele portetfotos klaar voor download.
               </p>
             </div>
           </div>
