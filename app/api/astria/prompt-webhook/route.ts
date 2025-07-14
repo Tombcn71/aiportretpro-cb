@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
 
     // Find project by tune_id
     const projects = await sql`
-      SELECT * FROM projects WHERE tune_id = ${tuneId}
+      SELECT * FROM projects WHERE tune_id = ${tuneId.toString()}
     `
 
     if (projects.length === 0) {

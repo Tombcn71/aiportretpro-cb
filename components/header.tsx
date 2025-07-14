@@ -1,9 +1,9 @@
 "use client"
 
-import { useSession, signOut } from "next-auth/react"
 import Link from "next/link"
+import { useSession, signOut } from "next-auth/react"
 import { Button } from "@/components/ui/button"
-import { Logo } from "@/components/logo"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,79 +19,80 @@ export function Header() {
   return (
     <header className="border-b bg-white">
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2">
-          <Logo />
-          <span className="text-xl font-bold">AI Portrait Pro</span>
+        <Link href="/" className="text-xl font-bold text-gray-900">
+          AI Portrait Pro
         </Link>
-        <nav className="flex items-center gap-4">
+
+        <nav className="hidden md:flex items-center space-x-6">
+          <Link href="/pricing" className="text-gray-600 hover:text-gray-900">
+            Pricing
+          </Link>
           {session && (
-            <Link href="/dashboard">
-              <Button variant="ghost">Dashboard</Button>
+            <Link href="/dashboard" className="text-gray-600 hover:text-gray-900">
+              Dashboard
             </Link>
           )}
-          <Link href="/pricing">
-            <Button variant="ghost">Prijzen</Button>
-          </Link>
-          <Link href="/manual-fetch">
-            <Button variant="outline">🚨 Foto's Redden</Button>
-          </Link>
+        </nav>
+
+        <div className="flex items-center space-x-4">
           {status === "loading" ? (
-            <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse" />
+            <div className="h-8 w-8 rounded-full bg-gray-200 animate-pulse" />
           ) : session ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="flex items-center space-x-2">
-                  {session.user?.image ? (
-                    <img
-                      src={session.user.image || "/placeholder.svg"}
-                      alt={session.user.name || "User"}
-                      className="w-8 h-8 rounded-full"
-                    />
-                  ) : (
-                    <User className="w-5 h-5" />
-                  )}
-                  <span className="hidden md:block">{session.user?.name}</span>
+                <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage src={session.user?.image || ""} alt={session.user?.name || ""} />
+                    <AvatarFallback>{session.user?.name?.charAt(0).toUpperCase() || "U"}</AvatarFallback>
+                  </Avatar>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                <div className="px-2 py-1.5">
-                  <p className="text-sm font-medium">{session.user?.name}</p>
-                  <p className="text-xs text-gray-500">{session.user?.email}</p>
+              <DropdownMenuContent className="w-56" align="end" forceMount>
+                <div className="flex items-center justify-start gap-2 p-2">
+                  <div className="flex flex-col space-y-1 leading-none">
+                    {session.user?.name && <p className="font-medium">{session.user.name}</p>}
+                    {session.user?.email && (
+                      <p className="w-[200px] truncate text-sm text-muted-foreground">{session.user.email}</p>
+                    )}
+                  </div>
                 </div>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
                   <Link href="/dashboard" className="flex items-center">
-                    <User className="w-4 h-4 mr-2" />
+                    <User className="mr-2 h-4 w-4" />
                     Dashboard
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <Link href="/pricing" className="flex items-center">
-                    <CreditCard className="w-4 h-4 mr-2" />
-                    Tegoed Kopen
+                    <CreditCard className="mr-2 h-4 w-4" />
+                    Pricing
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
-                  onClick={() => signOut({ callbackUrl: "/" })}
-                  className="flex items-center text-red-600"
+                  className="cursor-pointer"
+                  onSelect={(event) => {
+                    event.preventDefault()
+                    signOut()
+                  }}
                 >
-                  <LogOut className="w-4 h-4 mr-2" />
-                  Uitloggen
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Sign out
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
             <div className="flex items-center space-x-2">
-              <Link href="/auth/signin">
-                <Button variant="ghost">Inloggen</Button>
-              </Link>
-              <Link href="/pricing">
-                <Button className="bg-[#0077B5] hover:bg-[#004182]">Start Nu</Button>
-              </Link>
+              <Button variant="ghost" asChild>
+                <Link href="/login">Sign In</Link>
+              </Button>
+              <Button asChild>
+                <Link href="/pricing">Get Started</Link>
+              </Button>
             </div>
           )}
-        </nav>
+        </div>
       </div>
     </header>
   )

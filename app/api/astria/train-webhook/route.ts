@@ -1,19 +1,38 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { sql } from "@/lib/db"
 
+type TuneData = {
+  id: number
+  title: string
+  name: string
+  steps: null
+  trained_at: null
+  started_training_at: null
+  created_at: string
+  updated_at: string
+  expires_at: null
+}
+
 export async function POST(request: NextRequest) {
   try {
     console.log("🔔 TRAIN WEBHOOK CALLED")
     console.log("Headers:", Object.fromEntries(request.headers.entries()))
     console.log("URL:", request.url)
 
-    const body = await request.json()
-    console.log("🔔 Train webhook body:", JSON.stringify(body, null, 2))
+    const incomingData = (await request.json()) as { tune: TuneData }
+    const { tune } = incomingData
 
-    // Handle different webhook formats
-    const tuneData = body.data || body
-    const tuneId = tuneData.id
-    const status = tuneData.status
+    console.log("🔔 Train webhook body:", JSON.stringify(incomingData, null, 2))
+
+    const urlObj = new URL(request.url)
+    const user_id = urlObj.searchParams.get("user_id")
+    const model_id = urlObj.searchParams.get("model_id")
+    const webhook_secret = urlObj.searchParams.get("webhook_secret")
+
+    console.log("🔍 URL params:", { user_id, model_id, webhook_secret })
+
+    const tuneId = tune.id
+    const status = tune.trained_at ? "trained" : "training"
 
     if (!tuneId) {
       console.error("❌ No tune ID found in webhook")
@@ -24,7 +43,7 @@ export async function POST(request: NextRequest) {
 
     // Find project by tune_id
     const projects = await sql`
-      SELECT * FROM projects WHERE tune_id = ${tuneId}
+      SELECT * FROM projects WHERE tune_id = ${tuneId.toString()}
     `
 
     if (projects.length === 0) {
@@ -43,7 +62,7 @@ export async function POST(request: NextRequest) {
     `
 
     // If training succeeded, fetch all photos
-    if (status === "succeeded") {
+    if (status === "trained") {
       console.log(`✅ Training completed for project ${project.id}. Fetching photos...`)
 
       try {
