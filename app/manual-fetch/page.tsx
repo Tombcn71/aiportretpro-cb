@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Loader2, CheckCircle, XCircle, Camera, Database } from "lucide-react"
+import { Loader2, CheckCircle, XCircle, Camera, Database, AlertTriangle, Info } from "lucide-react"
 
 export default function ManualFetchPage() {
   const [projectId, setProjectId] = useState("40") // Default to Tina's project
@@ -48,13 +48,17 @@ export default function ManualFetchPage() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "trained":
-        return "bg-green-100 text-green-800"
+        return "bg-green-100 text-green-800 border-green-200"
       case "training":
-        return "bg-yellow-100 text-yellow-800"
+        return "bg-yellow-100 text-yellow-800 border-yellow-200"
+      case "succeeded":
+        return "bg-green-100 text-green-800 border-green-200"
+      case "processing":
+        return "bg-blue-100 text-blue-800 border-blue-200"
       case "failed":
-        return "bg-red-100 text-red-800"
+        return "bg-red-100 text-red-800 border-red-200"
       default:
-        return "bg-gray-100 text-gray-800"
+        return "bg-gray-100 text-gray-800 border-gray-200"
     }
   }
 
@@ -105,60 +109,111 @@ export default function ManualFetchPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 {getStatusIcon(result.success)}
-                Resultaat
+                Resultaat voor Project {result.project?.name || projectId}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               {result.success ? (
                 <div className="space-y-4">
                   <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                    <h3 className="font-semibold text-green-800 mb-2">✅ Succes!</h3>
+                    <h3 className="font-semibold text-green-800 mb-2 flex items-center gap-2">
+                      <CheckCircle className="h-5 w-5" />
+                      Succes!
+                    </h3>
                     <p className="text-green-700">{result.message}</p>
                   </div>
 
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className="bg-blue-50 p-3 rounded-lg">
+                    <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
                       <div className="text-2xl font-bold text-blue-600">{result.photosFound}</div>
                       <div className="text-sm text-blue-800">Foto's Gevonden</div>
                     </div>
-                    <div className="bg-green-50 p-3 rounded-lg">
+                    <div className="bg-green-50 p-3 rounded-lg border border-green-200">
                       <div className="text-2xl font-bold text-green-600">{result.completedPrompts}</div>
                       <div className="text-sm text-green-800">Klaar</div>
                     </div>
-                    <div className="bg-gray-50 p-3 rounded-lg">
+                    <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
                       <div className="text-2xl font-bold text-gray-600">{result.totalPrompts}</div>
                       <div className="text-sm text-gray-800">Totaal Prompts</div>
                     </div>
-                    <div className="bg-purple-50 p-3 rounded-lg">
+                    <div className="bg-purple-50 p-3 rounded-lg border border-purple-200">
                       <Badge className={getStatusColor(result.tuneStatus)}>{result.tuneStatus}</Badge>
                       <div className="text-sm text-purple-800 mt-1">Tune Status</div>
                     </div>
                   </div>
 
+                  {result.samplePhotos && result.samplePhotos.length > 0 && (
+                    <div>
+                      <h4 className="font-semibold mb-2">🖼️ Voorbeeld Foto's:</h4>
+                      <div className="grid grid-cols-3 gap-2">
+                        {result.samplePhotos.map((imageUrl: string, index: number) => (
+                          <img
+                            key={index}
+                            src={imageUrl || "/placeholder.svg"}
+                            alt={`Sample ${index + 1}`}
+                            className="w-full h-24 object-cover rounded border"
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement
+                              target.style.display = "none"
+                            }}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                   <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                    <h4 className="font-semibold text-blue-800 mb-2">🎯 Volgende Stappen:</h4>
+                    <h4 className="font-semibold text-blue-800 mb-2 flex items-center gap-2">
+                      <Info className="h-5 w-5" />
+                      Volgende Stappen:
+                    </h4>
                     <ol className="list-decimal list-inside text-blue-700 space-y-1">
                       <li>
                         Ga naar je{" "}
-                        <a href="/dashboard" className="underline font-medium">
+                        <a href="/dashboard" className="underline font-medium hover:text-blue-900">
                           dashboard
                         </a>
                       </li>
-                      <li>Controleer of de foto's nu zichtbaar zijn</li>
-                      <li>Als het werkt, kunnen we de webhooks repareren</li>
+                      <li>Ververs de pagina (F5 of Ctrl+R)</li>
+                      <li>Controleer of de {result.photosFound} foto's nu zichtbaar zijn</li>
+                      <li>Als het werkt, kunnen we de webhooks repareren voor toekomstige projecten</li>
                     </ol>
                   </div>
                 </div>
               ) : (
                 <div className="space-y-4">
                   <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                    <h3 className="font-semibold text-red-800 mb-2">❌ Probleem</h3>
+                    <h3 className="font-semibold text-red-800 mb-2 flex items-center gap-2">
+                      <XCircle className="h-5 w-5" />
+                      Probleem
+                    </h3>
                     <p className="text-red-700">{result.message || result.error}</p>
+                    {result.explanation && <p className="text-red-600 text-sm mt-2">{result.explanation}</p>}
                   </div>
+
+                  {result.project && (
+                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                      <h4 className="font-semibold text-gray-800 mb-2">📋 Project Info:</h4>
+                      <div className="space-y-1 text-sm">
+                        <div>
+                          <strong>Naam:</strong> {result.project.name}
+                        </div>
+                        <div>
+                          <strong>ID:</strong> {result.project.id}
+                        </div>
+                        <div>
+                          <strong>Tune ID:</strong> {result.project.tuneId || "Niet gevonden"}
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
                   {result.tuneStatus && (
                     <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                      <h4 className="font-semibold text-yellow-800 mb-2">📊 Status Info:</h4>
+                      <h4 className="font-semibold text-yellow-800 mb-2 flex items-center gap-2">
+                        <AlertTriangle className="h-5 w-5" />
+                        Status Info:
+                      </h4>
                       <div className="space-y-2">
                         <div>
                           <span className="font-medium">Tune Status: </span>
@@ -174,17 +229,17 @@ export default function ManualFetchPage() {
                     </div>
                   )}
 
-                  {result.promptsData && (
+                  {result.promptDetails && result.promptDetails.length > 0 && (
                     <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
                       <h4 className="font-semibold text-gray-800 mb-2">🔍 Prompt Details:</h4>
                       <div className="space-y-1 text-sm">
-                        {result.promptsData.map((prompt: any, index: number) => (
-                          <div key={index} className="flex justify-between">
+                        {result.promptDetails.map((prompt: any, index: number) => (
+                          <div key={index} className="flex justify-between items-center py-1">
                             <span>Prompt {prompt.id}:</span>
-                            <span className="flex items-center gap-2">
+                            <div className="flex items-center gap-2">
                               <Badge className={getStatusColor(prompt.status)}>{prompt.status}</Badge>
-                              <span>{prompt.imageCount} foto's</span>
-                            </span>
+                              <span className="text-gray-600">{prompt.imageCount} foto's</span>
+                            </div>
                           </div>
                         ))}
                       </div>
@@ -194,7 +249,7 @@ export default function ManualFetchPage() {
                   {result.details && (
                     <details className="bg-gray-50 border border-gray-200 rounded-lg p-4">
                       <summary className="font-semibold text-gray-800 cursor-pointer">🔧 Technische Details</summary>
-                      <pre className="mt-2 text-xs text-gray-600 overflow-auto">
+                      <pre className="mt-2 text-xs text-gray-600 overflow-auto whitespace-pre-wrap">
                         {typeof result.details === "string" ? result.details : JSON.stringify(result.details, null, 2)}
                       </pre>
                     </details>
@@ -206,19 +261,25 @@ export default function ManualFetchPage() {
         )}
 
         <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-6">
-          <h3 className="font-semibold text-blue-800 mb-3">💡 Hoe dit werkt:</h3>
+          <h3 className="font-semibold text-blue-800 mb-3 flex items-center gap-2">
+            <Info className="h-5 w-5" />
+            Hoe dit werkt:
+          </h3>
           <ul className="text-blue-700 space-y-2">
             <li>
               • <strong>Stap 1:</strong> Controleert Astria API direct (geen webhooks)
             </li>
             <li>
-              • <strong>Stap 2:</strong> Haalt alle beschikbare foto's op
+              • <strong>Stap 2:</strong> Gebruikt prediction_id (2951161) uit database
             </li>
             <li>
-              • <strong>Stap 3:</strong> Slaat ze op in database zoals project 23
+              • <strong>Stap 3:</strong> Haalt alle beschikbare foto's op
             </li>
             <li>
-              • <strong>Stap 4:</strong> Toont resultaat en volgende stappen
+              • <strong>Stap 4:</strong> Slaat ze op in database zoals project 23
+            </li>
+            <li>
+              • <strong>Stap 5:</strong> Toont resultaat en volgende stappen
             </li>
           </ul>
         </div>
