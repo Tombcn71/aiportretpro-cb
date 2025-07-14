@@ -215,7 +215,7 @@ export default function HomePage() {
 
         <p className="text-lg md:text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
           Transformeer jouw selfies in professionele portretfotos met onze AI-technologie. Geen fotoshoot of fotograaf
-          nodig – bespaar tijd, geld en moeite.
+          nodig – bespaar tijd, geld.
         </p>
 
         <Button
@@ -270,9 +270,9 @@ export default function HomePage() {
               <div className="w-12 h-12 bg-[#0077B5] text-white rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">
                 1
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Upload 6+ selfies van hoge kwaliteit</h3>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">Upload 6+ goede foto's</h3>
               <p className="text-gray-600">
-                Upload verschillende foto's van jezelf met goede belichting en verschillende hoeken
+                Verschillende achtergronden met verschillende kleding. geen hoeden of zonnebrillen.
               </p>
             </div>
 
@@ -285,7 +285,7 @@ export default function HomePage() {
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-2">Onze AI gaat aan de slag voor je</h3>
               <p className="text-gray-600">
-                Onze geavanceerde AI analyseert je foto's en creëert professionele headshots
+                Onze geavanceerde AI analyseert je foto's en creëert professionele portretfoto's
               </p>
             </div>
 
@@ -301,9 +301,9 @@ export default function HomePage() {
               <div className="w-12 h-12 bg-[#0077B5] text-white rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">
                 3
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Gefeliciteerd! Je headshots zijn klaar</h3>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">Gefeliciteerd! Je portretfoto's zijn klaar</h3>
               <p className="text-gray-600">
-                Download je 40+ professionele headshots en gebruik ze direct voor LinkedIn, CV en meer
+                Download je 40+ professionele portretfoto's en gebruik ze direct voor LinkedIn, CV en meer
               </p>
             </div>
           </div>
@@ -322,7 +322,7 @@ export default function HomePage() {
               <CardContent className="p-6 text-center">
                 <Upload className="h-12 w-12 text-[#0077B5] mx-auto mb-4" />
                 <h3 className="text-xl font-semibold mb-2">Supersnel</h3>
-                <p className="text-gray-600">Resultaten binnen 30 minuten. Geen weken wachten op een fotoshoot.</p>
+                <p className="text-gray-600">Resultaten binnen 15 minuten. Makkelijk vanuit thuis, geen reistijd geen studio..</p>
               </CardContent>
             </Card>
 
@@ -331,7 +331,7 @@ export default function HomePage() {
                 <Zap className="h-12 w-12 text-[#0077B5] mx-auto mb-4" />
                 <h3 className="text-xl font-semibold mb-2">Betaalbaar</h3>
                 <p className="text-gray-600">
-                  €29 voor 40+ foto's. Bespaar honderden euro's op een professionele fotoshoot.
+                  €29 voor AI portretfoto's. Bespaar tot wel 100 euro op een traditionele fotoshoot.
                 </p>
               </CardContent>
             </Card>
@@ -341,7 +341,7 @@ export default function HomePage() {
                 <Download className="h-12 w-12 text-[#0077B5] mx-auto mb-4" />
                 <h3 className="text-xl font-semibold mb-2">Hoge kwaliteit</h3>
                 <p className="text-gray-600">
-                  Professionele kwaliteit die niet te onderscheiden is van echte fotoshoots.
+                  Professionele kwaliteit die niet te onderscheiden is van traditionele fotoshoots.
                 </p>
               </CardContent>
             </Card>

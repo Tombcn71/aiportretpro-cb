@@ -1,20 +1,26 @@
--- Fix the credits table to have proper unique constraint
-DROP TABLE IF EXISTS credits CASCADE;
-
-CREATE TABLE credits (
+-- First, let's check if credits table exists and fix the schema
+CREATE TABLE IF NOT EXISTS credits (
   id SERIAL PRIMARY KEY,
-  user_id TEXT NOT NULL UNIQUE,
-  credits INTEGER NOT NULL DEFAULT 0,
+  user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+  credits INTEGER DEFAULT 0,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Create index for faster lookups
-CREATE INDEX idx_credits_user_id ON credits(user_id);
+-- Add unique constraint on user_id (this is what was missing!)
+ALTER TABLE credits 
+ADD CONSTRAINT credits_user_id_unique UNIQUE (user_id);
 
--- Insert default credits for existing users who don't have credits yet
-INSERT INTO credits (user_id, credits)
-SELECT DISTINCT user_id, 0
-FROM projects 
-WHERE user_id NOT IN (SELECT user_id FROM credits)
-ON CONFLICT (user_id) DO NOTHING;
+-- Create index for better performance
+CREATE INDEX IF NOT EXISTS idx_credits_user_id ON credits(user_id);
+
+-- Verify the schema
+SELECT table_name, column_name, data_type, is_nullable
+FROM information_schema.columns 
+WHERE table_schema = 'public' AND table_name = 'credits'
+ORDER BY ordinal_position;
+
+-- Show constraints
+SELECT constraint_name, constraint_type 
+FROM information_schema.table_constraints 
+WHERE table_name = 'credits' AND table_schema = 'public';

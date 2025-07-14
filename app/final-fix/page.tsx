@@ -5,11 +5,11 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
 export default function FinalFixPage() {
-  const [isFixing, setIsFixing] = useState(false)
+  const [loading, setLoading] = useState(false)
   const [result, setResult] = useState<any>(null)
 
   const handleFix = async () => {
-    setIsFixing(true)
+    setLoading(true)
     try {
       const response = await fetch("/api/fix-all-credits", {
         method: "POST",
@@ -19,59 +19,51 @@ export default function FinalFixPage() {
     } catch (error) {
       setResult({ error: "Failed to fix credits", details: error })
     } finally {
-      setIsFixing(false)
+      setLoading(false)
     }
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
       <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold text-green-600">🎉 FINAL FIX</CardTitle>
-          <CardDescription>Get all your credits back for every project you created</CardDescription>
+        <CardHeader>
+          <CardTitle className="text-2xl font-bold text-center">🔧 Final Fix</CardTitle>
+          <CardDescription className="text-center">
+            Get all your credits back for every purchase you made
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {!result && (
-            <Button
-              onClick={handleFix}
-              disabled={isFixing}
-              className="w-full bg-green-600 hover:bg-green-700"
-              size="lg"
-            >
-              {isFixing ? "Fixing Credits..." : "FIX ALL MY CREDITS NOW"}
-            </Button>
-          )}
+          <Button onClick={handleFix} disabled={loading} className="w-full" size="lg">
+            {loading ? "Fixing..." : "Fix All My Credits Now"}
+          </Button>
 
           {result && (
-            <div className="space-y-4">
+            <div
+              className={`p-4 rounded-lg ${
+                result.success ? "bg-green-50 border border-green-200" : "bg-red-50 border border-red-200"
+              }`}
+            >
               {result.success ? (
-                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                  <h3 className="font-semibold text-green-800 mb-2">✅ Credits Fixed Successfully!</h3>
-                  <p className="text-green-700">{result.message}</p>
-                  <p className="text-green-700 font-medium">Total credits added: {result.totalCreditsAdded}</p>
+                <div className="text-green-800">
+                  <h3 className="font-semibold">✅ Success!</h3>
+                  <p>{result.message}</p>
+                  <div className="mt-2 text-sm">
+                    <p>Total Purchases: {result.totalPurchases}</p>
+                    <p>Your Credits: {result.credits}</p>
+                  </div>
                 </div>
               ) : (
-                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                  <h3 className="font-semibold text-red-800 mb-2">❌ Error</h3>
-                  <p className="text-red-700">{result.error}</p>
-                  {result.details && <p className="text-red-600 text-sm mt-2">{result.details}</p>}
+                <div className="text-red-800">
+                  <h3 className="font-semibold">❌ Error</h3>
+                  <p>{result.error}</p>
+                  {result.details && <p className="text-sm mt-1">{result.details}</p>}
                 </div>
               )}
-
-              <div className="flex gap-2">
-                <Button onClick={() => (window.location.href = "/dashboard")} className="flex-1">
-                  Go to Dashboard
-                </Button>
-                <Button onClick={() => window.location.reload()} variant="outline" className="flex-1">
-                  Try Again
-                </Button>
-              </div>
             </div>
           )}
 
           <div className="text-center text-sm text-gray-600">
-            <p>This will give you 1 credit for every project you created.</p>
-            <p className="mt-2 font-medium">Future purchases will now work automatically! 🎉</p>
+            <p>After fixing, go to your dashboard to see your credits!</p>
           </div>
         </CardContent>
       </Card>

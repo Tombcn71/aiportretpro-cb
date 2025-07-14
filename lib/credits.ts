@@ -1,88 +1,86 @@
-import { sql } from "@vercel/postgres"
-
-export interface Credit {
-  id: number
-  userId: number
-  amount: number
-  createdAt: Date
-  updatedAt: Date
-}
+import { sql } from "@/lib/db"
 
 export class CreditManager {
   static async getUserCredits(userId: number): Promise<number> {
     try {
       const result = await sql`
-        SELECT amount FROM credits WHERE user_id = ${userId}
+        SELECT credits FROM credits WHERE user_id = ${userId}
       `
-      return result.rows[0]?.amount || 0
+      return result[0]?.credits || 0
     } catch (error) {
       console.error("Error getting user credits:", error)
       return 0
     }
   }
 
-  static async addCredits(userId: number, amount: number): Promise<boolean> {
+  static async useCredit(userId: number, projectId: number): Promise<boolean> {
     try {
-      await sql`
-        INSERT INTO credits (user_id, amount, created_at, updated_at)
-        VALUES (${userId}, ${amount}, NOW(), NOW())
-        ON CONFLICT (user_id) 
-        DO UPDATE SET 
-          amount = credits.amount + ${amount},
-          updated_at = NOW()
-      `
-      return true
-    } catch (error) {
-      console.error("Error adding credits:", error)
-      return false
-    }
-  }
+      // Check current credits first
+      const currentCredits = await this.getUserCredits(userId)
+      console.log(`User ${userId} has ${currentCredits} credits`)
 
-  static async useCredit(userId: number): Promise<boolean> {
-    try {
-      const result = await sql`
+      if (currentCredits < 1) {
+        throw new Error("Insufficient credits")
+      }
+
+      // Deduct credit
+      const updateResult = await sql`
         UPDATE credits 
-        SET amount = amount - 1, updated_at = NOW()
-        WHERE user_id = ${userId} AND amount > 0
-        RETURNING amount
+        SET credits = credits - 1, updated_at = CURRENT_TIMESTAMP
+        WHERE user_id = ${userId} AND credits > 0
+        RETURNING credits
       `
-      return result.rowCount > 0
+
+      if (updateResult.length === 0) {
+        throw new Error("Failed to deduct credit - insufficient balance")
+      }
+
+      console.log(`Credit used. User ${userId} now has ${updateResult[0].credits} credits`)
+
+      // Track usage in project
+      await sql`
+        UPDATE projects 
+        SET credits_used = 1
+        WHERE id = ${projectId}
+      `
+
+      return true
     } catch (error) {
       console.error("Error using credit:", error)
-      return false
+      throw error
     }
   }
 
-  static async setCredits(userId: number, amount: number): Promise<boolean> {
+  static async addCredits(userId: number, creditsToAdd: number): Promise<void> {
     try {
-      await sql`
-        INSERT INTO credits (user_id, amount, created_at, updated_at)
-        VALUES (${userId}, ${amount}, NOW(), NOW())
-        ON CONFLICT (user_id) 
-        DO UPDATE SET 
-          amount = ${amount},
-          updated_at = NOW()
+      console.log(`Adding ${creditsToAdd} credits to user ${userId}`)
+
+      // Check if user already has credits
+      const existingCredit = await sql`
+        SELECT credits FROM credits WHERE user_id = ${userId}
       `
-      return true
+
+      if (existingCredit[0]) {
+        // Update existing
+        const result = await sql`
+          UPDATE credits 
+          SET credits = credits + ${creditsToAdd}, updated_at = CURRENT_TIMESTAMP
+          WHERE user_id = ${userId}
+          RETURNING credits
+        `
+        console.log(`User ${userId} now has ${result[0]?.credits} total credits`)
+      } else {
+        // Create new
+        const result = await sql`
+          INSERT INTO credits (user_id, credits, created_at, updated_at)
+          VALUES (${userId}, ${creditsToAdd}, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+          RETURNING credits
+        `
+        console.log(`User ${userId} now has ${result[0]?.credits} total credits`)
+      }
     } catch (error) {
-      console.error("Error setting credits:", error)
-      return false
+      console.error("Error adding credits:", error)
+      throw error
     }
   }
-}
-
-export async function getUserCredits(userId: number): Promise<number> {
-  return CreditManager.getUserCredits(userId)
-}
-
-export async function addCredits(userId: number, amount: number): Promise<boolean> {
-  return CreditManager.addCredits(userId, amount)
-}
-
-export async function useCredit(userId: number): Promise<boolean> {
-  return CreditManager.useCredit(userId)
-}
-
-export async function setCredits(userId: number, amount: number): Promise<boolean> {
-  return CreditManager.setCredits(userId, amount)
 }

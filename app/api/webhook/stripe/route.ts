@@ -1,79 +1,112 @@
 import { type NextRequest, NextResponse } from "next/server"
-import Stripe from "stripe"
-import { neon } from "@neondatabase/serverless"
+import { sql } from "@/lib/db"
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2024-06-20",
-})
+async function getStripe() {
+  const { stripe } = await import("@/lib/stripe")
+  return stripe
+}
 
-const sql = neon(process.env.DATABASE_URL!)
+export async function POST(request: NextRequest) {
+  console.log("🔔 WEBHOOK RECEIVED at", new Date().toISOString())
 
-export async function POST(req: NextRequest) {
+  const body = await request.text()
+  const signature = request.headers.get("stripe-signature")
+
+  if (!signature) {
+    console.log("❌ No signature")
+    return NextResponse.json({ error: "No signature" }, { status: 400 })
+  }
+
+  if (!process.env.STRIPE_WEBHOOK_SECRET) {
+    console.log("❌ No webhook secret")
+    return NextResponse.json({ error: "Webhook secret not configured" }, { status: 500 })
+  }
+
   try {
-    const body = await req.text()
-    const signature = req.headers.get("stripe-signature")
+    const stripe = await getStripe()
+    const event = stripe.webhooks.constructEvent(body, signature, process.env.STRIPE_WEBHOOK_SECRET!)
 
-    if (!signature) {
-      console.log("❌ No Stripe signature found")
-      return NextResponse.json({ error: "No signature" }, { status: 400 })
-    }
-
-    let event: Stripe.Event
-
-    try {
-      event = stripe.webhooks.constructEvent(body, signature, process.env.STRIPE_WEBHOOK_SECRET!)
-    } catch (err) {
-      console.log("❌ Webhook signature verification failed:", err)
-      return NextResponse.json({ error: "Invalid signature" }, { status: 400 })
-    }
-
-    console.log("✅ Webhook received:", event.type)
+    console.log("✅ Event type:", event.type)
 
     if (event.type === "checkout.session.completed") {
-      const session = event.data.object as Stripe.Checkout.Session
+      const session = event.data.object
+      console.log("💳 Processing checkout session:", session.id)
 
-      console.log("💳 Payment completed for session:", session.id)
-      console.log("👤 Customer email:", session.customer_details?.email)
+      // Find and update the purchase
+      const purchaseResult = await sql`
+        UPDATE purchases 
+        SET status = 'completed', updated_at = CURRENT_TIMESTAMP
+        WHERE stripe_session_id = ${session.id}
+        RETURNING user_id, id
+      `
 
-      if (session.customer_details?.email) {
-        const userEmail = session.customer_details.email
+      if (purchaseResult[0]) {
+        const userId = purchaseResult[0].user_id
+        console.log(`👤 Adding credit for user ${userId}`)
 
+        // Add 1 credit - using INSERT with proper conflict handling
         try {
-          // First ensure the user exists in credits table
-          await sql`
-            INSERT INTO credits (user_id, credits)
-            VALUES (${userEmail}, 0)
-            ON CONFLICT (user_id) DO NOTHING
-          `
-
-          // Then add 1 credit
-          const result = await sql`
-            UPDATE credits 
-            SET credits = credits + 1, updated_at = CURRENT_TIMESTAMP
-            WHERE user_id = ${userEmail}
+          const creditResult = await sql`
+            INSERT INTO credits (user_id, credits, created_at, updated_at)
+            VALUES (${userId}, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+            ON CONFLICT (user_id) 
+            DO UPDATE SET 
+              credits = credits.credits + 1,
+              updated_at = CURRENT_TIMESTAMP
             RETURNING credits
           `
 
-          if (result.length > 0) {
-            console.log("✅ Added 1 credit to user:", userEmail)
-            console.log("💰 New credit balance:", result[0].credits)
-          } else {
-            console.log("❌ Failed to update credits for user:", userEmail)
-          }
-        } catch (dbError) {
-          console.error("❌ Database error:", dbError)
+          console.log(`✅ User ${userId} now has ${creditResult[0]?.credits} credits`)
 
-          // Fallback: try simple insert if update fails
-          try {
-            await sql`
-              INSERT INTO credits (user_id, credits)
-              VALUES (${userEmail}, 1)
+          return NextResponse.json({
+            received: true,
+            userId,
+            creditsAdded: 1,
+            totalCredits: creditResult[0]?.credits,
+          })
+        } catch (creditError) {
+          console.error("❌ Credit error:", creditError)
+
+          // Fallback: try to update existing or create new
+          const existingCredit = await sql`
+            SELECT credits FROM credits WHERE user_id = ${userId}
+          `
+
+          if (existingCredit[0]) {
+            // Update existing
+            const updateResult = await sql`
+              UPDATE credits 
+              SET credits = credits + 1, updated_at = CURRENT_TIMESTAMP
+              WHERE user_id = ${userId}
+              RETURNING credits
             `
-            console.log("✅ Fallback: Created new credit entry for user:", userEmail)
-          } catch (fallbackError) {
-            console.error("❌ Fallback also failed:", fallbackError)
+            console.log(`✅ Updated credits for user ${userId}: ${updateResult[0]?.credits}`)
+
+            return NextResponse.json({
+              received: true,
+              userId,
+              creditsAdded: 1,
+              totalCredits: updateResult[0]?.credits,
+            })
+          } else {
+            // Create new
+            const newCredit = await sql`
+              INSERT INTO credits (user_id, credits, created_at, updated_at)
+              VALUES (${userId}, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+              RETURNING credits
+            `
+            console.log(`✅ Created new credits for user ${userId}: ${newCredit[0]?.credits}`)
+
+            return NextResponse.json({
+              received: true,
+              userId,
+              creditsAdded: 1,
+              totalCredits: newCredit[0]?.credits,
+            })
           }
         }
+      } else {
+        console.log("❌ No purchase found for session:", session.id)
       }
     }
 
@@ -81,12 +114,11 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     console.error("❌ Webhook error:", error)
     return NextResponse.json(
-      { error: "Webhook error", details: error instanceof Error ? error.message : "Unknown error" },
-      { status: 500 },
+      {
+        error: "Webhook error",
+        details: error instanceof Error ? error.message : "Unknown error",
+      },
+      { status: 400 },
     )
   }
-}
-
-export async function GET() {
-  return NextResponse.json({ message: "Stripe webhook endpoint is working" })
 }

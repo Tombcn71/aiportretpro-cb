@@ -1,9 +1,7 @@
 import { NextResponse } from "next/server"
-import { neon } from "@neondatabase/serverless"
+import { sql } from "@/lib/db"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
-
-const sql = neon(process.env.DATABASE_URL!)
 
 export async function POST() {
   try {
@@ -12,72 +10,69 @@ export async function POST() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    console.log("🔧 Starting credit fix process...")
+    console.log("🔧 FIXING ALL CREDITS - FINAL FIX")
 
-    // First, ensure credits table exists with proper schema
-    await sql`
-      CREATE TABLE IF NOT EXISTS credits (
-        id SERIAL PRIMARY KEY,
-        user_id TEXT NOT NULL UNIQUE,
-        credits INTEGER NOT NULL DEFAULT 0,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )
+    // Get user
+    const userResult = await sql`
+      SELECT id FROM users WHERE email = ${session.user.email}
     `
 
-    // Get all unique users from projects
-    const users = await sql`
-      SELECT DISTINCT user_id 
-      FROM projects 
-      WHERE user_id IS NOT NULL
-    `
-
-    console.log(`👥 Found ${users.length} unique users`)
-
-    let creditsAdded = 0
-
-    for (const user of users) {
-      try {
-        // Count projects for this user
-        const projectCount = await sql`
-          SELECT COUNT(*) as count
-          FROM projects 
-          WHERE user_id = ${user.user_id}
-        `
-
-        const count = Number.parseInt(projectCount[0].count)
-
-        if (count > 0) {
-          // Insert or update credits
-          await sql`
-            INSERT INTO credits (user_id, credits)
-            VALUES (${user.user_id}, ${count})
-            ON CONFLICT (user_id) 
-            DO UPDATE SET 
-              credits = GREATEST(credits, ${count}),
-              updated_at = CURRENT_TIMESTAMP
-          `
-
-          creditsAdded += count
-          console.log(`✅ User ${user.user_id}: ${count} credits`)
-        }
-      } catch (userError) {
-        console.error(`❌ Error processing user ${user.user_id}:`, userError)
-      }
+    if (!userResult[0]) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 })
     }
 
-    console.log(`🎉 Credit fix complete! Added ${creditsAdded} total credits`)
+    const userId = userResult[0].id
+
+    // Count ALL purchases for this user
+    const purchaseCount = await sql`
+      SELECT COUNT(*) as total FROM purchases WHERE user_id = ${userId}
+    `
+
+    const totalPurchases = Number.parseInt(purchaseCount[0]?.total || "0")
+    console.log(`Found ${totalPurchases} total purchases for user ${userId}`)
+
+    // Mark all as completed
+    await sql`
+      UPDATE purchases SET status = 'completed', updated_at = CURRENT_TIMESTAMP
+      WHERE user_id = ${userId}
+    `
+
+    // Check if user already has credits
+    const existingCredit = await sql`
+      SELECT credits FROM credits WHERE user_id = ${userId}
+    `
+
+    let creditResult
+    if (existingCredit[0]) {
+      // Update existing credits
+      creditResult = await sql`
+        UPDATE credits 
+        SET credits = ${totalPurchases}, updated_at = CURRENT_TIMESTAMP
+        WHERE user_id = ${userId}
+        RETURNING credits
+      `
+    } else {
+      // Create new credits record
+      creditResult = await sql`
+        INSERT INTO credits (user_id, credits, created_at, updated_at)
+        VALUES (${userId}, ${totalPurchases}, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+        RETURNING credits
+      `
+    }
+
+    console.log("✅ FINAL FIX COMPLETE")
 
     return NextResponse.json({
       success: true,
-      message: `Fixed credits for ${users.length} users`,
-      totalCreditsAdded: creditsAdded,
+      totalPurchases,
+      credits: creditResult[0]?.credits,
+      message: `Fixed! You now have ${creditResult[0]?.credits} credits for your ${totalPurchases} purchases.`,
     })
   } catch (error) {
-    console.error("❌ Fix credits error:", error)
+    console.error("❌ Final fix error:", error)
     return NextResponse.json(
       {
-        error: "Failed to fix credits",
+        error: "Final fix failed",
         details: error instanceof Error ? error.message : "Unknown error",
       },
       { status: 500 },
