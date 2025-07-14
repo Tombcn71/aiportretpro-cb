@@ -21,14 +21,14 @@ export const authOptions: NextAuthOptions = {
           if (existingUser.length === 0) {
             // Create new user
             await sql`
-              INSERT INTO users (email, name, avatar_url, created_at, updated_at)
+              INSERT INTO users (email, name, image, created_at, updated_at)
               VALUES (${user.email}, ${user.name || ""}, ${user.image || ""}, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
             `
           } else {
             // Update existing user
             await sql`
               UPDATE users 
-              SET name = ${user.name || ""}, avatar_url = ${user.image || ""}, updated_at = CURRENT_TIMESTAMP
+              SET name = ${user.name || ""}, image = ${user.image || ""}, updated_at = CURRENT_TIMESTAMP
               WHERE email = ${user.email}
             `
           }
@@ -43,7 +43,7 @@ export const authOptions: NextAuthOptions = {
       if (session.user?.email) {
         try {
           const user = await sql`
-            SELECT id, email, name, avatar_url FROM users WHERE email = ${session.user.email}
+            SELECT id, email, name, image FROM users WHERE email = ${session.user.email}
           `
           if (user.length > 0) {
             session.user.id = user[0].id.toString()

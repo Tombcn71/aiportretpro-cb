@@ -26,74 +26,73 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "No model ID" }, { status: 400 })
     }
 
-    // Get the raw body
-    const rawBody = await request.text()
-    console.log("🖼️ Raw prompt webhook body:", rawBody)
+    console.log("🔥 Prompt webhook received")
 
-    let body
-    try {
-      body = JSON.parse(rawBody)
-    } catch (parseError) {
-      console.error("❌ Failed to parse JSON body:", parseError)
-      return NextResponse.json({ error: "Invalid JSON" }, { status: 400 })
-    }
+    const body = await request.json()
+    console.log("Prompt webhook body:", JSON.stringify(body, null, 2))
 
-    console.log("🖼️ Parsed prompt webhook body:", body)
+    // Check if this is a completed prompt with images
+    if (body.data?.object === "prompt" && body.data?.status === "succeeded" && body.data?.images) {
+      const tuneId = body.data.tune_id
+      const images = body.data.images
 
-    const webhookStatus = body.status || body.state
-    const imageUrl = body.images?.[0] || body.image || body.output?.[0]
+      console.log(`✅ Prompt completed for tune: ${tuneId}`)
+      console.log(`📸 Received ${images.length} images`)
 
-    console.log("🔍 Processed prompt webhook data:", {
-      webhookStatus,
-      imageUrl: imageUrl ? "present" : "missing",
-    })
+      // Find project with this tune_id
+      const projects = await sql`
+        SELECT * FROM projects WHERE tune_id = ${tuneId}
+      `
 
-    // If we have a completed image, add it to the project
-    if (webhookStatus === "succeeded" && imageUrl) {
+      if (projects.length === 0) {
+        console.log(`❌ No project found for tune_id: ${tuneId}`)
+        return NextResponse.json({ error: "Project not found" }, { status: 404 })
+      }
+
+      const project = projects[0]
+      console.log(`📁 Found project: ${project.id} - ${project.name}`)
+
+      // Parse existing photos
+      let existingPhotos: string[] = []
       try {
-        // Get current photos
-        const result = await sql`
-          SELECT generated_photos FROM projects WHERE id = ${Number.parseInt(modelId)}
+        if (project.generated_photos) {
+          existingPhotos =
+            typeof project.generated_photos === "string"
+              ? JSON.parse(project.generated_photos)
+              : project.generated_photos
+        }
+      } catch (e) {
+        console.log("Error parsing existing photos, starting fresh")
+        existingPhotos = []
+      }
+
+      // Add new photos
+      const newPhotos: string[] = []
+      for (const image of images) {
+        if (image.url && typeof image.url === "string" && !existingPhotos.includes(image.url)) {
+          newPhotos.push(image.url)
+        }
+      }
+
+      if (newPhotos.length > 0) {
+        const allPhotos = [...existingPhotos, ...newPhotos]
+
+        // Update project with new photos
+        await sql`
+          UPDATE projects 
+          SET generated_photos = ${JSON.stringify(allPhotos)}, 
+              status = ${allPhotos.length >= 40 ? "completed" : "processing"},
+              updated_at = CURRENT_TIMESTAMP
+          WHERE id = ${project.id}
         `
 
-        if (result.length > 0) {
-          let currentPhotos = []
-
-          // Parse existing photos
-          if (result[0].generated_photos) {
-            try {
-              currentPhotos = JSON.parse(result[0].generated_photos)
-            } catch (e) {
-              console.warn("Could not parse existing photos, starting fresh")
-              currentPhotos = []
-            }
-          }
-
-          // Add new photo
-          currentPhotos.push(imageUrl)
-
-          // Update with new photos array as JSON string
-          await sql`
-            UPDATE projects 
-            SET generated_photos = ${JSON.stringify(currentPhotos)}, 
-                updated_at = CURRENT_TIMESTAMP,
-                status = CASE 
-                  WHEN ${currentPhotos.length} >= 40 THEN 'completed'
-                  ELSE 'processing'
-                END
-            WHERE id = ${Number.parseInt(modelId)}
-          `
-
-          console.log(`✅ Added photo to project ${modelId}. Total photos: ${currentPhotos.length}`)
-        }
-      } catch (error) {
-        console.error("❌ Error updating photos:", error)
+        console.log(`✅ Added ${newPhotos.length} new photos to project ${project.id}. Total: ${allPhotos.length}`)
       }
     }
 
-    return NextResponse.json({ received: true, processed: true })
+    return NextResponse.json({ success: true })
   } catch (error) {
-    console.error("❌ Prompt webhook error:", error)
-    return NextResponse.json({ error: "Webhook error" }, { status: 400 })
+    console.error("Prompt webhook error:", error)
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }

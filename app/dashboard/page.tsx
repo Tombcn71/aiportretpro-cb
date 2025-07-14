@@ -1,13 +1,12 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Header } from "@/components/header"
-import { Button } from "@/components/ui/button"
+import { useSession } from "next-auth/react"
+import { useRouter } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Download, Camera, CreditCard, Clock, CheckCircle, AlertCircle } from "lucide-react"
-import Link from "next/link"
-import Image from "next/image"
+import { Button } from "@/components/ui/button"
+import { Download, Eye, Loader2 } from "lucide-react"
 
 interface Project {
   id: number
@@ -15,320 +14,303 @@ interface Project {
   status: string
   created_at: string
   generated_photos: string | string[]
+  gender: string
 }
 
-interface UserCredits {
-  credits: number
-}
-
-export default function DashboardPage() {
+export default function Dashboard() {
+  const { data: session, status } = useSession()
+  const router = useRouter()
   const [projects, setProjects] = useState<Project[]>([])
-  const [credits, setCredits] = useState<UserCredits>({ credits: 0 })
   const [loading, setLoading] = useState(true)
-  const [imageErrors, setImageErrors] = useState<Set<string>>(new Set())
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null)
+  const [showPhotos, setShowPhotos] = useState(false)
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        // Fetch projects and credits in parallel
-        const [projectsResponse, creditsResponse] = await Promise.all([
-          fetch("/api/projects"),
-          fetch("/api/credits/balance"),
-        ])
-
-        if (!projectsResponse.ok || !creditsResponse.ok) {
-          throw new Error("Failed to fetch data")
-        }
-
-        const projectsData = await projectsResponse.json()
-        const creditsData = await creditsResponse.json()
-
-        console.log("Dashboard data:", { projectsData, creditsData })
-
-        setProjects(projectsData)
-        setCredits(creditsData)
-      } catch (error) {
-        console.error("Error fetching data:", error)
-        // Set default values on error
-        setCredits({ credits: 0 })
-      } finally {
-        setLoading(false)
-      }
+    if (status === "unauthenticated") {
+      router.push("/auth/signin")
+      return
     }
 
-    fetchData()
-  }, [])
-
-  // Parse generated photos properly
-  const allPhotos = projects.flatMap((project) => {
-    let photos = []
-
-    // Parse generated_photos based on how it's stored
-    if (project.generated_photos) {
-      try {
-        if (typeof project.generated_photos === "string") {
-          photos = JSON.parse(project.generated_photos)
-        } else if (Array.isArray(project.generated_photos)) {
-          photos = project.generated_photos
-        }
-      } catch (e) {
-        console.warn("Could not parse photos for project", project.id)
-        photos = []
-      }
+    if (status === "authenticated") {
+      fetchProjects()
     }
+  }, [status, router])
 
-    return photos.map((photo: string, index: number) => ({
-      url: photo,
-      projectName: project.name,
-      projectId: project.id,
-      index: index,
-      key: `${project.id}-${index}`,
-    }))
-  })
-
-  console.log("All photos:", allPhotos.length, allPhotos.slice(0, 5))
-
-  const handleImageError = (photoKey: string) => {
-    setImageErrors((prev) => new Set([...prev, photoKey]))
+  const fetchProjects = async () => {
+    try {
+      const response = await fetch("/api/projects")
+      if (response.ok) {
+        const data = await response.json()
+        setProjects(data)
+      }
+    } catch (error) {
+      console.error("Error fetching projects:", error)
+    } finally {
+      setLoading(false)
+    }
   }
 
-  const downloadPhoto = (photoUrl: string, projectName: string, index: number) => {
-    const link = document.createElement("a")
-    link.href = photoUrl
-    link.download = `${projectName}_portretfoto_${index + 1}.jpg`
-    link.target = "_blank"
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
+  const parsePhotos = (photos: string | string[]): string[] => {
+    if (!photos) return []
+
+    try {
+      if (typeof photos === "string") {
+        const parsed = JSON.parse(photos)
+        return Array.isArray(parsed) ? parsed : []
+      }
+      return Array.isArray(photos) ? photos : []
+    } catch (e) {
+      console.log("Error parsing photos:", e)
+      return []
+    }
   }
 
-  const getStatusBadge = (status: string) => {
+  const isValidPhotoUrl = (url: string): boolean => {
+    return (
+      url && typeof url === "string" && url.length > 10 && (url.startsWith("http://") || url.startsWith("https://"))
+    )
+  }
+
+  const getValidPhotos = (project: Project): string[] => {
+    const photos = parsePhotos(project.generated_photos)
+    const validPhotos = photos.filter(isValidPhotoUrl)
+
+    console.log(`Project ${project.name}: ${photos.length} total, ${validPhotos.length} valid photos`)
+
+    return validPhotos
+  }
+
+  const getAllPhotos = (): string[] => {
+    const allPhotos: string[] = []
+    projects.forEach((project) => {
+      const validPhotos = getValidPhotos(project)
+      allPhotos.push(...validPhotos)
+    })
+    return allPhotos
+  }
+
+  const downloadPhoto = async (url: string, filename: string) => {
+    try {
+      const response = await fetch(url)
+      const blob = await response.blob()
+      const downloadUrl = window.URL.createObjectURL(blob)
+      const link = document.createElement("a")
+      link.href = downloadUrl
+      link.download = filename
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(downloadUrl)
+    } catch (error) {
+      console.error("Error downloading photo:", error)
+    }
+  }
+
+  const getStatusColor = (status: string) => {
     switch (status) {
       case "completed":
-        return (
-          <Badge className="bg-green-100 text-green-800">
-            <CheckCircle className="w-3 h-3 mr-1" />
-            Voltooid
-          </Badge>
-        )
+        return "bg-green-500"
       case "processing":
-        return (
-          <Badge className="bg-blue-100 text-blue-800">
-            <Clock className="w-3 h-3 mr-1" />
-            Bezig...
-          </Badge>
-        )
-      case "pending":
-        return (
-          <Badge className="bg-yellow-100 text-yellow-800">
-            <Clock className="w-3 h-3 mr-1" />
-            Wachtend
-          </Badge>
-        )
+        return "bg-yellow-500"
       case "training":
-        return (
-          <Badge className="bg-purple-100 text-purple-800">
-            <AlertCircle className="w-3 h-3 mr-1" />
-            Training
-          </Badge>
-        )
+        return "bg-blue-500"
       case "failed":
-        return (
-          <Badge className="bg-red-100 text-red-800">
-            <AlertCircle className="w-3 h-3 mr-1" />
-            Mislukt
-          </Badge>
-        )
+        return "bg-red-500"
       default:
-        return <Badge variant="secondary">{status}</Badge>
+        return "bg-gray-500"
     }
   }
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <Header />
-        <div className="flex items-center justify-center min-h-[60vh]">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0077B5]"></div>
-        </div>
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin" />
       </div>
     )
   }
 
+  const allPhotos = getAllPhotos()
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Header />
+    <div className="container mx-auto px-4 py-8">
+      <div className="flex justify-between items-center mb-8">
+        <div>
+          <h1 className="text-3xl font-bold">Dashboard</h1>
+          <p className="text-gray-600 mt-2">Welkom terug, {session?.user?.name}</p>
+        </div>
+        <Button onClick={() => router.push("/wizard/welcome")}>Nieuwe Fotoshoot</Button>
+      </div>
 
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold text-center mb-8">Dashboard</h1>
-
-        {/* Credits Overview */}
-        <div className="mb-8">
-          <Card className="bg-gradient-to-r from-[#0077B5] to-[#004182] text-white">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <CreditCard className="h-5 w-5" />
-                Jouw Tegoed
-              </CardTitle>
-            </CardHeader>
+      {/* All Photos Section */}
+      {allPhotos.length > 0 && (
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between">
+              <span>Alle Portetfotos ({allPhotos.length} foto's)</span>
+              <Button variant="outline" onClick={() => setShowPhotos(!showPhotos)}>
+                <Eye className="h-4 w-4 mr-2" />
+                {showPhotos ? "Verberg" : "Bekijk Alle"}
+              </Button>
+            </CardTitle>
+          </CardHeader>
+          {showPhotos && (
             <CardContent>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-2xl font-bold">
-                    {credits.credits} project{credits.credits !== 1 ? "en" : ""} over
-                  </p>
-                  <p className="text-blue-100">Maak professionele portetfotos</p>
-                </div>
-                <div>
-                  {credits.credits > 0 ? (
-                    <Link href="/use-credit">
-                      <Button className="bg-white text-[#0077B5] hover:bg-gray-100 font-semibold">
-                        Start Nieuw Project
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                {allPhotos.map((photo, index) => (
+                  <div key={index} className="relative group">
+                    <img
+                      src={photo || "/placeholder.svg"}
+                      alt={`Portrait ${index + 1}`}
+                      className="w-full h-32 object-cover rounded-lg"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement
+                        target.style.display = "none"
+                        const parent = target.parentElement
+                        if (parent) {
+                          parent.innerHTML = `
+                            <div class="w-full h-32 bg-gray-200 rounded-lg flex items-center justify-center text-sm text-gray-500">
+                              <div class="text-center">
+                                <div>⚠️</div>
+                                <div>Foto niet beschikbaar</div>
+                                <div class="text-xs mt-1">${photo.substring(0, 30)}...</div>
+                              </div>
+                            </div>
+                          `
+                        }
+                      }}
+                    />
+                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all duration-200 rounded-lg flex items-center justify-center">
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        className="opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={() => downloadPhoto(photo, `portrait-${index + 1}.jpg`)}
+                      >
+                        <Download className="h-4 w-4" />
                       </Button>
-                    </Link>
-                  ) : (
-                    <Link href="/pricing">
-                      <Button className="bg-white text-[#0077B5] hover:bg-gray-100 font-semibold">Koop Tegoed</Button>
-                    </Link>
-                  )}
-                </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             </CardContent>
-          </Card>
-        </div>
-
-        {/* Projects Overview */}
-        {projects.length > 0 && (
-          <div className="mb-8">
-            <h2 className="text-2xl font-semibold mb-4">Jouw Projecten</h2>
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {projects.map((project) => {
-                let photoCount = 0
-                try {
-                  if (project.generated_photos) {
-                    if (typeof project.generated_photos === "string") {
-                      photoCount = JSON.parse(project.generated_photos).length
-                    } else if (Array.isArray(project.generated_photos)) {
-                      photoCount = project.generated_photos.length
-                    }
-                  }
-                } catch (e) {
-                  photoCount = 0
-                }
-
-                return (
-                  <Card key={project.id}>
-                    <CardHeader>
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="text-lg">{project.name}</CardTitle>
-                        {getStatusBadge(project.status)}
-                      </div>
-                      <p className="text-sm text-gray-500">
-                        {new Date(project.created_at).toLocaleDateString("nl-NL")}
-                      </p>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="flex items-center justify-between">
-                        <p className="text-sm">
-                          {photoCount} foto's gegenereerd
-                          {project.status === "completed" && photoCount !== 40 && (
-                            <span className="text-orange-600 ml-2">(verwacht: 40)</span>
-                          )}
-                        </p>
-                        {project.status === "completed" && photoCount > 0 && (
-                          <Link href={`/generate/${project.id}`}>
-                            <Button size="sm" variant="outline">
-                              Bekijk Foto's
-                            </Button>
-                          </Link>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                )
-              })}
-            </div>
-          </div>
-        )}
-
-        {/* Photos Gallery */}
-        <div>
-          <h2 className="text-2xl font-semibold mb-6">Alle Portetfotos ({allPhotos.length} foto's)</h2>
-
-          {allPhotos.length === 0 ? (
-            <div className="text-center py-20">
-              <Camera className="h-16 w-16 text-gray-400 mx-auto mb-6" />
-              <h3 className="text-xl font-semibold mb-4">Nog geen portetfotos</h3>
-              <p className="text-gray-600 mb-8">
-                {credits.credits > 0
-                  ? "Je hebt tegoed! Start je eerste project."
-                  : "Koop tegoed om je eerste professionele portetfotos te maken."}
-              </p>
-              {credits.credits > 0 ? (
-                <Link href="/use-credit">
-                  <Button className="bg-[#0077B5] hover:bg-[#004182] text-white px-8 py-3">Start Nieuw Project</Button>
-                </Link>
-              ) : (
-                <Link href="/pricing">
-                  <Button className="bg-[#0077B5] hover:bg-[#004182] text-white px-8 py-3">Portetfotos maken</Button>
-                </Link>
-              )}
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-              {allPhotos.map((photo) => (
-                <div key={photo.key} className="group">
-                  <div className="aspect-[3/4] rounded-lg overflow-hidden bg-gray-100 shadow-md hover:shadow-lg transition-shadow">
-                    {!imageErrors.has(photo.key) ? (
-                      <Image
-                        src={photo.url || "/placeholder.svg"}
-                        alt={`Portretfoto ${photo.index + 1} van ${photo.projectName}`}
-                        width={300}
-                        height={400}
-                        className="w-full h-full object-cover"
-                        onError={() => handleImageError(photo.key)}
-                        unoptimized
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-gray-200">
-                        <div className="text-center text-gray-500">
-                          <AlertCircle className="h-8 w-8 mx-auto mb-2" />
-                          <p className="text-xs">Foto niet beschikbaar</p>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                  <Button
-                    onClick={() => downloadPhoto(photo.url, photo.projectName, photo.index)}
-                    size="sm"
-                    variant="outline"
-                    className="w-full mt-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                    disabled={imageErrors.has(photo.key)}
-                  >
-                    <Download className="h-4 w-4 mr-2" />
-                    Download
-                  </Button>
-                </div>
-              ))}
-            </div>
           )}
-        </div>
+        </Card>
+      )}
 
-        {/* Debug Info */}
-        {process.env.NODE_ENV === "development" && (
-          <div className="mt-8 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-            <h3 className="font-semibold mb-2">Debug Info:</h3>
-            <p className="text-sm">Total projects: {projects.length}</p>
-            <p className="text-sm">Total photos: {allPhotos.length}</p>
-            <p className="text-sm">Image errors: {imageErrors.size}</p>
-            <Link href="/debug-astria">
-              <Button size="sm" variant="outline" className="mt-2 bg-transparent">
-                Open Debug Dashboard
-              </Button>
-            </Link>
-          </div>
-        )}
+      {/* Projects Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {projects.map((project) => {
+          const validPhotos = getValidPhotos(project)
+
+          return (
+            <Card key={project.id} className="hover:shadow-lg transition-shadow">
+              <CardHeader>
+                <div className="flex justify-between items-start">
+                  <div>
+                    <CardTitle className="text-lg">{project.name}</CardTitle>
+                    <p className="text-sm text-gray-500 capitalize">{project.gender}</p>
+                  </div>
+                  <Badge className={`${getStatusColor(project.status)} text-white`}>{project.status}</Badge>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="text-sm text-gray-600">
+                    <p>Aangemaakt: {new Date(project.created_at).toLocaleDateString("nl-NL")}</p>
+                    <p>Foto's: {validPhotos.length}</p>
+                  </div>
+
+                  {validPhotos.length > 0 && (
+                    <div className="grid grid-cols-3 gap-2">
+                      {validPhotos.slice(0, 6).map((photo, index) => (
+                        <img
+                          key={index}
+                          src={photo || "/placeholder.svg"}
+                          alt={`${project.name} ${index + 1}`}
+                          className="w-full h-20 object-cover rounded cursor-pointer hover:opacity-80"
+                          onClick={() => {
+                            setSelectedProject(project)
+                            setShowPhotos(true)
+                          }}
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement
+                            target.style.display = "none"
+                          }}
+                        />
+                      ))}
+                    </div>
+                  )}
+
+                  {validPhotos.length > 6 && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full bg-transparent"
+                      onClick={() => {
+                        setSelectedProject(project)
+                        setShowPhotos(true)
+                      }}
+                    >
+                      Bekijk alle {validPhotos.length} foto's
+                    </Button>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )
+        })}
       </div>
+
+      {projects.length === 0 && (
+        <div className="text-center py-12">
+          <h2 className="text-xl font-semibold mb-4">Nog geen projecten</h2>
+          <p className="text-gray-600 mb-6">Start je eerste AI fotoshoot om aan de slag te gaan!</p>
+          <Button onClick={() => router.push("/wizard/welcome")}>Start Nieuwe Fotoshoot</Button>
+        </div>
+      )}
+
+      {/* Selected Project Modal */}
+      {selectedProject && showPhotos && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg max-w-6xl max-h-[90vh] overflow-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-2xl font-bold">{selectedProject.name}</h2>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setSelectedProject(null)
+                    setShowPhotos(false)
+                  }}
+                >
+                  Sluiten
+                </Button>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                {getValidPhotos(selectedProject).map((photo, index) => (
+                  <div key={index} className="relative group">
+                    <img
+                      src={photo || "/placeholder.svg"}
+                      alt={`${selectedProject.name} ${index + 1}`}
+                      className="w-full h-32 object-cover rounded-lg"
+                    />
+                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all duration-200 rounded-lg flex items-center justify-center">
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        className="opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={() => downloadPhoto(photo, `${selectedProject.name}-${index + 1}.jpg`)}
+                      >
+                        <Download className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

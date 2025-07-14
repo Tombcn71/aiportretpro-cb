@@ -1,86 +1,89 @@
 import { NextResponse } from "next/server"
 import { sql } from "@/lib/db"
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/lib/auth"
 
 export async function GET() {
   try {
-    // Get all projects with their photo counts
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
+    // Get user
+    const users = await sql`SELECT id FROM users WHERE email = ${session.user.email}`
+    if (users.length === 0) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 })
+    }
+
+    const userId = users[0].id
+
+    // Get all projects with their photos
     const projects = await sql`
-      SELECT 
-        id,
-        name,
-        status,
-        generated_photos,
-        created_at,
-        updated_at,
-        COALESCE(array_length(generated_photos, 1), 0) as photo_count
+      SELECT id, name, status, generated_photos, created_at
       FROM projects 
-      ORDER BY created_at DESC 
-      LIMIT 20
+      WHERE user_id = ${userId}
+      ORDER BY created_at DESC
     `
 
-    // Get recent webhook logs specifically for photos
-    const webhookLogs = await sql`
-      SELECT 
-        id,
-        webhook_type,
-        project_id,
-        raw_body,
-        parsed_data,
-        status,
-        error_message,
-        created_at
-      FROM webhook_logs 
-      WHERE webhook_type = 'prompt'
-      ORDER BY created_at DESC 
-      LIMIT 50
-    `
+    // Analyze each project's photos
+    const analysis = projects.map((project) => {
+      let photoCount = 0
+      let photoSample = []
+      let parseError = null
 
-    // Check which projects have photos vs which don't
-    const projectsWithPhotos = projects.filter((p) => p.photo_count > 0)
-    const projectsWithoutPhotos = projects.filter((p) => p.photo_count === 0)
+      if (project.generated_photos) {
+        try {
+          let photos = []
 
-    // Get sample photos from projects that have them
-    const samplePhotos = projectsWithPhotos.slice(0, 3).map((project) => ({
-      projectId: project.id,
-      projectName: project.name,
-      photoCount: project.photo_count,
-      firstFewPhotos: project.generated_photos?.slice(0, 3) || [],
-    }))
+          if (typeof project.generated_photos === "string") {
+            if (project.generated_photos.startsWith("[")) {
+              photos = JSON.parse(project.generated_photos)
+            } else {
+              photos = [project.generated_photos]
+            }
+          } else if (Array.isArray(project.generated_photos)) {
+            photos = project.generated_photos
+          }
+
+          photoCount = photos.length
+          photoSample = photos.slice(0, 3) // First 3 photos as sample
+        } catch (e) {
+          parseError = e.message
+        }
+      }
+
+      return {
+        id: project.id,
+        name: project.name,
+        status: project.status,
+        created_at: project.created_at,
+        photoCount,
+        photoSample,
+        parseError,
+        rawPhotosType: typeof project.generated_photos,
+        rawPhotosPreview: project.generated_photos
+          ? JSON.stringify(project.generated_photos).substring(0, 200) + "..."
+          : null,
+      }
+    })
+
+    const totalPhotos = analysis.reduce((sum, project) => sum + project.photoCount, 0)
 
     return NextResponse.json({
-      summary: {
-        totalProjects: projects.length,
-        projectsWithPhotos: projectsWithPhotos.length,
-        projectsWithoutPhotos: projectsWithoutPhotos.length,
-        totalWebhookLogs: webhookLogs.length,
-      },
-      projectsWithPhotos: projectsWithPhotos.map((p) => ({
-        id: p.id,
-        name: p.name,
-        status: p.status,
-        photoCount: p.photo_count,
-        created: p.created_at,
-        updated: p.updated_at,
-      })),
-      projectsWithoutPhotos: projectsWithoutPhotos.map((p) => ({
-        id: p.id,
-        name: p.name,
-        status: p.status,
-        created: p.created_at,
-      })),
-      samplePhotos,
-      recentWebhooks: webhookLogs.map((log) => ({
-        id: log.id,
-        projectId: log.project_id,
-        status: log.status,
-        hasImages: log.parsed_data?.images?.length > 0,
-        imageCount: log.parsed_data?.images?.length || 0,
-        created: log.created_at,
-        error: log.error_message,
-      })),
+      success: true,
+      totalProjects: projects.length,
+      totalPhotos,
+      projects: analysis,
     })
   } catch (error) {
     console.error("Error checking photos:", error)
-    return NextResponse.json({ error: "Failed to check photos", details: error.message }, { status: 500 })
+    return NextResponse.json(
+      {
+        error: "Failed to check photos",
+        details: error.message,
+      },
+      { status: 500 },
+    )
   }
 }
