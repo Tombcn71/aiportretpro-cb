@@ -4,7 +4,7 @@ declare global {
   }
 }
 
-export const FB_PIXEL_ID = "1508299057002595"
+export const FB_PIXEL_ID = "8110588262372718"
 
 export const trackEvent = (eventName: string, parameters?: any) => {
   if (typeof window !== "undefined" && window.fbq) {
