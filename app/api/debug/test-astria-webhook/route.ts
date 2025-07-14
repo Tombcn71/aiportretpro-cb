@@ -19,6 +19,7 @@ export async function POST(request: NextRequest) {
     const webhookUrl = `${baseUrl}/api/astria/prompt-webhook?user_id=1&model_id=${projectId}&webhook_secret=${process.env.APP_WEBHOOK_SECRET}`
 
     console.log("🧪 Testing webhook with URL:", webhookUrl.replace(process.env.APP_WEBHOOK_SECRET, "***SECRET***"))
+    console.log("🧪 Test data being sent:", testData)
 
     // Call our own webhook endpoint with the correct secret
     const response = await fetch(webhookUrl, {
@@ -31,10 +32,13 @@ export async function POST(request: NextRequest) {
 
     const responseData = await response.json()
 
+    console.log("🧪 Webhook response:", responseData)
+
     return NextResponse.json({
       status: response.status,
       data: responseData,
       webhookUrl: webhookUrl.replace(process.env.APP_WEBHOOK_SECRET, "***SECRET***"),
+      testData,
     })
   } catch (error) {
     console.error("Error testing Astria webhook:", error)

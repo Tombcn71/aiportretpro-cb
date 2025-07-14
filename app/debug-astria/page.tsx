@@ -113,6 +113,9 @@ export default function DebugAstriaPage() {
                 <strong>NextAuth URL:</strong>{" "}
                 {data.envInfo.hasNextAuthUrl ? `✅ ${data.envInfo.nextAuthUrl}` : "❌ Missing"}
               </p>
+              <p>
+                <strong>Astria API Key:</strong> {data.envInfo.hasAstriaApiKey ? "✅ Present" : "❌ Missing"}
+              </p>
             </div>
           </CardContent>
         </Card>
@@ -132,17 +135,35 @@ export default function DebugAstriaPage() {
                 <strong>Name:</strong> {data.projectDetails.name}
               </p>
               <p>
-                <strong>Status:</strong> {data.projectDetails.status}
+                <strong>Status:</strong>{" "}
+                <span
+                  className={`font-medium ${
+                    data.projectDetails.status === "completed"
+                      ? "text-green-600"
+                      : data.projectDetails.status === "processing"
+                        ? "text-blue-600"
+                        : data.projectDetails.status === "failed"
+                          ? "text-red-600"
+                          : "text-gray-600"
+                  }`}
+                >
+                  {data.projectDetails.status}
+                </span>
               </p>
               <p>
-                <strong>Model ID:</strong> {data.projectDetails.model_id}
+                <strong>Model ID:</strong> {data.projectDetails.model_id || "N/A"}
               </p>
               <p>
-                <strong>Generated Photos:</strong> {data.projectDetails.generated_photos?.length || 0}
+                <strong>Generated Photos:</strong> {data.projectDetails.photo_count}
               </p>
               <p>
                 <strong>Created:</strong> {new Date(data.projectDetails.created_at).toLocaleString()}
               </p>
+              {data.projectDetails.updated_at && (
+                <p>
+                  <strong>Updated:</strong> {new Date(data.projectDetails.updated_at).toLocaleString()}
+                </p>
+              )}
             </div>
 
             {data.projectDetails.generated_photos && data.projectDetails.generated_photos.length > 0 && (

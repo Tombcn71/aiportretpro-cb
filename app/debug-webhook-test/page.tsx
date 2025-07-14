@@ -3,59 +3,60 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
 
 export default function WebhookTestPage() {
-  const [simpleResult, setSimpleResult] = useState<any>(null)
-  const [astriaResult, setAstriaResult] = useState<any>(null)
-  const [astriaCorrectResult, setAstriaCorrectResult] = useState<any>(null)
-  const [loading, setLoading] = useState<string | null>(null)
+  const [results, setResults] = useState<any>({})
+  const [loading, setLoading] = useState<any>({})
+  const [projectId, setProjectId] = useState("39")
 
   const testSimpleWebhook = async () => {
-    setLoading("simple")
+    setLoading({ ...loading, simple: true })
     try {
       const response = await fetch("/api/debug/test-webhook", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ test: "simple webhook test" }),
+        body: JSON.stringify({ test: "simple webhook", timestamp: new Date().toISOString() }),
       })
       const data = await response.json()
-      setSimpleResult({ status: response.status, data })
+      setResults({ ...results, simple: { status: response.status, data } })
     } catch (error) {
-      setSimpleResult({ status: "error", data: { error: error.message } })
+      setResults({ ...results, simple: { status: 500, error: error.message } })
     }
-    setLoading(null)
+    setLoading({ ...loading, simple: false })
   }
 
-  const testAstriaWebhookWrong = async () => {
-    setLoading("wrong")
+  const testAstriaWebhookWrongSecret = async () => {
+    setLoading({ ...loading, wrongSecret: true })
     try {
-      const response = await fetch("/api/astria/prompt-webhook?user_id=1&model_id=39&webhook_secret=wrong_secret", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          id: "test-123",
-          status: "completed",
-          images: ["https://example.com/image1.jpg", "https://example.com/image2.jpg"],
-        }),
-      })
-
-      const data = await response.json()
-      setAstriaResult({ status: response.status, data })
-    } catch (error) {
-      setAstriaResult({ status: "error", data: { error: error.message } })
-    }
-    setLoading(null)
-  }
-
-  const testAstriaWebhookCorrect = async () => {
-    setLoading("correct")
-    try {
-      // Use the server action to test with correct secret
       const response = await fetch("/api/debug/test-astria-webhook", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          projectId: "39",
+          projectId,
+          testData: {
+            id: "test_prompt_123",
+            status: "finished",
+            images: ["https://example.com/test1.jpg", "https://example.com/test2.jpg"],
+          },
+        }),
+      })
+      const data = await response.json()
+      setResults({ ...results, wrongSecret: { status: response.status, data } })
+    } catch (error) {
+      setResults({ ...results, wrongSecret: { status: 500, error: error.message } })
+    }
+    setLoading({ ...loading, wrongSecret: false })
+  }
+
+  const testAstriaWebhookCorrectSecret = async () => {
+    setLoading({ ...loading, correctSecret: true })
+    try {
+      const response = await fetch("/api/debug/test-astria-webhook", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          projectId,
           testData: {
             id: "test-123",
             status: "completed",
@@ -63,13 +64,39 @@ export default function WebhookTestPage() {
           },
         }),
       })
-
       const data = await response.json()
-      setAstriaCorrectResult({ status: response.status, data })
+      setResults({ ...results, correctSecret: { status: response.status, data } })
     } catch (error) {
-      setAstriaCorrectResult({ status: "error", data: { error: error.message } })
+      setResults({ ...results, correctSecret: { status: 500, error: error.message } })
     }
-    setLoading(null)
+    setLoading({ ...loading, correctSecret: false })
+  }
+
+  const renderResult = (key: string, title: string) => {
+    const result = results[key]
+    if (!result) return null
+
+    return (
+      <Card className="mt-4">
+        <CardHeader>
+          <CardTitle className="text-lg">{title}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            <p>
+              <strong>Status:</strong>{" "}
+              <span className={result.status === 200 ? "text-green-600" : "text-red-600"}>{result.status}</span>
+            </p>
+            <div>
+              <strong>Response:</strong>
+              <pre className="bg-gray-100 p-3 rounded mt-2 text-sm overflow-auto">
+                {JSON.stringify(result.data || result.error, null, 2)}
+              </pre>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    )
   }
 
   return (
@@ -78,23 +105,27 @@ export default function WebhookTestPage() {
 
       <Card>
         <CardHeader>
+          <CardTitle>Project ID for Testing</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Input
+            value={projectId}
+            onChange={(e) => setProjectId(e.target.value)}
+            placeholder="Enter project ID"
+            className="max-w-xs"
+          />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
           <CardTitle>Simple Webhook Test</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <Button onClick={testSimpleWebhook} disabled={loading === "simple"}>
-            {loading === "simple" ? "Testing..." : "Test Simple Webhook"}
+        <CardContent>
+          <Button onClick={testSimpleWebhook} disabled={loading.simple}>
+            {loading.simple ? "Testing..." : "Test Simple Webhook"}
           </Button>
-
-          {simpleResult && (
-            <div className="p-4 bg-gray-100 rounded">
-              <p>
-                <strong>Status:</strong> {simpleResult.status}
-              </p>
-              <p>
-                <strong>Response:</strong> {JSON.stringify(simpleResult.data)}
-              </p>
-            </div>
-          )}
+          {renderResult("simple", "Simple Webhook Result")}
         </CardContent>
       </Card>
 
@@ -102,21 +133,11 @@ export default function WebhookTestPage() {
         <CardHeader>
           <CardTitle>Astria Webhook Test (Wrong Secret)</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <Button onClick={testAstriaWebhookWrong} disabled={loading === "wrong"}>
-            {loading === "wrong" ? "Testing..." : "Test Astria Webhook (Wrong Secret)"}
+        <CardContent>
+          <Button onClick={testAstriaWebhookWrongSecret} disabled={loading.wrongSecret} variant="destructive">
+            {loading.wrongSecret ? "Testing..." : "Test Astria Webhook (Wrong Secret)"}
           </Button>
-
-          {astriaResult && (
-            <div className="p-4 bg-gray-100 rounded">
-              <p>
-                <strong>Status:</strong> {astriaResult.status}
-              </p>
-              <p>
-                <strong>Response:</strong> {JSON.stringify(astriaResult.data)}
-              </p>
-            </div>
-          )}
+          {renderResult("wrongSecret", "Wrong Secret Result")}
         </CardContent>
       </Card>
 
@@ -124,21 +145,11 @@ export default function WebhookTestPage() {
         <CardHeader>
           <CardTitle>Astria Webhook Test (Correct Secret)</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <Button onClick={testAstriaWebhookCorrect} disabled={loading === "correct"}>
-            {loading === "correct" ? "Testing..." : "Test Astria Webhook (Correct Secret)"}
+        <CardContent>
+          <Button onClick={testAstriaWebhookCorrectSecret} disabled={loading.correctSecret} variant="default">
+            {loading.correctSecret ? "Testing..." : "Test Astria Webhook (Correct Secret)"}
           </Button>
-
-          {astriaCorrectResult && (
-            <div className="p-4 bg-gray-100 rounded">
-              <p>
-                <strong>Status:</strong> {astriaCorrectResult.status}
-              </p>
-              <p>
-                <strong>Response:</strong> {JSON.stringify(astriaCorrectResult.data)}
-              </p>
-            </div>
-          )}
+          {renderResult("correctSecret", "Correct Secret Result")}
         </CardContent>
       </Card>
 
@@ -147,14 +158,14 @@ export default function WebhookTestPage() {
           <CardTitle>Environment Check</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-2">
+          <div className="space-y-2 text-sm">
             <p>
               <strong>Test URL:</strong> /api/astria/prompt-webhook
             </p>
             <p>
               <strong>Simple Test URL:</strong> /api/debug/test-webhook
             </p>
-            <p>
+            <p className="text-gray-600">
               <strong>Note:</strong> Webhook secret is handled server-side for security
             </p>
           </div>
