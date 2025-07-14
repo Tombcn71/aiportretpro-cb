@@ -14,7 +14,7 @@ interface Project {
   name: string
   status: string
   created_at: string
-  generated_photos: string[]
+  generated_photos: string | string[]
 }
 
 interface UserCredits {
@@ -59,16 +59,32 @@ export default function DashboardPage() {
     fetchData()
   }, [])
 
-  // Get all photos from all projects
-  const allPhotos = projects.flatMap((project) =>
-    (project.generated_photos || []).map((photo, index) => ({
+  // Parse generated photos properly
+  const allPhotos = projects.flatMap((project) => {
+    let photos = []
+
+    // Parse generated_photos based on how it's stored
+    if (project.generated_photos) {
+      try {
+        if (typeof project.generated_photos === "string") {
+          photos = JSON.parse(project.generated_photos)
+        } else if (Array.isArray(project.generated_photos)) {
+          photos = project.generated_photos
+        }
+      } catch (e) {
+        console.warn("Could not parse photos for project", project.id)
+        photos = []
+      }
+    }
+
+    return photos.map((photo: string, index: number) => ({
       url: photo,
       projectName: project.name,
       projectId: project.id,
       index: index,
       key: `${project.id}-${index}`,
-    })),
-  )
+    }))
+  })
 
   console.log("All photos:", allPhotos.length, allPhotos.slice(0, 5))
 
@@ -186,34 +202,51 @@ export default function DashboardPage() {
           <div className="mb-8">
             <h2 className="text-2xl font-semibold mb-4">Jouw Projecten</h2>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {projects.map((project) => (
-                <Card key={project.id}>
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="text-lg">{project.name}</CardTitle>
-                      {getStatusBadge(project.status)}
-                    </div>
-                    <p className="text-sm text-gray-500">{new Date(project.created_at).toLocaleDateString("nl-NL")}</p>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center justify-between">
-                      <p className="text-sm">
-                        {project.generated_photos?.length || 0} foto's gegenereerd
-                        {project.status === "completed" && project.generated_photos?.length !== 40 && (
-                          <span className="text-orange-600 ml-2">(verwacht: 40)</span>
-                        )}
+              {projects.map((project) => {
+                let photoCount = 0
+                try {
+                  if (project.generated_photos) {
+                    if (typeof project.generated_photos === "string") {
+                      photoCount = JSON.parse(project.generated_photos).length
+                    } else if (Array.isArray(project.generated_photos)) {
+                      photoCount = project.generated_photos.length
+                    }
+                  }
+                } catch (e) {
+                  photoCount = 0
+                }
+
+                return (
+                  <Card key={project.id}>
+                    <CardHeader>
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="text-lg">{project.name}</CardTitle>
+                        {getStatusBadge(project.status)}
+                      </div>
+                      <p className="text-sm text-gray-500">
+                        {new Date(project.created_at).toLocaleDateString("nl-NL")}
                       </p>
-                      {project.status === "completed" && project.generated_photos?.length > 0 && (
-                        <Link href={`/generate/${project.id}`}>
-                          <Button size="sm" variant="outline">
-                            Bekijk Foto's
-                          </Button>
-                        </Link>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex items-center justify-between">
+                        <p className="text-sm">
+                          {photoCount} foto's gegenereerd
+                          {project.status === "completed" && photoCount !== 40 && (
+                            <span className="text-orange-600 ml-2">(verwacht: 40)</span>
+                          )}
+                        </p>
+                        {project.status === "completed" && photoCount > 0 && (
+                          <Link href={`/generate/${project.id}`}>
+                            <Button size="sm" variant="outline">
+                              Bekijk Foto's
+                            </Button>
+                          </Link>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )
+              })}
             </div>
           </div>
         )}

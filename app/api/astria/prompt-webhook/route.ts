@@ -1,54 +1,64 @@
-import { NextResponse } from "next/server"
-import { neon } from "@neondatabase/serverless"
+import { type NextRequest, NextResponse } from "next/server"
+import { sql } from "@/lib/db"
 
-const sql = neon(process.env.DATABASE_URL!)
-
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
-    const body = await request.json()
     const url = new URL(request.url)
-
     const userId = url.searchParams.get("user_id")
     const modelId = url.searchParams.get("model_id")
     const webhookSecret = url.searchParams.get("webhook_secret")
 
-    console.log("🖼️ Prompt webhook received:", {
+    console.log("🖼️ PROMPT WEBHOOK CALLED:", {
       userId,
       modelId,
       webhookSecret: webhookSecret ? "present" : "missing",
-      body,
+      timestamp: new Date().toISOString(),
     })
 
-    // Validate webhook secret
-    if (!webhookSecret || webhookSecret !== process.env.APP_WEBHOOK_SECRET) {
+    // Verify webhook secret
+    if (webhookSecret !== process.env.APP_WEBHOOK_SECRET) {
       console.error("❌ Invalid webhook secret")
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    if (!userId || !modelId) {
-      console.error("❌ Missing required parameters")
-      return NextResponse.json({ error: "Missing parameters" }, { status: 400 })
+    // Get the raw body first
+    const rawBody = await request.text()
+    console.log("🖼️ Raw prompt webhook body:", rawBody)
+
+    let body
+    try {
+      body = JSON.parse(rawBody)
+    } catch (parseError) {
+      console.error("❌ Failed to parse JSON body:", parseError)
+      return NextResponse.json({ error: "Invalid JSON" }, { status: 400 })
     }
 
-    // Handle different webhook formats - Astria sends different structures
+    console.log("🖼️ Parsed prompt webhook body:", body)
+
+    if (!modelId) {
+      console.error("❌ No model ID in webhook")
+      return NextResponse.json({ error: "No model ID" }, { status: 400 })
+    }
+
+    // Extract images from webhook
     const images = body.images || (body.prompt && body.prompt.images) || []
 
     if (!Array.isArray(images) || images.length === 0) {
-      console.error("❌ No images in prompt data")
-      return NextResponse.json({ error: "No images found" }, { status: 400 })
+      console.log("⚠️ No images in this webhook, might be status update")
+      return NextResponse.json({ received: true, processed: true })
     }
 
-    console.log("📸 Received", images.length, "images from prompt")
+    // Get image URLs
+    const imageUrls = images.filter((img) => img && img.url).map((img) => img.url)
 
-    // Extract image URLs
-    const newImageUrls = images.filter((img: any) => img.url).map((img: any) => img.url)
-
-    if (newImageUrls.length === 0) {
-      console.error("❌ No valid image URLs found")
-      return NextResponse.json({ error: "No valid images" }, { status: 400 })
+    if (imageUrls.length === 0) {
+      console.log("⚠️ No valid image URLs found")
+      return NextResponse.json({ received: true, processed: true })
     }
 
-    // Get current images from database
+    console.log(`📸 Found ${imageUrls.length} new images`)
+
+    // Get current project
     const currentProject = await sql`
       SELECT generated_photos 
       FROM projects 
@@ -60,57 +70,51 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Project not found" }, { status: 404 })
     }
 
-    // Parse existing images from JSON string
-    let existingImages: string[] = []
+    // Parse existing photos
+    let existingPhotos = []
     const currentPhotos = currentProject[0].generated_photos
 
     if (currentPhotos) {
       try {
-        // Your database stores as JSON string, so parse it
         if (typeof currentPhotos === "string") {
-          existingImages = JSON.parse(currentPhotos)
+          existingPhotos = JSON.parse(currentPhotos)
         } else if (Array.isArray(currentPhotos)) {
-          existingImages = currentPhotos
+          existingPhotos = currentPhotos
         }
-      } catch (parseError) {
-        console.warn("⚠️ Could not parse existing images, starting fresh:", parseError)
-        existingImages = []
+      } catch (e) {
+        console.warn("Could not parse existing photos, starting fresh")
+        existingPhotos = []
       }
     }
 
     // Add new images (avoid duplicates)
-    const allImages = [...existingImages]
-    for (const newUrl of newImageUrls) {
-      if (!allImages.includes(newUrl)) {
-        allImages.push(newUrl)
+    const allPhotos = [...existingPhotos]
+    for (const newUrl of imageUrls) {
+      if (!allPhotos.includes(newUrl)) {
+        allPhotos.push(newUrl)
       }
     }
 
-    // Update database with all images as JSON string (matching your schema)
+    // Update database with all photos as JSON string
     await sql`
       UPDATE projects 
       SET 
-        generated_photos = ${JSON.stringify(allImages)},
+        generated_photos = ${JSON.stringify(allPhotos)},
+        status = 'completed',
         updated_at = CURRENT_TIMESTAMP
       WHERE id = ${Number.parseInt(modelId)}
     `
 
-    console.log("✅ Updated project with", allImages.length, "total images")
+    console.log(`✅ Updated project ${modelId} with ${allPhotos.length} total photos`)
 
     return NextResponse.json({
-      success: true,
-      message: "Prompt webhook processed successfully",
-      totalImages: allImages.length,
-      newImages: newImageUrls.length,
+      received: true,
+      processed: true,
+      totalPhotos: allPhotos.length,
+      newPhotos: imageUrls.length,
     })
   } catch (error) {
     console.error("❌ Prompt webhook error:", error)
-    return NextResponse.json(
-      {
-        error: "Internal server error",
-        details: error instanceof Error ? error.message : "Unknown error",
-      },
-      { status: 500 },
-    )
+    return NextResponse.json({ error: "Webhook error" }, { status: 400 })
   }
 }
