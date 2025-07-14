@@ -1,105 +1,135 @@
 "use client"
 
 import { useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 export default function WebhookTestPage() {
-  const [projectId, setProjectId] = useState("39")
-  const [webhookBody, setWebhookBody] = useState(`{
-  "id": "test-123",
-  "status": "finished",
-  "images": [
-    "https://example.com/image1.jpg",
-    "https://example.com/image2.jpg"
-  ]
-}`)
-  const [result, setResult] = useState("")
-  const [loading, setLoading] = useState(false)
-
-  const testWebhook = async () => {
-    setLoading(true)
-    try {
-      // We gebruiken een test secret omdat we de echte secret niet client-side kunnen gebruiken
-      const webhookUrl = `/api/astria/prompt-webhook?user_id=1&model_id=${projectId}&webhook_secret=test-secret`
-
-      const response = await fetch(webhookUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: webhookBody,
-      })
-
-      const responseText = await response.text()
-      setResult(`Status: ${response.status}\nResponse: ${responseText}`)
-    } catch (error) {
-      setResult(`Error: ${error.message}`)
-    } finally {
-      setLoading(false)
-    }
-  }
+  const [results, setResults] = useState<any>({})
+  const [loading, setLoading] = useState<string | null>(null)
 
   const testSimpleWebhook = async () => {
-    setLoading(true)
+    setLoading("simple")
     try {
       const response = await fetch("/api/debug/test-webhook", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ test: true, timestamp: new Date().toISOString() }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ test: "simple webhook test" }),
       })
 
-      const responseText = await response.text()
-      setResult(`Status: ${response.status}\nResponse: ${responseText}`)
+      const data = await response.text()
+      setResults((prev) => ({
+        ...prev,
+        simple: {
+          status: response.status,
+          response: data,
+        },
+      }))
     } catch (error) {
-      setResult(`Error: ${error.message}`)
-    } finally {
-      setLoading(false)
+      setResults((prev) => ({
+        ...prev,
+        simple: {
+          status: "Error",
+          response: error.message,
+        },
+      }))
     }
+    setLoading(null)
+  }
+
+  const testAstriaWebhook = async () => {
+    setLoading("astria")
+    try {
+      // Test with the actual webhook secret from environment
+      const response = await fetch("/api/astria/prompt-webhook?user_id=1&model_id=39&webhook_secret=test_secret", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: "test_prompt_123",
+          status: "finished",
+          images: ["https://example.com/test1.jpg", "https://example.com/test2.jpg"],
+        }),
+      })
+
+      const data = await response.text()
+      setResults((prev) => ({
+        ...prev,
+        astria: {
+          status: response.status,
+          response: data,
+        },
+      }))
+    } catch (error) {
+      setResults((prev) => ({
+        ...prev,
+        astria: {
+          status: "Error",
+          response: error.message,
+        },
+      }))
+    }
+    setLoading(null)
+  }
+
+  const testAstriaWebhookWithCorrectSecret = async () => {
+    setLoading("astria_correct")
+    try {
+      // Test with the correct webhook secret
+      const response = await fetch(
+        "/api/astria/prompt-webhook?user_id=1&model_id=39&webhook_secret=shadf892yr32548hq23h",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            id: "test_prompt_123",
+            status: "finished",
+            images: ["https://example.com/test1.jpg", "https://example.com/test2.jpg"],
+          }),
+        },
+      )
+
+      const data = await response.text()
+      setResults((prev) => ({
+        ...prev,
+        astria_correct: {
+          status: response.status,
+          response: data,
+        },
+      }))
+    } catch (error) {
+      setResults((prev) => ({
+        ...prev,
+        astria_correct: {
+          status: "Error",
+          response: error.message,
+        },
+      }))
+    }
+    setLoading(null)
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold mb-6">Webhook Testing</h1>
+    <div className="container mx-auto p-6">
+      <h1 className="text-3xl font-bold mb-6">Webhook Test Dashboard</h1>
 
-        <Card className="mb-6">
+      <div className="grid gap-6">
+        <Card>
           <CardHeader>
-            <CardTitle>Test Webhook Handler</CardTitle>
+            <CardTitle>Simple Webhook Test</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium mb-2">Project ID</label>
-              <Input value={projectId} onChange={(e) => setProjectId(e.target.value)} placeholder="Enter project ID" />
-            </div>
+          <CardContent>
+            <Button onClick={testSimpleWebhook} disabled={loading === "simple"} className="mb-4">
+              {loading === "simple" ? "Testing..." : "Test Simple Webhook"}
+            </Button>
 
-            <div>
-              <label className="block text-sm font-medium mb-2">Webhook Body (JSON)</label>
-              <Textarea
-                value={webhookBody}
-                onChange={(e) => setWebhookBody(e.target.value)}
-                rows={8}
-                className="font-mono text-sm"
-              />
-            </div>
-
-            <div className="flex gap-2">
-              <Button onClick={testWebhook} disabled={loading}>
-                {loading ? "Testing..." : "Test Astria Webhook"}
-              </Button>
-              <Button onClick={testSimpleWebhook} disabled={loading} variant="outline">
-                Test Simple Webhook
-              </Button>
-            </div>
-
-            {result && (
-              <div className="mt-4">
-                <label className="block text-sm font-medium mb-2">Result</label>
-                <pre className="bg-gray-100 p-4 rounded text-sm overflow-auto">{result}</pre>
+            {results.simple && (
+              <div className="bg-gray-100 p-4 rounded">
+                <p>
+                  <strong>Status:</strong> {results.simple.status}
+                </p>
+                <p>
+                  <strong>Response:</strong> {results.simple.response}
+                </p>
               </div>
             )}
           </CardContent>
@@ -107,39 +137,68 @@ export default function WebhookTestPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Debugging Steps</CardTitle>
+            <CardTitle>Astria Webhook Test (Wrong Secret)</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3 text-sm">
-              <div className="p-3 bg-blue-50 rounded">
-                <p className="font-semibold">1. Test Simple Webhook</p>
-                <p>Dit test of de webhook endpoint bereikbaar is</p>
+            <Button onClick={testAstriaWebhook} disabled={loading === "astria"} className="mb-4">
+              {loading === "astria" ? "Testing..." : "Test Astria Webhook"}
+            </Button>
+
+            {results.astria && (
+              <div className="bg-gray-100 p-4 rounded">
+                <p>
+                  <strong>Status:</strong> {results.astria.status}
+                </p>
+                <p>
+                  <strong>Response:</strong> {results.astria.response}
+                </p>
               </div>
-              <div className="p-3 bg-yellow-50 rounded">
-                <p className="font-semibold">2. Test Astria Webhook</p>
-                <p>Dit test de webhook handler met sample data (zal falen door verkeerde secret, dat is normaal)</p>
-              </div>
-              <div className="p-3 bg-green-50 rounded">
-                <p className="font-semibold">3. Check Debug Dashboard</p>
-                <p>Ga naar /debug-astria om te zien of er logs verschijnen</p>
-              </div>
-              <div className="p-3 bg-red-50 rounded">
-                <p className="font-semibold">4. Check Astria Configuration</p>
-                <p>Als manual tests werken maar Astria niet, dan is het probleem bij Astria's webhook configuratie</p>
-              </div>
-            </div>
+            )}
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>Expected Webhook URL</CardTitle>
+            <CardTitle>Astria Webhook Test (Correct Secret)</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="p-3 bg-gray-100 rounded font-mono text-sm">
-              https://www.aiportretpro.nl/api/astria/prompt-webhook?user_id=1&model_id=PROJECT_ID&webhook_secret=shadf892yr32548hq23h
+            <Button
+              onClick={testAstriaWebhookWithCorrectSecret}
+              disabled={loading === "astria_correct"}
+              className="mb-4"
+            >
+              {loading === "astria_correct" ? "Testing..." : "Test Astria Webhook (Correct Secret)"}
+            </Button>
+
+            {results.astria_correct && (
+              <div className="bg-gray-100 p-4 rounded">
+                <p>
+                  <strong>Status:</strong> {results.astria_correct.status}
+                </p>
+                <p>
+                  <strong>Response:</strong> {results.astria_correct.response}
+                </p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Environment Check</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="bg-gray-100 p-4 rounded">
+              <p>
+                <strong>Expected Webhook Secret:</strong> shadf892yr32548hq23h
+              </p>
+              <p>
+                <strong>Test URL:</strong> /api/astria/prompt-webhook
+              </p>
+              <p>
+                <strong>Simple Test URL:</strong> /api/debug/test-webhook
+              </p>
             </div>
-            <p className="text-sm text-gray-600 mt-2">Dit is de URL die Astria zou moeten gebruiken voor webhooks</p>
           </CardContent>
         </Card>
       </div>
