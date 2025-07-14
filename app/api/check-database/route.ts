@@ -1,78 +1,79 @@
 import { NextResponse } from "next/server"
-import { sql } from "@/lib/db"
+import { neon } from "@neondatabase/serverless"
+
+const sql = neon(process.env.DATABASE_URL!)
 
 export async function GET() {
   try {
-    // Check project 39 specifically
-    const project39 = await sql`
-      SELECT 
-        id,
-        name,
-        status,
-        generated_photos,
-        CASE 
-          WHEN generated_photos IS NOT NULL AND generated_photos != '[]' 
-          THEN json_array_length(generated_photos::json)
-          ELSE 0
-        END as photo_count
-      FROM projects 
-      WHERE id = 39
+    console.log("🔍 Checking database connection and schema...")
+
+    // Test basic connection
+    const connectionTest = await sql`SELECT NOW() as current_time`
+    console.log("✅ Database connection successful:", connectionTest[0])
+
+    // Check if projects table exists and get structure
+    const tableCheck = await sql`
+      SELECT column_name, data_type, is_nullable
+      FROM information_schema.columns 
+      WHERE table_name = 'projects'
+      ORDER BY ordinal_position
     `
 
-    // Check all recent projects
-    const recentProjects = await sql`
+    if (tableCheck.length === 0) {
+      return NextResponse.json({
+        success: false,
+        error: "Projects table does not exist",
+      })
+    }
+
+    console.log("📋 Projects table structure:", tableCheck)
+
+    // Check for projects with potential array issues
+    const projectsWithArrays = await sql`
       SELECT 
-        id,
+        id, 
         name,
-        status,
-        created_at,
         CASE 
-          WHEN generated_photos IS NULL THEN 'NULL'
-          WHEN generated_photos = '[]' THEN 'EMPTY'
-          ELSE 'HAS_PHOTOS'
+          WHEN generated_photos IS NULL THEN 'null'
+          WHEN generated_photos::text = '[]' THEN 'empty_array'
+          WHEN generated_photos::text = '"[]"' THEN 'malformed_string'
+          ELSE 'has_data'
         END as photo_status,
-        CASE 
-          WHEN generated_photos IS NOT NULL AND generated_photos != '[]' 
-          THEN json_array_length(generated_photos::json)
-          ELSE 0
-        END as photo_count
+        generated_photos::text as raw_photos
       FROM projects 
-      ORDER BY id DESC 
+      WHERE generated_photos IS NOT NULL
       LIMIT 10
     `
 
-    // Check webhook logs for project 39
-    const webhookLogs = await sql`
+    console.log("📸 Projects with photo data:", projectsWithArrays)
+
+    // Count projects by status
+    const statusCounts = await sql`
       SELECT 
-        project_id,
-        webhook_type,
-        processed,
-        created_at,
-        request_body,
-        error_message
-      FROM webhook_logs 
-      WHERE project_id = 39
-      ORDER BY created_at DESC 
-      LIMIT 10
+        status,
+        COUNT(*) as count
+      FROM projects 
+      GROUP BY status
     `
+
+    console.log("📊 Project status counts:", statusCounts)
 
     return NextResponse.json({
-      project39: project39[0] || null,
-      recentProjects,
-      webhookLogs,
-      summary: {
-        project39HasPhotos: project39[0]?.photo_count > 0,
-        project39PhotoCount: project39[0]?.photo_count || 0,
-        totalRecentProjects: recentProjects.length,
-        projectsWithPhotos: recentProjects.filter((p) => p.photo_count > 0).length,
-      },
+      success: true,
+      connection: connectionTest[0],
+      tableStructure: tableCheck,
+      sampleProjects: projectsWithArrays,
+      statusCounts: statusCounts,
+      message: "Database check completed successfully",
     })
   } catch (error) {
-    console.error("Database check error:", error)
+    console.error("❌ Database check error:", error)
+
     return NextResponse.json(
       {
-        error: "Database check failed",
-        details: error.message,
+        success: false,
+        error: error instanceof Error ? error.message : "Unknown database error",
+        details: error,
       },
       { status: 500 },
     )

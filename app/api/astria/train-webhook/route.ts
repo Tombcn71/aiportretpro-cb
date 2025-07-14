@@ -1,79 +1,114 @@
-import { type NextRequest, NextResponse } from "next/server"
-import { sql } from "@/lib/db"
+import { NextResponse } from "next/server"
+import { neon } from "@neondatabase/serverless"
 
-export async function POST(request: NextRequest) {
+const sql = neon(process.env.DATABASE_URL!)
+
+export async function POST(request: Request) {
   try {
+    const body = await request.json()
     const url = new URL(request.url)
+
     const userId = url.searchParams.get("user_id")
     const modelId = url.searchParams.get("model_id")
     const webhookSecret = url.searchParams.get("webhook_secret")
 
-    console.log("🔔 TRAIN WEBHOOK CALLED:", {
+    console.log("🎯 Train webhook received:", {
       userId,
       modelId,
       webhookSecret: webhookSecret ? "present" : "missing",
-      timestamp: new Date().toISOString(),
-      method: request.method,
-      headers: Object.fromEntries(request.headers.entries()),
+      body,
     })
 
-    // Verify webhook secret
-    if (webhookSecret !== process.env.APP_WEBHOOK_SECRET) {
+    // Validate webhook secret
+    if (!webhookSecret || webhookSecret !== process.env.APP_WEBHOOK_SECRET) {
       console.error("❌ Invalid webhook secret")
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    // Get the raw body first
-    const rawBody = await request.text()
-    console.log("🔔 Raw train webhook body:", rawBody)
+    if (!userId || !modelId) {
+      console.error("❌ Missing required parameters")
+      return NextResponse.json({ error: "Missing parameters" }, { status: 400 })
+    }
 
-    let body
+    const tune = body.tune
+    if (!tune || !tune.id) {
+      console.error("❌ Invalid tune data")
+      return NextResponse.json({ error: "Invalid tune data" }, { status: 400 })
+    }
+
+    console.log("✅ Training completed for tune:", tune.id)
+
+    // Update project with tune ID and status
+    const updateResult = await sql`
+      UPDATE projects 
+      SET 
+        astria_tune_id = ${tune.id.toString()},
+        status = 'completed',
+        updated_at = NOW()
+      WHERE id = ${Number.parseInt(modelId)}
+      RETURNING id, name, status, astria_tune_id
+    `
+
+    if (updateResult.length === 0) {
+      console.error("❌ Project not found:", modelId)
+      return NextResponse.json({ error: "Project not found" }, { status: 404 })
+    }
+
+    console.log("✅ Project updated:", updateResult[0])
+
+    // Try to fetch generated images from Astria
     try {
-      body = JSON.parse(rawBody)
-    } catch (parseError) {
-      console.error("❌ Failed to parse JSON body:", parseError)
-      console.log("Raw body was:", rawBody)
-      return NextResponse.json({ error: "Invalid JSON" }, { status: 400 })
+      const imagesResponse = await fetch(`https://api.astria.ai/tunes/${tune.id}/prompts`, {
+        headers: {
+          Authorization: `Bearer ${process.env.ASTRIA_API_KEY}`,
+        },
+      })
+
+      if (imagesResponse.ok) {
+        const promptsData = await imagesResponse.json()
+        console.log("📸 Fetched prompts from Astria:", promptsData.length || 0)
+
+        // Extract image URLs from prompts
+        const imageUrls: string[] = []
+        if (Array.isArray(promptsData)) {
+          for (const prompt of promptsData) {
+            if (prompt.images && Array.isArray(prompt.images)) {
+              for (const image of prompt.images) {
+                if (image.url) {
+                  imageUrls.push(image.url)
+                }
+              }
+            }
+          }
+        }
+
+        if (imageUrls.length > 0) {
+          // Store images in database as JSONB
+          await sql`
+            UPDATE projects 
+            SET generated_photos = ${JSON.stringify(imageUrls)}::jsonb
+            WHERE id = ${Number.parseInt(modelId)}
+          `
+          console.log("✅ Stored", imageUrls.length, "images in database")
+        }
+      }
+    } catch (imageError) {
+      console.error("⚠️ Could not fetch images (training still successful):", imageError)
     }
 
-    console.log("🔔 Parsed train webhook body:", body)
-
-    if (!modelId) {
-      console.error("❌ No model ID in webhook")
-      return NextResponse.json({ error: "No model ID" }, { status: 400 })
-    }
-
-    // Handle different webhook formats from Astria
-    const webhookStatus = body.status || body.state || body.tune?.status
-    const webhookId = body.id || body.tune?.id || "unknown"
-
-    console.log("🔍 Processed train webhook data:", {
-      webhookStatus,
-      webhookId,
+    return NextResponse.json({
+      success: true,
+      message: "Training webhook processed successfully",
+      tuneId: tune.id,
     })
-
-    // Update project status based on training status using Neon
-    if (webhookStatus === "finished" || webhookStatus === "completed") {
-      await sql`
-        UPDATE projects 
-        SET status = 'processing', updated_at = CURRENT_TIMESTAMP
-        WHERE id = ${Number.parseInt(modelId)}
-      `
-      console.log(`✅ Model ${modelId} training completed, prompts should start generating`)
-    } else if (webhookStatus === "failed" || webhookStatus === "error") {
-      await sql`
-        UPDATE projects 
-        SET status = 'failed', updated_at = CURRENT_TIMESTAMP
-        WHERE id = ${Number.parseInt(modelId)}
-      `
-      console.log(`❌ Model ${modelId} training failed`)
-    } else {
-      console.log(`🔄 Model ${modelId} training status: ${webhookStatus}`)
-    }
-
-    return NextResponse.json({ received: true, processed: true })
   } catch (error) {
     console.error("❌ Train webhook error:", error)
-    return NextResponse.json({ error: "Webhook error" }, { status: 400 })
+    return NextResponse.json(
+      {
+        error: "Internal server error",
+        details: error instanceof Error ? error.message : "Unknown error",
+      },
+      { status: 500 },
+    )
   }
 }

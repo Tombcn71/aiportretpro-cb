@@ -1,39 +1,20 @@
--- Check project 39 (martina) specifically
+-- Check project 39 (martina) specifically - simple version
 SELECT 
     id,
     name,
     status,
     created_at,
-    CASE 
-        WHEN generated_photos IS NULL THEN 'NULL'
-        WHEN generated_photos = '[]' THEN 'EMPTY ARRAY'
-        ELSE 'HAS PHOTOS'
-    END as photo_status,
-    CASE 
-        WHEN generated_photos IS NOT NULL AND generated_photos != '[]' 
-        THEN json_array_length(generated_photos::json)
-        ELSE 0
-    END as photo_count,
-    LEFT(generated_photos::text, 200) as photo_sample
+    generated_photos
 FROM projects 
 WHERE id = 39;
 
--- Check all recent projects
+-- Check all recent projects - simple version
 SELECT 
     id,
     name,
     status,
     created_at,
-    CASE 
-        WHEN generated_photos IS NULL THEN 'NULL'
-        WHEN generated_photos = '[]' THEN 'EMPTY ARRAY'
-        ELSE 'HAS PHOTOS'
-    END as photo_status,
-    CASE 
-        WHEN generated_photos IS NOT NULL AND generated_photos != '[]' 
-        THEN json_array_length(generated_photos::json)
-        ELSE 0
-    END as photo_count
+    generated_photos
 FROM projects 
 ORDER BY id DESC 
 LIMIT 10;
@@ -44,9 +25,18 @@ SELECT
     webhook_type,
     processed,
     created_at,
-    LEFT(request_body::text, 300) as body_sample,
+    request_body,
     error_message
 FROM webhook_logs 
 WHERE project_id = 39
 ORDER BY created_at DESC 
 LIMIT 10;
+
+-- Check the data type of generated_photos column
+SELECT 
+    column_name,
+    data_type,
+    is_nullable
+FROM information_schema.columns 
+WHERE table_name = 'projects' 
+AND column_name = 'generated_photos';
