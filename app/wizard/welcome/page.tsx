@@ -31,14 +31,7 @@ export default function WelcomePage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white flex items-center justify-center p-4">
       <div className="w-full max-w-2xl">
-        {/* Progress Bar */}
-        <div className="mb-6">
-          <div className="flex justify-between text-sm text-gray-600 mb-2">
-            <span>Stap 1 van 4</span>
-            <span>25% voltooid</span>
-          </div>
-          <ProgressBar progress={25} />
-        </div>
+        
 
         <Card className="border-[#0077B5]/20 shadow-xl">
           <CardContent className="p-6 md:p-8 text-center">
