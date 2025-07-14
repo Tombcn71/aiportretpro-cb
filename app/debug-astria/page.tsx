@@ -6,189 +6,211 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 
 export default function DebugAstriaPage() {
-  const [debugData, setDebugData] = useState<any>(null)
+  const [data, setData] = useState<any>(null)
   const [projectId, setProjectId] = useState("")
   const [loading, setLoading] = useState(false)
 
-  const fetchDebugData = async (pid?: string) => {
+  const fetchData = async (specificProjectId?: string) => {
     setLoading(true)
     try {
-      const url = pid ? `/api/debug/astria-flow?projectId=${pid}` : "/api/debug/astria-flow"
+      const url = specificProjectId ? `/api/debug/astria-flow?projectId=${specificProjectId}` : "/api/debug/astria-flow"
+
       const response = await fetch(url)
-      const data = await response.json()
-      setDebugData(data)
+      const result = await response.json()
+      setData(result)
     } catch (error) {
-      console.error("Failed to fetch debug data:", error)
+      console.error("Error fetching debug data:", error)
+      setData({ error: error.message })
     }
     setLoading(false)
   }
 
   useEffect(() => {
-    fetchDebugData()
+    fetchData()
   }, [])
 
   const handleProjectSearch = () => {
-    if (projectId) {
-      fetchDebugData(projectId)
+    if (projectId.trim()) {
+      fetchData(projectId.trim())
     } else {
-      fetchDebugData()
+      fetchData()
     }
   }
 
   if (loading) {
-    return <div className="container mx-auto p-6">Loading...</div>
+    return (
+      <div className="container mx-auto p-6">
+        <h1 className="text-3xl font-bold mb-6">Debug Astria Flow</h1>
+        <p>Loading...</p>
+      </div>
+    )
+  }
+
+  if (!data) {
+    return (
+      <div className="container mx-auto p-6">
+        <h1 className="text-3xl font-bold mb-6">Debug Astria Flow</h1>
+        <p>No data available</p>
+      </div>
+    )
   }
 
   return (
     <div className="container mx-auto p-6 space-y-6">
-      <h1 className="text-3xl font-bold">Astria Debug Dashboard</h1>
+      <h1 className="text-3xl font-bold">Debug Astria Flow</h1>
 
       <Card>
         <CardHeader>
-          <CardTitle>Project Search</CardTitle>
+          <CardTitle>Search Project</CardTitle>
         </CardHeader>
-        <CardContent className="flex gap-4">
-          <Input placeholder="Enter Project ID" value={projectId} onChange={(e) => setProjectId(e.target.value)} />
-          <Button onClick={handleProjectSearch}>Search</Button>
-          <Button
-            variant="outline"
-            onClick={() => {
-              setProjectId("")
-              fetchDebugData()
-            }}
-          >
-            Show All
-          </Button>
+        <CardContent className="space-y-4">
+          <div className="flex gap-2">
+            <Input
+              value={projectId}
+              onChange={(e) => setProjectId(e.target.value)}
+              placeholder="Enter project ID (e.g., 39)"
+            />
+            <Button onClick={handleProjectSearch}>Search</Button>
+            <Button
+              onClick={() => {
+                setProjectId("")
+                fetchData()
+              }}
+              variant="outline"
+            >
+              Show All
+            </Button>
+          </div>
         </CardContent>
       </Card>
 
-      {debugData && (
-        <>
-          <Card>
-            <CardHeader>
-              <CardTitle>Environment Status</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-2">
-                <p>
-                  <strong>Webhook Secret:</strong> {debugData.envInfo.webhookSecret}
-                </p>
-                <p>
-                  <strong>NextAuth URL:</strong> {debugData.envInfo.nextAuthUrl}
-                </p>
-                <p>
-                  <strong>Astria API Key:</strong> {debugData.envInfo.astriaApiKey}
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-
-          {debugData.projectInfo && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Project Details</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid gap-2">
-                  <p>
-                    <strong>ID:</strong> {debugData.projectInfo.id}
-                  </p>
-                  <p>
-                    <strong>Name:</strong> {debugData.projectInfo.name}
-                  </p>
-                  <p>
-                    <strong>Status:</strong> {debugData.projectInfo.status}
-                  </p>
-                  <p>
-                    <strong>Created:</strong> {new Date(debugData.projectInfo.created_at).toLocaleString()}
-                  </p>
-                  <p>
-                    <strong>Updated:</strong> {new Date(debugData.projectInfo.updated_at).toLocaleString()}
-                  </p>
-                  <p>
-                    <strong>Generated Photos:</strong> {debugData.projectInfo.generated_photos?.length || 0}
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Recent Webhook Logs</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {debugData.webhookLogs.length === 0 ? (
-                <p className="text-red-600">No webhook logs found. This might be the issue!</p>
-              ) : (
-                <div className="space-y-4">
-                  {debugData.webhookLogs.map((log: any, index: number) => (
-                    <div key={index} className="p-4 border rounded">
-                      <p>
-                        <strong>Project ID:</strong> {log.project_id}
-                      </p>
-                      <p>
-                        <strong>Status:</strong> {log.status}
-                      </p>
-                      <p>
-                        <strong>Time:</strong> {new Date(log.created_at).toLocaleString()}
-                      </p>
-                      {log.error_message && (
-                        <p>
-                          <strong>Error:</strong> {log.error_message}
-                        </p>
-                      )}
-                      <details className="mt-2">
-                        <summary>Raw Body</summary>
-                        <pre className="text-xs bg-gray-100 p-2 mt-2 overflow-auto">{log.raw_body}</pre>
-                      </details>
-                      {log.parsed_data && (
-                        <details className="mt-2">
-                          <summary>Parsed Data</summary>
-                          <pre className="text-xs bg-gray-100 p-2 mt-2 overflow-auto">
-                            {JSON.stringify(JSON.parse(log.parsed_data), null, 2)}
-                          </pre>
-                        </details>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Recent Projects</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                {debugData.recentProjects.map((project: any) => (
-                  <div key={project.id} className="p-3 border rounded flex justify-between">
-                    <div>
-                      <p>
-                        <strong>#{project.id}</strong> - {project.name}
-                      </p>
-                      <p className="text-sm text-gray-600">
-                        Status: {project.status} | Photos: {project.photo_count || 0}
-                      </p>
-                    </div>
-                    <Button
-                      size="sm"
-                      onClick={() => {
-                        setProjectId(project.id.toString())
-                        fetchDebugData(project.id.toString())
-                      }}
-                    >
-                      Debug
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </>
+      {data.error && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-red-600">Error</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p>{data.error}</p>
+            {data.details && <p className="text-sm text-gray-600 mt-2">{data.details}</p>}
+          </CardContent>
+        </Card>
       )}
+
+      {data.envInfo && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Environment Check</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              <p>
+                <strong>Webhook Secret:</strong>{" "}
+                {data.envInfo.hasWebhookSecret
+                  ? `✅ Present (${data.envInfo.webhookSecretLength} chars)`
+                  : "❌ Missing"}
+              </p>
+              <p>
+                <strong>NextAuth URL:</strong>{" "}
+                {data.envInfo.hasNextAuthUrl ? `✅ ${data.envInfo.nextAuthUrl}` : "❌ Missing"}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {data.projectDetails && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Project Details</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              <p>
+                <strong>ID:</strong> {data.projectDetails.id}
+              </p>
+              <p>
+                <strong>Name:</strong> {data.projectDetails.name}
+              </p>
+              <p>
+                <strong>Status:</strong> {data.projectDetails.status}
+              </p>
+              <p>
+                <strong>Model ID:</strong> {data.projectDetails.model_id}
+              </p>
+              <p>
+                <strong>Generated Photos:</strong> {data.projectDetails.generated_photos?.length || 0}
+              </p>
+              <p>
+                <strong>Created:</strong> {new Date(data.projectDetails.created_at).toLocaleString()}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Recent Webhook Logs</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {data.webhookLogs && data.webhookLogs.length > 0 ? (
+            <div className="space-y-4">
+              {data.webhookLogs.map((log: any) => (
+                <div key={log.id} className="border p-4 rounded">
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <p>
+                      <strong>Project ID:</strong> {log.project_id}
+                    </p>
+                    <p>
+                      <strong>Type:</strong> {log.webhook_type}
+                    </p>
+                    <p>
+                      <strong>Method:</strong> {log.method}
+                    </p>
+                    <p>
+                      <strong>Processed:</strong> {log.processed ? "✅ Yes" : "❌ No"}
+                    </p>
+                    <p>
+                      <strong>Created:</strong> {new Date(log.created_at).toLocaleString()}
+                    </p>
+                    {log.error_message && (
+                      <p>
+                        <strong>Error:</strong> {log.error_message}
+                      </p>
+                    )}
+                  </div>
+                  {log.body && (
+                    <div className="mt-2">
+                      <strong>Body:</strong>
+                      <pre className="bg-gray-100 p-2 rounded text-xs mt-1 overflow-auto">
+                        {JSON.stringify(log.body, null, 2)}
+                      </pre>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p>No webhook logs found. This might be the issue!</p>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Actions</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            <Button onClick={() => fetchData()} className="mr-2">
+              Refresh Data
+            </Button>
+            <Button onClick={() => window.open("/debug-webhook-test", "_blank")} variant="outline">
+              Test Webhooks
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   )
 }
