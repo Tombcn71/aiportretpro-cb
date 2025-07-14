@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
     let tuneData = null
     if (tuneResponse.ok) {
       tuneData = await tuneResponse.json()
-      console.log("�� TUNE DATA:")
+      console.log("🔍 TUNE DATA:")
       console.log(JSON.stringify(tuneData, null, 2))
     }
 
