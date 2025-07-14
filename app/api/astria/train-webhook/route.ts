@@ -3,77 +3,94 @@ import { sql } from "@/lib/db"
 
 export async function POST(request: NextRequest) {
   try {
-    console.log("🔥 Train webhook received")
+    console.log("🔔 TRAIN WEBHOOK CALLED")
+    console.log("Headers:", Object.fromEntries(request.headers.entries()))
+    console.log("URL:", request.url)
 
     const body = await request.json()
-    console.log("Train webhook body:", JSON.stringify(body, null, 2))
+    console.log("🔔 Train webhook body:", JSON.stringify(body, null, 2))
 
-    // Check if this is a completed training
-    if (body.data?.object === "tune" && body.data?.status === "succeeded") {
-      const tuneId = body.data.id
-      console.log(`✅ Training completed for tune: ${tuneId}`)
+    // Handle different webhook formats
+    const tuneData = body.data || body
+    const tuneId = tuneData.id
+    const status = tuneData.status
 
-      // Find project with this tune_id
-      const projects = await sql`
-        SELECT * FROM projects WHERE tune_id = ${tuneId}
-      `
+    if (!tuneId) {
+      console.error("❌ No tune ID found in webhook")
+      return NextResponse.json({ error: "No tune ID" }, { status: 400 })
+    }
 
-      if (projects.length === 0) {
-        console.log(`❌ No project found for tune_id: ${tuneId}`)
-        return NextResponse.json({ error: "Project not found" }, { status: 404 })
-      }
+    console.log(`🔍 Processing tune ${tuneId} with status: ${status}`)
 
-      const project = projects[0]
-      console.log(`📁 Found project: ${project.id} - ${project.name}`)
+    // Find project by tune_id
+    const projects = await sql`
+      SELECT * FROM projects WHERE tune_id = ${tuneId}
+    `
 
-      // Fetch all prompts for this tune from Astria API
-      const astriaResponse = await fetch(`https://api.astria.ai/tunes/${tuneId}/prompts`, {
-        headers: {
-          Authorization: `Bearer ${process.env.ASTRIA_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-      })
+    if (projects.length === 0) {
+      console.error(`❌ No project found for tune_id: ${tuneId}`)
+      return NextResponse.json({ error: "Project not found" }, { status: 404 })
+    }
 
-      if (!astriaResponse.ok) {
-        console.error("Failed to fetch prompts from Astria:", astriaResponse.status)
-        return NextResponse.json({ error: "Failed to fetch prompts" }, { status: 500 })
-      }
+    const project = projects[0]
+    console.log(`📁 Found project: ${project.id} - ${project.name}`)
 
-      const promptsData = await astriaResponse.json()
-      console.log(`📸 Found ${promptsData.length} prompts`)
+    // Update project status
+    await sql`
+      UPDATE projects 
+      SET status = ${status}, updated_at = CURRENT_TIMESTAMP
+      WHERE id = ${project.id}
+    `
 
-      // Collect all image URLs
-      const allPhotos: string[] = []
+    // If training succeeded, fetch all photos
+    if (status === "succeeded") {
+      console.log(`✅ Training completed for project ${project.id}. Fetching photos...`)
 
-      for (const prompt of promptsData) {
-        if (prompt.images && Array.isArray(prompt.images)) {
-          for (const image of prompt.images) {
-            if (image.url && typeof image.url === "string") {
-              allPhotos.push(image.url)
+      try {
+        const promptsResponse = await fetch(`https://api.astria.ai/tunes/${tuneId}/prompts`, {
+          headers: {
+            Authorization: `Bearer ${process.env.ASTRIA_API_KEY}`,
+          },
+        })
+
+        if (promptsResponse.ok) {
+          const promptsData = await promptsResponse.json()
+          console.log(`📸 Found ${promptsData.length} prompts`)
+
+          const allImageUrls: string[] = []
+
+          for (const prompt of promptsData) {
+            if (prompt.images && Array.isArray(prompt.images)) {
+              for (const image of prompt.images) {
+                if (image.url) {
+                  allImageUrls.push(image.url)
+                }
+              }
             }
           }
+
+          console.log(`🖼️ Collected ${allImageUrls.length} total images`)
+
+          if (allImageUrls.length > 0) {
+            await sql`
+              UPDATE projects 
+              SET 
+                generated_photos = ${JSON.stringify(allImageUrls)},
+                status = 'completed',
+                updated_at = CURRENT_TIMESTAMP
+              WHERE id = ${project.id}
+            `
+            console.log(`✅ Updated project ${project.id} with ${allImageUrls.length} photos`)
+          }
         }
-      }
-
-      console.log(`🖼️ Collected ${allPhotos.length} photos`)
-
-      if (allPhotos.length > 0) {
-        // Update project with photos
-        await sql`
-          UPDATE projects 
-          SET generated_photos = ${JSON.stringify(allPhotos)}, 
-              status = ${allPhotos.length >= 40 ? "completed" : "processing"},
-              updated_at = CURRENT_TIMESTAMP
-          WHERE id = ${project.id}
-        `
-
-        console.log(`✅ Updated project ${project.id} with ${allPhotos.length} photos`)
+      } catch (fetchError) {
+        console.error("❌ Error fetching photos:", fetchError)
       }
     }
 
-    return NextResponse.json({ success: true })
+    return NextResponse.json({ success: true, processed: true })
   } catch (error) {
-    console.error("Train webhook error:", error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    console.error("❌ Train webhook error:", error)
+    return NextResponse.json({ error: "Webhook error" }, { status: 500 })
   }
 }

@@ -154,8 +154,8 @@ export async function createTuneWithPack(
     userId: number
   },
 ) {
-  const webhookUrl = `${process.env.NEXTAUTH_URL}/api/astria/train-webhook?user_id=${projectData.userId}&model_id=${projectData.projectId}&webhook_secret=${process.env.APP_WEBHOOK_SECRET}`
-  const promptWebhookUrl = `${process.env.NEXTAUTH_URL}/api/astria/prompt-webhook?user_id=${projectData.userId}&model_id=${projectData.projectId}&webhook_secret=${process.env.APP_WEBHOOK_SECRET}`
+  const webhookUrl = `${process.env.NEXTAUTH_URL}/api/astria/train-webhook`
+  const promptWebhookUrl = `${process.env.NEXTAUTH_URL}/api/astria/prompt-webhook`
 
   console.log("🎯 Creating tune with pack:", {
     packId,
@@ -231,6 +231,20 @@ export async function getPromptStatus(promptId: string) {
 
   if (!response.ok) {
     throw new Error(`Failed to get prompt status: ${response.statusText}`)
+  }
+
+  return response.json()
+}
+
+export async function getTunePrompts(tuneId: string) {
+  const response = await fetch(`${ASTRIA_API_URL}/tunes/${tuneId}/prompts`, {
+    headers: {
+      Authorization: `Bearer ${ASTRIA_API_KEY}`,
+    },
+  })
+
+  if (!response.ok) {
+    throw new Error(`Failed to get tune prompts: ${response.statusText}`)
   }
 
   return response.json()
