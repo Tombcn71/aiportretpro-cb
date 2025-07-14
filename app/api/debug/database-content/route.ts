@@ -1,51 +1,70 @@
-import { NextResponse } from "next/server"
+import { type NextRequest, NextResponse } from "next/server"
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/lib/auth"
 import { neon } from "@neondatabase/serverless"
 
 const sql = neon(process.env.DATABASE_URL!)
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
     const projects = await sql`
-      SELECT id, name, status, created_at, generated_photos, pack_id, user_email
+      SELECT id, name, status, created_at, generated_photos
       FROM projects 
+      WHERE user_email = ${session.user.email}
       ORDER BY created_at DESC
-      LIMIT 20
     `
 
-    const credits = await sql`
-      SELECT id, user_email, amount, used, created_at
-      FROM credits
-      ORDER BY created_at DESC
-      LIMIT 10
-    `
+    const projectsWithAnalysis = projects.map((project: any) => {
+      const photoAnalysis = {
+        raw: project.generated_photos,
+        type: typeof project.generated_photos,
+        parsed: null,
+        validCount: 0,
+        validPhotos: [],
+      }
 
-    return NextResponse.json({
-      success: true,
-      projects: projects.map((project) => ({
+      try {
+        if (project.generated_photos) {
+          if (typeof project.generated_photos === "string") {
+            if (project.generated_photos.startsWith("[")) {
+              photoAnalysis.parsed = JSON.parse(project.generated_photos)
+            } else {
+              photoAnalysis.parsed = [project.generated_photos]
+            }
+          } else if (Array.isArray(project.generated_photos)) {
+            photoAnalysis.parsed = project.generated_photos
+          }
+
+          if (Array.isArray(photoAnalysis.parsed)) {
+            photoAnalysis.validPhotos = photoAnalysis.parsed.filter(
+              (photo: any) =>
+                photo &&
+                typeof photo === "string" &&
+                photo.length > 30 &&
+                (photo.includes("astria.ai") || photo.includes("mp.astria.ai")) &&
+                !photo.includes("placeholder"),
+            )
+            photoAnalysis.validCount = photoAnalysis.validPhotos.length
+          }
+        }
+      } catch (e) {
+        photoAnalysis.parsed = "PARSE_ERROR"
+      }
+
+      return {
         ...project,
-        photoCount: project.generated_photos
-          ? (() => {
-              try {
-                const photos = JSON.parse(project.generated_photos)
-                return Array.isArray(photos)
-                  ? photos.filter((p) => typeof p === "string" && p.includes("astria.ai")).length
-                  : 0
-              } catch {
-                return 0
-              }
-            })()
-          : 0,
-      })),
-      credits,
+        photoAnalysis,
+      }
     })
+
+    return NextResponse.json(projectsWithAnalysis)
   } catch (error) {
     console.error("Database debug error:", error)
-    return NextResponse.json(
-      {
-        success: false,
-        error: error instanceof Error ? error.message : "Unknown error",
-      },
-      { status: 500 },
-    )
+    return NextResponse.json({ error: "Database error" }, { status: 500 })
   }
 }
