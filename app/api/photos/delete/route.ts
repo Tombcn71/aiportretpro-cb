@@ -8,7 +8,6 @@ const sql = neon(process.env.DATABASE_URL!)
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
-
     if (!session?.user?.email) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
@@ -19,26 +18,24 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Photo URL is required" }, { status: 400 })
     }
 
-    // Find all projects for this user
+    // Find all projects for this user that contain this photo
     const projects = await sql`
       SELECT id, generated_photos 
       FROM projects 
       WHERE user_email = ${session.user.email}
+      AND generated_photos IS NOT NULL
     `
 
-    // Update each project by removing the photo URL from the generated_photos array
+    // Update each project to remove the photo
     for (const project of projects) {
       if (project.generated_photos && Array.isArray(project.generated_photos)) {
         const updatedPhotos = project.generated_photos.filter((url: string) => url !== photoUrl)
 
-        // Only update if the array actually changed
-        if (updatedPhotos.length !== project.generated_photos.length) {
-          await sql`
-            UPDATE projects 
-            SET generated_photos = ${JSON.stringify(updatedPhotos)}
-            WHERE id = ${project.id}
-          `
-        }
+        await sql`
+          UPDATE projects 
+          SET generated_photos = ${JSON.stringify(updatedPhotos)}
+          WHERE id = ${project.id}
+        `
       }
     }
 

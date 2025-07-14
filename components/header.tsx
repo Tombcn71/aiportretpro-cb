@@ -102,7 +102,7 @@ export function Header() {
 
           {/* Mobile menu button */}
           <div className="md:hidden">
-            <Button variant="ghost" size="sm" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+            <Button variant="ghost" size="sm" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="p-2">
               {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </Button>
           </div>
@@ -110,58 +110,61 @@ export function Header() {
 
         {/* Mobile Navigation */}
         {mobileMenuOpen && (
-          <div className="md:hidden border-t bg-white py-4">
-            <nav className="flex flex-col space-y-4">
+          <div className="md:hidden border-t bg-white">
+            <div className="px-2 pt-2 pb-3 space-y-1">
               <Link
                 href="/pricing"
-                className="text-gray-600 hover:text-gray-900 transition-colors px-2"
+                className="block px-3 py-2 text-gray-600 hover:text-gray-900 transition-colors"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Prijzen
               </Link>
               <Link
                 href="/contact"
-                className="text-gray-600 hover:text-gray-900 transition-colors px-2"
+                className="block px-3 py-2 text-gray-600 hover:text-gray-900 transition-colors"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Contact
               </Link>
 
               {session ? (
-                <div className="flex flex-col space-y-2 pt-4 border-t">
+                <>
                   <Link
                     href="/dashboard"
-                    className="text-gray-600 hover:text-gray-900 transition-colors px-2"
+                    className="block px-3 py-2 text-gray-600 hover:text-gray-900 transition-colors"
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     Dashboard
                   </Link>
-                  <Button
+                  <button
                     onClick={() => {
                       handleSignOut()
                       setMobileMenuOpen(false)
                     }}
-                    variant="ghost"
-                    className="justify-start px-2"
+                    className="block w-full text-left px-3 py-2 text-gray-600 hover:text-gray-900 transition-colors"
                   >
                     Uitloggen
-                  </Button>
-                </div>
+                  </button>
+                </>
               ) : (
-                <div className="flex flex-col space-y-2 pt-4 border-t">
-                  <Button asChild variant="ghost" className="justify-start px-2">
-                    <Link href="/login" onClick={() => setMobileMenuOpen(false)}>
-                      Inloggen
-                    </Link>
-                  </Button>
-                  <Button asChild className="bg-[#0077B5] hover:bg-[#005885] mx-2">
-                    <Link href="/pricing" onClick={() => setMobileMenuOpen(false)}>
-                      Start Nu
-                    </Link>
-                  </Button>
-                </div>
+                <>
+                  <Link
+                    href="/login"
+                    className="block px-3 py-2 text-gray-600 hover:text-gray-900 transition-colors"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Inloggen
+                  </Link>
+                  <Link
+                    href="/pricing"
+                    className="block px-3 py-2 bg-[#0077B5] text-white rounded-md hover:bg-[#005885] transition-colors"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Start Nu
+                  </Link>
+                </>
               )}
-            </nav>
+            </div>
           </div>
         )}
       </div>

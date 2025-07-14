@@ -98,46 +98,36 @@ const carouselPhotos = [
   },
   {
     id: 9,
-    photo: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/27695045-1.jpg-IkKxB1U9N501QKro8xuovNpN8bYyzA.jpeg",
-    name: "Professional Man Portrait",
-  },
-  {
-    id: 10,
-    photo: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/27694199-3.jpg-iUC8zde67LRjahn8npRVJhDlHdolnG.jpeg",
-    name: "Professional Woman Portrait",
-  },
-  {
-    id: 11,
     photo: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/tom4.jpg-LDoo7oxRS7FtRFyn0ViKz3w1AMx6nS.jpeg",
     name: "Professional Man Portrait",
   },
   {
-    id: 12,
+    id: 10,
     photo: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/tina2.jpg-JmLfmZqKD3gQGbxEhfp1rdIYfcQqUk.jpeg",
     name: "Professional Woman Portrait",
   },
   {
-    id: 13,
+    id: 11,
     photo: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/tom2.jpg-75Ga3OHoyMkLDbihmTESJEq5UI0CPQ.jpeg",
     name: "Professional Man Portrait",
   },
   {
-    id: 14,
+    id: 12,
     photo: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/tina4.jpg-Q65UYAWURSQ7QgRv6uWmjJxn4PBWdK.jpeg",
     name: "Professional Woman Portrait",
   },
   {
-    id: 15,
+    id: 13,
     photo: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/tom3.jpg-8GBrNhaQHvPP2gi0mWUbVHbccPXwk8.jpeg",
     name: "Professional Man Portrait",
   },
   {
-    id: 16,
+    id: 14,
     photo: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/tina1.jpg-BKAe2TB3CEtkqhVaW0K6ILS3cHgEc9.jpeg",
     name: "Professional Woman Portrait",
   },
   {
-    id: 17,
+    id: 15,
     photo:
       "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/f8d2a738-b0bc-4a4f-9c9c-57dbd0af6bf0.jpg-H0C5Ulu0NP6oCzNiqzv2lr06pU8eNj.jpeg",
     name: "Professional Man Portrait",
