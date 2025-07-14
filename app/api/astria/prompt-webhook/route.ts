@@ -130,7 +130,7 @@ export async function POST(request: NextRequest) {
         await updateProjectWithGeneratedPhotos(Number.parseInt(projectId), allGeneratedPhotos, "processing")
 
         // Check if we have enough images to mark as completed (expecting ~40 images total)
-        if (allGeneratedPhotos.length >= 10) {
+        if (allGeneratedPhotos.length >= 40) {
           await updateProjectWithGeneratedPhotos(Number.parseInt(projectId), allGeneratedPhotos, "completed")
           console.log(`🎉 Project ${projectId} completed with ${allGeneratedPhotos.length} total images`)
         }
