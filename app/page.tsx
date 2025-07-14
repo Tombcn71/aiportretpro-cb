@@ -7,10 +7,11 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { ArrowRight, X, ChevronDown, ChevronUp, Star, Upload, Zap, Download } from "lucide-react"
 import { Header } from "@/components/header"
+import { Facebook, Instagram, Linkedin } from "lucide-react"
 
 const testimonials = [
   {
-    name: "Sarah M.",
+    name: "Tom B .",
     role: "Marketing Manager",
     content:
       "Ongelooflijk! Mijn LinkedIn profiel ziet er nu zo professioneel uit. Kreeg direct meer connectieverzoeken!",
@@ -57,73 +58,73 @@ const testimonials = [
 const carouselPhotos = [
   {
     id: 1,
-    photo: "/images/man1.jpg",
+    photo: "/images/carousel1.jpg",
     name: "Professional Man Portrait",
   },
   {
     id: 2,
-    photo: "/images/woman1.jpg",
+    photo: "/images/carousel2.jpg",
     name: "Professional Woman Portrait",
   },
   {
     id: 3,
-    photo: "/images/man2.jpg",
+    photo: "/images/carousel3.jpg",
     name: "Professional Man Portrait",
   },
   {
     id: 4,
-    photo: "/images/woman2.jpg",
+    photo: "/images/carousel4.jpg",
     name: "Professional Woman Portrait",
   },
   {
     id: 5,
-    photo: "/images/man3.jpg",
+    photo: "/images/carousel5.jpg",
     name: "Professional Man Portrait",
   },
   {
     id: 6,
-    photo: "/images/woman3.jpg",
+    photo: "/images/carousel6.jpg",
     name: "Professional Woman Portrait",
   },
   {
     id: 7,
-    photo: "/images/man4.jpg",
+    photo: "/images/carousel7.jpg",
     name: "Professional Man Portrait",
   },
   {
     id: 8,
-    photo: "/images/woman4.jpg",
+    photo: "/images/carousel8.jpg",
     name: "Professional Woman Portrait",
   },
   {
     id: 9,
-    photo: "/images/man5.jpg",
+    photo: "/images/carousel9.jpg",
     name: "Professional Man Portrait",
   },
   {
     id: 10,
-    photo: "/images/man6.jpg",
-    name: "Professional Man Portrait",
+    photo: "/images/carousel10.jpg",
+    name: "Professional Woman Portrait",
   },
 ]
 
 const galleryPhotos = [
-  "/images/man1.jpg",
-  "/images/woman1.jpg",
-  "/images/man2.jpg",
-  "/images/woman2.jpg",
-  "/images/man3.jpg",
-  "/images/woman3.jpg",
-  "/images/man4.jpg",
-  "/images/woman4.jpg",
-  "/images/man5.jpg",
-  "/images/man6.jpg",
-  "/images/man1.jpg",
-  "/images/woman1.jpg",
-  "/images/man2.jpg",
-  "/images/woman2.jpg",
-  "/images/man3.jpg",
-  "/images/woman3.jpg",
+  "/images/gallery1.jpg", // Man met bril
+  "/images/gallery2.jpg", // Vrouw in grijs pak
+  "/images/gallery3.jpg", // Man lachend
+  "/images/gallery4.jpg", // Vrouw wit shirt
+  "/images/gallery5.jpg", // Man donker pak
+  "/images/gallery6.jpg", // Vrouw blauw shirt
+  "/images/gallery7.jpg", // Man blauw shirt
+  "/images/gallery8.jpg", // Vrouw donker pak
+  "/images/gallery9.jpg", // Man met bril blauw shirt
+  "/images/gallery10.jpg", // Vrouw donker pak blauw shirt
+  "/images/gallery11.jpg", // Man wit shirt (nieuw)
+  "/images/gallery12.jpg", // Vrouw blauw shirt (nieuw)
+  "/images/gallery1.jpg", // Man met bril (herhaling)
+  "/images/gallery2.jpg", // Vrouw in grijs pak (herhaling)
+  "/images/gallery3.jpg", // Man lachend (herhaling)
+  "/images/gallery4.jpg", // Vrouw wit shirt (herhaling)
 ]
 
 const companies = [
@@ -210,7 +211,7 @@ export default function HomePage() {
         <h1 className="text-3xl md:text-5xl font-bold mb-6">
           Professionele <span className="text-[#0077B5]">portretfotos</span>
           <br />
-          in enkele minuten voor 29€
+          in 15 minuten voor 29€
         </h1>
 
         <p className="text-lg md:text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
@@ -243,6 +244,7 @@ export default function HomePage() {
                       width={256}
                       height={320}
                       className="w-full h-full object-cover brightness-110 contrast-105"
+                      priority={index < 10}
                     />
                   </div>
                 </div>
@@ -258,7 +260,7 @@ export default function HomePage() {
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Hoe werkt het?</h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              In 3 eenvoudige stappen naar professionele headshots
+              In 3 eenvoudige stappen naar professionele portretfoto's
             </p>
           </div>
 
@@ -314,7 +316,7 @@ export default function HomePage() {
       <section className="py-16">
         <div className="max-w-6xl mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Waarom kiezen voor AI Portrait Pro?</h2>
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Waarom kiezen voor AI Portret Pro?</h2>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
@@ -322,14 +324,16 @@ export default function HomePage() {
               <CardContent className="p-6 text-center">
                 <Upload className="h-12 w-12 text-[#0077B5] mx-auto mb-4" />
                 <h3 className="text-xl font-semibold mb-2">Supersnel</h3>
-                <p className="text-gray-600">Resultaten binnen 15 minuten. Makkelijk vanuit thuis, geen reistijd geen studio..</p>
+                <p className="text-gray-600">
+                  Resultaten binnen 15 minuten. Makkelijk vanuit thuis, geen reistijd geen studio..
+                </p>
               </CardContent>
             </Card>
 
             <Card className="border-[#0077B5]/20 hover:border-[#0077B5]/40 transition-colors">
               <CardContent className="p-6 text-center">
                 <Zap className="h-12 w-12 text-[#0077B5] mx-auto mb-4" />
-                <h3 className="text-xl font-semibold mb-2">Betaalbaar</h3>
+                <h3 className="text-xl font-semibold mb-2">Beste deal</h3>
                 <p className="text-gray-600">
                   €29 voor AI portretfoto's. Bespaar tot wel 100 euro op een traditionele fotoshoot.
                 </p>
@@ -392,7 +396,9 @@ export default function HomePage() {
       {/* CTA Section */}
       <section className="py-16">
         <div className="max-w-4xl mx-auto text-center px-4">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Klaar voor je professionele headshots?</h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            Klaar voor je professionele portretfoto's?
+          </h2>
           <p className="text-xl text-gray-600 mb-8">
             Join duizenden professionals die al hun LinkedIn profiel hebben geüpgraded
           </p>
@@ -502,125 +508,111 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* Trust Section */}
-      <section className="container mx-auto px-4 py-12 md:py-16 text-center">
-        <h2 className="text-xl md:text-2xl lg:text-3xl font-bold mb-4">
-          Vertrouwd door meer dan <span className="text-[#0077B5]">1.000.000</span> professionals en{" "}
-          <span className="text-[#0077B5]">teams</span>. 25.000.000+ zakelijke portretten gegenereerd tot nu toe.
-        </h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4 md:gap-8 items-center mt-8 md:mt-12 opacity-60">
-          {companies.map((company, index) => (
-            <div key={index} className="flex items-center justify-center">
-              <Image
-                src={company.logo || "/placeholder.svg"}
-                alt={`${company.name} logo`}
-                width={120}
-                height={40}
-                className="max-w-full h-auto grayscale hover:grayscale-0 transition-all duration-300"
-              />
-            </div>
-          ))}
-        </div>
-      </section>
-
       {/* CTA Section */}
-      <section className="bg-gradient-to-r from-[#0077B5] to-[#004182] text-white py-12 md:py-16">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-4">
-            Klaar om je professionele zakelijke portretten te maken?
-          </h2>
-          <p className="text-lg md:text-xl mb-6 md:mb-8 opacity-90">
-            Sluit je aan bij miljoenen professionals die onze AI technologie vertrouwen
+      <section className="py-16">
+        <div className="max-w-4xl mx-auto text-center px-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Klaar voor je professionele headshots?</h2>
+          <p className="text-xl text-gray-600 mb-8">
+            Join duizenden professionals die al hun LinkedIn profiel hebben geüpgraded
           </p>
-          <Button
-            asChild
-            size="lg"
-            variant="secondary"
-            className="bg-white text-[#0077B5] hover:bg-gray-100 px-6 md:px-8 py-3 md:py-4 text-base md:text-lg"
-          >
-            <Link href="/pricing">
-              Begin Nu <ArrowRight className="ml-2 h-4 md:h-5 w-4 md:w-5" />
-            </Link>
-          </Button>
+          <Link href="/pricing">
+            <Button size="lg" className="bg-[#0077B5] hover:bg-[#005885] text-white px-8 py-4 text-lg">
+              Start nu voor €29 <ArrowRight className="ml-2 h-5 w-5" />
+            </Button>
+          </Link>
         </div>
       </section>
-
       {/* Footer */}
-      <footer className="bg-gray-900 text-white py-8 md:py-12">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
-            <div className="col-span-2 md:col-span-1">
-              <div className="flex items-center space-x-2 mb-4">
-                <div className="w-8 h-8 bg-gradient-to-r from-[#0077B5] to-[#004182] rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-sm">AI</span>
-                </div>
-                <span className="text-lg md:text-xl font-bold">AI Portrait Pro</span>
+      <footer className="bg-black text-white py-8 px-6">
+        <div className="container mx-auto">
+          <div className="flex flex-col lg:flex-row lg:justify-between space-y-8 lg:space-y-0">
+            {/* Logo and Company Info */}
+            <div className="flex flex-col space-y-4">
+              <div className="flex items-center space-x-3">
+                <Image
+                  src="/images/logo.png"
+                  alt="AI Portrait Pro Logo"
+                  width={30}
+                  height={30}
+                  className="rounded-lg"
+                />
+                <h3 className="text-xl font-bold text-white">aiportretpro</h3>
               </div>
-              <p className="text-gray-400 text-sm md:text-base">Professionele AI zakelijke portretten in minuten</p>
+              <p className="text-gray-300 text-sm leading-relaxed max-w-xs">
+                Professionele AI zakelijke portretten in minuten.
+              </p>
             </div>
-            <div>
-              <h3 className="font-semibold mb-4 text-sm md:text-base">Product</h3>
-              <ul className="space-y-2 text-gray-400 text-sm md:text-base">
-                <li>
-                  <Link href="/pricing" className="hover:text-white transition-colors">
-                    Prijzen
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/examples" className="hover:text-white transition-colors">
-                    Voorbeelden
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/api" className="hover:text-white transition-colors">
-                    API
-                  </Link>
-                </li>
-              </ul>
+
+            {/* Navigation Links */}
+            <div className="flex flex-col space-y-4">
+              <h4 className="text-white font-semibold text-sm uppercase tracking-wide">Navigatie</h4>
+              <div className="flex flex-col space-y-2">
+                <Link
+                  href="/over-ons"
+                  className="text-gray-300 hover:text-white transition-colors duration-200 text-sm"
+                >
+                  Over Ons
+                </Link>
+                <Link href="/pricing" className="text-gray-300 hover:text-white transition-colors duration-200 text-sm">
+                  Prijzen
+                </Link>
+                <Link href="/contact" className="text-gray-300 hover:text-white transition-colors duration-200 text-sm">
+                  Contact
+                </Link>
+              </div>
             </div>
-            <div>
-              <h3 className="font-semibold mb-4 text-sm md:text-base">Bedrijf</h3>
-              <ul className="space-y-2 text-gray-400 text-sm md:text-base">
-                <li>
-                  <Link href="/about" className="hover:text-white transition-colors">
-                    Over Ons
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/contact" className="hover:text-white transition-colors">
-                    Contact
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/privacy" className="hover:text-white transition-colors">
-                    Privacy
-                  </Link>
-                </li>
-              </ul>
+
+            {/* Legal Links */}
+            <div className="flex flex-col space-y-4">
+              <h4 className="text-white font-semibold text-sm uppercase tracking-wide">Juridisch</h4>
+              <div className="flex flex-col space-y-2">
+                <Link href="/privacy" className="text-gray-300 hover:text-white transition-colors duration-200 text-sm">
+                  Privacy Policy
+                </Link>
+                <Link href="/terms" className="text-gray-300 hover:text-white transition-colors duration-200 text-sm">
+                  Terms
+                </Link>
+              </div>
             </div>
-            <div>
-              <h3 className="font-semibold mb-4 text-sm md:text-base">Ondersteuning</h3>
-              <ul className="space-y-2 text-gray-400 text-sm md:text-base">
-                <li>
-                  <Link href="/help" className="hover:text-white transition-colors">
-                    Helpcentrum
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/faq" className="hover:text-white transition-colors">
-                    Veelgestelde Vragen
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/contact" className="hover:text-white transition-colors">
-                    Contact Opnemen
-                  </Link>
-                </li>
-              </ul>
+
+            {/* Social Media */}
+            <div className="flex flex-col space-y-4">
+              <h4 className="text-white font-semibold text-sm uppercase tracking-wide">Volg Ons</h4>
+              <div className="flex space-x-4">
+                <Link
+                  href="https://linkedin.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-300 hover:text-white transition-colors duration-200"
+                  aria-label="LinkedIn"
+                >
+                  <Linkedin size={20} />
+                </Link>
+                <Link
+                  href="https://www.facebook.com/profile.php?id=61578343760041"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-300 hover:text-white transition-colors duration-200"
+                  aria-label="Facebook"
+                >
+                  <Facebook size={20} />
+                </Link>
+                <Link
+                  href="https://www.instagram.com/aiportretpro.nl"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-300 hover:text-white transition-colors duration-200"
+                  aria-label="Instagram"
+                >
+                  <Instagram size={20} />
+                </Link>
+              </div>
             </div>
           </div>
-          <div className="border-t border-gray-800 mt-6 md:mt-8 pt-6 md:pt-8 text-center text-gray-400 text-sm md:text-base">
-            <p>&copy; 2025 AI Portret Pro. Alle rechten voorbehouden.</p>
+
+          {/* Bottom Border */}
+          <div className="border-t border-gray-800 mt-8 pt-6">
+            <p className="text-gray-400 text-xs text-center">© 2025 aiportretpro. Alle rechten voorbehouden.</p>
           </div>
         </div>
       </footer>
