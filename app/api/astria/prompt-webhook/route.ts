@@ -36,11 +36,18 @@ export async function POST(request: NextRequest) {
     }
 
     // Verify webhook secret
+    console.log("🔍 Webhook secret verification:", {
+      expected: process.env.APP_WEBHOOK_SECRET,
+      received: webhookSecret,
+      match: webhookSecret === process.env.APP_WEBHOOK_SECRET,
+    })
+
     if (webhookSecret !== process.env.APP_WEBHOOK_SECRET) {
       console.error("❌ Invalid webhook secret")
       console.error("Expected:", process.env.APP_WEBHOOK_SECRET)
       console.error("Received:", webhookSecret)
 
+      // Log to database with more details
       await sql`
         INSERT INTO webhook_logs (webhook_type, project_id, raw_body, status, error_message)
         VALUES ('prompt', ${projectId ? Number.parseInt(projectId) : null}, ${rawBody}, 'failed', 'Invalid webhook secret')

@@ -144,6 +144,25 @@ export default function DebugAstriaPage() {
                 <strong>Created:</strong> {new Date(data.projectDetails.created_at).toLocaleString()}
               </p>
             </div>
+
+            {data.projectDetails.generated_photos && data.projectDetails.generated_photos.length > 0 && (
+              <div className="mt-4">
+                <p className="font-semibold mb-2">Sample Photos:</p>
+                <div className="grid grid-cols-3 gap-2">
+                  {data.projectDetails.generated_photos.slice(0, 6).map((photo: string, index: number) => (
+                    <img
+                      key={index}
+                      src={photo || "/placeholder.svg"}
+                      alt={`Generated ${index + 1}`}
+                      className="w-full h-32 object-cover rounded"
+                      onError={(e) => {
+                        e.currentTarget.src = "/placeholder.svg?height=128&width=128&text=Error"
+                      }}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
       )}
@@ -165,7 +184,7 @@ export default function DebugAstriaPage() {
                       <strong>Type:</strong> {log.webhook_type}
                     </p>
                     <p>
-                      <strong>Method:</strong> {log.method}
+                      <strong>Method:</strong> {log.method || "N/A"}
                     </p>
                     <p>
                       <strong>Processed:</strong> {log.processed ? "✅ Yes" : "❌ No"}
@@ -174,8 +193,8 @@ export default function DebugAstriaPage() {
                       <strong>Created:</strong> {new Date(log.created_at).toLocaleString()}
                     </p>
                     {log.error_message && (
-                      <p>
-                        <strong>Error:</strong> {log.error_message}
+                      <p className="col-span-2">
+                        <strong>Error:</strong> <span className="text-red-600">{log.error_message}</span>
                       </p>
                     )}
                   </div>
@@ -191,10 +210,62 @@ export default function DebugAstriaPage() {
               ))}
             </div>
           ) : (
-            <p>No webhook logs found. This might be the issue!</p>
+            <div className="text-center p-8">
+              <p className="text-red-600 text-lg font-semibold">No webhook logs found. This might be the issue!</p>
+              <p className="text-gray-600 mt-2">
+                This means Astria is not sending webhooks to your endpoint, or the webhook handler is not logging them.
+              </p>
+            </div>
           )}
         </CardContent>
       </Card>
+
+      {data.recentProjects && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Recent Projects</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              {data.recentProjects.map((project: any) => (
+                <div key={project.id} className="p-3 border rounded flex justify-between items-center">
+                  <div>
+                    <p className="font-semibold">
+                      #{project.id} - {project.name}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      Status:{" "}
+                      <span
+                        className={`font-medium ${
+                          project.status === "completed"
+                            ? "text-green-600"
+                            : project.status === "processing"
+                              ? "text-blue-600"
+                              : project.status === "failed"
+                                ? "text-red-600"
+                                : "text-gray-600"
+                        }`}
+                      >
+                        {project.status}
+                      </span>{" "}
+                      | Photos: {project.photo_count} | Created: {new Date(project.created_at).toLocaleDateString()}
+                    </p>
+                  </div>
+                  <Button
+                    size="sm"
+                    onClick={() => {
+                      setProjectId(project.id.toString())
+                      fetchData(project.id.toString())
+                    }}
+                  >
+                    Debug This Project
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <Card>
         <CardHeader>

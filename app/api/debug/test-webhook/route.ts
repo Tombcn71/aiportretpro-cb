@@ -1,7 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { neon } from "@neondatabase/serverless"
-
-const sql = neon(process.env.DATABASE_URL!)
+import { sql } from "@/lib/db"
 
 export async function POST(request: NextRequest) {
   try {
@@ -18,7 +16,7 @@ export async function POST(request: NextRequest) {
         query_params, 
         processed
       ) VALUES (
-        'test', 
+        999, 
         'test-webhook', 
         'POST', 
         ${JSON.stringify(Object.fromEntries(request.headers.entries()))}, 
