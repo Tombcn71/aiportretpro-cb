@@ -66,7 +66,7 @@ export default function DashboardPage() {
     fetchData()
   }, [])
 
-  // Parse generated photos and filter out invalid ones
+  // Parse generated photos and filter out invalid ones - ONLY COUNT UNIQUE PHOTOS
   const allPhotos = projects.flatMap((project) => {
     let photos: string[] = []
 
@@ -75,7 +75,7 @@ export default function DashboardPage() {
         if (typeof project.generated_photos === "string") {
           if (project.generated_photos.startsWith("[") && project.generated_photos.endsWith("]")) {
             photos = JSON.parse(project.generated_photos)
-          } else {
+          } else if (project.generated_photos.includes("astria.ai")) {
             photos = [project.generated_photos]
           }
         } else if (Array.isArray(project.generated_photos)) {
@@ -87,6 +87,7 @@ export default function DashboardPage() {
       }
     }
 
+    // Filter for valid Astria photos only
     const validPhotos = photos.filter(
       (photo) =>
         photo &&
@@ -95,7 +96,9 @@ export default function DashboardPage() {
         (photo.includes("astria.ai") || photo.includes("mp.astria.ai")) &&
         !photo.includes("example.com") &&
         !photo.includes("placeholder") &&
-        !photo.includes("/placeholder.svg"),
+        !photo.includes("/placeholder.svg") &&
+        !photo.includes("null") &&
+        photo.startsWith("http"),
     )
 
     return validPhotos.map((photo: string, index: number) => ({
@@ -103,11 +106,14 @@ export default function DashboardPage() {
       projectName: project.name,
       projectId: project.id,
       index: index,
-      key: `${project.id}-${index}`,
+      key: `${project.id}-${photo.substring(photo.lastIndexOf("/") + 1)}`,
     }))
   })
 
-  console.log("Valid photos:", allPhotos.length)
+  // Remove duplicates based on URL - THIS IS THE KEY FIX
+  const uniquePhotos = allPhotos.filter((photo, index, self) => index === self.findIndex((p) => p.url === photo.url))
+
+  console.log("Total photos found:", allPhotos.length, "Unique photos:", uniquePhotos.length)
 
   const handleImageError = (photoKey: string) => {
     console.log("Image error for:", photoKey)
@@ -251,8 +257,10 @@ export default function DashboardPage() {
         {/* Photos Gallery */}
         <div>
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-semibold">Jouw Portetfotos ({allPhotos.length} foto's)</h2>
-            {allPhotos.length > 0 && (
+            <h2 className="text-2xl font-semibold">
+              Jouw Portetfotos ({uniquePhotos.filter((photo) => !imageErrors.has(photo.key)).length} foto's)
+            </h2>
+            {uniquePhotos.length > 0 && (
               <Button
                 onClick={() => setShowDeleteMode(!showDeleteMode)}
                 variant={showDeleteMode ? "destructive" : "outline"}
@@ -281,7 +289,7 @@ export default function DashboardPage() {
             </div>
           )}
 
-          {allPhotos.length === 0 ? (
+          {uniquePhotos.length === 0 ? (
             <div className="text-center py-20">
               <Camera className="h-16 w-16 text-gray-400 mx-auto mb-6" />
               <h3 className="text-xl font-semibold mb-4">Nog geen portetfotos</h3>
@@ -302,7 +310,7 @@ export default function DashboardPage() {
             </div>
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-              {allPhotos
+              {uniquePhotos
                 .filter((photo) => !imageErrors.has(photo.key))
                 .map((photo) => (
                   <div key={photo.key} className="group relative">
@@ -357,12 +365,13 @@ export default function DashboardPage() {
         </div>
 
         {/* Success message */}
-        {allPhotos.length > 0 && !showDeleteMode && (
+        {uniquePhotos.filter((photo) => !imageErrors.has(photo.key)).length > 0 && !showDeleteMode && (
           <div className="mt-8 p-4 bg-green-50 border border-green-200 rounded-lg">
             <div className="flex items-center">
               <CheckCircle className="h-5 w-5 text-green-600 mr-2" />
               <p className="text-green-800 font-medium">
-                Geweldig! Je hebt {allPhotos.length} professionele portetfotos klaar voor download.
+                Geweldig! Je hebt {uniquePhotos.filter((photo) => !imageErrors.has(photo.key)).length} professionele
+                portetfotos klaar voor download.
               </p>
             </div>
           </div>

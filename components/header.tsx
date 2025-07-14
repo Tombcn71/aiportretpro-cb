@@ -1,6 +1,6 @@
 "use client"
 
-import { useSession, signIn, signOut } from "next-auth/react"
+import { useSession, signOut } from "next-auth/react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import {
@@ -12,32 +12,31 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { User, LogOut, CreditCard, Camera } from "lucide-react"
-import Image from "next/image"
+import { Logo } from "./logo"
 
 export function Header() {
   const { data: session, status } = useSession()
 
   return (
-    <header className="bg-white shadow-sm border-b">
+    <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <Link href="/" className="flex items-center space-x-2">
-            <Image src="/images/logo.png" alt="AI Portrait Pro" width={40} height={40} className="rounded-lg" />
-            <span className="text-xl font-bold text-[#0077B5]">AI Portrait Pro</span>
+          <Link href="/" className="flex items-center">
+            <Logo />
           </Link>
 
           {/* Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
-            <Link href="/pricing" className="text-gray-600 hover:text-[#0077B5] transition-colors">
+            <Link href="/pricing" className="text-gray-600 hover:text-gray-900 transition-colors">
               Prijzen
             </Link>
-            <Link href="/contact" className="text-gray-600 hover:text-[#0077B5] transition-colors">
+            <Link href="/contact" className="text-gray-600 hover:text-gray-900 transition-colors">
               Contact
             </Link>
           </nav>
 
-          {/* User Menu */}
+          {/* Auth Section */}
           <div className="flex items-center space-x-4">
             {status === "loading" ? (
               <div className="animate-pulse">
@@ -49,7 +48,9 @@ export function Header() {
                   <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                     <Avatar className="h-8 w-8">
                       <AvatarImage src={session.user?.image || ""} alt={session.user?.name || ""} />
-                      <AvatarFallback>{session.user?.name?.charAt(0).toUpperCase() || "U"}</AvatarFallback>
+                      <AvatarFallback>
+                        {session.user?.name?.charAt(0)?.toUpperCase() || <User className="h-4 w-4" />}
+                      </AvatarFallback>
                     </Avatar>
                   </Button>
                 </DropdownMenuTrigger>
@@ -64,13 +65,13 @@ export function Header() {
                   </div>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
-                    <Link href="/dashboard" className="cursor-pointer">
-                      <User className="mr-2 h-4 w-4" />
+                    <Link href="/dashboard" className="flex items-center">
+                      <Camera className="mr-2 h-4 w-4" />
                       Dashboard
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href="/pricing" className="cursor-pointer">
+                    <Link href="/pricing" className="flex items-center">
                       <CreditCard className="mr-2 h-4 w-4" />
                       Koop Credits
                     </Link>
@@ -80,7 +81,7 @@ export function Header() {
                     className="cursor-pointer"
                     onSelect={(event) => {
                       event.preventDefault()
-                      signOut()
+                      signOut({ callbackUrl: "/" })
                     }}
                   >
                     <LogOut className="mr-2 h-4 w-4" />
@@ -89,14 +90,13 @@ export function Header() {
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <div className="flex items-center space-x-2">
-                <Button variant="ghost" onClick={() => signIn("google")} className="text-gray-600 hover:text-[#0077B5]">
-                  Inloggen
-                </Button>
-                <Button onClick={() => signIn("google")} className="bg-[#0077B5] hover:bg-[#005885] text-white">
-                  <Camera className="mr-2 h-4 w-4" />
-                  Start Nu
-                </Button>
+              <div className="flex items-center space-x-4">
+                <Link href="/login">
+                  <Button variant="ghost">Inloggen</Button>
+                </Link>
+                <Link href="/pricing">
+                  <Button className="bg-[#0077B5] hover:bg-[#005885]">Start Nu</Button>
+                </Link>
               </div>
             )}
           </div>

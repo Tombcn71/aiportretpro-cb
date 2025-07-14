@@ -1,7 +1,9 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
-import { sql } from "@/lib/db"
+import { neon } from "@neondatabase/serverless"
+
+const sql = neon(process.env.DATABASE_URL!)
 
 export async function DELETE(request: NextRequest) {
   try {
@@ -17,25 +19,18 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: "Missing photoUrl or projectId" }, { status: 400 })
     }
 
-    // Get user ID
-    const userResult = await sql`SELECT id FROM users WHERE email = ${session.user.email}`
-    if (!userResult.length) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 })
-    }
-    const userId = userResult[0].id
-
-    // Get the project and verify ownership
-    const projectResult = await sql`
-      SELECT id, generated_photos, user_id 
+    // First, verify that the project belongs to the user
+    const projectCheck = await sql`
+      SELECT id, generated_photos, user_email 
       FROM projects 
-      WHERE id = ${projectId} AND user_id = ${userId}
+      WHERE id = ${projectId} AND user_email = ${session.user.email}
     `
 
-    if (!projectResult.length) {
-      return NextResponse.json({ error: "Project not found or access denied" }, { status: 404 })
+    if (projectCheck.length === 0) {
+      return NextResponse.json({ error: "Project not found or unauthorized" }, { status: 404 })
     }
 
-    const project = projectResult[0]
+    const project = projectCheck[0]
     let currentPhotos: string[] = []
 
     // Parse current photos
@@ -56,14 +51,14 @@ export async function DELETE(request: NextRequest) {
       }
     }
 
-    // Remove the specific photo
+    // Remove the specific photo URL
     const updatedPhotos = currentPhotos.filter((photo) => photo !== photoUrl)
 
-    // Update the project with the new photos array
+    // Update the database
     await sql`
       UPDATE projects 
-      SET generated_photos = ${JSON.stringify(updatedPhotos)}, updated_at = CURRENT_TIMESTAMP
-      WHERE id = ${projectId} AND user_id = ${userId}
+      SET generated_photos = ${JSON.stringify(updatedPhotos)}
+      WHERE id = ${projectId} AND user_email = ${session.user.email}
     `
 
     return NextResponse.json({
