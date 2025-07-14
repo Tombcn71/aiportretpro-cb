@@ -275,8 +275,7 @@ export default function HomePage() {
       {/* Photo Carousel */}
       <section className="w-full overflow-hidden mb-16 md:mb-24 bg-gradient-to-r from-blue-50 via-white to-blue-50">
         <div className="relative">
-          <div className="flex animate-scroll">
-            {carouselPhotos.concat(carouselPhotos).map((item, index) => (
+<div className="flex animate-scroll-photos whitespace-nowrap">            {carouselPhotos.concat(carouselPhotos).map((item, index) => (
               <div key={`${item.id}-${index}`} className="flex-shrink-0 mx-1 md:mx-2">
                 <div className="relative">
                   <div className="w-40 h-52 md:w-64 md:h-80 rounded-xl md:rounded-2xl overflow-hidden bg-gray-100 shadow-md md:shadow-lg">
@@ -661,7 +660,7 @@ export default function HomePage() {
 
 
 
-      
+
 <style jsx>{`
   /* Animatie voor de fotocarrousel */
   @keyframes scroll-photos {
