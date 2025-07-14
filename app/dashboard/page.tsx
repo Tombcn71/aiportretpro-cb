@@ -1,201 +1,149 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { useSession } from "next-auth/react"
+import { useRouter } from "next/navigation"
 import { Header } from "@/components/header"
-import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Download, Camera, CreditCard, Clock, CheckCircle, AlertCircle } from "lucide-react"
+import { Calendar, Camera, CreditCard, Plus } from "lucide-react"
 import Link from "next/link"
-import Image from "next/image"
 
 interface Project {
   id: number
   name: string
   status: string
   created_at: string
-  generated_photos: string | string[] | null
+  generated_photos: any
+  pack_id?: string
 }
 
-interface UserCredits {
-  credits: number
+interface Credit {
+  id: number
+  amount: number
+  used: boolean
+  created_at: string
+}
+
+function getValidPhotoCount(generatedPhotos: any): number {
+  if (!generatedPhotos) return 0
+
+  try {
+    let photos: string[] = []
+
+    if (typeof generatedPhotos === "string") {
+      if (generatedPhotos.startsWith("[")) {
+        photos = JSON.parse(generatedPhotos)
+      } else {
+        photos = [generatedPhotos]
+      }
+    } else if (Array.isArray(generatedPhotos)) {
+      photos = generatedPhotos
+    }
+
+    return photos.filter((photo: any) => {
+      if (!photo || typeof photo !== "string") return false
+      if (photo.length < 30) return false
+      if (!photo.startsWith("http")) return false
+      if (!photo.includes("astria.ai") && !photo.includes("mp.astria.ai")) return false
+      if (photo.includes("placeholder")) return false
+      return /\.(jpg|jpeg|png|webp)(\?|$)/i.test(photo)
+    }).length
+  } catch (error) {
+    console.error("Error parsing photos:", error)
+    return 0
+  }
+}
+
+function getValidPhotos(generatedPhotos: any): string[] {
+  if (!generatedPhotos) return []
+
+  try {
+    let photos: string[] = []
+
+    if (typeof generatedPhotos === "string") {
+      if (generatedPhotos.startsWith("[")) {
+        photos = JSON.parse(generatedPhotos)
+      } else {
+        photos = [generatedPhotos]
+      }
+    } else if (Array.isArray(generatedPhotos)) {
+      photos = generatedPhotos
+    }
+
+    return photos.filter((photo: any) => {
+      if (!photo || typeof photo !== "string") return false
+      if (photo.length < 30) return false
+      if (!photo.startsWith("http")) return false
+      if (!photo.includes("astria.ai") && !photo.includes("mp.astria.ai")) return false
+      if (photo.includes("placeholder")) return false
+      return /\.(jpg|jpeg|png|webp)(\?|$)/i.test(photo)
+    })
+  } catch (error) {
+    console.error("Error parsing photos:", error)
+    return []
+  }
 }
 
 export default function DashboardPage() {
+  const { data: session, status } = useSession()
+  const router = useRouter()
   const [projects, setProjects] = useState<Project[]>([])
-  const [credits, setCredits] = useState<UserCredits>({ credits: 0 })
+  const [credits, setCredits] = useState<Credit[]>([])
   const [loading, setLoading] = useState(true)
-  const [imageErrors, setImageErrors] = useState<Set<string>>(new Set())
+  const [allPhotos, setAllPhotos] = useState<string[]>([])
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [projectsResponse, creditsResponse] = await Promise.all([
-          fetch("/api/projects"),
-          fetch("/api/credits/balance"),
-        ])
-
-        if (!projectsResponse.ok || !creditsResponse.ok) {
-          throw new Error("Failed to fetch data")
-        }
-
-        const projectsData = await projectsResponse.json()
-        const creditsData = await creditsResponse.json()
-
-        setProjects(projectsData)
-        setCredits(creditsData)
-      } catch (error) {
-        console.error("Error fetching data:", error)
-        setCredits({ credits: 0 })
-      } finally {
-        setLoading(false)
-      }
+    if (status === "unauthenticated") {
+      router.push("/auth/signin")
+      return
     }
 
-    fetchData()
-  }, [])
+    if (status === "authenticated") {
+      fetchData()
+    }
+  }, [status, router])
 
-  // Helper function to count valid photos in a project
-  const getValidPhotoCount = (project: Project): number => {
-    let photoCount = 0
+  const fetchData = async () => {
     try {
-      if (project.generated_photos) {
-        if (typeof project.generated_photos === "string") {
-          if (project.generated_photos.startsWith("[")) {
-            const parsed = JSON.parse(project.generated_photos)
-            if (Array.isArray(parsed)) {
-              photoCount = parsed.filter(
-                (photo) =>
-                  photo &&
-                  typeof photo === "string" &&
-                  photo.length > 20 &&
-                  (photo.includes("astria.ai") || photo.includes("mp.astria.ai")),
-              ).length
-            }
-          } else if (project.generated_photos.includes("astria.ai")) {
-            photoCount = 1
-          }
-        } else if (Array.isArray(project.generated_photos)) {
-          photoCount = project.generated_photos.filter(
-            (photo) =>
-              photo &&
-              typeof photo === "string" &&
-              photo.length > 20 &&
-              (photo.includes("astria.ai") || photo.includes("mp.astria.ai")),
-          ).length
-        }
+      const [projectsRes, creditsRes] = await Promise.all([fetch("/api/projects"), fetch("/api/credits/balance")])
+
+      if (projectsRes.ok) {
+        const projectsData = await projectsRes.json()
+        console.log("Raw projects data:", projectsData)
+
+        // Filter projects with valid photos
+        const validProjects = projectsData.filter((project: Project) => {
+          const photoCount = getValidPhotoCount(project.generated_photos)
+          console.log(`Project ${project.name} (${project.id}): ${photoCount} valid photos`)
+          return photoCount > 0
+        })
+
+        console.log("Valid projects:", validProjects)
+        setProjects(validProjects)
+
+        // Collect all photos
+        const photos: string[] = []
+        validProjects.forEach((project: Project) => {
+          const projectPhotos = getValidPhotos(project.generated_photos)
+          photos.push(...projectPhotos)
+        })
+        setAllPhotos(photos)
       }
-    } catch (e) {
-      photoCount = 0
-    }
-    return photoCount
-  }
 
-  // Parse generated photos and filter out invalid ones
-  const allPhotos = projects.flatMap((project) => {
-    let photos: string[] = []
-
-    if (project.generated_photos) {
-      try {
-        if (typeof project.generated_photos === "string") {
-          if (project.generated_photos.startsWith("[") && project.generated_photos.endsWith("]")) {
-            photos = JSON.parse(project.generated_photos)
-          } else {
-            photos = [project.generated_photos]
-          }
-        } else if (Array.isArray(project.generated_photos)) {
-          photos = project.generated_photos
-        }
-      } catch (e) {
-        console.warn("Could not parse photos for project", project.id, e)
-        photos = []
+      if (creditsRes.ok) {
+        const creditsData = await creditsRes.json()
+        setCredits(creditsData.credits || [])
       }
-    }
-
-    const validPhotos = photos.filter(
-      (photo) =>
-        photo &&
-        typeof photo === "string" &&
-        photo.length > 20 &&
-        (photo.includes("astria.ai") || photo.includes("mp.astria.ai")) &&
-        !photo.includes("example.com") &&
-        !photo.includes("placeholder") &&
-        !photo.includes("/placeholder.svg"),
-    )
-
-    return validPhotos.map((photo: string, index: number) => ({
-      url: photo,
-      projectName: project.name,
-      projectId: project.id,
-      index: index,
-      key: `${project.id}-${index}`,
-    }))
-  })
-
-  // Filter projects: only show if they have photos OR are currently processing/training
-  const projectsToShow = projects.filter((project) => {
-    const photoCount = getValidPhotoCount(project)
-    const isActivelyProcessing = project.status === "processing" || project.status === "training"
-    return photoCount > 0 || isActivelyProcessing
-  })
-
-  const handleImageError = (photoKey: string) => {
-    setImageErrors((prev) => new Set([...prev, photoKey]))
-  }
-
-  const downloadPhoto = (photoUrl: string, projectName: string, index: number) => {
-    const link = document.createElement("a")
-    link.href = photoUrl
-    link.download = `${projectName}_portretfoto_${index + 1}.jpg`
-    link.target = "_blank"
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-  }
-
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "completed":
-        return (
-          <Badge className="bg-green-100 text-green-800">
-            <CheckCircle className="w-3 h-3 mr-1" />
-            Voltooid
-          </Badge>
-        )
-      case "processing":
-        return (
-          <Badge className="bg-blue-100 text-blue-800">
-            <Clock className="w-3 h-3 mr-1" />
-            Bezig...
-          </Badge>
-        )
-      case "pending":
-        return (
-          <Badge className="bg-yellow-100 text-yellow-800">
-            <Clock className="w-3 h-3 mr-1" />
-            Wachtend
-          </Badge>
-        )
-      case "training":
-        return (
-          <Badge className="bg-purple-100 text-purple-800">
-            <AlertCircle className="w-3 h-3 mr-1" />
-            Training
-          </Badge>
-        )
-      case "failed":
-        return (
-          <Badge className="bg-red-100 text-red-800">
-            <AlertCircle className="w-3 h-3 mr-1" />
-            Mislukt
-          </Badge>
-        )
-      default:
-        return <Badge variant="secondary">{status}</Badge>
+    } catch (error) {
+      console.error("Error fetching data:", error)
+    } finally {
+      setLoading(false)
     }
   }
 
-  if (loading) {
+  if (status === "loading" || loading) {
     return (
       <div className="min-h-screen bg-gray-50">
         <Header />
@@ -206,152 +154,176 @@ export default function DashboardPage() {
     )
   }
 
+  if (status === "unauthenticated") {
+    return null
+  }
+
+  const availableCredits = credits.filter((credit) => !credit.used).length
+  const totalPhotos = allPhotos.length
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
 
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold text-center mb-8">Dashboard</h1>
-
-        {/* Credits Overview */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
-          <Card className="bg-gradient-to-r from-[#0077B5] to-[#004182] text-white">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <CreditCard className="h-5 w-5" />
-                Jouw Tegoed
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-2xl font-bold">
-                    {credits.credits} project{credits.credits !== 1 ? "en" : ""} over
-                  </p>
-                  <p className="text-blue-100">Maak professionele portetfotos</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Dashboard</h1>
+          <p className="text-gray-600">Welkom terug! Hier zie je al je AI portretten.</p>
+        </div>
+
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center">
+                <CreditCard className="h-8 w-8 text-[#0077B5]" />
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-600">Beschikbare Credits</p>
+                  <p className="text-2xl font-bold text-gray-900">{availableCredits}</p>
                 </div>
-                <div>
-                  {credits.credits > 0 ? (
-                    <Link href="/use-credit">
-                      <Button className="bg-white text-[#0077B5] hover:bg-gray-100 font-semibold">
-                        Start Nieuw Project
-                      </Button>
-                    </Link>
-                  ) : (
-                    <Link href="/pricing">
-                      <Button className="bg-white text-[#0077B5] hover:bg-gray-100 font-semibold">Koop Tegoed</Button>
-                    </Link>
-                  )}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center">
+                <Camera className="h-8 w-8 text-[#0077B5]" />
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-600">Totaal Foto's</p>
+                  <p className="text-2xl font-bold text-gray-900">{totalPhotos}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center">
+                <Calendar className="h-8 w-8 text-[#0077B5]" />
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-600">Projecten</p>
+                  <p className="text-2xl font-bold text-gray-900">{projects.length}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Projects Overview */}
-        {projectsToShow.length > 0 && (
-          <div className="mb-8">
-            <h2 className="text-2xl font-semibold mb-4">Jouw Projecten</h2>
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {projectsToShow.map((project) => {
-                const photoCount = getValidPhotoCount(project)
-
-                return (
-                  <Card key={project.id}>
-                    <CardHeader>
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="text-lg">{project.name}</CardTitle>
-                        {getStatusBadge(project.status)}
-                      </div>
-                      <p className="text-sm text-gray-500">
-                        {new Date(project.created_at).toLocaleDateString("nl-NL")}
-                      </p>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="flex items-center justify-between">
-                        <p className="text-sm">
-                          {photoCount > 0 ? `${photoCount} foto's gegenereerd` : "Wordt verwerkt..."}
-                        </p>
-                        {project.status === "completed" && photoCount > 0 && (
-                          <Link href={`/generate/${project.id}`}>
-                            <Button size="sm" variant="outline">
-                              Bekijk Foto's
-                            </Button>
-                          </Link>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                )
-              })}
-            </div>
-          </div>
-        )}
-
-        {/* Photos Gallery */}
-        <div>
-          <h2 className="text-2xl font-semibold mb-6">Alle Portetfotos ({allPhotos.length} foto's)</h2>
-
-          {allPhotos.length === 0 ? (
-            <div className="text-center py-20">
-              <Camera className="h-16 w-16 text-gray-400 mx-auto mb-6" />
-              <h3 className="text-xl font-semibold mb-4">Nog geen portetfotos</h3>
-              <p className="text-gray-600 mb-8">
-                {credits.credits > 0
-                  ? "Je hebt tegoed! Start je eerste project."
-                  : "Koop tegoed om je eerste professionele portetfotos te maken."}
-              </p>
-              {credits.credits > 0 ? (
-                <Link href="/use-credit">
-                  <Button className="bg-[#0077B5] hover:bg-[#004182] text-white px-8 py-3">Start Nieuw Project</Button>
-                </Link>
-              ) : (
-                <Link href="/pricing">
-                  <Button className="bg-[#0077B5] hover:bg-[#004182] text-white px-8 py-3">Portetfotos maken</Button>
-                </Link>
-              )}
-            </div>
+        {/* Action Buttons */}
+        <div className="flex flex-col sm:flex-row gap-4 mb-8">
+          {availableCredits > 0 ? (
+            <Link href="/use-credit">
+              <Button className="bg-[#0077B5] hover:bg-[#005885] text-white">
+                <Plus className="h-4 w-4 mr-2" />
+                Nieuwe Fotoshoot
+              </Button>
+            </Link>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-              {allPhotos
-                .filter((photo) => !imageErrors.has(photo.key))
-                .map((photo) => (
-                  <div key={photo.key} className="group">
-                    <div className="aspect-[3/4] rounded-lg overflow-hidden bg-gray-100 shadow-md hover:shadow-lg transition-shadow">
-                      <Image
-                        src={photo.url || "/placeholder.svg"}
-                        alt={`Portretfoto ${photo.index + 1} van ${photo.projectName}`}
-                        width={300}
-                        height={400}
-                        className="w-full h-full object-cover"
-                        onError={() => handleImageError(photo.key)}
-                        unoptimized
-                        crossOrigin="anonymous"
-                      />
-                    </div>
-                    <Button
-                      onClick={() => downloadPhoto(photo.url, photo.projectName, photo.index)}
-                      size="sm"
-                      variant="outline"
-                      className="w-full mt-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                    >
-                      <Download className="h-4 w-4 mr-2" />
-                      Download
-                    </Button>
-                  </div>
-                ))}
-            </div>
+            <Link href="/pricing">
+              <Button className="bg-[#0077B5] hover:bg-[#005885] text-white">
+                <Plus className="h-4 w-4 mr-2" />
+                Credits Kopen
+              </Button>
+            </Link>
           )}
         </div>
 
-        {/* Success message */}
-        {allPhotos.length > 0 && (
-          <div className="mt-8 p-4 bg-green-50 border border-green-200 rounded-lg">
-            <div className="flex items-center">
-              <CheckCircle className="h-5 w-5 text-green-600 mr-2" />
-              <p className="text-green-800 font-medium">
-                Geweldig! Je hebt {allPhotos.length} professionele portetfotos klaar voor download.
+        {/* Projects Grid */}
+        {projects.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            {projects.map((project) => {
+              const photoCount = getValidPhotoCount(project.generated_photos)
+              const photos = getValidPhotos(project.generated_photos)
+
+              return (
+                <Card key={project.id} className="overflow-hidden">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-lg">{project.name}</CardTitle>
+                      <Badge variant={project.status === "completed" ? "default" : "secondary"}>
+                        {project.status === "completed" ? "Voltooid" : "Bezig"}
+                      </Badge>
+                    </div>
+                    <p className="text-sm text-gray-600">{new Date(project.created_at).toLocaleDateString("nl-NL")}</p>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-600">{photoCount} foto's gegenereerd</span>
+                        <Link href={`/generate/${project.id}`}>
+                          <Button size="sm" variant="outline">
+                            Bekijk Foto's
+                          </Button>
+                        </Link>
+                      </div>
+
+                      {photos.length > 0 && (
+                        <div className="grid grid-cols-3 gap-2">
+                          {photos.slice(0, 3).map((photo, index) => (
+                            <div key={index} className="aspect-square relative overflow-hidden rounded-md">
+                              <img
+                                src={photo || "/placeholder.svg"}
+                                alt={`Preview ${index + 1}`}
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                  const target = e.target as HTMLImageElement
+                                  target.style.display = "none"
+                                }}
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              )
+            })}
+          </div>
+        ) : (
+          <Card>
+            <CardContent className="p-12 text-center">
+              <Camera className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">Nog geen projecten</h3>
+              <p className="text-gray-600 mb-6">
+                Start je eerste AI fotoshoot om professionele portretten te genereren.
               </p>
+              {availableCredits > 0 ? (
+                <Link href="/use-credit">
+                  <Button className="bg-[#0077B5] hover:bg-[#005885] text-white">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Start Fotoshoot
+                  </Button>
+                </Link>
+              ) : (
+                <Link href="/pricing">
+                  <Button className="bg-[#0077B5] hover:bg-[#005885] text-white">Credits Kopen</Button>
+                </Link>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {/* All Photos Section */}
+        {totalPhotos > 0 && (
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">Alle Portretfotos ({totalPhotos} foto's)</h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+              {allPhotos.map((photo, index) => (
+                <div key={index} className="aspect-square relative overflow-hidden rounded-lg">
+                  <img
+                    src={photo || "/placeholder.svg"}
+                    alt={`Portrait ${index + 1}`}
+                    className="w-full h-full object-cover hover:scale-105 transition-transform cursor-pointer"
+                    onClick={() => window.open(photo, "_blank")}
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement
+                      target.style.display = "none"
+                    }}
+                  />
+                </div>
+              ))}
             </div>
           </div>
         )}
