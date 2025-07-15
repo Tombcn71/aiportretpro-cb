@@ -3,220 +3,109 @@ import { sql } from "@/lib/db"
 
 export const dynamic = "force-dynamic"
 
-const appWebhookSecret = process.env.APP_WEBHOOK_SECRET
-
-if (!appWebhookSecret) {
-  throw new Error("MISSING APP_WEBHOOK_SECRET!")
-}
-
 export async function POST(request: NextRequest) {
   try {
-    console.log("🖼️ PROMPT WEBHOOK CALLED")
-    console.log("Headers:", Object.fromEntries(request.headers.entries()))
-    console.log("URL:", request.url)
+    console.log("🖼️ WEBHOOK CALLED")
 
-    // Parse the incoming data - based on the other app structure
-    type PromptData = {
-      id: number
-      text: string
-      negative_prompt: string
-      steps: null | number
-      tune_id: number
-      trained_at: string
-      started_training_at: string
-      created_at: string
-      updated_at: string
-      images: string[]
+    // Parse de data van Astria
+    const data = await request.json()
+    console.log("📦 Webhook data:", JSON.stringify(data, null, 2))
+
+    // Haal URL parameters op
+    const url = new URL(request.url)
+    const model_id = url.searchParams.get("model_id")
+    const webhook_secret = url.searchParams.get("webhook_secret")
+
+    // Check webhook secret
+    if (webhook_secret !== process.env.APP_WEBHOOK_SECRET) {
+      console.log("❌ Wrong webhook secret")
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const incomingData = (await request.json()) as { prompt: PromptData }
-    const { prompt } = incomingData
-
-    console.log("🖼️ Prompt webhook data:", JSON.stringify({ prompt }, null, 2))
-
-    // Log webhook to database for debugging
-    try {
-      await sql`
-        INSERT INTO webhook_logs (type, payload, created_at)
-        VALUES ('prompt_webhook', ${JSON.stringify(incomingData)}, CURRENT_TIMESTAMP)
-      `
-    } catch (logError) {
-      console.warn("Could not log webhook:", logError)
-    }
-
-    // Extract URL parameters - same as other app
-    const urlObj = new URL(request.url)
-    const user_id = urlObj.searchParams.get("user_id")
-    const model_id = urlObj.searchParams.get("model_id")
-    const webhook_secret = urlObj.searchParams.get("webhook_secret")
-
-    // Validate required parameters
     if (!model_id) {
-      return NextResponse.json(
-        {
-          message: "Malformed URL, no model_id detected!",
-        },
-        { status: 500 },
-      )
+      console.log("❌ No model_id")
+      return NextResponse.json({ error: "No model_id" }, { status: 400 })
     }
 
-    if (!webhook_secret) {
-      return NextResponse.json(
-        {
-          message: "Malformed URL, no webhook_secret detected!",
-        },
-        { status: 500 },
-      )
-    }
-
-    if (webhook_secret.toLowerCase() !== appWebhookSecret?.toLowerCase()) {
-      return NextResponse.json(
-        {
-          message: "Unauthorized!",
-        },
-        { status: 401 },
-      )
-    }
-
-    if (!user_id) {
-      return NextResponse.json(
-        {
-          message: "Malformed URL, no user_id detected!",
-        },
-        { status: 500 },
-      )
-    }
-
-    console.log(`🔍 Processing prompt for model ${model_id}, user ${user_id}`)
-
-    // Find project by tune_id (model_id in URL corresponds to tune_id in our DB)
+    // Zoek project met tune_id
     const projects = await sql`
       SELECT * FROM projects WHERE tune_id = ${model_id}
     `
 
     if (projects.length === 0) {
-      console.error(`❌ No project found for tune_id: ${model_id}`)
-
-      // Log all recent projects for debugging
-      const allProjects = await sql`SELECT id, name, tune_id FROM projects ORDER BY created_at DESC LIMIT 10`
-      console.log("Recent projects:", allProjects)
-
-      return NextResponse.json(
-        {
-          message: "Project not found",
-          tuneId: model_id,
-          recentProjects: allProjects.map((p) => ({ id: p.id, name: p.name, tune_id: p.tune_id })),
-        },
-        { status: 404 },
-      )
+      console.log(`❌ No project found for tune_id: ${model_id}`)
+      return NextResponse.json({ error: "Project not found" }, { status: 404 })
     }
 
     const project = projects[0]
     console.log(`📁 Found project: ${project.id} - ${project.name}`)
 
-    // Extract all headshots from the prompt - same as other app
-    const allHeadshots = prompt.images
-    console.log(`📸 Processing ${allHeadshots.length} images for project ${project.id}`)
+    // Haal images uit de webhook data
+    let images: string[] = []
 
-    if (!allHeadshots || allHeadshots.length === 0) {
-      console.log("ℹ️ No images in this webhook")
-      return NextResponse.json({ message: "success" }, { status: 200 })
+    // Probeer verschillende manieren om images te vinden
+    if (data.prompt?.images) {
+      images = data.prompt.images
+    } else if (data.images) {
+      images = data.images
+    } else if (data.prompt?.image_urls) {
+      images = data.prompt.image_urls
     }
 
-    // Get existing photos
+    console.log(`🖼️ Found ${images.length} images:`, images)
+
+    if (images.length === 0) {
+      console.log("ℹ️ No images in webhook")
+      return NextResponse.json({ message: "No images" }, { status: 200 })
+    }
+
+    // Haal bestaande foto's op
     let existingPhotos: string[] = []
     if (project.generated_photos) {
       try {
         existingPhotos =
           typeof project.generated_photos === "string" ? JSON.parse(project.generated_photos) : project.generated_photos
       } catch (e) {
-        console.warn("Could not parse existing photos, starting fresh")
         existingPhotos = []
       }
     }
 
-    // Process each image
-    const newImageUrls: string[] = []
-    for (const imageUrl of allHeadshots) {
-      if (typeof imageUrl === "string" && imageUrl.startsWith("http")) {
-        newImageUrls.push(imageUrl)
-        console.log(`✅ Added image: ${imageUrl}`)
-      } else {
-        console.warn(`⚠️ Invalid image URL: ${imageUrl}`)
-      }
-    }
-
-    console.log(`🎯 Extracted ${newImageUrls.length} valid URLs from ${allHeadshots.length} images`)
-
-    // Combine with existing photos
+    // Voeg nieuwe images toe
     const allPhotos = [...existingPhotos]
     let addedCount = 0
 
-    for (const newUrl of newImageUrls) {
-      if (!allPhotos.includes(newUrl)) {
-        allPhotos.push(newUrl)
+    for (const imageUrl of images) {
+      if (typeof imageUrl === "string" && imageUrl.startsWith("http") && !allPhotos.includes(imageUrl)) {
+        allPhotos.push(imageUrl)
         addedCount++
-        console.log(`➕ Added new photo: ${newUrl}`)
-      } else {
-        console.log(`⏭️ Skipped duplicate: ${newUrl}`)
+        console.log(`✅ Added: ${imageUrl}`)
       }
     }
 
     // Update database
     if (addedCount > 0) {
-      try {
-        await sql`
-          UPDATE projects 
-          SET 
-            generated_photos = ${JSON.stringify(allPhotos)},
-            status = CASE 
-              WHEN ${allPhotos.length} >= 28 THEN 'completed'
-              ELSE 'processing'
-            END,
-            updated_at = CURRENT_TIMESTAMP
-          WHERE id = ${project.id}
-        `
-
-        console.log(
-          `✅ DATABASE UPDATED: Added ${addedCount} photos to project ${project.id}. Total: ${allPhotos.length}`,
-        )
-      } catch (dbError) {
-        console.error("❌ Database update failed:", dbError)
-        return NextResponse.json(
-          {
-            message: "Database update failed",
-          },
-          { status: 500 },
-        )
-      }
-    } else {
-      console.log(`ℹ️ No new photos to add (all ${newImageUrls.length} already existed)`)
-    }
-
-    return NextResponse.json(
-      {
-        message: "success",
-      },
-      { status: 200, statusText: "Success" },
-    )
-  } catch (error) {
-    console.error("❌ Prompt webhook error:", error)
-
-    // Log error to database
-    try {
       await sql`
-        INSERT INTO webhook_logs (type, payload, error, created_at)
-        VALUES ('prompt_webhook_error', ${JSON.stringify({ error: error.message, stack: error.stack })}, ${error.message}, CURRENT_TIMESTAMP)
+        UPDATE projects 
+        SET 
+          generated_photos = ${JSON.stringify(allPhotos)},
+          status = CASE 
+            WHEN ${allPhotos.length} >= 28 THEN 'completed'
+            ELSE 'processing'
+          END,
+          updated_at = CURRENT_TIMESTAMP
+        WHERE id = ${project.id}
       `
-    } catch (logError) {
-      console.warn("Could not log error:", logError)
+
+      console.log(`✅ Added ${addedCount} photos to project ${project.id}. Total: ${allPhotos.length}`)
     }
 
-    return NextResponse.json(
-      {
-        message: "Something went wrong!",
-      },
-      { status: 500 },
-    )
+    return NextResponse.json({
+      message: "success",
+      added: addedCount,
+      total: allPhotos.length,
+    })
+  } catch (error) {
+    console.error("❌ Webhook error:", error)
+    return NextResponse.json({ error: "Webhook failed" }, { status: 500 })
   }
 }
