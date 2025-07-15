@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
       console.warn("Could not log webhook:", logError)
     }
 
-    // IMPROVED PARSING - Handle different webhook formats
+    // IMPROVED PARSING based on yesterday's findings - images come via 'images' not '.images'
     let promptData = body.data || body
     let tuneId = null
     let status = null
@@ -50,20 +50,25 @@ export async function POST(request: NextRequest) {
     // Extract status
     status = promptData.status || body.status || (body.prompt && body.prompt.status)
 
-    // CRITICAL: Extract images with better parsing
-    if (promptData.images) {
-      images = promptData.images
-    } else if (body.images) {
+    // CRITICAL FIX: Extract images - they come via 'images' property directly
+    if (body.images) {
       images = body.images
+      console.log("✅ Found images in body.images")
+    } else if (promptData.images) {
+      images = promptData.images
+      console.log("✅ Found images in promptData.images")
     } else if (body.prompt && body.prompt.images) {
       images = body.prompt.images
+      console.log("✅ Found images in body.prompt.images")
     } else if (body.data && body.data.images) {
       images = body.data.images
+      console.log("✅ Found images in body.data.images")
     }
 
     console.log(`🔍 Extracted data:`, {
       tuneId,
       status,
+      imagesFound: !!images,
       imagesType: typeof images,
       imagesLength: Array.isArray(images) ? images.length : "not array",
       imagesPreview: Array.isArray(images) ? images.slice(0, 2) : images,
@@ -167,6 +172,7 @@ export async function POST(request: NextRequest) {
 
       if (Array.isArray(images)) {
         await processImages(project, images)
+        console.log(`✅ Successfully processed ${images.length} images for project ${project.id}`)
       } else {
         console.error("❌ Images is not an array:", images)
         return NextResponse.json(
@@ -217,33 +223,44 @@ async function processImages(project: any, images: any[]) {
     }
   }
 
-  // IMPROVED IMAGE URL EXTRACTION
+  // IMPROVED IMAGE URL EXTRACTION - based on yesterday's findings
   const newImageUrls: string[] = []
 
   for (const img of images) {
     let imageUrl = null
 
-    // Try different ways to extract URL
-    if (typeof img === "string") {
+    // Try different ways to extract URL - images come as direct URLs or objects
+    if (typeof img === "string" && img.startsWith("http")) {
       imageUrl = img
+      console.log(`✅ Found direct URL: ${img}`)
     } else if (img && typeof img === "object") {
-      if (img.url) {
+      if (img.url && typeof img.url === "string") {
         imageUrl = img.url
-      } else if (img.image_url) {
+        console.log(`✅ Found URL in object: ${img.url}`)
+      } else if (img.image_url && typeof img.image_url === "string") {
         imageUrl = img.image_url
-      } else if (img.src) {
+        console.log(`✅ Found image_url in object: ${img.image_url}`)
+      } else if (img.src && typeof img.src === "string") {
         imageUrl = img.src
+        console.log(`✅ Found src in object: ${img.src}`)
+      } else {
+        console.warn(`⚠️ Object found but no URL property:`, Object.keys(img))
       }
+    } else {
+      console.warn(`⚠️ Unexpected image format:`, typeof img, img)
     }
 
     if (imageUrl && typeof imageUrl === "string" && imageUrl.startsWith("http")) {
       newImageUrls.push(imageUrl)
-    } else {
-      console.warn(`⚠️ Could not extract URL from image:`, img)
     }
   }
 
   console.log(`🎯 Extracted ${newImageUrls.length} valid URLs from ${images.length} images`)
+
+  if (newImageUrls.length === 0) {
+    console.error("❌ No valid image URLs found!")
+    return
+  }
 
   const allPhotos = [...existingPhotos]
   let addedCount = 0
@@ -252,23 +269,33 @@ async function processImages(project: any, images: any[]) {
     if (!allPhotos.includes(newUrl)) {
       allPhotos.push(newUrl)
       addedCount++
+      console.log(`➕ Added new photo: ${newUrl}`)
+    } else {
+      console.log(`⏭️ Skipped duplicate: ${newUrl}`)
     }
   }
 
   if (addedCount > 0) {
-    await sql`
-      UPDATE projects 
-      SET 
-        generated_photos = ${JSON.stringify(allPhotos)},
-        status = CASE 
-          WHEN ${allPhotos.length} >= 40 THEN 'completed'
-          ELSE 'processing'
-        END,
-        updated_at = CURRENT_TIMESTAMP
-      WHERE id = ${project.id}
-    `
+    try {
+      await sql`
+        UPDATE projects 
+        SET 
+          generated_photos = ${JSON.stringify(allPhotos)},
+          status = CASE 
+            WHEN ${allPhotos.length} >= 40 THEN 'completed'
+            ELSE 'processing'
+          END,
+          updated_at = CURRENT_TIMESTAMP
+        WHERE id = ${project.id}
+      `
 
-    console.log(`✅ Added ${addedCount} photos to project ${project.id}. Total: ${allPhotos.length}`)
+      console.log(
+        `✅ DATABASE UPDATED: Added ${addedCount} photos to project ${project.id}. Total: ${allPhotos.length}`,
+      )
+    } catch (dbError) {
+      console.error("❌ Database update failed:", dbError)
+      throw dbError
+    }
   } else {
     console.log(`ℹ️ No new photos to add (all ${newImageUrls.length} already existed)`)
   }

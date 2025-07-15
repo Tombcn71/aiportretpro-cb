@@ -39,7 +39,8 @@ export default function DebugAstriaResponsesPage() {
         setWebhookLogs(data.webhookLogs || [])
         setProjects(data.projects || [])
       } else {
-        setError("Failed to fetch data")
+        const errorData = await response.json()
+        setError(errorData.error || "Failed to fetch data")
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unknown error")
@@ -119,39 +120,45 @@ export default function DebugAstriaResponsesPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {projects.map((project) => (
-                <div key={project.id} className="p-4 border rounded-lg">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h4 className="font-medium">
-                        #{project.id}: {project.name}
-                      </h4>
-                      <p className="text-sm text-gray-600">
-                        Tune ID: <code className="bg-gray-100 px-1 rounded">{project.tune_id}</code>
-                      </p>
-                      <p className="text-xs text-gray-500">Created: {new Date(project.created_at).toLocaleString()}</p>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <div className="text-right">
-                        <Badge variant={project.has_photos ? "default" : "destructive"}>
-                          {project.has_photos ? `${project.photo_count} photos` : "No photos"}
-                        </Badge>
-                        <br />
-                        <Badge variant="outline" className="mt-1">
-                          {project.status}
-                        </Badge>
+              {projects.length === 0 ? (
+                <p className="text-gray-500">No projects with tune_id found</p>
+              ) : (
+                projects.map((project) => (
+                  <div key={project.id} className="p-4 border rounded-lg">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-medium">
+                          #{project.id}: {project.name}
+                        </h4>
+                        <p className="text-sm text-gray-600">
+                          Tune ID: <code className="bg-gray-100 px-1 rounded">{project.tune_id}</code>
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          Created: {new Date(project.created_at).toLocaleString()}
+                        </p>
                       </div>
-                      <Button
-                        size="sm"
-                        onClick={() => manualFetch(project.id)}
-                        className="bg-blue-600 hover:bg-blue-700"
-                      >
-                        🔄 Fetch Photos
-                      </Button>
+                      <div className="flex items-center gap-3">
+                        <div className="text-right">
+                          <Badge variant={project.has_photos ? "default" : "destructive"}>
+                            {project.has_photos ? `${project.photo_count} photos` : "No photos"}
+                          </Badge>
+                          <br />
+                          <Badge variant="outline" className="mt-1">
+                            {project.status}
+                          </Badge>
+                        </div>
+                        <Button
+                          size="sm"
+                          onClick={() => manualFetch(project.id)}
+                          className="bg-blue-600 hover:bg-blue-700"
+                        >
+                          🔄 Fetch Photos
+                        </Button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </CardContent>
         </Card>
