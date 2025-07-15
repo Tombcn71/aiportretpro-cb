@@ -38,21 +38,17 @@ export async function POST(request: NextRequest) {
     }
 
     const astriaData = await astriaResponse.json()
-    console.log("📦 Astria response:", JSON.stringify(astriaData, null, 2))
+    console.log("📦 Astria response length:", Array.isArray(astriaData) ? astriaData.length : "not array")
 
-    // Extract all images from all prompts - based on your example structure
+    // Extract all images from all prompts
     let allImages: string[] = []
 
     if (Array.isArray(astriaData)) {
-      // If it's an array of prompts
       for (const prompt of astriaData) {
         if (prompt.images && Array.isArray(prompt.images)) {
           allImages = [...allImages, ...prompt.images]
         }
       }
-    } else if (astriaData.images && Array.isArray(astriaData.images)) {
-      // If it's a single prompt with images
-      allImages = astriaData.images
     }
 
     console.log(`🖼️ Found ${allImages.length} total images from Astria`)
@@ -60,20 +56,41 @@ export async function POST(request: NextRequest) {
     if (allImages.length === 0) {
       return NextResponse.json({
         message: "No images found in Astria response",
-        astriaData,
+        promptCount: Array.isArray(astriaData) ? astriaData.length : 0,
       })
     }
 
-    // Get existing photos
+    // Parse existing photos safely
     let existingPhotos: string[] = []
     if (project.generated_photos) {
       try {
-        existingPhotos =
-          typeof project.generated_photos === "string" ? JSON.parse(project.generated_photos) : project.generated_photos
+        let photosData = project.generated_photos
+
+        // Handle double-escaped JSON
+        if (typeof photosData === "string") {
+          try {
+            photosData = JSON.parse(photosData)
+          } catch (e) {
+            console.log("First parse failed, trying to clean up...")
+            // If it's a malformed string like "\"[...]\"", clean it up
+            if (photosData.startsWith('"[') && photosData.endsWith(']"')) {
+              photosData = photosData.slice(1, -1) // Remove outer quotes
+              photosData = photosData.replace(/\\"/g, '"') // Unescape quotes
+            }
+            photosData = JSON.parse(photosData)
+          }
+        }
+
+        if (Array.isArray(photosData)) {
+          existingPhotos = photosData
+        }
       } catch (e) {
+        console.warn("Could not parse existing photos, starting fresh:", e.message)
         existingPhotos = []
       }
     }
+
+    console.log(`📸 Existing photos: ${existingPhotos.length}`)
 
     // Add new images
     const allPhotos = [...existingPhotos]
@@ -83,11 +100,10 @@ export async function POST(request: NextRequest) {
       if (typeof imageUrl === "string" && imageUrl.startsWith("http") && !allPhotos.includes(imageUrl)) {
         allPhotos.push(imageUrl)
         addedCount++
-        console.log(`✅ Added: ${imageUrl}`)
       }
     }
 
-    // Update database
+    // Update database with clean JSON
     if (addedCount > 0) {
       await sql`
         UPDATE projects 

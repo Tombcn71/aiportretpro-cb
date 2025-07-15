@@ -5,63 +5,78 @@ export const dynamic = "force-dynamic"
 
 export async function POST(request: NextRequest) {
   try {
-    console.log("🖼️ ASTRIA WEBHOOK RECEIVED")
-
-    // Parse Astria webhook data
-    const data = await request.json()
-    console.log("📦 Webhook data:", JSON.stringify(data, null, 2))
-
-    // Get URL parameters
     const url = new URL(request.url)
-    const model_id = url.searchParams.get("model_id")
-    const webhook_secret = url.searchParams.get("webhook_secret")
+    const modelId = url.searchParams.get("model_id")
+    const webhookSecret = url.searchParams.get("webhook_secret")
 
-    // Validate webhook secret
-    if (webhook_secret !== process.env.APP_WEBHOOK_SECRET) {
-      console.log("❌ Invalid webhook secret")
+    console.log("🔔 Webhook received:", { modelId, webhookSecret })
+
+    // Verify webhook secret
+    if (webhookSecret !== process.env.APP_WEBHOOK_SECRET) {
+      console.error("❌ Invalid webhook secret")
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    if (!model_id) {
-      console.log("❌ No model_id provided")
-      return NextResponse.json({ error: "No model_id" }, { status: 400 })
+    const data = await request.json()
+    console.log("📦 Webhook data:", JSON.stringify(data, null, 2))
+
+    // Extract images from webhook data based on your example
+    const images = data?.prompt?.images || []
+
+    if (!Array.isArray(images) || images.length === 0) {
+      console.log("⚠️ No images found in webhook")
+      return NextResponse.json({ message: "No images in webhook" })
     }
 
-    // Find project by tune_id
+    console.log(`🖼️ Found ${images.length} images in webhook`)
+
+    // Find project by tune_id (model_id)
     const projects = await sql`
-      SELECT * FROM projects WHERE tune_id = ${model_id}
+      SELECT * FROM projects WHERE tune_id = ${modelId}
     `
 
     if (projects.length === 0) {
-      console.log(`❌ No project found for tune_id: ${model_id}`)
+      console.error(`❌ No project found for tune_id: ${modelId}`)
       return NextResponse.json({ error: "Project not found" }, { status: 404 })
     }
 
     const project = projects[0]
     console.log(`📁 Found project: ${project.id} - ${project.name}`)
 
-    // Extract images from Astria webhook - based on your example
-    const images = data.prompt?.images || []
-    console.log(`🖼️ Found ${images.length} images:`, images)
-
-    if (images.length === 0) {
-      console.log("ℹ️ No images in this webhook")
-      return NextResponse.json({ message: "No images" }, { status: 200 })
-    }
-
-    // Get existing photos
+    // Parse existing photos safely
     let existingPhotos: string[] = []
     if (project.generated_photos) {
       try {
-        existingPhotos =
-          typeof project.generated_photos === "string" ? JSON.parse(project.generated_photos) : project.generated_photos
+        let photosData = project.generated_photos
+
+        // Handle double-escaped JSON
+        if (typeof photosData === "string") {
+          // Try to parse once
+          try {
+            photosData = JSON.parse(photosData)
+          } catch (e) {
+            console.log("First parse failed, trying to clean up...")
+            // If it's a malformed string like "\"[...]\"", clean it up
+            if (photosData.startsWith('"[') && photosData.endsWith(']"')) {
+              photosData = photosData.slice(1, -1) // Remove outer quotes
+              photosData = photosData.replace(/\\"/g, '"') // Unescape quotes
+            }
+            photosData = JSON.parse(photosData)
+          }
+        }
+
+        if (Array.isArray(photosData)) {
+          existingPhotos = photosData
+        }
       } catch (e) {
-        console.warn("Could not parse existing photos, starting fresh")
+        console.warn("Could not parse existing photos, starting fresh:", e.message)
         existingPhotos = []
       }
     }
 
-    // Add new images (avoid duplicates)
+    console.log(`📸 Existing photos: ${existingPhotos.length}`)
+
+    // Add new images
     const allPhotos = [...existingPhotos]
     let addedCount = 0
 
@@ -73,30 +88,30 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Update database if we have new images
-    if (addedCount > 0) {
-      await sql`
-        UPDATE projects 
-        SET 
-          generated_photos = ${JSON.stringify(allPhotos)},
-          status = CASE 
-            WHEN ${allPhotos.length} >= 28 THEN 'completed'
-            ELSE 'processing'
-          END,
-          updated_at = CURRENT_TIMESTAMP
-        WHERE id = ${project.id}
-      `
-
-      console.log(`✅ SUCCESS: Added ${addedCount} photos to project ${project.id}. Total: ${allPhotos.length}`)
-    } else {
-      console.log(`ℹ️ No new photos to add (${images.length} already existed)`)
+    if (addedCount === 0) {
+      console.log("ℹ️ No new images to add")
+      return NextResponse.json({ message: "No new images" })
     }
+
+    // Update database with clean JSON
+    await sql`
+      UPDATE projects 
+      SET 
+        generated_photos = ${JSON.stringify(allPhotos)},
+        status = CASE 
+          WHEN ${allPhotos.length} >= 28 THEN 'completed'
+          ELSE 'processing'
+        END,
+        updated_at = CURRENT_TIMESTAMP
+      WHERE id = ${project.id}
+    `
+
+    console.log(`✅ Webhook SUCCESS: Added ${addedCount} photos. Total: ${allPhotos.length}`)
 
     return NextResponse.json({
       message: "success",
       projectId: project.id,
-      imagesReceived: images.length,
-      newImagesAdded: addedCount,
+      newImages: addedCount,
       totalImages: allPhotos.length,
     })
   } catch (error) {
