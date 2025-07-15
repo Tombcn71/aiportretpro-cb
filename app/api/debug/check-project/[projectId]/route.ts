@@ -3,11 +3,7 @@ import { sql } from "@/lib/db"
 
 export async function GET(request: NextRequest, { params }: { params: { projectId: string } }) {
   try {
-    const projectId = Number.parseInt(params.projectId)
-
-    if (isNaN(projectId)) {
-      return NextResponse.json({ error: "Invalid project ID" }, { status: 400 })
-    }
+    const projectId = params.projectId
 
     // Get project details
     const projects = await sql`
@@ -20,75 +16,68 @@ export async function GET(request: NextRequest, { params }: { params: { projectI
 
     const project = projects[0]
 
-    // Get webhook logs for this project
-    const webhookLogs = await sql`
-      SELECT * FROM webhook_logs 
-      WHERE payload::text LIKE '%${project.tune_id || projectId}%'
-      ORDER BY created_at DESC 
-      LIMIT 10
-    `
-
     // Parse generated photos
-    let photoCount = 0
     let photos: string[] = []
     if (project.generated_photos) {
       try {
         photos =
           typeof project.generated_photos === "string" ? JSON.parse(project.generated_photos) : project.generated_photos
-        photoCount = photos.length
       } catch (e) {
-        console.warn("Could not parse photos")
+        photos = []
       }
+    }
+
+    // Get webhook logs for this project's tune_id
+    let webhookLogs = []
+    if (project.tune_id) {
+      webhookLogs = await sql`
+        SELECT * FROM webhook_logs 
+        WHERE payload::text LIKE ${`%${project.tune_id}%`}
+        ORDER BY created_at DESC 
+        LIMIT 10
+      `
     }
 
     // Check Astria API status if tune_id exists
     let astriaStatus = null
     if (project.tune_id) {
       try {
-        const astriaApiKey = process.env.ASTRIA_API_KEY
-        if (astriaApiKey) {
-          const response = await fetch(`https://api.astria.ai/tunes/${project.tune_id}`, {
-            headers: {
-              Authorization: `Bearer ${astriaApiKey}`,
-              "Content-Type": "application/json",
-            },
-          })
+        const response = await fetch(`https://api.astria.ai/tunes/${project.tune_id}`, {
+          headers: {
+            Authorization: `Bearer ${process.env.ASTRIA_API_KEY}`,
+            "Content-Type": "application/json",
+          },
+        })
 
-          if (response.ok) {
-            const tuneData = await response.json()
-            astriaStatus = {
-              status: tuneData.status,
-              title: tuneData.title,
-              created_at: tuneData.created_at,
-              updated_at: tuneData.updated_at,
-            }
-          }
+        if (response.ok) {
+          astriaStatus = await response.json()
+        } else {
+          astriaStatus = { error: `HTTP ${response.status}` }
         }
       } catch (error) {
-        console.warn("Could not fetch Astria status:", error)
+        astriaStatus = { error: error.message }
       }
     }
 
     return NextResponse.json({
       project: {
         ...project,
-        photo_count: photoCount,
+        photoCount: photos.length,
         photos: photos.slice(0, 5), // First 5 photos for preview
+        created_at: new Date(project.created_at).toLocaleString("nl-NL"),
+        updated_at: new Date(project.updated_at).toLocaleString("nl-NL"),
       },
       webhookLogs: webhookLogs.map((log) => ({
-        id: log.id,
-        type: log.type,
-        created_at: log.created_at,
-        error: log.error,
-        payload: typeof log.payload === "string" ? JSON.parse(log.payload) : log.payload,
+        ...log,
+        created_at: new Date(log.created_at).toLocaleString("nl-NL"),
       })),
       astriaStatus,
+      webhookUrl: project.tune_id
+        ? `https://www.aiportretpro.nl/api/astria/prompt-webhook?user_id=1&model_id=${project.tune_id}&webhook_secret=shadf892yr32548hq23h`
+        : null,
     })
   } catch (error) {
     console.error("Check project error:", error)
-    return NextResponse.json(
-      { error: "Failed to check project", details: error instanceof Error ? error.message : String(error) },
-      { status: 500 },
-    )
+    return NextResponse.json({ error: "Failed to check project", details: error.message }, { status: 500 })
   }
 }

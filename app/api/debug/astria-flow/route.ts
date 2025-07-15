@@ -3,104 +3,67 @@ import { sql } from "@/lib/db"
 
 export async function GET() {
   try {
-    // Get environment info
-    const webhookSecret = process.env.APP_WEBHOOK_SECRET ? "✅ Present" : "❌ Missing"
-    const nextAuthUrl = process.env.NEXTAUTH_URL || "Not set"
-
-    // Get recent webhook logs
-    const webhookLogs = await sql`
-      SELECT 
-        id,
-        type,
-        payload,
-        error,
-        created_at
-      FROM webhook_logs 
-      WHERE type IN ('prompt_webhook', 'train_webhook', 'prompt_webhook_error')
+    // Get recent projects with tune_ids
+    const projects = await sql`
+      SELECT id, name, tune_id, status, generated_photos, created_at, updated_at
+      FROM projects 
+      WHERE tune_id IS NOT NULL
       ORDER BY created_at DESC 
       LIMIT 20
     `
 
-    // Transform webhook logs for display
-    const transformedLogs = webhookLogs.map((log: any) => {
-      let payload = null
-      let projectId = null
-      let processed = false
+    // Get recent webhook logs
+    const webhookLogs = await sql`
+      SELECT id, type, payload, error, created_at
+      FROM webhook_logs 
+      ORDER BY created_at DESC 
+      LIMIT 50
+    `
 
-      try {
-        payload = typeof log.payload === "string" ? JSON.parse(log.payload) : log.payload
-
-        // Try to extract project ID from various sources
-        if (payload.model_id) {
-          projectId = payload.model_id
-        } else if (payload.tune_id) {
-          projectId = payload.tune_id
-        } else if (payload.id) {
-          projectId = payload.id
-        } else if (payload.prompt && payload.prompt.tune_id) {
-          projectId = payload.prompt.tune_id
+    // Process projects to add photo counts
+    const processedProjects = projects.map((project) => {
+      let photoCount = 0
+      if (project.generated_photos) {
+        try {
+          const photos =
+            typeof project.generated_photos === "string"
+              ? JSON.parse(project.generated_photos)
+              : project.generated_photos
+          photoCount = Array.isArray(photos) ? photos.length : 0
+        } catch (e) {
+          photoCount = 0
         }
-
-        // Determine if processed successfully
-        processed =
-          !log.error &&
-          payload &&
-          (payload.status === "succeeded" ||
-            payload.status === "completed" ||
-            payload.status === "finished" ||
-            (payload.prompt && payload.prompt.images && payload.prompt.images.length > 0))
-      } catch (e) {
-        console.warn("Could not parse webhook payload:", e)
       }
 
       return {
-        id: log.id,
-        project_id: projectId || "Unknown",
-        type: log.type.replace("_webhook", ""),
-        method: "POST",
-        processed,
-        created_at: log.created_at,
-        body: payload,
-        error: log.error,
+        ...project,
+        photoCount,
+        created_at: new Date(project.created_at).toLocaleString("nl-NL"),
+        updated_at: new Date(project.updated_at).toLocaleString("nl-NL"),
       }
     })
 
-    // Get recent projects with photo counts
-    const projects = await sql`
-      SELECT 
-        id,
-        name,
-        status,
-        tune_id,
-        generated_photos,
-        created_at,
-        CASE 
-          WHEN generated_photos IS NULL THEN 0
-          WHEN generated_photos = 'null' THEN 0
-          WHEN generated_photos = '[]' THEN 0
-          ELSE (
-            SELECT array_length(
-              CASE 
-                WHEN generated_photos::text LIKE '[%' THEN generated_photos::json
-                ELSE '[]'::json
-              END, 1
-            )
-          )
-        END as photo_count
-      FROM projects 
-      ORDER BY created_at DESC 
-      LIMIT 10
-    `
+    // Process webhook logs
+    const processedWebhookLogs = webhookLogs.map((log) => {
+      let payload = null
+      try {
+        payload = typeof log.payload === "string" ? JSON.parse(log.payload) : log.payload
+      } catch (e) {
+        payload = log.payload
+      }
+
+      return {
+        ...log,
+        payload,
+        created_at: new Date(log.created_at).toLocaleString("nl-NL"),
+      }
+    })
 
     return NextResponse.json({
-      webhookSecret:
-        webhookSecret + (process.env.APP_WEBHOOK_SECRET ? ` (${process.env.APP_WEBHOOK_SECRET.length} chars)` : ""),
-      nextAuthUrl,
-      webhookLogs: transformedLogs,
-      projects: projects.map((p: any) => ({
-        ...p,
-        photo_count: p.photo_count || 0,
-      })),
+      projects: processedProjects,
+      webhookLogs: processedWebhookLogs,
+      webhookSecret: process.env.APP_WEBHOOK_SECRET ? "✅ Present" : "❌ Missing",
+      nextAuthUrl: process.env.NEXTAUTH_URL || "Not set",
     })
   } catch (error) {
     console.error("Debug astria flow error:", error)

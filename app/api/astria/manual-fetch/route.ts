@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Project has no tune_id" }, { status: 400 })
     }
 
-    console.log(`📁 Fetching photos for project: ${project.name} (tune_id: ${project.tune_id})`)
+    console.log(`📡 Fetching from Astria API for tune_id: ${project.tune_id}`)
 
     // Fetch from Astria API
     const astriaApiKey = process.env.ASTRIA_API_KEY
@@ -52,33 +52,36 @@ export async function POST(request: NextRequest) {
     }
 
     const prompts = await response.json()
-    console.log(`📸 Found ${prompts.length} prompts for tune ${project.tune_id}`)
+    console.log(`📋 Found ${prompts.length} prompts`)
 
     // Extract all images from all prompts
     const allImages: string[] = []
-    let promptCount = 0
-    let imageCount = 0
+    let completedPrompts = 0
 
     for (const prompt of prompts) {
-      if (prompt.images && Array.isArray(prompt.images)) {
-        promptCount++
-        for (const imageUrl of prompt.images) {
-          if (typeof imageUrl === "string" && imageUrl.startsWith("http")) {
-            allImages.push(imageUrl)
-            imageCount++
+      console.log(`📝 Prompt ${prompt.id}: status=${prompt.status}, images=${prompt.images?.length || 0}`)
+
+      if (prompt.status === "succeeded" || prompt.status === "completed") {
+        completedPrompts++
+        if (prompt.images && Array.isArray(prompt.images)) {
+          for (const imageUrl of prompt.images) {
+            if (typeof imageUrl === "string" && imageUrl.startsWith("http")) {
+              allImages.push(imageUrl)
+            }
           }
         }
       }
     }
 
-    console.log(`🎯 Extracted ${imageCount} images from ${promptCount} prompts`)
+    console.log(`🎯 Total images found: ${allImages.length} from ${completedPrompts} completed prompts`)
 
     if (allImages.length === 0) {
       return NextResponse.json({
         success: true,
-        message: "No images found in Astria API",
-        promptCount,
-        imageCount: 0,
+        message: "No images found yet",
+        promptsTotal: prompts.length,
+        promptsCompleted: completedPrompts,
+        imagesFound: 0,
       })
     }
 
@@ -123,10 +126,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       message: `Successfully fetched ${addedCount} new photos`,
-      promptCount,
-      imageCount,
-      addedCount,
-      totalPhotos: combinedPhotos.length,
+      promptsTotal: prompts.length,
+      promptsCompleted: completedPrompts,
+      imagesFound: allImages.length,
+      imagesAdded: addedCount,
+      totalImages: combinedPhotos.length,
     })
   } catch (error) {
     console.error("Manual fetch error:", error)
