@@ -3,6 +3,7 @@ import { sql } from "@/lib/db"
 
 export async function GET() {
   try {
+    // Haal alle webhook logs op, inclusief oude
     const logs = await sql`
       SELECT * FROM webhook_logs 
       ORDER BY created_at DESC 
@@ -10,17 +11,11 @@ export async function GET() {
     `
 
     return NextResponse.json({
-      success: true,
-      logs: logs.map((log) => ({
-        id: log.id,
-        type: log.type,
-        payload: typeof log.payload === "string" ? JSON.parse(log.payload) : log.payload,
-        error: log.error,
-        created_at: log.created_at,
-      })),
+      logs: logs,
+      count: logs.length,
     })
   } catch (error) {
     console.error("Error fetching webhook logs:", error)
-    return NextResponse.json({ error: "Failed to fetch webhook logs" }, { status: 500 })
+    return NextResponse.json({ error: "Failed to fetch logs", details: error.message }, { status: 500 })
   }
 }
