@@ -22,6 +22,17 @@ export async function POST(request: NextRequest) {
       userEmail: session.user.email,
     })
 
+    // Validate inputs
+    if (!imageUrls || imageUrls.length === 0) {
+      return NextResponse.json({ error: "No images provided" }, { status: 400 })
+    }
+
+    // Clean project name - only letters, numbers, spaces
+    const cleanName = projectName.replace(/[^a-zA-Z0-9\s]/g, "").trim()
+    if (!cleanName) {
+      return NextResponse.json({ error: "Invalid project name" }, { status: 400 })
+    }
+
     // Get user ID
     const userResult = await sql`
       SELECT id FROM users WHERE email = ${session.user.email}
@@ -32,7 +43,6 @@ export async function POST(request: NextRequest) {
     }
 
     const user = userResult[0]
-    console.log("👤 User found:", { id: user.id })
 
     // Check credits in separate credits table
     const creditsResult = await sql`
@@ -40,7 +50,6 @@ export async function POST(request: NextRequest) {
     `
 
     const currentCredits = creditsResult[0]?.credits || 0
-    console.log("💳 Current credits:", currentCredits)
 
     if (currentCredits < 1) {
       return NextResponse.json({ error: "Insufficient credits" }, { status: 400 })
@@ -60,7 +69,7 @@ export async function POST(request: NextRequest) {
       )
       VALUES (
         ${user.id}, 
-        ${projectName}, 
+        ${cleanName}, 
         ${gender}, 
         ${imageUrls}, 
         'training', 
@@ -72,7 +81,6 @@ export async function POST(request: NextRequest) {
     `
 
     const project = projectResult[0]
-    console.log("📦 Project created:", project)
 
     // Deduct credit from credits table
     await sql`
@@ -81,19 +89,15 @@ export async function POST(request: NextRequest) {
       WHERE user_id = ${user.id}
     `
 
-    console.log("💳 Credit deducted from credits table")
-
     // Create tune with Astria using pack 928
     const packId = "928"
     const tuneResult = await createTuneWithPack(packId, {
-      title: projectName,
-      name: `project_${project.id}_${Date.now()}`,
+      title: cleanName,
+      name: `project${project.id}${Date.now()}`, // No spaces or special chars
       imageUrls: imageUrls,
       projectId: project.id,
       userId: user.id,
     })
-
-    console.log("🎨 Astria tune created:", tuneResult)
 
     // Update project with tune_id
     await sql`
@@ -101,8 +105,6 @@ export async function POST(request: NextRequest) {
       SET tune_id = ${tuneResult.id}, updated_at = NOW()
       WHERE id = ${project.id}
     `
-
-    console.log("✅ Project updated with tune_id:", tuneResult.id)
 
     return NextResponse.json({
       success: true,
