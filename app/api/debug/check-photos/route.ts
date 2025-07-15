@@ -37,19 +37,38 @@ export async function GET() {
           let photos = []
 
           if (typeof project.generated_photos === "string") {
+            // Handle JSON string
             if (project.generated_photos.startsWith("[")) {
               photos = JSON.parse(project.generated_photos)
+            } else if (project.generated_photos.startsWith("{")) {
+              // Handle single object
+              const parsed = JSON.parse(project.generated_photos)
+              photos = Array.isArray(parsed) ? parsed : [parsed]
             } else {
+              // Handle single URL string
               photos = [project.generated_photos]
             }
           } else if (Array.isArray(project.generated_photos)) {
             photos = project.generated_photos
+          } else if (typeof project.generated_photos === "object") {
+            // Handle object case
+            photos = [project.generated_photos]
           }
 
+          // Filter valid URLs only
+          photos = photos.filter(
+            (photo) =>
+              photo &&
+              typeof photo === "string" &&
+              (photo.includes("astria.ai") || photo.includes("mp.astria.ai")) &&
+              photo.startsWith("http"),
+          )
+
           photoCount = photos.length
-          photoSample = photos.slice(0, 3) // First 3 photos as sample
+          photoSample = photos.slice(0, 3)
         } catch (e) {
-          parseError = e.message
+          parseError = `Parse error: ${e.message}`
+          console.error(`Error parsing photos for project ${project.id}:`, e)
         }
       }
 
@@ -69,6 +88,14 @@ export async function GET() {
     })
 
     const totalPhotos = analysis.reduce((sum, project) => sum + project.photoCount, 0)
+
+    console.log(`📊 Photo check summary:
+- Total projects: ${projects.length}
+- Projects with photos: ${analysis.filter((p) => p.photoCount > 0).length}
+- Projects without photos: ${analysis.filter((p) => p.photoCount === 0).length}
+- Total photos found: ${totalPhotos}
+- Parse errors: ${analysis.filter((p) => p.parseError).length}
+`)
 
     return NextResponse.json({
       success: true,
