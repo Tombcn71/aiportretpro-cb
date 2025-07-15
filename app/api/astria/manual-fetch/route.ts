@@ -60,34 +60,10 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    // Parse existing photos safely
+    // Get existing photos (now as PostgreSQL array)
     let existingPhotos: string[] = []
-    if (project.generated_photos) {
-      try {
-        let photosData = project.generated_photos
-
-        // Handle double-escaped JSON
-        if (typeof photosData === "string") {
-          try {
-            photosData = JSON.parse(photosData)
-          } catch (e) {
-            console.log("First parse failed, trying to clean up...")
-            // If it's a malformed string like "\"[...]\"", clean it up
-            if (photosData.startsWith('"[') && photosData.endsWith(']"')) {
-              photosData = photosData.slice(1, -1) // Remove outer quotes
-              photosData = photosData.replace(/\\"/g, '"') // Unescape quotes
-            }
-            photosData = JSON.parse(photosData)
-          }
-        }
-
-        if (Array.isArray(photosData)) {
-          existingPhotos = photosData
-        }
-      } catch (e) {
-        console.warn("Could not parse existing photos, starting fresh:", e.message)
-        existingPhotos = []
-      }
+    if (project.generated_photos && Array.isArray(project.generated_photos)) {
+      existingPhotos = project.generated_photos
     }
 
     console.log(`📸 Existing photos: ${existingPhotos.length}`)
@@ -103,12 +79,12 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Update database with clean JSON
+    // Update database with PostgreSQL array (not JSON string!)
     if (addedCount > 0) {
       await sql`
         UPDATE projects 
         SET 
-          generated_photos = ${JSON.stringify(allPhotos)},
+          generated_photos = ${allPhotos},
           status = CASE 
             WHEN ${allPhotos.length} >= 28 THEN 'completed'
             ELSE 'processing'
