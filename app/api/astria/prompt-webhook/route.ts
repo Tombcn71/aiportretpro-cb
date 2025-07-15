@@ -10,9 +10,10 @@ export async function POST(request: NextRequest) {
     console.log("URL:", request.url)
 
     const url = new URL(request.url)
+    const modelId = url.searchParams.get("model_id")
     const webhookSecret = url.searchParams.get("webhook_secret")
 
-    console.log("Webhook secret from URL:", webhookSecret)
+    console.log("URL params:", { modelId, webhookSecret })
 
     // Verify webhook secret
     if (webhookSecret !== process.env.APP_WEBHOOK_SECRET) {
@@ -23,9 +24,9 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     console.log("🖼️ Webhook body:", JSON.stringify(body, null, 2))
 
-    // Extract data from webhook
+    // Extract data from webhook - handle different formats
     const promptData = body.prompt || body.data || body
-    const tuneId = promptData.tune_id
+    const tuneId = promptData.tune_id || modelId
     const status = promptData.status
     const images = promptData.images
 
@@ -36,40 +37,47 @@ export async function POST(request: NextRequest) {
 
     console.log(`🔍 Processing webhook for tune ${tuneId} with status: ${status}`)
 
-    // Find project by tune_id - check both the main tune_id and tunes array
+    // Find project by tune_id - need to match the actual tune_id from the tunes array
+    let project = null
+
+    // First try to find by the main tune_id
     let projects = await sql`
       SELECT * FROM projects WHERE tune_id = ${tuneId.toString()}
     `
 
-    if (projects.length === 0 && promptData.tunes && promptData.tunes.length > 0) {
-      // Try with the tune_id from the tunes array
-      const actualTuneId = promptData.tunes[0].id
-      console.log(`🔍 Trying with actual tune_id: ${actualTuneId}`)
+    if (projects.length === 0) {
+      // If not found, try to find by the tune_id in the tunes array
+      // Based on your response, the actual tune_id is in promptData.tunes[0].id
+      if (promptData.tunes && promptData.tunes.length > 0) {
+        const actualTuneId = promptData.tunes[0].id
+        console.log(`🔍 Trying with actual tune_id: ${actualTuneId}`)
 
-      projects = await sql`
-        SELECT * FROM projects WHERE tune_id = ${actualTuneId.toString()}
-      `
+        projects = await sql`
+          SELECT * FROM projects WHERE tune_id = ${actualTuneId.toString()}
+        `
+      }
     }
 
     if (projects.length === 0) {
       console.error(`❌ No project found for tune_id: ${tuneId}`)
+      console.log("Available tune info:", promptData.tunes)
       return NextResponse.json({ error: "Project not found" }, { status: 404 })
     }
 
-    const project = projects[0]
+    project = projects[0]
     console.log(`📁 Found project: ${project.id} - ${project.name}`)
 
     // Process images if they exist
     if (images && Array.isArray(images) && images.length > 0) {
       console.log(`📸 Processing ${images.length} new images`)
 
-      // Get existing photos
+      // Get existing photos (now as PostgreSQL array)
       let existingPhotos: string[] = []
       if (project.generated_photos && Array.isArray(project.generated_photos)) {
         existingPhotos = project.generated_photos
       }
 
-      // Extract image URLs from webhook
+      // Extract image URLs from webhook - they should be direct strings
       const newImageUrls: string[] = []
       for (const image of images) {
         if (typeof image === "string" && image.startsWith("http")) {
@@ -91,7 +99,7 @@ export async function POST(request: NextRequest) {
       }
 
       if (addedCount > 0) {
-        // Update with PostgreSQL array
+        // Update with PostgreSQL array (not JSON string!)
         await sql`
           UPDATE projects 
           SET 
@@ -106,8 +114,10 @@ export async function POST(request: NextRequest) {
 
         console.log(`✅ Webhook: Added ${addedCount} photos to project ${project.id}. Total: ${allPhotos.length}`)
       } else {
-        console.log(`ℹ️ No new photos to add`)
+        console.log(`ℹ️ No new photos to add (all ${newImageUrls.length} already existed)`)
       }
+    } else {
+      console.log(`ℹ️ No images in webhook or not in succeeded status`)
     }
 
     return NextResponse.json({
