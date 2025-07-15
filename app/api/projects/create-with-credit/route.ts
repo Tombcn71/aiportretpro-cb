@@ -1,127 +1,120 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
-import { neon } from "@neondatabase/serverless"
-import { createTuneWithPack } from "@/lib/astria"
+import { getUserByEmail, sql } from "@/lib/db"
+import axios from "axios"
 
-const sql = neon(process.env.DATABASE_URL!)
+const astriaApiKey = process.env.ASTRIA_API_KEY
+const appWebhookSecret = process.env.APP_WEBHOOK_SECRET
 
 export async function POST(request: NextRequest) {
   try {
+    console.log("Creating project with credit...")
+
     const session = await getServerSession(authOptions)
     if (!session?.user?.email) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const { projectName, gender, imageUrls } = await request.json()
+    const data = await request.json()
+    const { projectName, gender, uploadedPhotos } = data
 
-    console.log("🎯 Creating project with credit:", {
-      projectName,
-      gender,
-      imageCount: imageUrls?.length,
-      userEmail: session.user.email,
-    })
-
-    // Validate inputs
-    if (!imageUrls || imageUrls.length === 0) {
-      return NextResponse.json({ error: "No images provided" }, { status: 400 })
+    // Validate required fields
+    if (!projectName || !gender || !uploadedPhotos || uploadedPhotos.length < 4) {
+      return NextResponse.json(
+        {
+          error: "Missing required fields or insufficient photos",
+        },
+        { status: 400 },
+      )
     }
 
-    // Clean project name - only letters, numbers, spaces
-    const cleanName = projectName.replace(/[^a-zA-Z0-9\s]/g, "").trim()
-    if (!cleanName) {
-      return NextResponse.json({ error: "Invalid project name" }, { status: 400 })
-    }
-
-    // Get user ID
-    const userResult = await sql`
-      SELECT id FROM users WHERE email = ${session.user.email}
-    `
-
-    if (userResult.length === 0) {
+    const user = await getUserByEmail(session.user.email)
+    if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 })
     }
 
-    const user = userResult[0]
-
-    // Check credits in separate credits table
-    const creditsResult = await sql`
+    // Check credits
+    const creditResult = await sql`
       SELECT credits FROM credits WHERE user_id = ${user.id}
     `
 
-    const currentCredits = creditsResult[0]?.credits || 0
-
+    const currentCredits = creditResult[0]?.credits || 0
     if (currentCredits < 1) {
-      return NextResponse.json({ error: "Insufficient credits" }, { status: 400 })
+      return NextResponse.json(
+        {
+          error: "Insufficient credits. Please purchase credits to continue.",
+        },
+        { status: 400 },
+      )
     }
 
-    // Create project in database with credits_used = 1
-    const projectResult = await sql`
-      INSERT INTO projects (
-        user_id, 
-        name, 
-        gender, 
-        uploaded_photos, 
-        status, 
-        credits_used,
-        created_at, 
-        updated_at
-      )
-      VALUES (
-        ${user.id}, 
-        ${cleanName}, 
-        ${gender}, 
-        ${imageUrls}, 
-        'training', 
-        1,
-        NOW(), 
-        NOW()
-      )
-      RETURNING id, name, gender, status, credits_used
+    // Create project with credits_used = 1
+    const result = await sql`
+      INSERT INTO projects (user_id, name, gender, outfits, backgrounds, uploaded_photos, status, credits_used)
+      VALUES (${user.id}, ${projectName}, ${gender}, ${[]}, ${[]}, ${uploadedPhotos}, 'training', 1)
+      RETURNING id
+    `
+    const projectId = result[0].id
+
+    // Use EXACT same code as working create-with-pack route
+    const baseUrl = process.env.NEXTAUTH_URL || `https://${process.env.VERCEL_URL}`
+    const DOMAIN = "https://api.astria.ai"
+    const selectedPackId = "928" // Use pack 928
+
+    const tuneBody = {
+      tune: {
+        title: `${projectName}_${projectId}`,
+        name: gender,
+        image_urls: uploadedPhotos,
+        callback: `${baseUrl}/api/astria/train-webhook?user_id=${user.id}&model_id=${projectId}&webhook_secret=${appWebhookSecret}`,
+        prompt_attributes: {
+          callback: `${baseUrl}/api/astria/prompt-webhook?user_id=${user.id}&model_id=${projectId}&webhook_secret=${appWebhookSecret}`,
+        },
+      },
+    }
+
+    console.log(`Creating tune with pack ${selectedPackId}`)
+
+    const response = await axios.post(`${DOMAIN}/p/${selectedPackId}/tunes`, tuneBody, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${astriaApiKey}`,
+      },
+    })
+
+    if (response.status !== 201) {
+      console.error("Astria error:", response.status, response.data)
+      await sql`DELETE FROM projects WHERE id = ${projectId}`
+      return NextResponse.json({ message: "Astria API error" }, { status: response.status })
+    }
+
+    // Update project with tune ID
+    await sql`
+      UPDATE projects 
+      SET tune_id = ${response.data.id.toString()}, status = 'training'
+      WHERE id = ${projectId}
     `
 
-    const project = projectResult[0]
-
-    // Deduct credit from credits table
+    // Deduct credit
     await sql`
       UPDATE credits 
-      SET credits = credits - 1, updated_at = NOW()
+      SET credits = ${currentCredits - 1}, updated_at = CURRENT_TIMESTAMP
       WHERE user_id = ${user.id}
     `
 
-    // Create tune with Astria using pack 928
-    const packId = "928"
-    const tuneResult = await createTuneWithPack(packId, {
-      title: cleanName,
-      name: `project${project.id}${Date.now()}`, // No spaces or special chars
-      imageUrls: imageUrls,
-      projectId: project.id,
-      userId: user.id,
-    })
-
-    // Update project with tune_id
-    await sql`
-      UPDATE projects 
-      SET tune_id = ${tuneResult.id}, updated_at = NOW()
-      WHERE id = ${project.id}
-    `
+    console.log(`✅ Credits deducted: ${currentCredits} -> ${currentCredits - 1}`)
 
     return NextResponse.json({
-      success: true,
-      project: {
-        id: project.id,
-        name: project.name,
-        status: project.status,
-        tuneId: tuneResult.id,
-        creditsUsed: project.credits_used,
-      },
-      message: "Project created successfully with credit",
+      projectId: projectId,
+      tuneId: response.data.id,
+      message: "Project created and generation started",
     })
   } catch (error) {
-    console.error("❌ Create with credit error:", error)
+    console.error("Error creating project with credit:", error)
     return NextResponse.json(
       {
-        error: "Failed to create project with credit",
+        error: "Internal server error",
         details: error instanceof Error ? error.message : "Unknown error",
       },
       { status: 500 },
