@@ -9,7 +9,7 @@ export async function GET() {
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user?.email) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 })
     }
 
     const user = await getUserByEmail(session.user.email)
@@ -19,10 +19,10 @@ export async function GET() {
 
     // Get user credits
     const creditResult = await sql`
-      SELECT * FROM credits WHERE user_id = ${user.id}
+      SELECT credits, updated_at FROM credits WHERE user_id = ${user.id}
     `
 
-    // Get all projects
+    // Get all user projects
     const projects = await sql`
       SELECT id, name, status, credits_used, created_at 
       FROM projects 
@@ -30,11 +30,10 @@ export async function GET() {
       ORDER BY created_at DESC
     `
 
-    // Calculate totals
+    const currentCredits = creditResult[0]?.credits || 0
     const totalProjects = projects.length
     const completedProjects = projects.filter((p) => p.status === "completed").length
-    const totalCreditsUsed = projects.reduce((sum, p) => sum + (p.credits_used || 0), 0)
-    const currentCredits = creditResult[0]?.credits || 0
+    const creditsUsedInProjects = projects.reduce((sum, p) => sum + (p.credits_used || 0), 0)
 
     return NextResponse.json({
       user: {
@@ -44,27 +43,30 @@ export async function GET() {
       credits: {
         current: currentCredits,
         lastUpdated: creditResult[0]?.updated_at,
-        totalUsed: totalCreditsUsed,
       },
       projects: {
         total: totalProjects,
         completed: completedProjects,
-        list: projects.map((p) => ({
-          id: p.id,
-          name: p.name,
-          status: p.status,
-          creditsUsed: p.credits_used || 0,
-          date: p.created_at,
-        })),
+        creditsUsed: creditsUsedInProjects,
+        available: currentCredits,
       },
       analysis: {
-        problemDetected: totalCreditsUsed === 0 && completedProjects > 0,
-        availableCredits: currentCredits,
-        shouldHaveUsed: completedProjects,
+        problemDetected: creditsUsedInProjects === 0 && completedProjects > 0,
+        message:
+          creditsUsedInProjects === 0 && completedProjects > 0
+            ? "❌ Credits worden niet afgetrokken bij projecten"
+            : "✅ Credits lijken correct te worden afgetrokken van projecten.",
       },
+      recentProjects: projects.slice(0, 20).map((p) => ({
+        id: p.id,
+        name: p.name,
+        status: p.status,
+        creditsUsed: p.credits_used || 0,
+        date: new Date(p.created_at).toLocaleDateString("nl-NL"),
+      })),
     })
   } catch (error) {
     console.error("Credit flow debug error:", error)
-    return NextResponse.json({ error: "Debug failed" }, { status: 500 })
+    return NextResponse.json({ error: "Something went wrong" }, { status: 500 })
   }
 }

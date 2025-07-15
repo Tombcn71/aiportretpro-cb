@@ -13,24 +13,24 @@ interface CreditFlowData {
   credits: {
     current: number
     lastUpdated: string
-    totalUsed: number
   }
   projects: {
     total: number
     completed: number
-    list: Array<{
-      id: number
-      name: string
-      status: string
-      creditsUsed: number
-      date: string
-    }>
+    creditsUsed: number
+    available: number
   }
   analysis: {
     problemDetected: boolean
-    availableCredits: number
-    shouldHaveUsed: number
+    message: string
   }
+  recentProjects: Array<{
+    id: number
+    name: string
+    status: string
+    creditsUsed: number
+    date: string
+  }>
 }
 
 export default function DebugCreditFlow() {
@@ -44,7 +44,7 @@ export default function DebugCreditFlow() {
       const result = await response.json()
       setData(result)
     } catch (error) {
-      console.error("Failed to fetch credit flow data:", error)
+      console.error("Error fetching credit flow:", error)
     } finally {
       setLoading(false)
     }
@@ -56,58 +56,72 @@ export default function DebugCreditFlow() {
 
   if (loading) {
     return (
-      <div className="container mx-auto p-6">
-        <div className="text-center">Loading credit analysis...</div>
+      <div className="container mx-auto p-4">
+        <Card>
+          <CardContent className="p-6">
+            <div className="text-center">Loading credit analysis...</div>
+          </CardContent>
+        </Card>
       </div>
     )
   }
 
   if (!data) {
     return (
-      <div className="container mx-auto p-6">
-        <div className="text-center text-red-500">Failed to load data</div>
+      <div className="container mx-auto p-4">
+        <Card>
+          <CardContent className="p-6">
+            <div className="text-center text-red-600">Error loading data</div>
+          </CardContent>
+        </Card>
       </div>
     )
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Credit Flow Debug</h1>
-        <Button onClick={fetchData}>Refresh Data</Button>
+    <div className="container mx-auto p-4 space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center justify-between">
+            Credit Flow Debug
+            <Button onClick={fetchData} variant="outline" size="sm">
+              Refresh Data
+            </Button>
+          </CardTitle>
+          <p className="text-sm text-gray-600">Analyseer hoe credits werken zonder iets te veranderen</p>
+        </CardHeader>
+      </Card>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>User Information</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            <div>
+              <strong>User ID:</strong> {data.user.id}
+            </div>
+            <div>
+              <strong>Email:</strong> {data.user.email}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Credits Status</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            <div>
+              <strong>Current Credits:</strong> {data.credits.current}
+            </div>
+            <div>
+              <strong>Last Updated:</strong> {new Date(data.credits.lastUpdated).toLocaleString()}
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
-      <p className="text-gray-600">Analyseer hoe credits werken zonder iets te veranderen</p>
-
-      {/* User Info */}
-      <Card>
-        <CardHeader>
-          <CardTitle>User Information</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p>
-            <strong>User ID:</strong> {data.user.id}
-          </p>
-          <p>
-            <strong>Email:</strong> {data.user.email}
-          </p>
-        </CardContent>
-      </Card>
-
-      {/* Credits Status */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Credits Status</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-2">
-          <div className="text-2xl font-bold text-green-600">Current Credits: {data.credits.current}</div>
-          <p>
-            <strong>Last Updated:</strong> {new Date(data.credits.lastUpdated).toLocaleString()}
-          </p>
-        </CardContent>
-      </Card>
-
-      {/* Credit Analysis */}
       <Card>
         <CardHeader>
           <CardTitle>Credit Analysis</CardTitle>
@@ -123,48 +137,54 @@ export default function DebugCreditFlow() {
               <div className="text-sm text-gray-600">Completed</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold">{data.credits.totalUsed}</div>
+              <div className="text-2xl font-bold">{data.projects.creditsUsed}</div>
               <div className="text-sm text-gray-600">Credits Used in Projects</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold">{data.analysis.availableCredits}</div>
+              <div className="text-2xl font-bold">{data.projects.available}</div>
               <div className="text-sm text-gray-600">Available Credits</div>
             </div>
           </div>
 
-          {/* Problem Detection */}
-          <div className="mt-4 p-4 rounded-lg bg-red-50 border border-red-200">
-            <h3 className="font-bold text-red-800">🔍 Problem Detection:</h3>
-            {data.analysis.problemDetected ? (
-              <p className="text-red-700">
-                ❌ Credits worden NIET afgetrokken! Je hebt {data.projects.completed} voltooide projecten maar slechts{" "}
-                {data.credits.totalUsed} credits gebruikt.
-              </p>
-            ) : (
-              <p className="text-green-700">✅ Credits lijken correct te worden afgetrokken van projecten.</p>
-            )}
+          <div className="p-4 rounded-lg bg-gray-50">
+            <div className="font-medium">🔍 Problem Detection:</div>
+            <div className={data.analysis.problemDetected ? "text-red-600" : "text-green-600"}>
+              {data.analysis.message}
+            </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Recent Projects */}
       <Card>
         <CardHeader>
           <CardTitle>Recent Projects</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
-            {data.projects.list.slice(0, 20).map((project) => (
-              <div key={project.id} className="flex justify-between items-center p-3 border rounded">
-                <div>
-                  <strong>{project.name}</strong> (ID: {project.id})
+            {data.recentProjects.map((project) => (
+              <div key={project.id} className="flex items-center justify-between p-3 border rounded-lg">
+                <div className="flex items-center space-x-3">
+                  <div>
+                    <div className="font-medium">{project.name}</div>
+                    <div className="text-sm text-gray-600">(ID: {project.id})</div>
+                  </div>
+                  <Badge
+                    variant={
+                      project.status === "completed"
+                        ? "default"
+                        : project.status === "training"
+                          ? "secondary"
+                          : project.status === "failed"
+                            ? "destructive"
+                            : "outline"
+                    }
+                  >
+                    {project.status}
+                  </Badge>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Badge variant={project.status === "completed" ? "default" : "secondary"}>{project.status}</Badge>
-                  <span className={project.creditsUsed > 0 ? "text-green-600" : "text-red-600"}>
-                    Credits used: {project.creditsUsed}
-                  </span>
-                  <span className="text-gray-500 text-sm">{new Date(project.date).toLocaleDateString()}</span>
+                <div className="text-right">
+                  <div className="font-medium">Credits used: {project.creditsUsed}</div>
+                  <div className="text-sm text-gray-600">{project.date}</div>
                 </div>
               </div>
             ))}

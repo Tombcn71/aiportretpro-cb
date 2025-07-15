@@ -11,7 +11,7 @@ export async function POST(request: Request) {
 
     const session = await getServerSession(authOptions)
     if (!session?.user?.email) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 })
     }
 
     const user = await getUserByEmail(session.user.email)
@@ -21,14 +21,16 @@ export async function POST(request: Request) {
 
     // Get project info
     const project = await sql`
-      SELECT * FROM projects WHERE id = ${projectId} AND user_id = ${user.id}
+      SELECT id, name, status, credits_used, user_id 
+      FROM projects 
+      WHERE id = ${projectId} AND user_id = ${user.id}
     `
 
     if (project.length === 0) {
       return NextResponse.json({ error: "Project not found" }, { status: 404 })
     }
 
-    // Get current credits
+    // Get user credits
     const creditResult = await sql`
       SELECT credits FROM credits WHERE user_id = ${user.id}
     `
@@ -48,7 +50,8 @@ export async function POST(request: Request) {
         canDeductCredit: currentCredits > 0,
       },
       actions: {
-        shouldDeductCredit: projectData.status === "completed" && (projectData.credits_used || 0) === 0,
+        shouldDeductCredit:
+          projectData.credits_used === 0 && (projectData.status === "completed" || projectData.status === "trained"),
         dryRun,
       },
     }
@@ -59,11 +62,11 @@ export async function POST(request: Request) {
         analysis,
         wouldDo: analysis.actions.shouldDeductCredit
           ? "Would deduct 1 credit and mark project as credits_used = 1"
-          : "No action needed",
+          : "No changes needed",
       })
     }
 
-    // Actually fix the credit if not dry run
+    // Actually make the changes
     if (analysis.actions.shouldDeductCredit && analysis.user.canDeductCredit) {
       // Deduct credit from user
       await sql`
@@ -85,13 +88,13 @@ export async function POST(request: Request) {
         changes: {
           creditDeducted: 1,
           newCreditBalance: currentCredits - 1,
-          projectUpdated: true,
+          projectMarked: true,
         },
       })
     }
 
     return NextResponse.json({
-      message: "No action taken",
+      message: "No changes made",
       analysis,
       reason: !analysis.actions.shouldDeductCredit
         ? "Project doesn't need credit deduction"
@@ -99,6 +102,6 @@ export async function POST(request: Request) {
     })
   } catch (error) {
     console.error("Test credit fix error:", error)
-    return NextResponse.json({ error: "Test failed" }, { status: 500 })
+    return NextResponse.json({ error: "Something went wrong" }, { status: 500 })
   }
 }

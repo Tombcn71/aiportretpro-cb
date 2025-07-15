@@ -85,11 +85,12 @@ export async function POST(request: Request) {
   let projectId
   try {
     const result = await sql`
-      INSERT INTO projects (user_id, name, gender, outfits, backgrounds, uploaded_photos, status)
-      VALUES (${user.id}, ${projectName}, ${gender}, ${[]}, ${[]}, ${uploadedPhotos}, 'training')
+      INSERT INTO projects (user_id, name, gender, outfits, backgrounds, uploaded_photos, status, credits_used)
+      VALUES (${user.id}, ${projectName}, ${gender}, ${[]}, ${[]}, ${uploadedPhotos}, 'training', ${stripeIsConfigured ? 1 : 0})
       RETURNING id
     `
     projectId = result[0].id
+    console.log(`✅ Project created with ID ${projectId}, credits_used: ${stripeIsConfigured ? 1 : 0}`)
   } catch (error) {
     console.error("Project creation error:", error)
     return NextResponse.json({ message: "Something went wrong!" }, { status: 500 })
@@ -134,13 +135,14 @@ export async function POST(request: Request) {
       WHERE id = ${projectId}
     `
 
-    // Deduct credits
+    // Deduct credits PROPERLY
     if (stripeIsConfigured && userCredits > 0) {
       await sql`
         UPDATE credits 
         SET credits = ${userCredits - 1}, updated_at = CURRENT_TIMESTAMP
         WHERE user_id = ${user.id}
       `
+      console.log(`✅ Credits deducted: ${userCredits} -> ${userCredits - 1}`)
     }
 
     return NextResponse.json({
