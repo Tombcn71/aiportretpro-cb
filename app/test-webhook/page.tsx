@@ -1,190 +1,184 @@
 "use client"
 
+import type React from "react"
+
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { CheckCircle, XCircle, RefreshCw, Database, Webhook } from "lucide-react"
 
 export default function TestWebhookPage() {
-  const [result, setResult] = useState<any>(null)
-  const [loading, setLoading] = useState(false)
+  const [manualFetchResult, setManualFetchResult] = useState<any>(null)
+  const [webhookTestResult, setWebhookTestResult] = useState<any>(null)
+  const [dbFixResult, setDbFixResult] = useState<any>(null)
+  const [loading, setLoading] = useState<string | null>(null)
 
   const testManualFetch = async () => {
-    setLoading(true)
+    setLoading("manual-fetch")
     try {
       const response = await fetch("/api/astria/manual-fetch", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          projectId: 42,
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ projectId: 42 }),
       })
-
       const data = await response.json()
-      setResult(data)
-      console.log("Manual fetch result:", data)
+      setManualFetchResult(data)
     } catch (error) {
-      console.error("Error:", error)
-      setResult({ error: error.message })
+      setManualFetchResult({ error: "Failed to test manual fetch" })
     } finally {
-      setLoading(false)
+      setLoading(null)
     }
   }
 
   const testWebhookSimulation = async () => {
-    setLoading(true)
+    setLoading("webhook-test")
     try {
-      // Simulate what Astria sends based on your actual response
-      const mockAstriaData = {
+      // Simulate a webhook call with test data
+      const testWebhookData = {
         prompt: {
-          id: 27826412,
-          tune_id: 1504944,
+          id: 12345,
+          tune_id: 2955915,
           status: "succeeded",
-          images: [
-            "https://mp.astria.ai/i2r2nxnfcql9y0a275tm8w00dzu7",
-            "https://mp.astria.ai/miutwrn6ablzka0cq3hblg3hkp5v",
-            "https://mp.astria.ai/9dm59qqrbt3w5epp88faxct18dm2",
-          ],
+          images: ["https://mp.astria.ai/test1.jpg", "https://mp.astria.ai/test2.jpg"],
           tunes: [
             {
               id: 2955915,
               title: "toms test fotoshoot",
               model_type: "lora",
               name: "man",
-              branch: "flux1",
             },
           ],
         },
       }
 
-      const response = await fetch("/api/astria/prompt-webhook?model_id=2955915&webhook_secret=shadf892yr32548hq23h", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      const response = await fetch(
+        "/api/astria/prompt-webhook?user_id=1&model_id=2955915&webhook_secret=shadf892yr32548hq23h",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(testWebhookData),
         },
-        body: JSON.stringify(mockAstriaData),
-      })
-
+      )
       const data = await response.json()
-      setResult(data)
-      console.log("Webhook simulation result:", data)
+      setWebhookTestResult(data)
     } catch (error) {
-      console.error("Error:", error)
-      setResult({ error: error.message })
+      setWebhookTestResult({ error: "Failed to test webhook" })
     } finally {
-      setLoading(false)
+      setLoading(null)
     }
   }
 
   const fixDatabase = async () => {
-    setLoading(true)
+    setLoading("db-fix")
     try {
       const response = await fetch("/api/database/fix-json", {
         method: "POST",
       })
-
       const data = await response.json()
-      setResult(data)
-      console.log("Fix database result:", data)
+      setDbFixResult(data)
     } catch (error) {
-      console.error("Error:", error)
-      setResult({ error: error.message })
+      setDbFixResult({ error: "Failed to fix database" })
     } finally {
-      setLoading(false)
+      setLoading(null)
     }
   }
 
-  return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold mb-8">Test Webhook & Manual Fetch</h1>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <Card>
-            <CardHeader>
-              <CardTitle>✅ Manual Fetch</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-gray-600 mb-4">Test manual fetch voor project #42 (werkt!)</p>
-              <Button onClick={testManualFetch} disabled={loading} className="w-full">
-                {loading ? "Fetching..." : "🔄 Test Manual Fetch"}
-              </Button>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>🧪 Webhook Test</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-gray-600 mb-4">Simuleer een Astria webhook</p>
-              <Button onClick={testWebhookSimulation} disabled={loading} className="w-full">
-                {loading ? "Testing..." : "🧪 Test Webhook"}
-              </Button>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>🔧 Fix Database</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-gray-600 mb-4">Fix malformed JSON in database</p>
-              <Button onClick={fixDatabase} disabled={loading} className="w-full">
-                {loading ? "Fixing..." : "🔧 Fix Database"}
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-
-        {result && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Result</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <pre className="bg-gray-100 p-4 rounded text-sm overflow-auto max-h-96">
-                {JSON.stringify(result, null, 2)}
-              </pre>
-            </CardContent>
-          </Card>
+  const ResultCard = ({ title, result, icon }: { title: string; result: any; icon: React.ReactNode }) => (
+    <Card className="mt-4">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          {icon}
+          {title}
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        {result ? (
+          <div className="space-y-2">
+            {result.success ? (
+              <Badge variant="default" className="bg-green-100 text-green-800">
+                <CheckCircle className="h-3 w-3 mr-1" />
+                Success
+              </Badge>
+            ) : (
+              <Badge variant="destructive">
+                <XCircle className="h-3 w-3 mr-1" />
+                Error
+              </Badge>
+            )}
+            <pre className="bg-gray-100 p-3 rounded text-xs overflow-auto max-h-48">
+              {JSON.stringify(result, null, 2)}
+            </pre>
+          </div>
+        ) : (
+          <p className="text-gray-500">No result yet</p>
         )}
+      </CardContent>
+    </Card>
+  )
 
-        <div className="mt-8">
-          <Card>
-            <CardHeader>
-              <CardTitle>✅ Success! Next Steps</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="bg-green-50 p-4 rounded-lg">
-                  <h4 className="font-semibold text-green-800 mb-2">Manual Fetch Works!</h4>
-                  <p className="text-sm text-green-700">Found 40 photos and saved them to the database.</p>
-                </div>
+  return (
+    <div className="container mx-auto p-6 max-w-4xl">
+      <Card>
+        <CardHeader>
+          <CardTitle>Test Webhook & Database</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Button
+              onClick={fixDatabase}
+              disabled={loading === "db-fix"}
+              variant="outline"
+              className="h-20 flex flex-col items-center justify-center bg-transparent"
+            >
+              {loading === "db-fix" ? <RefreshCw className="h-6 w-6 animate-spin" /> : <Database className="h-6 w-6" />}
+              <span className="mt-2">Fix Database JSON</span>
+            </Button>
 
-                <div className="bg-blue-50 p-4 rounded-lg">
-                  <h4 className="font-semibold text-blue-800 mb-2">Webhook URL Fix Needed</h4>
-                  <p className="text-sm text-blue-700 mb-2">
-                    In Astria, update the webhook URL to use the correct model_id:
-                  </p>
-                  <code className="text-xs bg-blue-100 p-2 rounded block">
-                    https://www.aiportretpro.nl/api/astria/prompt-webhook?user_id=1&model_id=2955915&webhook_secret=shadf892yr32548hq23h
-                  </code>
-                  <p className="text-xs text-blue-600 mt-2">Changed model_id from 42 to 2955915 (the actual tune_id)</p>
-                </div>
+            <Button
+              onClick={testManualFetch}
+              disabled={loading === "manual-fetch"}
+              variant="outline"
+              className="h-20 flex flex-col items-center justify-center bg-transparent"
+            >
+              {loading === "manual-fetch" ? (
+                <RefreshCw className="h-6 w-6 animate-spin" />
+              ) : (
+                <RefreshCw className="h-6 w-6" />
+              )}
+              <span className="mt-2">Test Manual Fetch</span>
+            </Button>
 
-                <ol className="list-decimal list-inside space-y-2 text-sm">
-                  <li>Test webhook simulation above</li>
-                  <li>Go to /dashboard to see the 40 photos</li>
-                  <li>Update webhook URL in Astria dashboard</li>
-                  <li>Test with a new generation</li>
-                </ol>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
+            <Button
+              onClick={testWebhookSimulation}
+              disabled={loading === "webhook-test"}
+              variant="outline"
+              className="h-20 flex flex-col items-center justify-center bg-transparent"
+            >
+              {loading === "webhook-test" ? (
+                <RefreshCw className="h-6 w-6 animate-spin" />
+              ) : (
+                <Webhook className="h-6 w-6" />
+              )}
+              <span className="mt-2">Test Webhook</span>
+            </Button>
+          </div>
+
+          <div className="p-4 bg-blue-50 rounded-lg">
+            <h3 className="font-semibold text-blue-900 mb-2">Test Order:</h3>
+            <ol className="list-decimal list-inside space-y-1 text-sm text-blue-800">
+              <li>First: Fix Database JSON (if needed)</li>
+              <li>Second: Test Manual Fetch (should find 40 photos)</li>
+              <li>Third: Test Webhook Simulation</li>
+              <li>Finally: Check dashboard for photos</li>
+            </ol>
+          </div>
+
+          <ResultCard title="Database Fix Result" result={dbFixResult} icon={<Database className="h-5 w-5" />} />
+          <ResultCard title="Manual Fetch Result" result={manualFetchResult} icon={<RefreshCw className="h-5 w-5" />} />
+          <ResultCard title="Webhook Test Result" result={webhookTestResult} icon={<Webhook className="h-5 w-5" />} />
+        </CardContent>
+      </Card>
     </div>
   )
 }

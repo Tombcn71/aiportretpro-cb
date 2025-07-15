@@ -5,73 +5,98 @@ export async function POST() {
   try {
     console.log("🔧 Starting database JSON fix...")
 
-    // Get all projects with generated_photos
+    // Get all projects with malformed JSON in generated_photos
     const projects = await sql`
       SELECT id, name, generated_photos 
       FROM projects 
-      WHERE generated_photos IS NOT NULL
+      WHERE generated_photos IS NOT NULL 
+      AND generated_photos != '[]'
+      AND generated_photos != ''
     `
 
-    console.log(`📊 Found ${projects.length} projects with photos`)
+    console.log(`📊 Found ${projects.length} projects to check`)
 
     let fixedCount = 0
-    let errorCount = 0
+    const results = []
 
     for (const project of projects) {
       try {
         let photos: string[] = []
 
-        if (project.generated_photos) {
-          // If it's already an array, skip
-          if (Array.isArray(project.generated_photos)) {
-            console.log(`✅ Project ${project.id} already has array format`)
-            continue
-          }
-
+        // Try to parse the existing data
+        if (typeof project.generated_photos === "string") {
           // If it's a string, try to parse it
-          if (typeof project.generated_photos === "string") {
-            let jsonString = project.generated_photos
-
-            // Handle double-escaped JSON like "\"[...]\""
-            if (jsonString.startsWith('"[') && jsonString.endsWith(']"')) {
-              jsonString = jsonString.slice(1, -1) // Remove outer quotes
-              jsonString = jsonString.replace(/\\"/g, '"') // Unescape quotes
+          try {
+            photos = JSON.parse(project.generated_photos)
+          } catch (parseError) {
+            // If parsing fails, try to extract URLs from malformed string
+            const urlMatches = project.generated_photos.match(/https:\/\/[^"]+/g)
+            if (urlMatches) {
+              photos = urlMatches
             }
-
-            photos = JSON.parse(jsonString)
           }
-
-          if (Array.isArray(photos) && photos.length > 0) {
-            // Update with PostgreSQL array
-            await sql`
-              UPDATE projects 
-              SET generated_photos = ${photos}
-              WHERE id = ${project.id}
-            `
-
-            console.log(`✅ Fixed project ${project.id}: ${photos.length} photos`)
-            fixedCount++
-          }
+        } else if (Array.isArray(project.generated_photos)) {
+          // If it's already an array, use it
+          photos = project.generated_photos
         }
-      } catch (error) {
-        console.error(`❌ Error fixing project ${project.id}:`, error.message)
-        errorCount++
+
+        // Filter for valid URLs
+        const validPhotos = photos.filter(
+          (photo) => typeof photo === "string" && photo.startsWith("http") && photo.includes("astria.ai"),
+        )
+
+        if (validPhotos.length > 0) {
+          // Update with PostgreSQL array syntax
+          await sql`
+            UPDATE projects 
+            SET generated_photos = ${validPhotos}
+            WHERE id = ${project.id}
+          `
+
+          fixedCount++
+          results.push({
+            projectId: project.id,
+            projectName: project.name,
+            photosFound: validPhotos.length,
+            status: "fixed",
+          })
+
+          console.log(`✅ Fixed project ${project.id}: ${validPhotos.length} photos`)
+        } else {
+          results.push({
+            projectId: project.id,
+            projectName: project.name,
+            photosFound: 0,
+            status: "no_photos",
+          })
+        }
+      } catch (projectError) {
+        console.error(`❌ Error fixing project ${project.id}:`, projectError)
+        results.push({
+          projectId: project.id,
+          projectName: project.name,
+          status: "error",
+          error: projectError instanceof Error ? projectError.message : "Unknown error",
+        })
       }
     }
 
+    console.log(`✅ Database fix completed: ${fixedCount} projects fixed`)
+
     return NextResponse.json({
       success: true,
-      message: `Fixed ${fixedCount} projects, ${errorCount} errors`,
-      fixedCount,
-      errorCount,
+      message: `Fixed ${fixedCount} projects`,
       totalProjects: projects.length,
+      fixedProjects: fixedCount,
+      results,
     })
   } catch (error) {
-    console.error("❌ Database fix error:", error)
+    console.error("❌ Database fix failed:", error)
     return NextResponse.json(
       {
+        success: false,
         error: "Database fix failed",
-        details: error.message,
+        details: error instanceof Error ? error.message : "Unknown error",
       },
       { status: 500 },
     )
