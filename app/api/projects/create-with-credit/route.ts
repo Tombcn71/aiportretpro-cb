@@ -1,84 +1,117 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
-import { createProject, getUserByEmail } from "@/lib/db"
-import { CreditManager } from "@/lib/credits"
-import { generateWithSelectedPack } from "@/lib/astria"
+import { neon } from "@neondatabase/serverless"
+import { createTuneWithPack } from "@/lib/astria"
+
+const sql = neon(process.env.DATABASE_URL!)
 
 export async function POST(request: NextRequest) {
   try {
-    console.log("Creating project with credit...")
-
     const session = await getServerSession(authOptions)
     if (!session?.user?.email) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const data = await request.json()
-    const { projectName, gender, uploadedPhotos } = data
+    const { projectName, gender, imageUrls } = await request.json()
 
-    // Validate required fields
-    if (!projectName || !gender || !uploadedPhotos || uploadedPhotos.length < 4) {
-      return NextResponse.json(
-        {
-          error: "Missing required fields or insufficient photos",
-        },
-        { status: 400 },
-      )
-    }
+    console.log("🎯 Creating project with credit:", {
+      projectName,
+      gender,
+      imageCount: imageUrls?.length,
+      userEmail: session.user.email,
+    })
 
-    const user = await getUserByEmail(session.user.email)
-    if (!user) {
+    // Get user ID and check credits
+    const userResult = await sql`
+      SELECT id, credits FROM users WHERE email = ${session.user.email}
+    `
+
+    if (userResult.length === 0) {
       return NextResponse.json({ error: "User not found" }, { status: 404 })
     }
 
-    // Check if user has credits
-    const availableCredits = await CreditManager.getUserCredits(user.id)
-    if (availableCredits < 1) {
-      return NextResponse.json(
-        {
-          error: "Insufficient credits. Please purchase credits to continue.",
-        },
-        { status: 400 },
-      )
+    const user = userResult[0]
+    console.log("👤 User found:", { id: user.id, credits: user.credits })
+
+    if (user.credits < 1) {
+      return NextResponse.json({ error: "Insufficient credits" }, { status: 400 })
     }
 
-    // Create project
-    const project = await createProject({
+    // Create project in database with credits_used = 1
+    const projectResult = await sql`
+      INSERT INTO projects (
+        user_id, 
+        name, 
+        gender, 
+        uploaded_photos, 
+        status, 
+        credits_used,
+        created_at, 
+        updated_at
+      )
+      VALUES (
+        ${user.id}, 
+        ${projectName}, 
+        ${gender}, 
+        ${imageUrls}, 
+        'training', 
+        1,
+        NOW(), 
+        NOW()
+      )
+      RETURNING id, name, gender, status, credits_used
+    `
+
+    const project = projectResult[0]
+    console.log("📦 Project created:", project)
+
+    // Deduct credit from user
+    await sql`
+      UPDATE users 
+      SET credits = credits - 1, updated_at = NOW()
+      WHERE id = ${user.id}
+    `
+
+    console.log("💳 Credit deducted from user")
+
+    // Create tune with Astria using pack 928
+    const packId = "928"
+    const tuneResult = await createTuneWithPack(packId, {
+      title: projectName,
+      name: `project_${project.id}_${Date.now()}`,
+      imageUrls: imageUrls,
+      projectId: project.id,
       userId: user.id,
-      purchaseId: 1, // Not needed for credit system
-      name: projectName,
-      gender,
-      outfits: [], // Not used with pack system
-      backgrounds: [], // Not used with pack system
-      uploadedPhotos,
     })
 
-    // Generate with pack 928
-    const astriaResponse = await generateWithSelectedPack({
-      packId: "928",
-      images: uploadedPhotos,
-      projectName,
-      gender,
-      projectId: project.id,
-    })
+    console.log("🎨 Astria tune created:", tuneResult)
 
-    console.log("Project created and generation started:", {
-      projectId: project.id,
-      astriaId: astriaResponse.id,
-    })
+    // Update project with tune_id
+    await sql`
+      UPDATE projects 
+      SET tune_id = ${tuneResult.id}, updated_at = NOW()
+      WHERE id = ${project.id}
+    `
 
-    await CreditManager.useCredit(user.id, project.id)
+    console.log("✅ Project updated with tune_id:", tuneResult.id)
 
     return NextResponse.json({
-      projectId: project.id,
-      message: "Project created and generation started",
+      success: true,
+      project: {
+        id: project.id,
+        name: project.name,
+        status: project.status,
+        tuneId: tuneResult.id,
+        creditsUsed: project.credits_used,
+      },
+      message: "Project created successfully with credit",
     })
   } catch (error) {
-    console.error("Error creating project with credit:", error)
+    console.error("❌ Create with credit error:", error)
     return NextResponse.json(
       {
-        error: "Internal server error",
+        error: "Failed to create project with credit",
         details: error instanceof Error ? error.message : "Unknown error",
       },
       { status: 500 },
