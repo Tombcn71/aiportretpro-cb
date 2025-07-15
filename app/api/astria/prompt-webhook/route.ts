@@ -90,10 +90,10 @@ export async function POST(request: NextRequest) {
       const allPhotos = [...currentPhotos, ...imageUrls]
       const uniquePhotos = [...new Set(allPhotos)]
 
-      // Update project with new photos
+      // FIX: Use PostgreSQL array format, not JSON string
       await sql`
         UPDATE projects 
-        SET generated_photos = ${JSON.stringify(uniquePhotos)}, 
+        SET generated_photos = ${uniquePhotos}, 
             status = CASE 
               WHEN ${uniquePhotos.length} >= 40 THEN 'completed'
               ELSE 'processing'
