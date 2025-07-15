@@ -25,6 +25,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         success: false,
         error: `Project already has tune_id: ${project.tune_id}`,
+        tuneId: project.tune_id,
       })
     }
 
