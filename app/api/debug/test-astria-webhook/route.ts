@@ -1,15 +1,17 @@
 import { NextResponse } from "next/server"
 
-export async function GET() {
-  const webhookUrl = `${process.env.NEXTAUTH_URL}/api/astria/prompt-webhook?user_id=1&model_id=39&webhook_secret=${process.env.APP_WEBHOOK_SECRET}`
-
-  const testPayload = {
-    id: "test_prompt_123",
-    status: "finished",
-    images: ["https://example.com/test1.jpg", "https://example.com/test2.jpg"],
-  }
-
+export async function POST() {
   try {
+    // Test payload that mimics Astria's webhook format
+    const testPayload = {
+      id: "test_prompt_123",
+      images: ["https://example.com/test1.jpg", "https://example.com/test2.jpg"],
+      status: "finished",
+    }
+
+    // Send test webhook to our prompt webhook endpoint
+    const webhookUrl = `${process.env.NEXTAUTH_URL}/api/astria/prompt-webhook?user_id=1&model_id=39&webhook_secret=${process.env.APP_WEBHOOK_SECRET}`
+
     const response = await fetch(webhookUrl, {
       method: "POST",
       headers: {
@@ -18,15 +20,21 @@ export async function GET() {
       body: JSON.stringify(testPayload),
     })
 
-    const data = await response.json()
+    let result
+    try {
+      result = await response.json()
+    } catch (e) {
+      result = await response.text()
+    }
 
     return NextResponse.json({
+      success: true,
       status: response.status,
-      data,
-      webhookUrl: webhookUrl.replace(process.env.APP_WEBHOOK_SECRET!, "***SECRET***"),
+      data: result,
+      webhookUrl: webhookUrl.replace(process.env.APP_WEBHOOK_SECRET, "***SECRET***"),
     })
   } catch (error) {
-    console.error("Astria webhook test error:", error)
-    return NextResponse.json({ error: "Test failed", details: error.message }, { status: 500 })
+    console.error("Test Astria webhook error:", error)
+    return NextResponse.json({ error: "Failed to test Astria webhook", details: error.message }, { status: 500 })
   }
 }

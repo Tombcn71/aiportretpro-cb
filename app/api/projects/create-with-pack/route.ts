@@ -107,28 +107,50 @@ export async function POST(request: Request) {
 
     const DOMAIN = "https://api.astria.ai"
 
-    // Use the pack-based API with the selected pack ID (ORIGINELE WERKENDE VERSIE)
-    const packBody = {
+    // Create tune using Astria API format based on documentation
+    const tuneBody = {
       tune: {
-        title: projectName,
-        name: gender,
-        callback: trainWebhookWithParams,
-        prompt_attributes: {
-          callback: promptWebhookWithParams,
-        },
-        image_urls: uploadedPhotos,
+        title: `${projectName}_${projectId}_${Date.now()}`, // UUID-like identifier for idempotency
+        name: gender, // Class name (man, woman, etc.)
+        image_urls: uploadedPhotos, // Array of training images
+        callback: trainWebhookWithParams, // Webhook for training completion
+        branch: "sdxl1", // Use SDXL branch
+        token: "ohwx", // Default token for SDXL
+        face_crop: true, // Enable face detection and cropping
+        training_face_correct: true, // Enhance low quality images
+        auto_extend: false, // Don't auto-extend when expires
+        prompts_attributes: [
+          {
+            text: `ohwx ${gender}, professional headshot, high quality, studio lighting`,
+            num_images: 4,
+            callback: promptWebhookWithParams,
+          },
+          {
+            text: `ohwx ${gender}, business portrait, corporate style, clean background`,
+            num_images: 4,
+            callback: promptWebhookWithParams,
+          },
+          {
+            text: `ohwx ${gender}, casual portrait, natural lighting, friendly expression`,
+            num_images: 4,
+            callback: promptWebhookWithParams,
+          },
+          {
+            text: `ohwx ${gender}, linkedin profile photo, professional attire, confident pose`,
+            num_images: 4,
+            callback: promptWebhookWithParams,
+          },
+        ],
       },
     }
 
-    console.log(`🎯 EXACT REQUEST TO ASTRIA:`)
-    console.log(`URL: ${DOMAIN}/p/${selectedPackId}/tunes`)
-    console.log(`Body:`, JSON.stringify(packBody, null, 2))
+    console.log(`🎯 CREATING TUNE WITH ASTRIA:`)
+    console.log(`URL: ${DOMAIN}/tunes`)
+    console.log(`Body:`, JSON.stringify(tuneBody, null, 2))
     console.log(`Train webhook: ${trainWebhookWithParams}`)
     console.log(`Prompt webhook: ${promptWebhookWithParams}`)
 
-    console.log(`🎯 Using selected pack: ${selectedPackId}`)
-
-    const response = await axios.post(`${DOMAIN}/p/${selectedPackId}/tunes`, packBody, {
+    const response = await axios.post(`${DOMAIN}/tunes`, tuneBody, {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${astriaApiKey}`,
@@ -144,25 +166,23 @@ export async function POST(request: Request) {
       await sql`DELETE FROM projects WHERE id = ${projectId}`
 
       if (status === 400) {
-        return NextResponse.json({ message: "Invalid request - check pack ID and parameters" }, { status })
+        return NextResponse.json({ message: "Invalid request - check parameters" }, { status })
       }
       if (status === 402) {
         return NextResponse.json({ message: "Training models is only available on paid plans." }, { status })
       }
       if (status === 404) {
-        return NextResponse.json(
-          { message: `Pack ${selectedPackId} not found. Please select a different pack.` },
-          { status },
-        )
+        return NextResponse.json({ message: "API endpoint not found" }, { status })
       }
     }
 
-    console.log("✅ Pack training started successfully!")
+    console.log("✅ Tune creation started successfully!")
+    console.log("Astria response:", response.data)
 
     // Update project with Astria tune ID
     await sql`
       UPDATE projects 
-      SET prediction_id = ${response.data.id.toString()}, status = 'training'
+      SET tune_id = ${response.data.id.toString()}, status = 'training'
       WHERE id = ${projectId}
     `
 
@@ -181,12 +201,12 @@ export async function POST(request: Request) {
       {
         message: "success",
         projectId: projectId,
-        packId: selectedPackId,
+        tuneId: response.data.id,
       },
       { status: 200 },
     )
   } catch (e) {
-    console.error("Pack generation error:", e)
+    console.error("Tune creation error:", e)
 
     // Rollback: Delete the created project if something goes wrong
     if (projectId) {
@@ -201,11 +221,8 @@ export async function POST(request: Request) {
         url: e.config?.url,
       })
 
-      if (e.response?.status === 404) {
-        return NextResponse.json(
-          { message: `Pack ${selectedPackId} not found. Please select a different pack.` },
-          { status: 404 },
-        )
+      if (e.response?.status === 402) {
+        return NextResponse.json({ message: "Training models is only available on paid plans." }, { status: 402 })
       }
     }
 

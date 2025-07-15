@@ -9,7 +9,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Project ID is required" }, { status: 400 })
     }
 
-    // Get project
+    console.log(`🔄 Manual fetch requested for project ${projectId}`)
+
+    // Get project details
     const projects = await sql`
       SELECT * FROM projects WHERE id = ${projectId}
     `
@@ -24,46 +26,61 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Project has no tune_id" }, { status: 400 })
     }
 
-    console.log(`🔍 Fetching images for project ${project.id} with tune_id: ${project.tune_id}`)
+    console.log(`📁 Fetching photos for project: ${project.name} (tune_id: ${project.tune_id})`)
 
     // Fetch from Astria API
-    const astriaResponse = await fetch(`https://api.astria.ai/tunes/${project.tune_id}/prompts`, {
+    const astriaApiKey = process.env.ASTRIA_API_KEY
+    if (!astriaApiKey) {
+      return NextResponse.json({ error: "Astria API key not configured" }, { status: 500 })
+    }
+
+    // Get all prompts for this tune
+    const response = await fetch(`https://api.astria.ai/tunes/${project.tune_id}/prompts`, {
       headers: {
-        Authorization: `Bearer ${process.env.ASTRIA_API_KEY}`,
+        Authorization: `Bearer ${astriaApiKey}`,
         "Content-Type": "application/json",
       },
     })
 
-    if (!astriaResponse.ok) {
-      const errorText = await astriaResponse.text()
-      console.error("Astria API error:", errorText)
+    if (!response.ok) {
+      const errorText = await response.text()
+      console.error(`Astria API error: ${response.status} - ${errorText}`)
       return NextResponse.json(
-        { error: "Failed to fetch from Astria API", details: errorText },
-        { status: astriaResponse.status },
+        { error: `Astria API error: ${response.status}`, details: errorText },
+        { status: response.status },
       )
     }
 
-    const astriaData = await astriaResponse.json()
-    console.log("Astria API response:", JSON.stringify(astriaData, null, 2))
+    const prompts = await response.json()
+    console.log(`📸 Found ${prompts.length} prompts for tune ${project.tune_id}`)
 
     // Extract all images from all prompts
     const allImages: string[] = []
+    let promptCount = 0
+    let imageCount = 0
 
-    if (Array.isArray(astriaData)) {
-      for (const prompt of astriaData) {
-        if (prompt.images && Array.isArray(prompt.images)) {
-          for (const img of prompt.images) {
-            if (typeof img === "string") {
-              allImages.push(img)
-            } else if (img && img.url) {
-              allImages.push(img.url)
-            }
+    for (const prompt of prompts) {
+      if (prompt.images && Array.isArray(prompt.images)) {
+        promptCount++
+        for (const imageUrl of prompt.images) {
+          if (typeof imageUrl === "string" && imageUrl.startsWith("http")) {
+            allImages.push(imageUrl)
+            imageCount++
           }
         }
       }
     }
 
-    console.log(`🎯 Found ${allImages.length} images total`)
+    console.log(`🎯 Extracted ${imageCount} images from ${promptCount} prompts`)
+
+    if (allImages.length === 0) {
+      return NextResponse.json({
+        success: true,
+        message: "No images found in Astria API",
+        promptCount,
+        imageCount: 0,
+      })
+    }
 
     // Get existing photos
     let existingPhotos: string[] = []
@@ -72,50 +89,50 @@ export async function POST(request: NextRequest) {
         existingPhotos =
           typeof project.generated_photos === "string" ? JSON.parse(project.generated_photos) : project.generated_photos
       } catch (e) {
-        console.warn("Could not parse existing photos")
+        console.warn("Could not parse existing photos, starting fresh")
         existingPhotos = []
       }
     }
 
-    // Add new images
+    // Combine with existing photos
     const combinedPhotos = [...existingPhotos]
     let addedCount = 0
 
-    for (const imageUrl of allImages) {
-      if (!combinedPhotos.includes(imageUrl)) {
-        combinedPhotos.push(imageUrl)
+    for (const newUrl of allImages) {
+      if (!combinedPhotos.includes(newUrl)) {
+        combinedPhotos.push(newUrl)
         addedCount++
       }
     }
 
     // Update database
-    if (addedCount > 0) {
-      await sql`
-        UPDATE projects 
-        SET 
-          generated_photos = ${JSON.stringify(combinedPhotos)},
-          status = CASE 
-            WHEN ${combinedPhotos.length} >= 40 THEN 'completed'
-            ELSE 'processing'
-          END,
-          updated_at = CURRENT_TIMESTAMP
-        WHERE id = ${projectId}
-      `
+    await sql`
+      UPDATE projects 
+      SET 
+        generated_photos = ${JSON.stringify(combinedPhotos)},
+        status = CASE 
+          WHEN ${combinedPhotos.length} >= 28 THEN 'completed'
+          ELSE 'processing'
+        END,
+        updated_at = CURRENT_TIMESTAMP
+      WHERE id = ${projectId}
+    `
 
-      console.log(`✅ Added ${addedCount} new photos. Total: ${combinedPhotos.length}`)
-    }
+    console.log(`✅ Updated project ${projectId}: Added ${addedCount} new photos. Total: ${combinedPhotos.length}`)
 
     return NextResponse.json({
       success: true,
-      projectId,
-      tune_id: project.tune_id,
-      totalImages: allImages.length,
-      newImages: addedCount,
+      message: `Successfully fetched ${addedCount} new photos`,
+      promptCount,
+      imageCount,
+      addedCount,
       totalPhotos: combinedPhotos.length,
-      astriaResponse: astriaData,
     })
   } catch (error) {
     console.error("Manual fetch error:", error)
-    return NextResponse.json({ error: "Internal server error", details: error.message }, { status: 500 })
+    return NextResponse.json(
+      { error: "Failed to fetch photos", details: error instanceof Error ? error.message : String(error) },
+      { status: 500 },
+    )
   }
 }
