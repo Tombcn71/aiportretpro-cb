@@ -36,10 +36,21 @@ export async function POST(request: NextRequest) {
 
     console.log("📦 Parsed webhook data:", JSON.stringify(webhookData, null, 2))
 
-    // Extract image URLs from webhook data
+    // Extract image URLs from webhook data - FIX: images are in webhookData.prompt.images
     const imageUrls: string[] = []
 
-    if (webhookData.images && Array.isArray(webhookData.images)) {
+    // Check in the prompt object first (this is where your images are!)
+    if (webhookData.prompt && webhookData.prompt.images && Array.isArray(webhookData.prompt.images)) {
+      for (const image of webhookData.prompt.images) {
+        if (typeof image === "string" && image.startsWith("http")) {
+          imageUrls.push(image)
+        } else if (image && image.url && typeof image.url === "string") {
+          imageUrls.push(image.url)
+        }
+      }
+    }
+    // Fallback: check in root images array
+    else if (webhookData.images && Array.isArray(webhookData.images)) {
       for (const image of webhookData.images) {
         if (typeof image === "string" && image.startsWith("http")) {
           imageUrls.push(image)
@@ -92,9 +103,16 @@ export async function POST(request: NextRequest) {
       `
 
       console.log(`✅ Updated project ${modelId} with ${uniquePhotos.length} total photos`)
+      console.log(`📸 New photos added:`, imageUrls)
+    } else {
+      console.log("⚠️ No images found in webhook - check structure")
     }
 
-    return NextResponse.json({ success: true })
+    return NextResponse.json({
+      success: true,
+      imagesFound: imageUrls.length,
+      imageUrls: imageUrls,
+    })
   } catch (error) {
     console.error("❌ Prompt webhook error:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
