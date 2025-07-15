@@ -3,49 +3,55 @@ import { sql } from "@/lib/db"
 
 export async function POST() {
   try {
-    console.log("🔧 Starting JSON fix...")
+    console.log("🔧 Starting database JSON fix...")
 
-    // Get all projects with photos
+    // Get all projects with generated_photos
     const projects = await sql`
-      SELECT id, name, generated_photos
+      SELECT id, name, generated_photos 
       FROM projects 
       WHERE generated_photos IS NOT NULL
     `
 
-    console.log(`Found ${projects.length} projects with photos`)
+    console.log(`📊 Found ${projects.length} projects with photos`)
 
     let fixedCount = 0
     let errorCount = 0
 
     for (const project of projects) {
       try {
-        const photosData = project.generated_photos
+        let photos: string[] = []
 
-        // Check if it's a malformed JSON string (starts with quote)
-        if (typeof photosData === "string" && photosData.startsWith('"[') && photosData.endsWith(']"')) {
-          console.log(`🔧 Fixing project ${project.id}: ${project.name}`)
+        if (project.generated_photos) {
+          // If it's already an array, skip
+          if (Array.isArray(project.generated_photos)) {
+            console.log(`✅ Project ${project.id} already has array format`)
+            continue
+          }
 
-          // Remove outer quotes and unescape
-          let cleanedData = photosData.slice(1, -1) // Remove outer quotes
-          cleanedData = cleanedData.replace(/\\"/g, '"') // Unescape quotes
+          // If it's a string, try to parse it
+          if (typeof project.generated_photos === "string") {
+            let jsonString = project.generated_photos
 
-          // Parse to get array
-          const photoArray = JSON.parse(cleanedData)
+            // Handle double-escaped JSON like "\"[...]\""
+            if (jsonString.startsWith('"[') && jsonString.endsWith(']"')) {
+              jsonString = jsonString.slice(1, -1) // Remove outer quotes
+              jsonString = jsonString.replace(/\\"/g, '"') // Unescape quotes
+            }
 
-          if (Array.isArray(photoArray)) {
-            // Update with PostgreSQL array syntax
+            photos = JSON.parse(jsonString)
+          }
+
+          if (Array.isArray(photos) && photos.length > 0) {
+            // Update with PostgreSQL array
             await sql`
               UPDATE projects 
-              SET generated_photos = ${photoArray}
+              SET generated_photos = ${photos}
               WHERE id = ${project.id}
             `
+
+            console.log(`✅ Fixed project ${project.id}: ${photos.length} photos`)
             fixedCount++
-            console.log(`✅ Fixed project ${project.id} - ${photoArray.length} photos`)
           }
-        } else if (Array.isArray(photosData)) {
-          console.log(`✅ Project ${project.id} already has valid array`)
-        } else {
-          console.log(`⚠️ Project ${project.id} has unknown format:`, typeof photosData)
         }
       } catch (error) {
         console.error(`❌ Error fixing project ${project.id}:`, error.message)
@@ -53,31 +59,18 @@ export async function POST() {
       }
     }
 
-    // Check final results
-    const results = await sql`
-      SELECT id, name, 
-             CASE 
-               WHEN generated_photos IS NULL THEN 'NULL'
-               WHEN array_length(generated_photos, 1) IS NULL THEN 'EMPTY ARRAY'
-               ELSE array_length(generated_photos, 1)::text || ' photos'
-             END as photo_count
-      FROM projects 
-      WHERE generated_photos IS NOT NULL
-      ORDER BY id
-    `
-
     return NextResponse.json({
-      message: "JSON fix completed",
-      totalProjects: projects.length,
+      success: true,
+      message: `Fixed ${fixedCount} projects, ${errorCount} errors`,
       fixedCount,
       errorCount,
-      results,
+      totalProjects: projects.length,
     })
   } catch (error) {
-    console.error("❌ JSON fix error:", error)
+    console.error("❌ Database fix error:", error)
     return NextResponse.json(
       {
-        error: "JSON fix failed",
+        error: "Database fix failed",
         details: error.message,
       },
       { status: 500 },

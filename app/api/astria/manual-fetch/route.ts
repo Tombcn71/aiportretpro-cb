@@ -34,21 +34,38 @@ export async function POST(request: Request) {
     }
 
     const data = await response.json()
-    console.log(`📊 Astria returned ${data.length} prompts`)
+    console.log(`📊 Astria returned:`, JSON.stringify(data, null, 2))
 
-    // Extract all image URLs
+    // Extract all image URLs - based on your example structure
     const allImages: string[] = []
-    for (const prompt of data) {
-      if (prompt.images && Array.isArray(prompt.images)) {
-        for (const image of prompt.images) {
-          if (image.url) {
-            allImages.push(image.url)
+
+    if (Array.isArray(data)) {
+      // If it's an array of prompts
+      for (const prompt of data) {
+        if (prompt.images && Array.isArray(prompt.images)) {
+          // Images can be either strings or objects with url property
+          for (const image of prompt.images) {
+            if (typeof image === "string") {
+              allImages.push(image)
+            } else if (image && image.url) {
+              allImages.push(image.url)
+            }
           }
+        }
+      }
+    } else if (data.images && Array.isArray(data.images)) {
+      // If it's a single response with images array
+      for (const image of data.images) {
+        if (typeof image === "string") {
+          allImages.push(image)
+        } else if (image && image.url) {
+          allImages.push(image.url)
         }
       }
     }
 
     console.log(`📸 Found ${allImages.length} total images`)
+    console.log(`📸 Sample images:`, allImages.slice(0, 3))
 
     if (allImages.length > 0) {
       // Update project with PostgreSQL array syntax
@@ -72,6 +89,7 @@ export async function POST(request: Request) {
       projectId,
       totalImages: allImages.length,
       images: allImages.slice(0, 5), // Show first 5 as sample
+      rawAstriaResponse: data, // Include raw response for debugging
     })
   } catch (error) {
     console.error("❌ Manual fetch error:", error)

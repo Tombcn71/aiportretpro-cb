@@ -1,29 +1,25 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { sql } from "@/lib/db"
 
-export const dynamic = "force-dynamic"
-
 export async function POST(request: NextRequest) {
   try {
     console.log("🖼️ PROMPT WEBHOOK CALLED")
-    console.log("Headers:", Object.fromEntries(request.headers.entries()))
-    console.log("URL:", request.url)
 
     const body = await request.json()
-    console.log("🖼️ Prompt webhook body:", JSON.stringify(body, null, 2))
+    console.log("🖼️ Webhook body:", JSON.stringify(body, null, 2))
 
-    // Handle different webhook formats
-    const promptData = body.data || body
+    // Extract data from webhook - handle different formats
+    const promptData = body.prompt || body.data || body
     const tuneId = promptData.tune_id
     const status = promptData.status
     const images = promptData.images
 
     if (!tuneId) {
-      console.error("❌ No tune ID found in prompt webhook")
+      console.error("❌ No tune ID found in webhook")
       return NextResponse.json({ error: "No tune ID" }, { status: 400 })
     }
 
-    console.log(`🔍 Processing prompt for tune ${tuneId} with status: ${status}`)
+    console.log(`🔍 Processing webhook for tune ${tuneId} with status: ${status}`)
 
     // Find project by tune_id
     const projects = await sql`
@@ -38,36 +34,39 @@ export async function POST(request: NextRequest) {
     const project = projects[0]
     console.log(`📁 Found project: ${project.id} - ${project.name}`)
 
-    if (status === "succeeded" && images && Array.isArray(images)) {
+    // Process images if status is succeeded and images exist
+    if (status === "succeeded" && images && Array.isArray(images) && images.length > 0) {
       console.log(`📸 Processing ${images.length} new images`)
 
-      // Get existing photos
+      // Get existing photos (now as PostgreSQL array)
       let existingPhotos: string[] = []
-      if (project.generated_photos) {
-        try {
-          existingPhotos = Array.isArray(project.generated_photos)
-            ? project.generated_photos
-            : JSON.parse(project.generated_photos)
-        } catch (e) {
-          console.warn("Could not parse existing photos")
-          existingPhotos = []
+      if (project.generated_photos && Array.isArray(project.generated_photos)) {
+        existingPhotos = project.generated_photos
+      }
+
+      // Extract image URLs from webhook
+      const newImageUrls: string[] = []
+      for (const image of images) {
+        if (typeof image === "string") {
+          newImageUrls.push(image)
+        } else if (image && image.url) {
+          newImageUrls.push(image.url)
         }
       }
 
-      // Add new image URLs
-      const newImageUrls = images
-        .filter((img: any) => img.url && typeof img.url === "string")
-        .map((img: any) => img.url)
-
+      // Combine with existing photos
       const allPhotos = [...existingPhotos]
+      let addedCount = 0
+
       for (const newUrl of newImageUrls) {
         if (!allPhotos.includes(newUrl)) {
           allPhotos.push(newUrl)
+          addedCount++
         }
       }
 
-      if (newImageUrls.length > 0) {
-        // Use PostgreSQL array syntax, not JSON.stringify
+      if (addedCount > 0) {
+        // Update with PostgreSQL array (not JSON string!)
         await sql`
           UPDATE projects 
           SET 
@@ -80,13 +79,19 @@ export async function POST(request: NextRequest) {
           WHERE id = ${project.id}
         `
 
-        console.log(`✅ Added ${newImageUrls.length} photos to project ${project.id}. Total: ${allPhotos.length}`)
+        console.log(`✅ Webhook: Added ${addedCount} photos to project ${project.id}. Total: ${allPhotos.length}`)
       }
     }
 
-    return NextResponse.json({ success: true, processed: true })
+    return NextResponse.json({
+      success: true,
+      processed: true,
+      tuneId,
+      status,
+      imagesReceived: images?.length || 0,
+    })
   } catch (error) {
-    console.error("❌ Prompt webhook error:", error)
+    console.error("❌ Webhook error:", error)
     return NextResponse.json({ error: "Webhook error" }, { status: 500 })
   }
 }
