@@ -22,9 +22,9 @@ export async function POST(request: NextRequest) {
       userEmail: session.user.email,
     })
 
-    // Get user ID and check credits
+    // Get user ID
     const userResult = await sql`
-      SELECT id, credits FROM users WHERE email = ${session.user.email}
+      SELECT id FROM users WHERE email = ${session.user.email}
     `
 
     if (userResult.length === 0) {
@@ -32,9 +32,17 @@ export async function POST(request: NextRequest) {
     }
 
     const user = userResult[0]
-    console.log("👤 User found:", { id: user.id, credits: user.credits })
+    console.log("👤 User found:", { id: user.id })
 
-    if (user.credits < 1) {
+    // Check credits in separate credits table
+    const creditsResult = await sql`
+      SELECT credits FROM credits WHERE user_id = ${user.id}
+    `
+
+    const currentCredits = creditsResult[0]?.credits || 0
+    console.log("💳 Current credits:", currentCredits)
+
+    if (currentCredits < 1) {
       return NextResponse.json({ error: "Insufficient credits" }, { status: 400 })
     }
 
@@ -66,14 +74,14 @@ export async function POST(request: NextRequest) {
     const project = projectResult[0]
     console.log("📦 Project created:", project)
 
-    // Deduct credit from user
+    // Deduct credit from credits table
     await sql`
-      UPDATE users 
+      UPDATE credits 
       SET credits = credits - 1, updated_at = NOW()
-      WHERE id = ${user.id}
+      WHERE user_id = ${user.id}
     `
 
-    console.log("💳 Credit deducted from user")
+    console.log("💳 Credit deducted from credits table")
 
     // Create tune with Astria using pack 928
     const packId = "928"

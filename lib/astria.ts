@@ -1,3 +1,6 @@
+import { neon } from "@neondatabase/serverless"
+
+const sql = neon(process.env.DATABASE_URL!)
 const ASTRIA_API_URL = process.env.ASTRIA_API_URL || "https://api.astria.ai"
 const ASTRIA_API_KEY = process.env.ASTRIA_API_KEY
 
@@ -103,10 +106,17 @@ export async function getAstriaModelStatus(tuneId: string) {
   }
 }
 
-export async function generateWithSelectedPack(packId: string, userId: string, projectId: string) {
+export async function generateWithSelectedPack(options: {
+  packId: string
+  images: string[]
+  projectName: string
+  gender: string
+  projectId: number
+}) {
   try {
-    // Create tune with pack
-    const response = await fetch(`${ASTRIA_API_URL}/p/${packId}/tunes`, {
+    console.log("🎯 Generating with selected pack:", options)
+
+    const response = await fetch("https://api.astria.ai/tunes", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${ASTRIA_API_KEY}`,
@@ -114,39 +124,38 @@ export async function generateWithSelectedPack(packId: string, userId: string, p
       },
       body: JSON.stringify({
         tune: {
-          title: `Project ${projectId}`,
-          name: `project_${projectId}_${Date.now()}`,
-          callback: `${process.env.NEXTAUTH_URL}/api/astria/train-webhook?user_id=${userId}&model_id=${projectId}&webhook_secret=${process.env.APP_WEBHOOK_SECRET}`,
-          prompt_attributes: {
-            callback: `${process.env.NEXTAUTH_URL}/api/astria/prompt-webhook?user_id=${userId}&model_id=${projectId}&webhook_secret=${process.env.APP_WEBHOOK_SECRET}`,
-          },
+          title: `${options.projectName} - ${options.gender}`,
+          name: `project_${options.projectId}_${Date.now()}`,
+          image_urls: options.images,
+          callback: `${process.env.NEXTAUTH_URL}/api/astria/train-webhook?userId=1&modelId=${options.projectId}&webhookSecret=${process.env.APP_WEBHOOK_SECRET}`,
         },
+        pack_id: options.packId,
       }),
     })
 
     if (!response.ok) {
-      throw new Error(`Failed to create tune with pack: ${response.status} ${response.statusText}`)
+      const errorText = await response.text()
+      console.error("❌ Generate with pack error:", {
+        status: response.status,
+        statusText: response.statusText,
+        body: errorText,
+      })
+      throw new Error(`Failed to generate with pack: ${response.status} ${response.statusText}`)
     }
 
-    const tuneData = await response.json()
+    const result = await response.json()
+    console.log("✅ Generation started:", result)
 
-    return {
-      success: true,
-      tuneId: tuneData.id,
-      message: "Successfully started generation with selected pack",
-    }
+    return result
   } catch (error) {
-    console.error("Generate with selected pack failed:", error)
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Unknown error",
-    }
+    console.error("❌ Error generating with selected pack:", error)
+    throw error
   }
 }
 
 export async function createTuneWithPack(
   packId: string,
-  projectData: {
+  options: {
     title: string
     name: string
     imageUrls: string[]
@@ -154,58 +163,44 @@ export async function createTuneWithPack(
     userId: number
   },
 ) {
-  const webhookUrl = `${process.env.NEXTAUTH_URL}/api/astria/train-webhook`
-  const promptWebhookUrl = `${process.env.NEXTAUTH_URL}/api/astria/prompt-webhook`
+  try {
+    console.log("🎨 Creating tune with pack:", { packId, ...options })
 
-  console.log("🎯 Creating tune with pack:", {
-    packId,
-    title: projectData.title,
-    name: projectData.name,
-    imageCount: projectData.imageUrls.length,
-    webhookUrl,
-    promptWebhookUrl,
-  })
-
-  const payload = {
-    tune: {
-      title: projectData.title,
-      name: projectData.name,
-      callback: webhookUrl,
-      prompt_attributes: {
-        callback: promptWebhookUrl,
+    const response = await fetch("https://api.astria.ai/tunes", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${ASTRIA_API_KEY}`,
+        "Content-Type": "application/json",
       },
-      image_urls: projectData.imageUrls,
-    },
-  }
-
-  console.log("🚀 Sending to Astria:", {
-    url: `${ASTRIA_API_URL}/p/${packId}/tunes`,
-    payload,
-  })
-
-  const response = await fetch(`${ASTRIA_API_URL}/p/${packId}/tunes`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${ASTRIA_API_KEY}`,
-    },
-    body: JSON.stringify(payload),
-  })
-
-  if (!response.ok) {
-    const errorText = await response.text()
-    console.error("❌ Astria API error:", {
-      status: response.status,
-      statusText: response.statusText,
-      error: errorText,
+      body: JSON.stringify({
+        tune: {
+          title: options.title,
+          name: options.name,
+          image_urls: options.imageUrls,
+          callback: `${process.env.NEXTAUTH_URL}/api/astria/train-webhook?userId=${options.userId}&modelId=${options.projectId}&webhookSecret=${process.env.APP_WEBHOOK_SECRET}`,
+        },
+        pack_id: packId,
+      }),
     })
-    throw new Error(`Astria API error: ${response.status} ${response.statusText} - ${errorText}`)
+
+    if (!response.ok) {
+      const errorText = await response.text()
+      console.error("❌ Astria API error:", {
+        status: response.status,
+        statusText: response.statusText,
+        body: errorText,
+      })
+      throw new Error(`Astria API error: ${response.status} ${response.statusText}`)
+    }
+
+    const result = await response.json()
+    console.log("✅ Tune created successfully:", result)
+
+    return result
+  } catch (error) {
+    console.error("❌ Error creating tune with pack:", error)
+    throw error
   }
-
-  const result = await response.json()
-  console.log("✅ Astria response:", result)
-
-  return result
 }
 
 export async function getTuneStatus(tuneId: string) {
