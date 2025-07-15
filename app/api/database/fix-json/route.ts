@@ -5,54 +5,73 @@ export async function POST() {
   try {
     console.log("🔧 Starting JSON fix...")
 
-    // First, let's see what we have
-    const beforeFix = await sql`
+    // Get all projects with photos
+    const projects = await sql`
       SELECT id, name, generated_photos
       FROM projects 
-      WHERE id = 42
-    `
-
-    console.log("Before fix:", beforeFix[0]?.generated_photos)
-
-    // Fix malformed JSON strings
-    await sql`
-      UPDATE projects 
-      SET generated_photos = CASE
-        -- If it's a malformed JSON string, try to parse it properly
-        WHEN generated_photos::text LIKE '"\[%\]"' THEN
-          -- This is a complex fix for double-escaped JSON
-          (
-            SELECT array_agg(trim(both '"' from unnest(string_to_array(
-              replace(replace(replace(generated_photos::text, '\"[\"', ''), '\"]\"', ''), '\",\"', '|'),
-              '|'
-            ))))
-          )
-        ELSE generated_photos
-      END
       WHERE generated_photos IS NOT NULL
-        AND generated_photos::text LIKE '"\[%\]"'
     `
 
-    // Check results
-    const afterFix = await sql`
+    console.log(`Found ${projects.length} projects with photos`)
+
+    let fixedCount = 0
+    let errorCount = 0
+
+    for (const project of projects) {
+      try {
+        const photosData = project.generated_photos
+
+        // Check if it's a malformed JSON string (starts with quote)
+        if (typeof photosData === "string" && photosData.startsWith('"[') && photosData.endsWith(']"')) {
+          console.log(`🔧 Fixing project ${project.id}: ${project.name}`)
+
+          // Remove outer quotes and unescape
+          let cleanedData = photosData.slice(1, -1) // Remove outer quotes
+          cleanedData = cleanedData.replace(/\\"/g, '"') // Unescape quotes
+
+          // Parse to get array
+          const photoArray = JSON.parse(cleanedData)
+
+          if (Array.isArray(photoArray)) {
+            // Update with PostgreSQL array syntax
+            await sql`
+              UPDATE projects 
+              SET generated_photos = ${photoArray}
+              WHERE id = ${project.id}
+            `
+            fixedCount++
+            console.log(`✅ Fixed project ${project.id} - ${photoArray.length} photos`)
+          }
+        } else if (Array.isArray(photosData)) {
+          console.log(`✅ Project ${project.id} already has valid array`)
+        } else {
+          console.log(`⚠️ Project ${project.id} has unknown format:`, typeof photosData)
+        }
+      } catch (error) {
+        console.error(`❌ Error fixing project ${project.id}:`, error.message)
+        errorCount++
+      }
+    }
+
+    // Check final results
+    const results = await sql`
       SELECT id, name, 
              CASE 
                WHEN generated_photos IS NULL THEN 'NULL'
                WHEN array_length(generated_photos, 1) IS NULL THEN 'EMPTY ARRAY'
                ELSE array_length(generated_photos, 1)::text || ' photos'
-             END as photo_count,
-             generated_photos[1:3] as sample_photos
+             END as photo_count
       FROM projects 
       WHERE generated_photos IS NOT NULL
       ORDER BY id
     `
 
-    console.log("✅ JSON fix completed")
-
     return NextResponse.json({
       message: "JSON fix completed",
-      beforeFix: beforeFix[0]?.generated_photos?.substring(0, 100) + "...",
-      results: afterFix,
+      totalProjects: projects.length,
+      fixedCount,
+      errorCount,
+      results,
     })
   } catch (error) {
     console.error("❌ JSON fix error:", error)
