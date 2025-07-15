@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
 
     console.log("📡 Fetching from Astria for tune:", tuneId)
 
-    // Fetch prompts from Astria
+    // Fetch prompts from Astria - this gets ALL prompts for the tune
     const response = await fetch(`https://api.astria.ai/tunes/${tuneId}/prompts`, {
       headers: {
         Authorization: `Bearer ${process.env.ASTRIA_API_KEY}`,
@@ -41,31 +41,58 @@ export async function POST(request: NextRequest) {
 
     if (!response.ok) {
       console.error("Astria API error:", response.status, response.statusText)
-      return NextResponse.json({ error: "Failed to fetch from Astria" }, { status: response.status })
+      const errorText = await response.text()
+      console.error("Error details:", errorText)
+      return NextResponse.json(
+        {
+          error: "Failed to fetch from Astria",
+          status: response.status,
+          details: errorText,
+        },
+        { status: response.status },
+      )
     }
 
     const prompts = await response.json()
     console.log("📦 Astria response:", JSON.stringify(prompts, null, 2))
 
-    // Extract all image URLs
+    // Extract all image URLs from all prompts
     const allImageUrls: string[] = []
 
     if (Array.isArray(prompts)) {
+      console.log(`📋 Processing ${prompts.length} prompts`)
+
       for (const prompt of prompts) {
+        console.log(`📝 Prompt ${prompt.id} status: ${prompt.status || "unknown"}`)
+
         if (prompt.images && Array.isArray(prompt.images)) {
-          const urls = prompt.images.map((img: any) => img.url).filter(Boolean)
-          allImageUrls.push(...urls)
+          console.log(`📸 Found ${prompt.images.length} images in prompt ${prompt.id}`)
+
+          for (const image of prompt.images) {
+            if (typeof image === "string" && image.startsWith("http")) {
+              allImageUrls.push(image)
+            } else if (image && typeof image === "object" && image.url) {
+              allImageUrls.push(image.url)
+            }
+          }
+        } else {
+          console.log(`⚠️ No images array found in prompt ${prompt.id}`)
         }
       }
+    } else {
+      console.log("⚠️ Response is not an array:", typeof prompts)
     }
 
-    console.log("🖼️ Found images:", allImageUrls.length)
+    console.log(`🖼️ Total images found: ${allImageUrls.length}`)
+    console.log(`📸 Sample URLs:`, allImageUrls.slice(0, 3))
 
     if (allImageUrls.length === 0) {
       return NextResponse.json({
-        message: "No images found yet",
+        error: "No images found",
+        message: "No images found in any prompts",
         status: project.status,
-        prompts: prompts,
+        promptCount: Array.isArray(prompts) ? prompts.length : 0,
+        rawResponse: prompts,
       })
     }
 
@@ -92,7 +119,11 @@ export async function POST(request: NextRequest) {
     const allPhotos = [...currentPhotos, ...allImageUrls]
     const uniquePhotos = [...new Set(allPhotos)]
 
-    // Update database
+    console.log(
+      `📊 Photo counts: existing=${currentPhotos.length}, new=${allImageUrls.length}, unique=${uniquePhotos.length}`,
+    )
+
+    // Update database with JSON string (to match your current structure)
     await sql`
       UPDATE projects 
       SET generated_photos = ${JSON.stringify(uniquePhotos)}, 
@@ -104,13 +135,24 @@ export async function POST(request: NextRequest) {
     console.log("✅ Updated project with", uniquePhotos.length, "photos")
 
     return NextResponse.json({
+      success: true,
       message: "Photos fetched successfully",
       photosFound: allImageUrls.length,
       totalPhotos: uniquePhotos.length,
-      newPhotos: allImageUrls.length - (allImageUrls.length - (uniquePhotos.length - currentPhotos.length)),
+      newPhotos:
+        allImageUrls.length -
+        (currentPhotos.length > 0 ? uniquePhotos.length - currentPhotos.length : allImageUrls.length),
+      sampleUrls: allImageUrls.slice(0, 5),
     })
   } catch (error) {
     console.error("❌ Manual fetch error:", error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    return NextResponse.json(
+      {
+        error: "Internal server error",
+        details: error.message,
+        stack: error.stack,
+      },
+      { status: 500 },
+    )
   }
 }
