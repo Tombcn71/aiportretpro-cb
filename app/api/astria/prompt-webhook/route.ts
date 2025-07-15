@@ -20,18 +20,25 @@ export async function POST(request: NextRequest) {
       console.warn("Could not log webhook:", logError)
     }
 
-    // Handle different webhook formats - MORE ROBUST PARSING
+    // IMPROVED PARSING - Handle different webhook formats
     let promptData = body.data || body
-    let tuneId = promptData.tune_id || promptData.tuneId || promptData.id
-    let status = promptData.status
-    let images = promptData.images
+    let tuneId = null
+    let status = null
+    let images = null
 
-    // Try alternative data structures
-    if (!tuneId && body.tune) {
-      tuneId = body.tune.id || body.tune.tune_id
+    // Try multiple ways to extract tune_id
+    if (promptData.tune_id) {
+      tuneId = promptData.tune_id
+    } else if (promptData.tuneId) {
+      tuneId = promptData.tuneId
+    } else if (promptData.id) {
+      tuneId = promptData.id
+    } else if (body.tune && body.tune.id) {
+      tuneId = body.tune.id
       promptData = body.tune
-      status = body.tune.status
-      images = body.tune.images
+    } else if (body.prompt && body.prompt.tune_id) {
+      tuneId = body.prompt.tune_id
+      promptData = body.prompt
     }
 
     // Try URL parameters as fallback
@@ -40,31 +47,33 @@ export async function POST(request: NextRequest) {
       tuneId = url.searchParams.get("model_id") || url.searchParams.get("tune_id")
     }
 
-    // Try to extract from nested structures
-    if (!tuneId && body.prompt) {
-      tuneId = body.prompt.tune_id
-      promptData = body.prompt
-      status = body.prompt.status
-      images = body.prompt.images
-    }
+    // Extract status
+    status = promptData.status || body.status || (body.prompt && body.prompt.status)
 
-    // Try different property names that Astria might use
-    if (!tuneId) {
-      tuneId = body.model_id || body.modelId || body.tune || body.id
+    // CRITICAL: Extract images with better parsing
+    if (promptData.images) {
+      images = promptData.images
+    } else if (body.images) {
+      images = body.images
+    } else if (body.prompt && body.prompt.images) {
+      images = body.prompt.images
+    } else if (body.data && body.data.images) {
+      images = body.data.images
     }
 
     console.log(`🔍 Extracted data:`, {
       tuneId,
       status,
-      imageCount: images ? images.length : 0,
-      promptDataKeys: Object.keys(promptData),
+      imagesType: typeof images,
+      imagesLength: Array.isArray(images) ? images.length : "not array",
+      imagesPreview: Array.isArray(images) ? images.slice(0, 2) : images,
       bodyKeys: Object.keys(body),
+      promptDataKeys: Object.keys(promptData),
     })
 
     if (!tuneId) {
       console.error("❌ No tune ID found in prompt webhook")
-      console.error("Available keys in body:", Object.keys(body))
-      console.error("Available keys in promptData:", Object.keys(promptData))
+      console.error("Full body structure:", JSON.stringify(body, null, 2))
 
       // Try to find project by other means - check recent projects
       const recentProjects = await sql`
@@ -85,7 +94,7 @@ export async function POST(request: NextRequest) {
 
         console.log(`📁 Using most recent project as fallback: ${mostRecentProject.id} - ${mostRecentProject.name}`)
 
-        if (status === "succeeded") {
+        if (status === "succeeded" || status === "completed") {
           await processImages(mostRecentProject, images)
           return NextResponse.json({
             success: true,
@@ -150,10 +159,28 @@ export async function POST(request: NextRequest) {
     const project = projects[0]
     console.log(`📁 Found project: ${project.id} - ${project.name}`)
 
-    if (status === "succeeded" && images && Array.isArray(images)) {
-      await processImages(project, images)
+    // CRITICAL: Check if we have images and status is success
+    if ((status === "succeeded" || status === "completed") && images) {
+      console.log(
+        `📸 Processing images - Type: ${typeof images}, Length: ${Array.isArray(images) ? images.length : "not array"}`,
+      )
+
+      if (Array.isArray(images)) {
+        await processImages(project, images)
+      } else {
+        console.error("❌ Images is not an array:", images)
+        return NextResponse.json(
+          {
+            error: "Images data is not in expected format",
+            imagesType: typeof images,
+            images: images,
+          },
+          { status: 400 },
+        )
+      }
     } else {
       console.log(`ℹ️ Webhook received but not processing: status=${status}, images=${images ? "present" : "missing"}`)
+      console.log(`Images type: ${typeof images}, Array: ${Array.isArray(images)}`)
     }
 
     return NextResponse.json({ success: true, processed: true })
@@ -175,7 +202,8 @@ export async function POST(request: NextRequest) {
 }
 
 async function processImages(project: any, images: any[]) {
-  console.log(`📸 Processing ${images.length} new images for project ${project.id}`)
+  console.log(`📸 Processing ${images.length} images for project ${project.id}`)
+  console.log(`First image sample:`, images[0])
 
   // Get existing photos
   let existingPhotos: string[] = []
@@ -184,13 +212,38 @@ async function processImages(project: any, images: any[]) {
       existingPhotos =
         typeof project.generated_photos === "string" ? JSON.parse(project.generated_photos) : project.generated_photos
     } catch (e) {
-      console.warn("Could not parse existing photos")
+      console.warn("Could not parse existing photos, starting fresh")
       existingPhotos = []
     }
   }
 
-  // Add new image URLs
-  const newImageUrls = images.filter((img: any) => img.url && typeof img.url === "string").map((img: any) => img.url)
+  // IMPROVED IMAGE URL EXTRACTION
+  const newImageUrls: string[] = []
+
+  for (const img of images) {
+    let imageUrl = null
+
+    // Try different ways to extract URL
+    if (typeof img === "string") {
+      imageUrl = img
+    } else if (img && typeof img === "object") {
+      if (img.url) {
+        imageUrl = img.url
+      } else if (img.image_url) {
+        imageUrl = img.image_url
+      } else if (img.src) {
+        imageUrl = img.src
+      }
+    }
+
+    if (imageUrl && typeof imageUrl === "string" && imageUrl.startsWith("http")) {
+      newImageUrls.push(imageUrl)
+    } else {
+      console.warn(`⚠️ Could not extract URL from image:`, img)
+    }
+  }
+
+  console.log(`🎯 Extracted ${newImageUrls.length} valid URLs from ${images.length} images`)
 
   const allPhotos = [...existingPhotos]
   let addedCount = 0

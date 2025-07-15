@@ -1,9 +1,8 @@
-import { type NextRequest, NextResponse } from "next/server"
+import { NextResponse } from "next/server"
 import { sql } from "@/lib/db"
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
-    // Get recent webhook logs
     const logs = await sql`
       SELECT * FROM webhook_logs 
       ORDER BY created_at DESC 
@@ -12,18 +11,16 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      logs: logs,
-      count: logs.length,
+      logs: logs.map((log) => ({
+        id: log.id,
+        type: log.type,
+        payload: typeof log.payload === "string" ? JSON.parse(log.payload) : log.payload,
+        error: log.error,
+        created_at: log.created_at,
+      })),
     })
   } catch (error) {
     console.error("Error fetching webhook logs:", error)
-    return NextResponse.json(
-      {
-        success: false,
-        error: error.message,
-        logs: [],
-      },
-      { status: 500 },
-    )
+    return NextResponse.json({ error: "Failed to fetch webhook logs" }, { status: 500 })
   }
 }
