@@ -51,7 +51,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "User not found" }, { status: 404 })
   }
 
-  // Check credits if Stripe is configured (using Neon database)
+  // Check credits if Stripe is configured
   let userCredits = 0
   if (stripeIsConfigured) {
     try {
@@ -60,7 +60,6 @@ export async function POST(request: Request) {
       `
 
       if (creditResult.length === 0) {
-        // Create credits for user
         await sql`
           INSERT INTO credits (user_id, credits) VALUES (${user.id}, 0)
         `
@@ -82,7 +81,7 @@ export async function POST(request: Request) {
     }
   }
 
-  // Create a project in Neon database
+  // Create a project in database
   let projectId
   try {
     const result = await sql`
@@ -98,132 +97,70 @@ export async function POST(request: Request) {
 
   try {
     const baseUrl = process.env.NEXTAUTH_URL || `https://${process.env.VERCEL_URL}`
-
-    const trainWebhook = `${baseUrl}/api/astria/train-webhook`
-    const trainWebhookWithParams = `${trainWebhook}?user_id=${user.id}&model_id=${projectId}&webhook_secret=${appWebhookSecret}`
-
-    const promptWebhook = `${baseUrl}/api/astria/prompt-webhook`
-    const promptWebhookWithParams = `${promptWebhook}?user_id=${user.id}&model_id=${projectId}&webhook_secret=${appWebhookSecret}`
-
     const DOMAIN = "https://api.astria.ai"
 
-    // Create tune using Astria API format based on documentation
+    // EXACT WORKING FORMAT FROM BEFORE
     const tuneBody = {
       tune: {
-        title: `${projectName}_${projectId}_${Date.now()}`, // UUID-like identifier for idempotency
-        name: gender, // Class name (man, woman, etc.)
-        image_urls: uploadedPhotos, // Array of training images
-        callback: trainWebhookWithParams, // Webhook for training completion
-        branch: "sdxl1", // Use SDXL branch
-        token: "ohwx", // Default token for SDXL
-        face_crop: true, // Enable face detection and cropping
-        training_face_correct: true, // Enhance low quality images
-        auto_extend: false, // Don't auto-extend when expires
-        prompts_attributes: [
-          {
-            text: `ohwx ${gender}, professional headshot, high quality, studio lighting`,
-            num_images: 4,
-            callback: promptWebhookWithParams,
-          },
-          {
-            text: `ohwx ${gender}, business portrait, corporate style, clean background`,
-            num_images: 4,
-            callback: promptWebhookWithParams,
-          },
-          {
-            text: `ohwx ${gender}, casual portrait, natural lighting, friendly expression`,
-            num_images: 4,
-            callback: promptWebhookWithParams,
-          },
-          {
-            text: `ohwx ${gender}, linkedin profile photo, professional attire, confident pose`,
-            num_images: 4,
-            callback: promptWebhookWithParams,
-          },
-        ],
+        title: `${projectName}_${projectId}`,
+        name: gender,
+        image_urls: uploadedPhotos,
+        callback: `${baseUrl}/api/astria/train-webhook?user_id=${user.id}&model_id=${projectId}&webhook_secret=${appWebhookSecret}`,
+        prompt_attributes: {
+          callback: `${baseUrl}/api/astria/prompt-webhook?user_id=${user.id}&model_id=${projectId}&webhook_secret=${appWebhookSecret}`,
+        },
       },
     }
 
-    console.log(`🎯 CREATING TUNE WITH ASTRIA:`)
-    console.log(`URL: ${DOMAIN}/tunes`)
-    console.log(`Body:`, JSON.stringify(tuneBody, null, 2))
-    console.log(`Train webhook: ${trainWebhookWithParams}`)
-    console.log(`Prompt webhook: ${promptWebhookWithParams}`)
+    console.log(`Creating tune with pack ${selectedPackId}`)
 
-    const response = await axios.post(`${DOMAIN}/tunes`, tuneBody, {
+    const response = await axios.post(`${DOMAIN}/p/${selectedPackId}/tunes`, tuneBody, {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${astriaApiKey}`,
       },
     })
 
-    const { status } = response
-
-    if (status !== 201) {
-      console.error({ status, data: response.data })
-
-      // Rollback: Delete the created project if something goes wrong
+    if (response.status !== 201) {
+      console.error("Astria error:", response.status, response.data)
       await sql`DELETE FROM projects WHERE id = ${projectId}`
-
-      if (status === 400) {
-        return NextResponse.json({ message: "Invalid request - check parameters" }, { status })
-      }
-      if (status === 402) {
-        return NextResponse.json({ message: "Training models is only available on paid plans." }, { status })
-      }
-      if (status === 404) {
-        return NextResponse.json({ message: "API endpoint not found" }, { status })
-      }
+      return NextResponse.json({ message: "Astria API error" }, { status: response.status })
     }
 
-    console.log("✅ Tune creation started successfully!")
-    console.log("Astria response:", response.data)
-
-    // Update project with Astria tune ID
+    // Update project with tune ID
     await sql`
       UPDATE projects 
       SET tune_id = ${response.data.id.toString()}, status = 'training'
       WHERE id = ${projectId}
     `
 
-    // Deduct credits if configured
+    // Deduct credits
     if (stripeIsConfigured && userCredits > 0) {
-      const subtractedCredits = userCredits - 1
       await sql`
         UPDATE credits 
-        SET credits = ${subtractedCredits}, updated_at = CURRENT_TIMESTAMP
+        SET credits = ${userCredits - 1}, updated_at = CURRENT_TIMESTAMP
         WHERE user_id = ${user.id}
       `
-      console.log(`Credits deducted: ${userCredits} -> ${subtractedCredits}`)
     }
 
-    return NextResponse.json(
-      {
-        message: "success",
-        projectId: projectId,
-        tuneId: response.data.id,
-      },
-      { status: 200 },
-    )
-  } catch (e) {
-    console.error("Tune creation error:", e)
+    return NextResponse.json({
+      message: "success",
+      projectId: projectId,
+      tuneId: response.data.id,
+    })
+  } catch (error) {
+    console.error("Tune creation error:", error)
 
-    // Rollback: Delete the created project if something goes wrong
+    // Rollback project
     if (projectId) {
       await sql`DELETE FROM projects WHERE id = ${projectId}`
     }
 
-    if (axios.isAxiosError(e)) {
-      console.error("Detailed error:", {
-        status: e.response?.status,
-        statusText: e.response?.statusText,
-        data: e.response?.data,
-        url: e.config?.url,
+    if (axios.isAxiosError(error)) {
+      console.error("Axios error details:", {
+        status: error.response?.status,
+        data: error.response?.data,
       })
-
-      if (e.response?.status === 402) {
-        return NextResponse.json({ message: "Training models is only available on paid plans." }, { status: 402 })
-      }
     }
 
     return NextResponse.json({ message: "Something went wrong!" }, { status: 500 })

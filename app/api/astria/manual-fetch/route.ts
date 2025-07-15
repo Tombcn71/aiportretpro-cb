@@ -1,104 +1,116 @@
-import { NextResponse } from "next/server"
+import { type NextRequest, NextResponse } from "next/server"
 import { sql } from "@/lib/db"
 
-export async function POST(request: Request) {
+export const dynamic = "force-dynamic"
+
+export async function POST(request: NextRequest) {
   try {
     const { projectId } = await request.json()
-    console.log(`🔄 Manual fetch for project ${projectId}`)
 
-    // Get project
-    const projects = await sql`
-      SELECT * FROM projects WHERE id = ${projectId}
+    if (!projectId) {
+      return NextResponse.json({ error: "Project ID is required" }, { status: 400 })
+    }
+
+    console.log("🔍 Manual fetch for project:", projectId)
+
+    // Get project details
+    const projectResult = await sql`
+      SELECT tune_id, status, generated_photos FROM projects WHERE id = ${projectId}
     `
 
-    if (projects.length === 0) {
+    if (projectResult.length === 0) {
       return NextResponse.json({ error: "Project not found" }, { status: 404 })
     }
 
-    const project = projects[0]
-    console.log(`📁 Found project: ${project.name}`)
+    const project = projectResult[0]
+    const tuneId = project.tune_id
 
-    if (!project.tune_id) {
-      return NextResponse.json({ error: "No tune_id found" }, { status: 400 })
+    if (!tuneId) {
+      return NextResponse.json({ error: "No tune ID found for this project" }, { status: 400 })
     }
 
-    // Fetch from Astria API
-    const response = await fetch(`https://api.astria.ai/tunes/${project.tune_id}/prompts`, {
+    console.log("📡 Fetching from Astria for tune:", tuneId)
+
+    // Fetch prompts from Astria
+    const response = await fetch(`https://api.astria.ai/tunes/${tuneId}/prompts`, {
       headers: {
         Authorization: `Bearer ${process.env.ASTRIA_API_KEY}`,
+        "Content-Type": "application/json",
       },
     })
 
     if (!response.ok) {
-      throw new Error(`Astria API error: ${response.status}`)
+      console.error("Astria API error:", response.status, response.statusText)
+      return NextResponse.json({ error: "Failed to fetch from Astria" }, { status: response.status })
     }
 
-    const data = await response.json()
-    console.log(`📊 Astria returned:`, JSON.stringify(data, null, 2))
+    const prompts = await response.json()
+    console.log("📦 Astria response:", JSON.stringify(prompts, null, 2))
 
-    // Extract all image URLs - based on your example structure
-    const allImages: string[] = []
+    // Extract all image URLs
+    const allImageUrls: string[] = []
 
-    if (Array.isArray(data)) {
-      // If it's an array of prompts
-      for (const prompt of data) {
+    if (Array.isArray(prompts)) {
+      for (const prompt of prompts) {
         if (prompt.images && Array.isArray(prompt.images)) {
-          // Images can be either strings or objects with url property
-          for (const image of prompt.images) {
-            if (typeof image === "string") {
-              allImages.push(image)
-            } else if (image && image.url) {
-              allImages.push(image.url)
-            }
+          const urls = prompt.images.map((img: any) => img.url).filter(Boolean)
+          allImageUrls.push(...urls)
+        }
+      }
+    }
+
+    console.log("🖼️ Found images:", allImageUrls.length)
+
+    if (allImageUrls.length === 0) {
+      return NextResponse.json({
+        message: "No images found yet",
+        status: project.status,
+        prompts: prompts,
+      })
+    }
+
+    // Get existing photos
+    let currentPhotos: string[] = []
+    if (project.generated_photos) {
+      try {
+        if (typeof project.generated_photos === "string") {
+          if (project.generated_photos.startsWith("[")) {
+            currentPhotos = JSON.parse(project.generated_photos)
+          } else {
+            currentPhotos = [project.generated_photos]
           }
+        } else if (Array.isArray(project.generated_photos)) {
+          currentPhotos = project.generated_photos
         }
-      }
-    } else if (data.images && Array.isArray(data.images)) {
-      // If it's a single response with images array
-      for (const image of data.images) {
-        if (typeof image === "string") {
-          allImages.push(image)
-        } else if (image && image.url) {
-          allImages.push(image.url)
-        }
+      } catch (e) {
+        console.warn("Could not parse existing photos:", e)
+        currentPhotos = []
       }
     }
 
-    console.log(`📸 Found ${allImages.length} total images`)
-    console.log(`📸 Sample images:`, allImages.slice(0, 3))
+    // Combine and deduplicate
+    const allPhotos = [...currentPhotos, ...allImageUrls]
+    const uniquePhotos = [...new Set(allPhotos)]
 
-    if (allImages.length > 0) {
-      // Update project with PostgreSQL array syntax
-      await sql`
-        UPDATE projects 
-        SET 
-          generated_photos = ${allImages},
-          status = CASE 
-            WHEN ${allImages.length} >= 40 THEN 'completed'
-            ELSE 'processing'
-          END,
+    // Update database
+    await sql`
+      UPDATE projects 
+      SET generated_photos = ${JSON.stringify(uniquePhotos)}, 
+          status = 'completed',
           updated_at = CURRENT_TIMESTAMP
-        WHERE id = ${projectId}
-      `
+      WHERE id = ${projectId}
+    `
 
-      console.log(`✅ Updated project ${projectId} with ${allImages.length} photos`)
-    }
+    console.log("✅ Updated project with", uniquePhotos.length, "photos")
 
     return NextResponse.json({
-      success: true,
-      projectId,
-      totalImages: allImages.length,
-      images: allImages.slice(0, 5), // Show first 5 as sample
-      rawAstriaResponse: data, // Include raw response for debugging
+      message: "Photos fetched successfully",
+      photosFound: allImageUrls.length,
+      totalPhotos: uniquePhotos.length,
+      newPhotos: allImageUrls.length - (allImageUrls.length - (uniquePhotos.length - currentPhotos.length)),
     })
   } catch (error) {
     console.error("❌ Manual fetch error:", error)
-    return NextResponse.json(
-      {
-        error: "Manual fetch failed",
-        details: error.message,
-      },
-      { status: 500 },
-    )
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }
