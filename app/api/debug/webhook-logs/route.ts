@@ -23,11 +23,22 @@ export async function GET(request: NextRequest) {
       `
     }
 
-    return NextResponse.json({ logs })
+    return NextResponse.json({
+      success: true,
+      logs: logs.map((log) => ({
+        id: log.id,
+        type: log.type,
+        payload: typeof log.payload === "string" ? JSON.parse(log.payload) : log.payload,
+        error: log.error,
+        created_at: log.created_at,
+        project_id: log.project_id,
+      })),
+    })
   } catch (error) {
     console.error("Error fetching webhook logs:", error)
     return NextResponse.json(
       {
+        success: false,
         error: "Failed to fetch webhook logs",
         details: error.message,
       },

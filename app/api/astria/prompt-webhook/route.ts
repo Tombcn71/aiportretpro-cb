@@ -30,6 +30,8 @@ export async function POST(request: NextRequest) {
     if (!tuneId && body.tune) {
       tuneId = body.tune.id || body.tune.tune_id
       promptData = body.tune
+      status = body.tune.status
+      images = body.tune.images
     }
 
     // Try URL parameters as fallback
@@ -46,11 +48,17 @@ export async function POST(request: NextRequest) {
       images = body.prompt.images
     }
 
+    // Try different property names that Astria might use
+    if (!tuneId) {
+      tuneId = body.model_id || body.modelId || body.tune || body.id
+    }
+
     console.log(`🔍 Extracted data:`, {
       tuneId,
       status,
       imageCount: images ? images.length : 0,
       promptDataKeys: Object.keys(promptData),
+      bodyKeys: Object.keys(body),
     })
 
     if (!tuneId) {
@@ -58,30 +66,47 @@ export async function POST(request: NextRequest) {
       console.error("Available keys in body:", Object.keys(body))
       console.error("Available keys in promptData:", Object.keys(promptData))
 
-      // Try to find project by other means
-      const url = new URL(request.url)
-      const userId = url.searchParams.get("user_id")
-      const projectId = url.searchParams.get("model_id")
+      // Try to find project by other means - check recent projects
+      const recentProjects = await sql`
+        SELECT id, name, tune_id, status, created_at
+        FROM projects 
+        WHERE tune_id IS NOT NULL 
+        AND status IN ('training', 'processing')
+        ORDER BY created_at DESC 
+        LIMIT 5
+      `
 
-      if (projectId) {
-        console.log(`🔄 Trying fallback with project ID: ${projectId}`)
+      console.log("Recent projects with tune_id:", recentProjects)
 
-        const projects = await sql`
-          SELECT * FROM projects WHERE id = ${Number.parseInt(projectId)}
-        `
+      // If we have images but no tune_id, try to match by timing
+      if (images && Array.isArray(images) && images.length > 0 && recentProjects.length > 0) {
+        console.log("🔄 Attempting to match by recent project...")
+        const mostRecentProject = recentProjects[0]
 
-        if (projects.length > 0) {
-          const project = projects[0]
-          console.log(`📁 Found project via fallback: ${project.id} - ${project.name}`)
+        console.log(`📁 Using most recent project as fallback: ${mostRecentProject.id} - ${mostRecentProject.name}`)
 
-          if (status === "succeeded" && images && Array.isArray(images)) {
-            await processImages(project, images)
-            return NextResponse.json({ success: true, processed: true, method: "fallback" })
-          }
+        if (status === "succeeded") {
+          await processImages(mostRecentProject, images)
+          return NextResponse.json({
+            success: true,
+            processed: true,
+            method: "fallback_recent_project",
+            projectId: mostRecentProject.id,
+          })
         }
       }
 
-      return NextResponse.json({ error: "No tune ID found", debug: { body, url: request.url } }, { status: 400 })
+      return NextResponse.json(
+        {
+          error: "No tune ID found",
+          debug: {
+            bodyKeys: Object.keys(body),
+            promptDataKeys: Object.keys(promptData),
+            recentProjects: recentProjects.map((p) => ({ id: p.id, tune_id: p.tune_id })),
+          },
+        },
+        { status: 400 },
+      )
     }
 
     console.log(`🔍 Processing prompt for tune ${tuneId} with status: ${status}`)
@@ -99,9 +124,9 @@ export async function POST(request: NextRequest) {
     }
 
     // If still not found, try as integer
-    if (projects.length === 0 && !isNaN(tuneId)) {
+    if (projects.length === 0 && !isNaN(Number(tuneId))) {
       projects = await sql`
-        SELECT * FROM projects WHERE tune_id = ${Number.parseInt(tuneId)}
+        SELECT * FROM projects WHERE tune_id = ${Number(tuneId)}
       `
     }
 
