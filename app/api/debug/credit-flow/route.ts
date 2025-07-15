@@ -1,66 +1,70 @@
 import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
-import { sql } from "@/lib/db"
+import { getUserByEmail, sql } from "@/lib/db"
+
+export const dynamic = "force-dynamic"
 
 export async function GET() {
   try {
     const session = await getServerSession(authOptions)
-
     if (!session?.user?.email) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    // Get user
-    const userResult = await sql`
-      SELECT id, email FROM users WHERE email = ${session.user.email}
-    `
-
-    if (!userResult[0]) {
+    const user = await getUserByEmail(session.user.email)
+    if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 })
     }
 
-    const userId = userResult[0].id
-
-    // Check credits table
-    const creditsResult = await sql`
-      SELECT * FROM credits WHERE user_id = ${userId}
+    // Get user credits
+    const creditResult = await sql`
+      SELECT * FROM credits WHERE user_id = ${user.id}
     `
 
-    // Check projects and their credit usage
-    const projectsResult = await sql`
-      SELECT id, name, status, credits_used, created_at FROM projects 
-      WHERE user_id = ${userId} 
+    // Get all projects
+    const projects = await sql`
+      SELECT id, name, status, credits_used, created_at 
+      FROM projects 
+      WHERE user_id = ${user.id} 
       ORDER BY created_at DESC
     `
 
-    // Check recent Stripe payments (if any)
-    const paymentsResult = await sql`
-      SELECT * FROM users WHERE email = ${session.user.email}
-    `
+    // Calculate totals
+    const totalProjects = projects.length
+    const completedProjects = projects.filter((p) => p.status === "completed").length
+    const totalCreditsUsed = projects.reduce((sum, p) => sum + (p.credits_used || 0), 0)
+    const currentCredits = creditResult[0]?.credits || 0
 
     return NextResponse.json({
       user: {
-        id: userId,
-        email: session.user.email,
+        id: user.id,
+        email: user.email,
       },
-      credits: creditsResult[0] || { message: "No credits record found" },
-      projects: projectsResult.map((p) => ({
-        id: p.id,
-        name: p.name,
-        status: p.status,
-        credits_used: p.credits_used,
-        created_at: p.created_at,
-      })),
+      credits: {
+        current: currentCredits,
+        lastUpdated: creditResult[0]?.updated_at,
+        totalUsed: totalCreditsUsed,
+      },
+      projects: {
+        total: totalProjects,
+        completed: completedProjects,
+        list: projects.map((p) => ({
+          id: p.id,
+          name: p.name,
+          status: p.status,
+          creditsUsed: p.credits_used || 0,
+          date: p.created_at,
+        })),
+      },
       analysis: {
-        totalProjects: projectsResult.length,
-        completedProjects: projectsResult.filter((p) => p.status === "completed").length,
-        creditsUsedInProjects: projectsResult.reduce((sum, p) => sum + (p.credits_used || 0), 0),
-        currentCredits: creditsResult[0]?.credits || 0,
+        problemDetected: totalCreditsUsed === 0 && completedProjects > 0,
+        availableCredits: currentCredits,
+        shouldHaveUsed: completedProjects,
       },
     })
   } catch (error) {
     console.error("Credit flow debug error:", error)
-    return NextResponse.json({ error: "Debug failed", details: error.message }, { status: 500 })
+    return NextResponse.json({ error: "Debug failed" }, { status: 500 })
   }
 }
