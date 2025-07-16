@@ -55,76 +55,66 @@ const testimonials = [
   },
 ]
 
+// Carousel photos: Man → Woman → Man → Woman alternating pattern with all different photos
 const carouselPhotos = [
-  {
-    id: 1,
-    photo: "/images/carousel1.jpg",
-    name: "Professional Man Portrait",
-  },
-  {
-    id: 2,
-    photo: "/images/carousel2.jpg",
-    name: "Professional Woman Portrait",
-  },
-  {
-    id: 3,
-    photo: "/images/carousel3.jpg",
-    name: "Professional Man Portrait",
-  },
-  {
-    id: 4,
-    photo: "/images/carousel4.jpg",
-    name: "Professional Woman Portrait",
-  },
-  {
-    id: 5,
-    photo: "/images/carousel5.jpg",
-    name: "Professional Man Portrait",
-  },
-  {
-    id: 6,
-    photo: "/images/carousel6.jpg",
-    name: "Professional Woman Portrait",
-  },
-  {
-    id: 7,
-    photo: "/images/carousel7.jpg",
-    name: "Professional Man Portrait",
-  },
-  {
-    id: 8,
-    photo: "/images/carousel8.jpg",
-    name: "Professional Woman Portrait",
-  },
-  {
-    id: 9,
-    photo: "/images/carousel9.jpg",
-    name: "Professional Man Portrait",
-  },
-  {
-    id: 10,
-    photo: "/images/carousel10.jpg",
-    name: "Professional Woman Portrait",
-  },
+  // Following the same pattern as gallery but extended for carousel
+  { id: 1, photo: "/images/new-man1.jpg", name: "Professional Man Portrait" },
+  { id: 2, photo: "/images/tina1.jpg", name: "Professional Woman Portrait" },
+  { id: 3, photo: "/images/new-man2.jpg", name: "Professional Man Portrait" },
+  { id: 4, photo: "/images/new-woman1.jpg", name: "Professional Woman Portrait" },
+  { id: 5, photo: "/images/new-man3.jpg", name: "Professional Man Portrait" },
+  { id: 6, photo: "/images/new-woman3.jpg", name: "Professional Woman Portrait" },
+  { id: 7, photo: "/images/new-man4.jpg", name: "Professional Man Portrait" },
+  { id: 8, photo: "/images/tina2.jpg", name: "Professional Woman Portrait" },
+  { id: 9, photo: "/images/new-man5.jpg", name: "Professional Man Portrait" },
+  { id: 10, photo: "/images/tina3.jpg", name: "Professional Woman Portrait" },
+  { id: 11, photo: "/images/new-man6.jpg", name: "Professional Man Portrait" },
+  { id: 12, photo: "/images/new-woman2.jpg", name: "Professional Woman Portrait" },
+  { id: 13, photo: "/images/new-man1.jpg", name: "Professional Man Portrait" },
+  { id: 14, photo: "/images/new-woman4.jpg", name: "Professional Woman Portrait" },
+  { id: 15, photo: "/images/new-man2.jpg", name: "Professional Man Portrait" },
+  { id: 16, photo: "/images/tina4.jpg", name: "Professional Woman Portrait" },
+  { id: 17, photo: "/images/new-man3.jpg", name: "Professional Man Portrait" },
+  { id: 18, photo: "/images/new-woman1.jpg", name: "Professional Woman Portrait" },
+  { id: 19, photo: "/images/new-man4.jpg", name: "Professional Man Portrait" },
+  { id: 20, photo: "/images/tina1.jpg", name: "Professional Woman Portrait" },
+  { id: 21, photo: "/images/new-man5.jpg", name: "Professional Man Portrait" },
+  { id: 22, photo: "/images/new-woman3.jpg", name: "Professional Woman Portrait" },
+  { id: 23, photo: "/images/new-man6.jpg", name: "Professional Man Portrait" },
+  { id: 24, photo: "/images/tina2.jpg", name: "Professional Woman Portrait" },
+  { id: 25, photo: "/images/new-man1.jpg", name: "Professional Man Portrait" },
+  { id: 26, photo: "/images/new-woman2.jpg", name: "Professional Woman Portrait" },
+  { id: 27, photo: "/images/new-man2.jpg", name: "Professional Man Portrait" },
+  { id: 28, photo: "/images/tina3.jpg", name: "Professional Woman Portrait" },
+  { id: 29, photo: "/images/new-man3.jpg", name: "Professional Man Portrait" },
+  { id: 30, photo: "/images/new-woman4.jpg", name: "Professional Woman Portrait" },
 ]
 
+// Gallery photos: Man → Woman alternating pattern using all available photos
 const galleryPhotos = [
-  "/images/gallery1.jpg", // Man met bril (nieuw)
-  "/images/gallery2.jpg", // Vrouw in grijs pak (nieuw)
-  "/images/gallery3.jpg", // Man met bril (nieuw)
-  "/images/gallery4.jpg", // Vrouw donker pak (nieuw)
-  "/images/gallery5.jpg", // Man donker pak
-  "/images/gallery6.jpg", // Vrouw blauw shirt
-  "/images/gallery7.jpg", // Man blauw shirt
-  "/images/gallery8.jpg", // Vrouw donker pak
-  "/images/gallery9.jpg", // Man met bril blauw shirt
-  "/images/gallery10.jpg", // Vrouw donker pak blauw shirt
-  "/images/gallery11.jpg", // Man wit shirt (nieuw)
-  "/images/gallery12.jpg", // Vrouw blauw shirt (nieuw)
-  "/images/gallery1.jpg", // Man met bril (herhaling)
-  "/images/gallery2.jpg", // Vrouw in grijs pak (herhaling)
-  "/images/gallery3.jpg", // Man lachend (herhaling)
-  "/images/gallery4.jpg", // Vrouw wit shirt (herhaling)
+  // Row 1: Man1, Woman1, Man2, Woman2
+  "/images/new-man1.jpg",
+  "/images/tina1.jpg",
+  "/images/new-man2.jpg",
+  "/images/new-woman1.jpg",
+
+  // Row 2: Man3, Woman3, Man4, Woman4
+  "/images/new-man3.jpg",
+  "/images/new-woman3.jpg",
+  "/images/new-man4.jpg",
+  "/images/tina2.jpg",
+
+  // Row 3: Man1, Woman1, Man2, Woman2 (different photos)
+  "/images/new-man5.jpg",
+  "/images/tina3.jpg",
+  "/images/new-man6.jpg",
+  "/images/new-woman2.jpg",
+
+  // Row 4: Man3, Woman3, Man4, Woman4 (different photos)
+  "/images/new-man2.jpg",
+  "/images/new-woman4.jpg",
+  "/images/new-man1.jpg",
+  "/images/tina4.jpg",
 ]
 
 const companies = [
