@@ -55,58 +55,44 @@ const testimonials = [
   },
 ]
 
-// Gallery photos: Strict man → woman alternating with 4 COMPLETELY different people per row
+// Gallery photos: Man → Woman alternating pattern
 const galleryPhotos = [
-  // Row 1: 4 completely different people
-  "/images/new-man1.jpg", // Man A
-  "/images/tina1.jpg", // Woman A
-  "/images/new-man2.jpg", // Man B
-  "/images/new-woman1.jpg", // Woman B
-
-  // Row 2: 4 completely different people (not used in row 1)
-  "/images/new-man3.jpg", // Man C
-  "/images/new-woman3.jpg", // Woman C
-  "/images/new-man4.jpg", // Man D
-  "/images/tina2.jpg", // Woman D
-
-  // Row 3: 4 completely different people (not used in rows 1-2)
-  "/images/new-man5.jpg", // Man E
-  "/images/tina3.jpg", // Woman E
-  "/images/new-man6.jpg", // Man F
-  "/images/new-woman2.jpg", // Woman F
-
-  // Row 4: Mix of remaining people (ensuring no immediate repeats)
-  "/images/new-man1.jpg", // Man A (different position)
-  "/images/new-woman4.jpg", // Woman G
-  "/images/new-man2.jpg", // Man B (different position)
-  "/images/tina4.jpg", // Woman H
+  "/images/new-man1.jpg",
+  "/images/tina1.jpg",
+  "/images/new-man2.jpg",
+  "/images/new-woman1.jpg",
+  "/images/new-man3.jpg",
+  "/images/new-woman3.jpg",
+  "/images/new-man4.jpg",
+  "/images/tina2.jpg",
+  "/images/new-man5.jpg",
+  "/images/tina3.jpg",
+  "/images/new-man6.jpg",
+  "/images/new-woman2.jpg",
+  "/images/new-man1.jpg",
+  "/images/new-woman4.jpg",
+  "/images/new-man2.jpg",
+  "/images/tina4.jpg",
 ]
 
-// Carousel photos: EXACT same order as gallery
+// Carousel photos: MIXED order to prevent same people appearing together when duplicated
 const carouselPhotos = [
-  // Row 1: 4 completely different people
-  { id: 1, photo: "/images/new-man1.jpg", name: "Professional Man Portrait" }, // Man A
-  { id: 2, photo: "/images/tina1.jpg", name: "Professional Woman Portrait" }, // Woman A
-  { id: 3, photo: "/images/new-man2.jpg", name: "Professional Man Portrait" }, // Man B
-  { id: 4, photo: "/images/new-woman1.jpg", name: "Professional Woman Portrait" }, // Woman B
-
-  // Row 2: 4 completely different people (not used in row 1)
-  { id: 5, photo: "/images/new-man3.jpg", name: "Professional Man Portrait" }, // Man C
-  { id: 6, photo: "/images/new-woman3.jpg", name: "Professional Woman Portrait" }, // Woman C
-  { id: 7, photo: "/images/new-man4.jpg", name: "Professional Man Portrait" }, // Man D
-  { id: 8, photo: "/images/tina2.jpg", name: "Professional Woman Portrait" }, // Woman D
-
-  // Row 3: 4 completely different people (not used in rows 1-2)
-  { id: 9, photo: "/images/new-man5.jpg", name: "Professional Man Portrait" }, // Man E
-  { id: 10, photo: "/images/tina3.jpg", name: "Professional Woman Portrait" }, // Woman E
-  { id: 11, photo: "/images/new-man6.jpg", name: "Professional Man Portrait" }, // Man F
-  { id: 12, photo: "/images/new-woman2.jpg", name: "Professional Woman Portrait" }, // Woman F
-
-  // Row 4: Mix of remaining people (ensuring no immediate repeats)
-  { id: 13, photo: "/images/new-man1.jpg", name: "Professional Man Portrait" }, // Man A (different position)
-  { id: 14, photo: "/images/new-woman4.jpg", name: "Professional Woman Portrait" }, // Woman G
-  { id: 15, photo: "/images/new-man2.jpg", name: "Professional Man Portrait" }, // Man B (different position)
-  { id: 16, photo: "/images/tina4.jpg", name: "Professional Woman Portrait" }, // Woman H
+  { id: 1, photo: "/images/new-man1.jpg", name: "Professional Man Portrait" },
+  { id: 2, photo: "/images/tina1.jpg", name: "Professional Woman Portrait" },
+  { id: 3, photo: "/images/new-man3.jpg", name: "Professional Man Portrait" },
+  { id: 4, photo: "/images/new-woman2.jpg", name: "Professional Woman Portrait" },
+  { id: 5, photo: "/images/new-man5.jpg", name: "Professional Man Portrait" },
+  { id: 6, photo: "/images/tina3.jpg", name: "Professional Woman Portrait" },
+  { id: 7, photo: "/images/new-man2.jpg", name: "Professional Man Portrait" },
+  { id: 8, photo: "/images/new-woman4.jpg", name: "Professional Woman Portrait" },
+  { id: 9, photo: "/images/new-man4.jpg", name: "Professional Man Portrait" },
+  { id: 10, photo: "/images/tina2.jpg", name: "Professional Woman Portrait" },
+  { id: 11, photo: "/images/new-man6.jpg", name: "Professional Man Portrait" },
+  { id: 12, photo: "/images/new-woman1.jpg", name: "Professional Woman Portrait" },
+  { id: 13, photo: "/images/new-man1.jpg", name: "Professional Man Portrait" },
+  { id: 14, photo: "/images/tina4.jpg", name: "Professional Woman Portrait" },
+  { id: 15, photo: "/images/new-man3.jpg", name: "Professional Man Portrait" },
+  { id: 16, photo: "/images/new-woman3.jpg", name: "Professional Woman Portrait" },
 ]
 
 const companies = [
@@ -212,26 +198,44 @@ export default function HomePage() {
         </Button>
       </section>
 
-      {/* Photo Carousel */}
+      {/* Photo Carousel - FIXED: Smooth continuous scrolling */}
       <section className="w-full overflow-hidden mb-16 md:mb-24 bg-gradient-to-r from-blue-50 via-white to-blue-50">
         <div className="relative">
-          <div className="flex animate-scroll">
-            {carouselPhotos.concat(carouselPhotos).map((item, index) => (
-              <div key={`${item.id}-${index}`} className="flex-shrink-0 mx-1 md:mx-2">
-                <div className="relative">
-                  <div className="w-40 h-52 md:w-64 md:h-80 rounded-xl md:rounded-2xl overflow-hidden bg-gray-100 shadow-md md:shadow-lg">
-                    <Image
-                      src={item.photo || "/placeholder.svg"}
-                      alt={`${item.name} professioneel portret`}
-                      width={256}
-                      height={320}
-                      className="w-full h-full object-cover brightness-110 contrast-105"
-                      priority={index < 10}
-                    />
+          <div className="carousel-container">
+            <div className="carousel-track">
+              {carouselPhotos.map((item, index) => (
+                <div key={`carousel-${item.id}-${index}`} className="carousel-item">
+                  <div className="relative">
+                    <div className="w-40 h-52 md:w-64 md:h-80 rounded-xl md:rounded-2xl overflow-hidden bg-gray-100 shadow-md md:shadow-lg">
+                      <Image
+                        src={item.photo || "/placeholder.svg"}
+                        alt={`${item.name} professioneel portret`}
+                        width={256}
+                        height={320}
+                        className="w-full h-full object-cover brightness-110 contrast-105"
+                        priority={index < 10}
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))}
+              {/* Duplicate items for seamless looping */}
+              {carouselPhotos.map((item, index) => (
+                <div key={`carousel-dup-${item.id}-${index}`} className="carousel-item">
+                  <div className="relative">
+                    <div className="w-40 h-52 md:w-64 md:h-80 rounded-xl md:rounded-2xl overflow-hidden bg-gray-100 shadow-md md:shadow-lg">
+                      <Image
+                        src={item.photo || "/placeholder.svg"}
+                        alt={`${item.name} professioneel portret`}
+                        width={256}
+                        height={320}
+                        className="w-full h-full object-cover brightness-110 contrast-105"
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -600,27 +604,62 @@ export default function HomePage() {
       </footer>
 
       <style jsx>{`
-        @keyframes scroll {
-          0% {
-            transform: translateX(0);
-          }
-          100% {
-            transform: translateX(-50%);
-          }
-        }
-        .animate-scroll {
-          animation: scroll 15s linear infinite;
-        }
-        .animate-scroll:hover {
-          animation-play-state: paused;
-        }
-        
-        @media (max-width: 768px) {
-          .animate-scroll {
-            animation: scroll 10s linear infinite;
-          }
-        }
-      `}</style>
+  @keyframes scroll {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+  
+  .animate-scroll {
+    animation: scroll 15s linear infinite;
+  }
+  
+  .animate-scroll:hover {
+    animation-play-state: paused;
+  }
+  
+  .carousel-container {
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+  }
+  
+  .carousel-track {
+    display: flex;
+    width: fit-content;
+    animation: carousel 60s linear infinite;
+  }
+  
+  .carousel-item {
+    flex-shrink: 0;
+    margin: 0 0.5rem;
+  }
+  
+  @keyframes carousel {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(calc(-100% / 2));
+    }
+  }
+  
+  .carousel-track:hover {
+    animation-play-state: paused;
+  }
+  
+  @media (max-width: 768px) {
+    .animate-scroll {
+      animation: scroll 10s linear infinite;
+    }
+    .carousel-track {
+      animation: carousel 40s linear infinite;
+    }
+  }
+`}</style>
     </div>
   )
 }
