@@ -55,51 +55,58 @@ const testimonials = [
   },
 ]
 
-// Gallery photos: Man → Woman alternating pattern met 4 verschillende personen
+// Gallery photos: Strict man → woman alternating with 4 COMPLETELY different people per row
 const galleryPhotos = [
-  // Row 1: Man1, Woman1, Man2, Woman2 (4 verschillende personen)
-  "/images/new-man1.jpg", // Man 1
-  "/images/tina1.jpg", // Woman 1
-  "/images/new-man2.jpg", // Man 2
-  "/images/new-woman1.jpg", // Woman 2
+  // Row 1: 4 completely different people
+  "/images/new-man1.jpg", // Man A
+  "/images/tina1.jpg", // Woman A
+  "/images/new-man2.jpg", // Man B
+  "/images/new-woman1.jpg", // Woman B
 
-  // Row 2: Man3, Woman3, Man4, Woman4 (4 verschillende personen)
-  "/images/new-man3.jpg", // Man 3
-  "/images/new-woman3.jpg", // Woman 3
-  "/images/new-man4.jpg", // Man 4
-  "/images/tina2.jpg", // Woman 4
+  // Row 2: 4 completely different people (not used in row 1)
+  "/images/new-man3.jpg", // Man C
+  "/images/new-woman3.jpg", // Woman C
+  "/images/new-man4.jpg", // Man D
+  "/images/tina2.jpg", // Woman D
 
-  // Row 3: Man5, Woman5, Man6, Woman6 (4 verschillende personen)
-  "/images/new-man5.jpg", // Man 5
-  "/images/tina3.jpg", // Woman 5
-  "/images/new-man6.jpg", // Man 6
-  "/images/new-woman2.jpg", // Woman 6
+  // Row 3: 4 completely different people (not used in rows 1-2)
+  "/images/new-man5.jpg", // Man E
+  "/images/tina3.jpg", // Woman E
+  "/images/new-man6.jpg", // Man F
+  "/images/new-woman2.jpg", // Woman F
 
-  // Row 4: Herhaling met andere combinaties (4 verschillende personen)
-  "/images/new-man4.jpg", // Man 4 (andere positie)
-  "/images/new-woman4.jpg", // Woman 7
-  "/images/new-man3.jpg", // Man 3 (andere positie)
-  "/images/tina4.jpg", // Woman 8
+  // Row 4: Mix of remaining people (ensuring no immediate repeats)
+  "/images/new-man1.jpg", // Man A (different position)
+  "/images/new-woman4.jpg", // Woman G
+  "/images/new-man2.jpg", // Man B (different position)
+  "/images/tina4.jpg", // Woman H
 ]
 
-// Carousel photos: Exact dezelfde volgorde als gallery
+// Carousel photos: EXACT same order as gallery
 const carouselPhotos = [
-  { id: 1, photo: "/images/new-man1.jpg", name: "Professional Man Portrait" }, // Man 1
-  { id: 2, photo: "/images/tina1.jpg", name: "Professional Woman Portrait" }, // Woman 1
-  { id: 3, photo: "/images/new-man2.jpg", name: "Professional Man Portrait" }, // Man 2
-  { id: 4, photo: "/images/new-woman1.jpg", name: "Professional Woman Portrait" }, // Woman 2
-  { id: 5, photo: "/images/new-man3.jpg", name: "Professional Man Portrait" }, // Man 3
-  { id: 6, photo: "/images/new-woman3.jpg", name: "Professional Woman Portrait" }, // Woman 3
-  { id: 7, photo: "/images/new-man4.jpg", name: "Professional Man Portrait" }, // Man 4
-  { id: 8, photo: "/images/tina2.jpg", name: "Professional Woman Portrait" }, // Woman 4
-  { id: 9, photo: "/images/new-man5.jpg", name: "Professional Man Portrait" }, // Man 5
-  { id: 10, photo: "/images/tina3.jpg", name: "Professional Woman Portrait" }, // Woman 5
-  { id: 11, photo: "/images/new-man6.jpg", name: "Professional Man Portrait" }, // Man 6
-  { id: 12, photo: "/images/new-woman2.jpg", name: "Professional Woman Portrait" }, // Woman 6
-  { id: 13, photo: "/images/new-man4.jpg", name: "Professional Man Portrait" }, // Man 4 (andere positie)
-  { id: 14, photo: "/images/new-woman4.jpg", name: "Professional Woman Portrait" }, // Woman 7
-  { id: 15, photo: "/images/new-man3.jpg", name: "Professional Man Portrait" }, // Man 3 (andere positie)
-  { id: 16, photo: "/images/tina4.jpg", name: "Professional Woman Portrait" }, // Woman 8
+  // Row 1: 4 completely different people
+  { id: 1, photo: "/images/new-man1.jpg", name: "Professional Man Portrait" }, // Man A
+  { id: 2, photo: "/images/tina1.jpg", name: "Professional Woman Portrait" }, // Woman A
+  { id: 3, photo: "/images/new-man2.jpg", name: "Professional Man Portrait" }, // Man B
+  { id: 4, photo: "/images/new-woman1.jpg", name: "Professional Woman Portrait" }, // Woman B
+
+  // Row 2: 4 completely different people (not used in row 1)
+  { id: 5, photo: "/images/new-man3.jpg", name: "Professional Man Portrait" }, // Man C
+  { id: 6, photo: "/images/new-woman3.jpg", name: "Professional Woman Portrait" }, // Woman C
+  { id: 7, photo: "/images/new-man4.jpg", name: "Professional Man Portrait" }, // Man D
+  { id: 8, photo: "/images/tina2.jpg", name: "Professional Woman Portrait" }, // Woman D
+
+  // Row 3: 4 completely different people (not used in rows 1-2)
+  { id: 9, photo: "/images/new-man5.jpg", name: "Professional Man Portrait" }, // Man E
+  { id: 10, photo: "/images/tina3.jpg", name: "Professional Woman Portrait" }, // Woman E
+  { id: 11, photo: "/images/new-man6.jpg", name: "Professional Man Portrait" }, // Man F
+  { id: 12, photo: "/images/new-woman2.jpg", name: "Professional Woman Portrait" }, // Woman F
+
+  // Row 4: Mix of remaining people (ensuring no immediate repeats)
+  { id: 13, photo: "/images/new-man1.jpg", name: "Professional Man Portrait" }, // Man A (different position)
+  { id: 14, photo: "/images/new-woman4.jpg", name: "Professional Woman Portrait" }, // Woman G
+  { id: 15, photo: "/images/new-man2.jpg", name: "Professional Man Portrait" }, // Man B (different position)
+  { id: 16, photo: "/images/tina4.jpg", name: "Professional Woman Portrait" }, // Woman H
 ]
 
 const companies = [
