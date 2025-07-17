@@ -20,38 +20,22 @@ export function Logo({ size = "md", variant = "default", showText = true }: Logo
     lg: "text-2xl",
   }
 
-  const iconColor = variant === "white" ? "text-white" : "text-[#0077B5]"
-  const textColor = variant === "white" ? "text-white" : variant === "dark" ? "text-gray-900" : "text-[#0077B5]"
-
   return (
     <Link href="/" className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
-      {/* Lightning Bolt Logo in LinkedIn Colors */}
+      {/* Your exact logo image */}
       <div className={`${sizeClasses[size]} relative flex-shrink-0`}>
-        <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
-          {/* Rounded square background */}
-          <rect
-            x="5"
-            y="5"
-            width="90"
-            height="90"
-            rx="20"
-            ry="20"
-            fill={variant === "white" ? "#ffffff" : "#0077B5"}
-            className="drop-shadow-sm"
-          />
-
-          {/* Lightning bolt */}
-          <path
-            d="M35 25 L65 25 L45 50 L55 50 L25 75 L45 50 L35 50 Z"
-            fill={variant === "white" ? "#0077B5" : "#ffffff"}
-            className="drop-shadow-sm"
-          />
-        </svg>
+        <Image
+          src="/images/logo-icon.png"
+          alt="AI Portret Pro Logo"
+          width={40}
+          height={40}
+          className="w-full h-full object-contain"
+        />
       </div>
 
       {showText && (
         <div className="flex flex-col">
-          <span className={`${textSizeClasses[size]} font-bold ${textColor} leading-tight`}>AI Portret Pro</span>
+          <span className={`${textSizeClasses[size]} font-bold text-black leading-tight`}>AI Portret Pro</span>
           {size === "lg" && (
             <span className="text-xs text-gray-500 font-medium tracking-wide">PROFESSIONELE HEADSHOTS</span>
           )}

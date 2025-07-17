@@ -15,7 +15,7 @@ const CrispWithNoSSR = dynamic(() => import("../components/crisp"))
 export const metadata: Metadata = {
   title: "AI Portrait Pro - Professional AI Headshots",
   description:
-    "Generate professional AI headshots in minutes. Perfect for LinkedIn, business profiles, and professional use.",
+    "Generate p AI headshots in minutes. Perfect for LinkedIn, business profiles, and professional use.",
   icons: {
     icon: [
       { url: "/favicon.ico" },

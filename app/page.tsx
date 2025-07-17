@@ -55,66 +55,51 @@ const testimonials = [
   },
 ]
 
-// Carousel photos: Man → Woman → Man → Woman alternating pattern with all different photos
-const carouselPhotos = [
-  // Following the same pattern as gallery but extended for carousel
-  { id: 1, photo: "/images/new-man1.jpg", name: "Professional Man Portrait" },
-  { id: 2, photo: "/images/tina1.jpg", name: "Professional Woman Portrait" },
-  { id: 3, photo: "/images/new-man2.jpg", name: "Professional Man Portrait" },
-  { id: 4, photo: "/images/new-woman1.jpg", name: "Professional Woman Portrait" },
-  { id: 5, photo: "/images/new-man3.jpg", name: "Professional Man Portrait" },
-  { id: 6, photo: "/images/new-woman3.jpg", name: "Professional Woman Portrait" },
-  { id: 7, photo: "/images/new-man4.jpg", name: "Professional Man Portrait" },
-  { id: 8, photo: "/images/tina2.jpg", name: "Professional Woman Portrait" },
-  { id: 9, photo: "/images/new-man5.jpg", name: "Professional Man Portrait" },
-  { id: 10, photo: "/images/tina3.jpg", name: "Professional Woman Portrait" },
-  { id: 11, photo: "/images/new-man6.jpg", name: "Professional Man Portrait" },
-  { id: 12, photo: "/images/new-woman2.jpg", name: "Professional Woman Portrait" },
-  { id: 13, photo: "/images/new-man1.jpg", name: "Professional Man Portrait" },
-  { id: 14, photo: "/images/new-woman4.jpg", name: "Professional Woman Portrait" },
-  { id: 15, photo: "/images/new-man2.jpg", name: "Professional Man Portrait" },
-  { id: 16, photo: "/images/tina4.jpg", name: "Professional Woman Portrait" },
-  { id: 17, photo: "/images/new-man3.jpg", name: "Professional Man Portrait" },
-  { id: 18, photo: "/images/new-woman1.jpg", name: "Professional Woman Portrait" },
-  { id: 19, photo: "/images/new-man4.jpg", name: "Professional Man Portrait" },
-  { id: 20, photo: "/images/tina1.jpg", name: "Professional Woman Portrait" },
-  { id: 21, photo: "/images/new-man5.jpg", name: "Professional Man Portrait" },
-  { id: 22, photo: "/images/new-woman3.jpg", name: "Professional Woman Portrait" },
-  { id: 23, photo: "/images/new-man6.jpg", name: "Professional Man Portrait" },
-  { id: 24, photo: "/images/tina2.jpg", name: "Professional Woman Portrait" },
-  { id: 25, photo: "/images/new-man1.jpg", name: "Professional Man Portrait" },
-  { id: 26, photo: "/images/new-woman2.jpg", name: "Professional Woman Portrait" },
-  { id: 27, photo: "/images/new-man2.jpg", name: "Professional Man Portrait" },
-  { id: 28, photo: "/images/tina3.jpg", name: "Professional Woman Portrait" },
-  { id: 29, photo: "/images/new-man3.jpg", name: "Professional Man Portrait" },
-  { id: 30, photo: "/images/new-woman4.jpg", name: "Professional Woman Portrait" },
+// Gallery photos: Man → Woman alternating pattern met 4 verschillende personen
+const galleryPhotos = [
+  // Row 1: Man1, Woman1, Man2, Woman2 (4 verschillende personen)
+  "/images/new-man1.jpg", // Man 1
+  "/images/tina1.jpg", // Woman 1
+  "/images/new-man2.jpg", // Man 2
+  "/images/new-woman1.jpg", // Woman 2
+
+  // Row 2: Man3, Woman3, Man4, Woman4 (4 verschillende personen)
+  "/images/new-man3.jpg", // Man 3
+  "/images/new-woman3.jpg", // Woman 3
+  "/images/new-man4.jpg", // Man 4
+  "/images/tina2.jpg", // Woman 4
+
+  // Row 3: Man5, Woman5, Man6, Woman6 (4 verschillende personen)
+  "/images/new-man5.jpg", // Man 5
+  "/images/tina3.jpg", // Woman 5
+  "/images/new-man6.jpg", // Man 6
+  "/images/new-woman2.jpg", // Woman 6
+
+  // Row 4: Herhaling met andere combinaties (4 verschillende personen)
+  "/images/new-man4.jpg", // Man 4 (andere positie)
+  "/images/new-woman4.jpg", // Woman 7
+  "/images/new-man3.jpg", // Man 3 (andere positie)
+  "/images/tina4.jpg", // Woman 8
 ]
 
-// Gallery photos: Man → Woman alternating pattern using all available photos
-const galleryPhotos = [
-  // Row 1: Man1, Woman1, Man2, Woman2
-  "/images/new-man1.jpg",
-  "/images/tina1.jpg",
-  "/images/new-man2.jpg",
-  "/images/new-woman1.jpg",
-
-  // Row 2: Man3, Woman3, Man4, Woman4
-  "/images/new-man3.jpg",
-  "/images/new-woman3.jpg",
-  "/images/new-man4.jpg",
-  "/images/tina2.jpg",
-
-  // Row 3: Man1, Woman1, Man2, Woman2 (different photos)
-  "/images/new-man5.jpg",
-  "/images/tina3.jpg",
-  "/images/new-man6.jpg",
-  "/images/new-woman2.jpg",
-
-  // Row 4: Man3, Woman3, Man4, Woman4 (different photos)
-  "/images/new-man2.jpg",
-  "/images/new-woman4.jpg",
-  "/images/new-man1.jpg",
-  "/images/tina4.jpg",
+// Carousel photos: Exact dezelfde volgorde als gallery
+const carouselPhotos = [
+  { id: 1, photo: "/images/new-man1.jpg", name: "Professional Man Portrait" }, // Man 1
+  { id: 2, photo: "/images/tina1.jpg", name: "Professional Woman Portrait" }, // Woman 1
+  { id: 3, photo: "/images/new-man2.jpg", name: "Professional Man Portrait" }, // Man 2
+  { id: 4, photo: "/images/new-woman1.jpg", name: "Professional Woman Portrait" }, // Woman 2
+  { id: 5, photo: "/images/new-man3.jpg", name: "Professional Man Portrait" }, // Man 3
+  { id: 6, photo: "/images/new-woman3.jpg", name: "Professional Woman Portrait" }, // Woman 3
+  { id: 7, photo: "/images/new-man4.jpg", name: "Professional Man Portrait" }, // Man 4
+  { id: 8, photo: "/images/tina2.jpg", name: "Professional Woman Portrait" }, // Woman 4
+  { id: 9, photo: "/images/new-man5.jpg", name: "Professional Man Portrait" }, // Man 5
+  { id: 10, photo: "/images/tina3.jpg", name: "Professional Woman Portrait" }, // Woman 5
+  { id: 11, photo: "/images/new-man6.jpg", name: "Professional Man Portrait" }, // Man 6
+  { id: 12, photo: "/images/new-woman2.jpg", name: "Professional Woman Portrait" }, // Woman 6
+  { id: 13, photo: "/images/new-man4.jpg", name: "Professional Man Portrait" }, // Man 4 (andere positie)
+  { id: 14, photo: "/images/new-woman4.jpg", name: "Professional Woman Portrait" }, // Woman 7
+  { id: 15, photo: "/images/new-man3.jpg", name: "Professional Man Portrait" }, // Man 3 (andere positie)
+  { id: 16, photo: "/images/tina4.jpg", name: "Professional Woman Portrait" }, // Woman 8
 ]
 
 const companies = [
@@ -520,13 +505,13 @@ export default function HomePage() {
             <div className="flex flex-col space-y-4">
               <div className="flex items-center space-x-3">
                 <Image
-                  src="/images/logo.png"
+                  src="/images/logo-icon.png"
                   alt="AI Portrait Pro Logo"
                   width={30}
                   height={30}
                   className="rounded-lg"
                 />
-                <h3 className="text-xl font-bold text-white">aiportretpro</h3>
+                <h3 className="text-xl font-bold text-white">AI Portret Pro</h3>
               </div>
               <p className="text-gray-300 text-sm leading-relaxed max-w-xs">
                 Professionele AI zakelijke portretten in minuten.
@@ -602,7 +587,7 @@ export default function HomePage() {
 
           {/* Bottom Border */}
           <div className="border-t border-gray-800 mt-8 pt-6">
-            <p className="text-gray-400 text-xs text-center">© 2025 aiportretpro. Alle rechten voorbehouden.</p>
+            <p className="text-gray-400 text-xs text-center">© 2025 AI Portret Pro. Alle rechten voorbehouden.</p>
           </div>
         </div>
       </footer>
