@@ -9,15 +9,15 @@ interface LogoProps {
 
 export function Logo({ size = "md", variant = "default", showText = true }: LogoProps) {
   const sizeClasses = {
-    sm: "h-6 w-6",
-    md: "h-6 w-6",
+    sm: "h-5 w-5",
+    md: "h-5 w-5",
     lg: "h-6 w-6",
   }
 
   const textSizeClasses = {
-    sm: "text-lg",
-    md: "text-xl",
-    lg: "text-2xl",
+    sm: "text-sm",
+    md: "text-md",
+    lg: "text-lg",
   }
 
   return (
@@ -35,7 +35,7 @@ export function Logo({ size = "md", variant = "default", showText = true }: Logo
 
       {showText && (
         <div className="flex flex-col">
-          <span className={`${textSizeClasses[size]}  text-black leading-tight`}>AI Portret Pro</span>
+          <span className={`${textSizeClasses[size]}  text-black leading-tight`}>AiPortretPro</span>
           {size === "lg" && (
             <span className="text-xs text-gray-500 font-medium tracking-wide">PROFESSIONELE HEADSHOTS</span>
           )}
