@@ -118,34 +118,61 @@ const faqData = [
       "Je ontvangt 40 professionele portretten in hoge kwaliteit, perfect voor LinkedIn, CV's en andere professionele doeleinden.",
   },
   {
+    question: "Waarom AI Portret Pro?",
+    answer:
+      "AI Portret Pro maakt Headshot-fotografie toegankelijk voor iedereen. Met AI Portret Pro reduceren we de kosten en de tijd die je kwijt bent aan traditionele fotoshoots aanzienlijk.",
+  },
+  {
+    question: "Kan dit een echte fotoshoot vervangen?",
+    answer:
+      "Ja, wij gebruiken FLUX AI technologie dit is de beste AI wat er bestaat en dit is niet meer van een traditionele fotoshoot te onderscheiden. Je kunt onze foto's overal gebruiken waar je traditionele foto's zou gebruiken.",
+  },
+  {
     question: "Welke foto's moet ik uploaden voor het beste resultaat?",
     answer:
       "Upload minimaal 4 foto's van jezelf met goede belichting. Een mix van close-ups en mid-range shots werkt het beste. Zorg ervoor dat je gezicht duidelijk zichtbaar is.",
   },
   {
-    question: "Kan ik de achtergrond en kleding aanpassen?",
+    question: "Hoe download ik mijn foto's?",
     answer:
-      "Ja! Onze AI genereert automatisch verschillende professionele achtergronden en kledingstijlen die perfect zijn voor zakelijke portretten.",
+      "Dubbelklik op de foto's om ze in een downloadmap op je computer of op je telefoon te plaatsen: raak de foto aan en volg de instructies van je telefoon.",
+  },
+  {
+    question: "Hoeveel goede foto's kan ik verwachten?",
+    answer:
+      "Net als bij een echte fotosessie is niet elke foto een winnaar. Waar je bij een traditionele fotosessie 1 tot 2 goede foto's krijgt, kunnen wij je 10 tot 18 garanderen. We sturen je de hele batch toe. We laten 40 foto's zien, zodat je zelf de beste kunt kiezen.",
+  },
+  {
+    question: "Wat voor kleding draag ik tijdens de fotoshoot?",
+    answer: "Je draagt tijdens de fotoshoot: blazers, pakken, overhemden en blouses.",
+  },
+  {
+    question: "Wat voor achtergrond hebben mijn foto's?",
+    answer:
+      "We gebruiken professionele achtergronden zoals een grijze studio back-drop en achtergronden van kantoren, trendy werkplekken, bokeh en meer.",
+  },
+  {
+    question: "Heb ik het recht om de foto's overal te gebruiken?",
+    answer: "Ja, je hebt alle commerciële en persoonlijke rechten op jouw foto's.",
   },
   {
     question: "Is mijn data veilig?",
     answer:
-      "Absoluut. We nemen privacy zeer serieus. Je foto's worden veilig verwerkt en na 30 dagen automatisch verwijderd van onze servers.",
+      "Wij slaan geen trainingsfoto's op de server op, jouw resultaten worden na 30 dagen automatisch verwijderd. Zodat je genoeg tijd hebt om ze te downloaden.",
+  },
+  {
+    question: "Zijn mijn betalingsgegevens veilig?",
+    answer: "Ja, wij gebruiken Stripe als betaalplatform en slaan nooit betalingsgegevens op.",
+  },
+  {
+    question: "Hoe kan ik contact met jullie opnemen?",
+    answer:
+      "Stuur ons een bericht via de live chat, indien niet direct, zullen wij contact met je opnemen via het e-mailadres dat je hebt opgegeven via de chat. Ons team spreekt Nederlands.",
   },
   {
     question: "Kan ik een terugbetaling krijgen als ik niet tevreden ben?",
     answer:
       "Ja, we bieden een 100% geld-terug-garantie binnen 7 dagen als je niet volledig tevreden bent met je portretten.",
-  },
-  {
-    question: "Werkt dit ook voor teams en bedrijven?",
-    answer:
-      "Ja! We hebben speciale pakketten voor teams en bedrijven. Neem contact met ons op voor aangepaste oplossingen en volume kortingen.",
-  },
-  {
-    question: "In welke formaten krijg ik mijn portretten?",
-    answer:
-      "Alle portretten worden geleverd in hoge resolutie (HD) en zijn perfect geschikt voor online gebruik, print en professionele toepassingen.",
   },
 ]
 

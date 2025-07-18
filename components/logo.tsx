@@ -9,9 +9,9 @@ interface LogoProps {
 
 export function Logo({ size = "md", variant = "default", showText = true }: LogoProps) {
   const sizeClasses = {
-    sm: "h-8 w-8",
-    md: "h-10 w-10",
-    lg: "h-12 w-12",
+    sm: "h-6 w-6",
+    md: "h-6 w-6",
+    lg: "h-6 w-6",
   }
 
   const textSizeClasses = {
@@ -35,7 +35,7 @@ export function Logo({ size = "md", variant = "default", showText = true }: Logo
 
       {showText && (
         <div className="flex flex-col">
-          <span className={`${textSizeClasses[size]} font-bold text-black leading-tight`}>AI Portret Pro</span>
+          <span className={`${textSizeClasses[size]}  text-black leading-tight`}>AI Portret Pro</span>
           {size === "lg" && (
             <span className="text-xs text-gray-500 font-medium tracking-wide">PROFESSIONELE HEADSHOTS</span>
           )}
@@ -141,7 +141,7 @@ export function ExactLinkedInLogo({ size = "md" }: { size?: "sm" | "md" | "lg" }
     <Link href="/" className="flex items-center hover:opacity-80 transition-opacity">
       <div className={`${containerSizes[size]} font-bold flex items-center`}>
         {/* AIPortrait in black like LinkedIn */}
-        <span className="text-black">Ai Portret</span>
+        <span className="text-black">A Portret</span>
 
         {/* PRO in blue box with proper padding like LinkedIn */}
         <div className={`${proBoxSizes[size]} bg-[#0077B5] text-white rounded-sm font-bold ml-1`}>PRO</div>
