@@ -196,12 +196,13 @@ export default function HomePage() {
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-6 text-center">
         <h1 className="tracking-tight text-2xl md:text-4xl font-bold mb-6">
-          Professionele zakelijke portretfoto's <br/>in 15 minuten voor slechts  <span className="text-[#0077B5]"> €29</span>
+          Professionele portretfoto's voor slechts  <span className="text-[#0077B5]"> €29</span>
      
         </h1>
 
         <p className="text-lg md:text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-          Bespaar tot 75% kosten en uren tijd met onze AI technologie op traditionele fotoshoots; je hoeft alleen maar 6 foto's te uploaden.
+         Bespaar tijd en geld, supersimpel vanaf je laptop of telefoon, geen gedoe<br/>
+Perfect voor; LinkedIn | Social Media | CV | Website | Print
         </p>
 
         <Button
