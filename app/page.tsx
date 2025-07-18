@@ -201,9 +201,8 @@ export default function HomePage() {
         </h1>
 
         <p className="text-lg md:text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-         Bespaar tijd en geld, supersimpel vanaf je laptop of telefoon, geen gedoe<br/>
-Perfect voor; LinkedIn | Social Media | CV | Website | Print
-        </p>
+         Bespaar tot 75% kosten en uren tijd met onze AI op traditionele fotoshoots; Perfect voor LinkedIn, Social Media, CV, Website en Print</p>
+
 
         <Button
           asChild
