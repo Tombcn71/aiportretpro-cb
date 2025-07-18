@@ -107,16 +107,8 @@ const companies = [
 ]
 
 const faqData = [
-  {
-    question: "Hoe lang duurt het om mijn portretten te ontvangen?",
-    answer:
-      "Je professionele portretten zijn meestal binnen 15-25 minuten klaar. Je ontvangt een e-mail zodra ze beschikbaar zijn in je dashboard.",
-  },
-  {
-    question: "Hoeveel foto's krijg ik voor €29?",
-    answer:
-      "Je ontvangt 40 professionele portretten in hoge kwaliteit, perfect voor LinkedIn, CV's en andere professionele doeleinden.",
-  },
+  
+  
   {
     question: "Waarom AI Portret Pro?",
     answer:
@@ -130,7 +122,7 @@ const faqData = [
   {
     question: "Welke foto's moet ik uploaden voor het beste resultaat?",
     answer:
-      "Upload minimaal 4 foto's van jezelf met goede belichting. Een mix van close-ups en mid-range shots werkt het beste. Zorg ervoor dat je gezicht duidelijk zichtbaar is.",
+      "Upload minimaal 6 foto's van jezelf met goede belichting. Een mix van close-ups en mid-range shots werkt het beste. Zorg ervoor dat je gezicht duidelijk zichtbaar is.",
   },
   {
     question: "Hoe download ik mijn foto's?",
@@ -203,7 +195,7 @@ export default function HomePage() {
 
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-6 text-center">
-        <h1 className="text-xl md:text-4xl font-bold mb-6">
+        <h1 className="text-2xl md:text-4xl font-bold mb-6">
           Jouw professionele portretten <br/>in 15 min voor slechts  <span className="text-[#0077B5]"> €29</span>
      
         </h1>
