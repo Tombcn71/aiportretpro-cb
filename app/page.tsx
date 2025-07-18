@@ -203,13 +203,13 @@ export default function HomePage() {
 
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-6 text-center">
-        <h1 className="text-3xl md:text-3xl font-bold mb-6">
-          Jouw professionele portretten voor slechts <br/> <span className="text-[#0077B5]"> €29</span>
+        <h1 className="text-3xl md:text-5xl font-bold mb-6">
+          Jouw professionele portretten voor slechts  <span className="text-[#0077B5]"> €29</span>
      
         </h1>
 
         <p className="text-lg md:text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-        Onze AI technologie veranderd jouw selfies in studiokwaliteit zakelijke portretten. Bespaar tot 75% kosten en uren van je tijd; je hoeft alleen maar 6 foto's te uploaden.
+        Onze AI technologie maakt studiokwaliteit zakelijke portretten. Bespaar tot 75% kosten en uren van je tijd; je hoeft alleen maar 6 foto's te uploaden.
         </p>
 
         <Button
