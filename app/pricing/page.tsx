@@ -71,7 +71,7 @@ export default function PricingPage() {
       <Header />
       <div className="container mx-auto px-4 py-16">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">Professionele AI Portetfotos tot wel 75% goedkoper dan een traditionele fotoshoot</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-4">Professionele Portetfotos tot wel 75% goedkoper dan een traditionele fotoshoot</h1>
           <p className="text-xl text-gray-600">Supersimpel vaf thuis geeh reistijd geen gedoe</p>
         </div>
 
