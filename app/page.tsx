@@ -209,7 +209,7 @@ export default function HomePage() {
         </h1>
 
         <p className="text-lg md:text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-        Onze AI technologie maakt studiokwaliteit zakelijke portretten. Bespaar tot 75% kosten en uren van je tijd; je hoeft alleen maar 6 foto's te uploaden.
+        Onze AI technologie maakt studiokwaliteit zakelijke portretten. Bespaar tot 75% kosten en uren tijd; je hoeft alleen maar 6 foto's te uploaden.
         </p>
 
         <Button
