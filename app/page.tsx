@@ -204,7 +204,7 @@ export default function HomePage() {
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-6 text-center">
         <h1 className="text-3xl md:text-5xl font-bold mb-6">
-          Jouw professionele portretten voor slechts <br/> <span className="text-[#0077B5]"> €29</span>
+          Jouw professionele portretten <br/> voor slechts  <span className="text-[#0077B5]"> €29</span>
      
         </h1>
 
