@@ -63,7 +63,7 @@ export default function PricingPage() {
     "Verschillende poses en achtergronden",
     "HD kwaliteit downloads",
     "Klaar binnen 15 minuten",
-    "Perfecte LinkedIn foto's",
+    "Perfect voor LinkedIn, Social Media, CV, Website en Print",
   ]
 
   return (
