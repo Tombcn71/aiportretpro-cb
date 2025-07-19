@@ -64,7 +64,7 @@ const galleryPhotos = [
   "/images/new-man3.jpg",
   "/images/new-woman3.jpg",
   "/images/new-man4.jpg",
-  "/images/new-professional-woman.jpg", // Replaced gallery8.jpg
+  "/images/new-professional-woman.jpg", // Position 8 - replaced gallery8.jpg
   "/images/new-man5.jpg",
   "/images/tina3.jpg",
   "/images/new-man6.jpg",
@@ -75,24 +75,24 @@ const galleryPhotos = [
   "/images/tina4.jpg",
 ]
 
-// Carousel photos: MIXED order to prevent same people appearing together when duplicated
+// Carousel photos: Completely different people, no duplicates
 const carouselPhotos = [
-  { id: 1, photo: "/images/new-man1.jpg", name: "Professional Man Portrait" },
-  { id: 2, photo: "/images/tina1.jpg", name: "Professional Woman Portrait" },
-  { id: 3, photo: "/images/new-man3.jpg", name: "Professional Man Portrait" },
-  { id: 4, photo: "/images/new-woman2.jpg", name: "Professional Woman Portrait" },
-  { id: 5, photo: "/images/new-man5.jpg", name: "Professional Man Portrait" },
-  { id: 6, photo: "/images/tina3.jpg", name: "Professional Woman Portrait" },
-  { id: 7, photo: "/images/new-man2.jpg", name: "Professional Man Portrait" },
-  { id: 8, photo: "/images/new-professional-woman.jpg", name: "Professional Woman Portrait" }, // Replaced carousel8.jpg
+  { id: 1, photo: "/images/tina1.jpg", name: "Professional Woman Portrait" }, // Changed from new-man1.jpg
+  { id: 2, photo: "/images/new-man3.jpg", name: "Professional Man Portrait" },
+  { id: 3, photo: "/images/new-woman1.jpg", name: "Professional Woman Portrait" },
+  { id: 4, photo: "/images/new-man2.jpg", name: "Professional Man Portrait" },
+  { id: 5, photo: "/images/tina3.jpg", name: "Professional Woman Portrait" },
+  { id: 6, photo: "/images/new-man5.jpg", name: "Professional Man Portrait" },
+  { id: 7, photo: "/images/new-woman3.jpg", name: "Professional Woman Portrait" },
+  { id: 8, photo: "/images/new-professional-woman.jpg", name: "Professional Woman Portrait" }, // Position 8 - replaced carousel8.jpg
   { id: 9, photo: "/images/new-man4.jpg", name: "Professional Man Portrait" },
   { id: 10, photo: "/images/tina2.jpg", name: "Professional Woman Portrait" },
   { id: 11, photo: "/images/new-man6.jpg", name: "Professional Man Portrait" },
-  { id: 12, photo: "/images/new-woman1.jpg", name: "Professional Woman Portrait" },
+  { id: 12, photo: "/images/new-woman2.jpg", name: "Professional Woman Portrait" },
   { id: 13, photo: "/images/new-man1.jpg", name: "Professional Man Portrait" },
   { id: 14, photo: "/images/tina4.jpg", name: "Professional Woman Portrait" },
-  { id: 15, photo: "/images/new-man3.jpg", name: "Professional Man Portrait" },
-  { id: 16, photo: "/images/new-woman3.jpg", name: "Professional Woman Portrait" },
+  { id: 15, photo: "/images/new-woman4.jpg", name: "Professional Woman Portrait" },
+  { id: 16, photo: "/images/new-man2.jpg", name: "Professional Man Portrait" }, // Changed from new-woman3.jpg to avoid duplicate
 ]
 
 const companies = [
