@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    console.log(`🔍 Checking webhook for tune ID: ${tuneId}`)
+    console.log(`��� Checking webhook for tune ID: ${tuneId}`)
 
     // Check if we can fetch the tune info from Astria
     const astriaResponse = await fetch(`https://api.astria.ai/tunes/${tuneId}`, {

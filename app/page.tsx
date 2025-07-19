@@ -66,7 +66,7 @@ const galleryPhotos = [
   "/images/new-man4.jpg",
   "/images/new-professional-woman.jpg", // Position 8 - replaced gallery8.jpg
   "/images/new-man5.jpg",
-  "/images/tina3.jpg", // Only in gallery, not in carousel
+  "/images/tina2.jpg", // Only in gallery, not in carousel
   "/images/new-man6.jpg",
   "/images/new-woman2.jpg",
   "/images/new-man1.jpg",
