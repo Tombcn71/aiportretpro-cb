@@ -619,62 +619,62 @@ export default function HomePage() {
       </footer>
 
       <style jsx>{`
-  @keyframes scroll {
-    0% {
-      transform: translateX(0);
-    }
-    100% {
-      transform: translateX(-50%);
-    }
-  }
-  
-  .animate-scroll {
-    animation: scroll 15s linear infinite;
-  }
-  
-  .animate-scroll:hover {
-    animation-play-state: paused;
-  }
-  
-  .carousel-container {
-    width: 100%;
-    overflow: hidden;
-    position: relative;
-  }
-  
-  .carousel-track {
-    display: flex;
-    width: fit-content;
-    animation: carousel 60s linear infinite;
-  }
-  
-  .carousel-item {
-    flex-shrink: 0;
-    margin: 0 0.5rem;
-  }
-  
-  @keyframes carousel {
-    0% {
-      transform: translateX(0);
-    }
-    100% {
-      transform: translateX(calc(-100% / 2));
-    }
-  }
-  
-  .carousel-track:hover {
-    animation-play-state: paused;
-  }
-  
-  @media (max-width: 768px) {
-    .animate-scroll {
-      animation: scroll 10s linear infinite;
-    }
-    .carousel-track {
-      animation: carousel 40s linear infinite;
-    }
-  }
-`}</style>
+        @keyframes scroll {
+          0% {
+            transform: translateX(0);
+          }
+          100% {
+            transform: translateX(-50%);
+          }
+        }
+
+        .animate-scroll {
+          animation: scroll 15s linear infinite;
+        }
+
+        .animate-scroll:hover {
+          animation-play-state: paused;
+        }
+
+        .carousel-container {
+          width: 100%;
+          overflow: hidden;
+          position: relative;
+        }
+
+        .carousel-track {
+          display: flex;
+          width: fit-content;
+          animation: carousel 60s linear infinite;
+        }
+
+        .carousel-item {
+          flex-shrink: 0;
+          margin: 0 0.5rem;
+        }
+
+        @keyframes carousel {
+          0% {
+            transform: translateX(0);
+          }
+          100% {
+            transform: translateX(calc(-100% / 2));
+          }
+        }
+
+        .carousel-track:hover {
+          animation-play-state: paused;
+        }
+
+        @media (max-width: 768px) {
+          .animate-scroll {
+            animation: scroll 10s linear infinite;
+          }
+          .carousel-track {
+            animation: carousel 40s linear infinite;
+          }
+        }
+      `}</style>
     </div>
   )
 }
