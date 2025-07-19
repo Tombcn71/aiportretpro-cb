@@ -64,7 +64,7 @@ const galleryPhotos = [
   "/images/new-man3.jpg",
   "/images/new-woman3.jpg",
   "/images/new-man4.jpg",
-  "/images/tina2.jpg",
+  "/images/new-professional-woman.jpg", // Replaced gallery8.jpg
   "/images/new-man5.jpg",
   "/images/tina3.jpg",
   "/images/new-man6.jpg",
@@ -84,7 +84,7 @@ const carouselPhotos = [
   { id: 5, photo: "/images/new-man5.jpg", name: "Professional Man Portrait" },
   { id: 6, photo: "/images/tina3.jpg", name: "Professional Woman Portrait" },
   { id: 7, photo: "/images/new-man2.jpg", name: "Professional Man Portrait" },
-  { id: 8, photo: "/images/new-woman4.jpg", name: "Professional Woman Portrait" },
+  { id: 8, photo: "/images/new-professional-woman.jpg", name: "Professional Woman Portrait" }, // Replaced carousel8.jpg
   { id: 9, photo: "/images/new-man4.jpg", name: "Professional Man Portrait" },
   { id: 10, photo: "/images/tina2.jpg", name: "Professional Woman Portrait" },
   { id: 11, photo: "/images/new-man6.jpg", name: "Professional Man Portrait" },
@@ -107,8 +107,6 @@ const companies = [
 ]
 
 const faqData = [
-  
-  
   {
     question: "Waarom AI Portret Pro?",
     answer:
@@ -196,13 +194,13 @@ export default function HomePage() {
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-6 text-center">
         <h1 className="tracking-tight text-2xl md:text-4xl font-bold mb-6">
-          Professionele portretfoto's voor slechts  <span className="text-[#0077B5]"> €29</span>
-     
+          Professionele portretfoto's voor slechts <span className="text-[#0077B5]"> €29</span>
         </h1>
 
         <p className="text-lg md:text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-         Bespaar tot 75% kosten en uren tijd met onze AI op traditionele fotoshoots; Perfect voor LinkedIn, Social Media, CV, Website en Print</p>
-
+          Bespaar tot 75% kosten en uren tijd met onze AI op traditionele fotoshoots; Perfect voor LinkedIn, Social
+          Media, CV, Website en Print
+        </p>
 
         <Button
           asChild
