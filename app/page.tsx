@@ -66,7 +66,7 @@ const galleryPhotos = [
   "/images/new-man4.jpg",
   "/images/new-professional-woman.jpg", // Position 8 - replaced gallery8.jpg
   "/images/new-man5.jpg",
-  "/images/tina3.jpg",
+  "/images/tina3.jpg", // Only in gallery, not in carousel
   "/images/new-man6.jpg",
   "/images/new-woman2.jpg",
   "/images/new-man1.jpg",
@@ -75,24 +75,24 @@ const galleryPhotos = [
   "/images/tina4.jpg",
 ]
 
-// Carousel photos: Completely different people, no duplicates
+// Carousel photos: Completely different people, no duplicates with gallery
 const carouselPhotos = [
-  { id: 1, photo: "/images/tina1.jpg", name: "Professional Woman Portrait" }, // Changed from new-man1.jpg
+  { id: 1, photo: "/images/tina1.jpg", name: "Professional Woman Portrait" },
   { id: 2, photo: "/images/new-man3.jpg", name: "Professional Man Portrait" },
   { id: 3, photo: "/images/new-woman1.jpg", name: "Professional Woman Portrait" },
   { id: 4, photo: "/images/new-man2.jpg", name: "Professional Man Portrait" },
-  { id: 5, photo: "/images/tina3.jpg", name: "Professional Woman Portrait" },
+  { id: 5, photo: "/images/tina2.jpg", name: "Professional Woman Portrait" }, // Changed from tina3.jpg to tina2.jpg
   { id: 6, photo: "/images/new-man5.jpg", name: "Professional Man Portrait" },
   { id: 7, photo: "/images/new-woman3.jpg", name: "Professional Woman Portrait" },
   { id: 8, photo: "/images/new-professional-woman.jpg", name: "Professional Woman Portrait" }, // Position 8 - replaced carousel8.jpg
   { id: 9, photo: "/images/new-man4.jpg", name: "Professional Man Portrait" },
-  { id: 10, photo: "/images/tina2.jpg", name: "Professional Woman Portrait" },
+  { id: 10, photo: "/images/new-woman4.jpg", name: "Professional Woman Portrait" }, // Changed from tina2.jpg to new-woman4.jpg
   { id: 11, photo: "/images/new-man6.jpg", name: "Professional Man Portrait" },
   { id: 12, photo: "/images/new-woman2.jpg", name: "Professional Woman Portrait" },
   { id: 13, photo: "/images/new-man1.jpg", name: "Professional Man Portrait" },
   { id: 14, photo: "/images/tina4.jpg", name: "Professional Woman Portrait" },
-  { id: 15, photo: "/images/new-woman4.jpg", name: "Professional Woman Portrait" },
-  { id: 16, photo: "/images/new-man2.jpg", name: "Professional Man Portrait" }, // Changed from new-woman3.jpg to avoid duplicate
+  { id: 15, photo: "/images/new-man3.jpg", name: "Professional Man Portrait" }, // Different from position 2
+  { id: 16, photo: "/images/new-man2.jpg", name: "Professional Man Portrait" },
 ]
 
 const companies = [
