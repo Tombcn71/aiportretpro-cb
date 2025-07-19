@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { Card, CardContent } from "@/components/ui/card"
-import { Progress } from "@/components/ui/progress"
+import { Header } from "@/components/header"
 
 interface Project {
   id: number
@@ -14,29 +14,11 @@ interface Project {
   updated_at: string
 }
 
-const waitingMessages = [
-  "☕ Tijd voor een lekker kopje koffie!",
-  "🎨 Je AI kunstenaar is hard aan het werk...",
-  "✨ Perfecte headshots worden gemaakt...",
-  "🚀 Bijna klaar met je professionele foto's!",
-  "💼 Bereid je voor op geweldige resultaten!",
-  "🎯 Kwaliteit kost tijd, maar het is het waard!",
-]
-
 export default function GeneratePage({ params }: { params: { projectId: string } }) {
   const [project, setProject] = useState<Project | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [messageIndex, setMessageIndex] = useState(0)
   const router = useRouter()
-
-  // Rotate messages every 8 seconds
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setMessageIndex((prev) => (prev + 1) % waitingMessages.length)
-    }, 8000)
-    return () => clearInterval(interval)
-  }, [])
 
   const fetchProject = async () => {
     try {
@@ -66,172 +48,99 @@ export default function GeneratePage({ params }: { params: { projectId: string }
     return () => clearInterval(interval)
   }, [params.projectId])
 
-  const getProgress = () => {
-    if (!project) return 0
-
-    switch (project.status) {
-      case "created":
-        return 10
-      case "training":
-        return 30
-      case "processing":
-        return 70
-      case "completed":
-        return 100
-      default:
-        return 0
-    }
-  }
-
-  const getStatusText = () => {
-    if (!project) return "Laden..."
-
-    switch (project.status) {
-      case "created":
-        return "Project aangemaakt"
-      case "training":
-        return "AI model wordt getraind (10-15 min)"
-      case "processing":
-        return "Foto's worden gegenereerd (5-10 min)"
-      case "completed":
-        return "Klaar! Doorsturen naar dashboard..."
-      default:
-        return project.status
-    }
-  }
-
-  const getTimeEstimate = () => {
-    if (!project) return ""
-
-    switch (project.status) {
-      case "training":
-        return "Nog ongeveer 10-15 minuten"
-      case "processing":
-        return "Nog ongeveer 5-10 minuten"
-      case "completed":
-        return "Klaar!"
-      default:
-        return ""
-    }
-  }
-
   if (loading && !project) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <div className="flex items-center justify-center min-h-[80vh]">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0077B5]"></div>
+        </div>
       </div>
     )
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
-        <Card className="w-full max-w-md">
-          <CardContent className="p-6 text-center">
-            <div className="text-red-500 text-xl mb-4">❌</div>
-            <h2 className="text-xl font-semibold mb-2">Oeps!</h2>
-            <p className="text-gray-600">{error}</p>
-          </CardContent>
-        </Card>
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <div className="flex items-center justify-center min-h-[80vh]">
+          <Card className="w-full max-w-md mx-4">
+            <CardContent className="p-8 text-center">
+              <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
+                  />
+                </svg>
+              </div>
+              <h2 className="text-xl font-semibold text-gray-900 mb-2">Er is een fout opgetreden</h2>
+              <p className="text-gray-600">{error}</p>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      <Card className="w-full max-w-2xl">
-        <CardContent className="p-8">
-          {/* Coffee Animation */}
-          <div className="text-center mb-8">
-            <div className="relative inline-block">
-              <div className="text-6xl mb-4">☕</div>
-              {/* Steam Animation */}
-              <div className="absolute -top-2 left-1/2 transform -translate-x-1/2">
-                <div className="flex space-x-1">
-                  <div className="w-1 h-6 bg-gray-300 rounded-full opacity-60 animate-pulse"></div>
-                  <div
-                    className="w-1 h-8 bg-gray-400 rounded-full opacity-40 animate-pulse"
-                    style={{ animationDelay: "0.5s" }}
-                  ></div>
-                  <div
-                    className="w-1 h-6 bg-gray-300 rounded-full opacity-60 animate-pulse"
-                    style={{ animationDelay: "1s" }}
-                  ></div>
+    <div className="min-h-screen bg-gray-50">
+      <Header />
+
+      <div className="flex items-center justify-center min-h-[80vh] px-4">
+        <Card className="w-full max-w-lg">
+          <CardContent className="p-12 text-center">
+            {/* LinkedIn-style Spinner */}
+            <div className="mb-8">
+              <div className="relative inline-flex">
+                <div className="w-16 h-16 border-4 border-gray-200 border-t-[#0077B5] rounded-full animate-spin"></div>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="w-8 h-8 bg-[#0077B5] rounded-full opacity-20"></div>
                 </div>
               </div>
             </div>
-          </div>
 
-          {/* Project Info */}
-          <div className="text-center mb-8">
-            <h1 className="text-2xl font-bold text-gray-800 mb-2">{project?.name || "Je Fotoshoot"}</h1>
-            <p className="text-lg text-blue-600 font-medium mb-4">{waitingMessages[messageIndex]}</p>
-          </div>
-
-          {/* Progress Bar */}
-          <div className="mb-8">
-            <div className="flex justify-between items-center mb-2">
-              <span className="text-sm font-medium text-gray-700">{getStatusText()}</span>
-              <span className="text-sm text-gray-500">{getProgress()}%</span>
-            </div>
-            <Progress value={getProgress()} className="h-3" />
-            <p className="text-sm text-gray-500 mt-2 text-center">{getTimeEstimate()}</p>
-          </div>
-
-          {/* Status Steps */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-            <div
-              className={`text-center p-4 rounded-lg ${
-                ["created", "training", "processing", "completed"].includes(project?.status || "")
-                  ? "bg-green-100 text-green-800"
-                  : "bg-gray-100 text-gray-500"
-              }`}
-            >
-              <div className="text-2xl mb-2">🎯</div>
-              <div className="font-medium">Project Gestart</div>
-            </div>
-
-            <div
-              className={`text-center p-4 rounded-lg ${
-                ["training", "processing", "completed"].includes(project?.status || "")
-                  ? "bg-blue-100 text-blue-800"
-                  : "bg-gray-100 text-gray-500"
-              }`}
-            >
-              <div className="text-2xl mb-2">🧠</div>
-              <div className="font-medium">AI Training</div>
-            </div>
-
-            <div
-              className={`text-center p-4 rounded-lg ${
-                ["processing", "completed"].includes(project?.status || "")
-                  ? "bg-purple-100 text-purple-800"
-                  : "bg-gray-100 text-gray-500"
-              }`}
-            >
-              <div className="text-2xl mb-2">📸</div>
-              <div className="font-medium">Foto's Genereren</div>
-            </div>
-          </div>
-
-          {/* Fun Facts */}
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-center">
-            <p className="text-sm text-yellow-800">
-              <strong>Wist je dat:</strong> Je AI model leert van je foto's om perfecte headshots te maken die er
-              precies uitzien zoals jij! 🎨
-            </p>
-          </div>
-
-          {/* Photo Count */}
-          {project?.generated_photos && project.generated_photos.length > 0 && (
-            <div className="mt-6 text-center">
-              <div className="inline-flex items-center px-4 py-2 bg-green-100 text-green-800 rounded-full">
-                <span className="text-sm font-medium">📸 {project.generated_photos.length} foto's ontvangen</span>
+            {/* Main Message */}
+            <div className="mb-8">
+              <h1 className="text-2xl font-semibold text-gray-900 mb-3">AI Training in Progress</h1>
+              <p className="text-lg text-gray-600 mb-4">Uw professionele portretten worden gegenereerd</p>
+              <div className="inline-flex items-center px-4 py-2 bg-[#0077B5] bg-opacity-10 rounded-full">
+                <svg className="w-4 h-4 text-[#0077B5] mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+                <span className="text-[#0077B5] font-medium">Geschatte tijd: 15 minuten</span>
               </div>
             </div>
-          )}
-        </CardContent>
-      </Card>
+
+            {/* Status Information */}
+            <div className="bg-gray-50 rounded-lg p-6 mb-6">
+              <div className="flex items-center justify-center mb-3">
+                <div className="w-2 h-2 bg-[#0077B5] rounded-full animate-pulse mr-2"></div>
+                <span className="text-sm font-medium text-gray-700">
+                  {project?.status === "training" ? "AI model wordt getraind" : "Foto's worden gegenereerd"}
+                </span>
+              </div>
+              <p className="text-sm text-gray-500">
+                U wordt automatisch doorgeleid naar uw dashboard wanneer de foto's klaar zijn
+              </p>
+            </div>
+
+            {/* Project Info */}
+            <div className="text-center">
+              <p className="text-sm text-gray-500">
+                Project: <span className="font-medium text-gray-700">{project?.name}</span>
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   )
 }
