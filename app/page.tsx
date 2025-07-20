@@ -154,7 +154,7 @@ const faqData = [
   {
     question: "Kan ik een terugbetaling krijgen als ik niet tevreden ben?",
     answer:
-      "Net als bij  traditionele fotoshoot zijn niet alle foto's goed. Wij laten je alle resultaten zien zodat je zelf de goede uit kan kiezen. Wij beloven dat je  aankoop van AI Portret Pro 100% risicoloos is want als je niet minstens 1 bruikbare portretfoto in je bestelling vindt, je 100% van je betaling terugkrijgt. Voorwaarde is wel dat je geen enkele foto gedownload hebt. Om dit proces in gang te zetten stuur ons een bericht via het contact formulier  ",
+      "Net als bij  traditionele fotoshoots zijn niet alle foto's goed. Wij laten je alle resultaten zien zodat je zelf de goede uit kan kiezen. Wij beloven dat je  aankoop van AI Portret Pro 100% risicoloos is want als je niet minstens 1 bruikbare portretfoto in je bestelling vindt, je 100% van je betaling terugkrijgt. Voorwaarde is wel dat je geen enkele foto gedownload hebt. Om dit proces in gang te zetten stuur ons een bericht via het contact formulier  ",
   },
 ]
 
@@ -190,7 +190,7 @@ export default function HomePage() {
         </h1>
 
         <p className="text-lg md:text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-          Bespaar tot 75% kosten en uren tijd met onze AI op traditionele fotoshoots; Perfect voor LinkedIn, Social
+          Bespaar tot 75% kosten en uren tijd met onze AI op traditionele fotoshoots. Perfect voor LinkedIn, Social
           Media, CV, Website en Print
         </p>
 
@@ -267,7 +267,7 @@ export default function HomePage() {
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-2">Upload 6+ goede foto's</h3>
               <p className="text-gray-600">
-                Verschillende achtergronden met verschillende kleding. geen hoeden of zonnebrillen.
+               Foto's met verschillende achtergronden met verschillende kleding. Gezicht naar de camera, vanaf je schouders of je middel. geen hoeden of zonnebrillen. 
               </p>
             </div>
 
@@ -298,7 +298,7 @@ export default function HomePage() {
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-2">Gefeliciteerd! Je portretfoto's zijn klaar</h3>
               <p className="text-gray-600">
-                Download je 40 professionele portretfoto's en gebruik ze direct voor LinkedIn, CV en meer
+                Download je 40 professionele portretfoto's en gebruik ze direct voor LinkedIn, Social Media, CV, Website of Print
               </p>
             </div>
           </div>
