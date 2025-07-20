@@ -145,7 +145,7 @@ export default function HomePage() {
         </h1>
 
         <p className="text-lg md:text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-         Onze AI bespaard jou tot 75% kosten en uren tijd op traditionele fotoshoots. Perfect voor LinkedIn, Social
+         Onze AI bespaart je tot 75% kosten en uren tijd op traditionele fotoshoots. Perfect voor LinkedIn, Social
           Media, CV, Website en Print
         </p>
 
