@@ -129,7 +129,7 @@ export default function Contact() {
               <Button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full bg-blue-500 hover:bg-blue-400 text-white font-semibold py-3 rounded-md transition duration-200 ease-in-out transform hover:scale-105"
+                className="w-full bg-sky-600 hover:bg-sky-700 text-white font-semibold py-3 rounded-md transition duration-200 ease-in-out transform hover:scale-105"
               >
                 {isSubmitting ? "Bericht wordt verzonden..." : "Verstuur bericht"}
               </Button>
