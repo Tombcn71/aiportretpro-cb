@@ -110,7 +110,7 @@ const faqData = [
   {
     question: "Waarom AI Portret Pro?",
     answer:
-      "AI Portret Pro maakt Headshot-fotografie toegankelijk voor iedereen. Met AI Portret Pro reduceren we de kosten en de tijd die je kwijt bent aan traditionele fotoshoots aanzienlijk.",
+      "AI Portret Pro maakt zakelijke portret-fotografie supersimpel voor iedereen, je kan dit gewoon vanaf overal met je laptop of telefoon doen. Met AI Portret Pro reduceren we de kosten en de tijd die je kwijt bent aan traditionele fotoshoots aanzienlijk.",
   },
   {
     question: "Kan dit een echte fotoshoot vervangen?",
@@ -120,18 +120,10 @@ const faqData = [
   {
     question: "Welke foto's moet ik uploaden voor het beste resultaat?",
     answer:
-      "Upload minimaal 6 foto's van jezelf met goede belichting. Een mix van close-ups en mid-range shots werkt het beste. Zorg ervoor dat je gezicht duidelijk zichtbaar is.",
+      "Upload minimaal 6 foto's van jezelf met goede belichting.Gemmakt op verschillende dagen met verschillende kleding en verschillende achtergronden Een mix van close-ups en mid-range shots werkt het beste. Zorg ervoor dat je gezicht duidelijk zichtbaar is.",
   },
-  {
-    question: "Hoe download ik mijn foto's?",
-    answer:
-      "Dubbelklik op de foto's om ze in een downloadmap op je computer of op je telefoon te plaatsen: raak de foto aan en volg de instructies van je telefoon.",
-  },
-  {
-    question: "Hoeveel goede foto's kan ik verwachten?",
-    answer:
-      "Net als bij een echte fotosessie is niet elke foto een winnaar. Waar je bij een traditionele fotosessie 1 tot 2 goede foto's krijgt, kunnen wij je 10 tot 18 garanderen. We sturen je de hele batch toe. We laten 40 foto's zien, zodat je zelf de beste kunt kiezen.",
-  },
+  
+  
   {
     question: "Wat voor kleding draag ik tijdens de fotoshoot?",
     answer: "Je draagt tijdens de fotoshoot: blazers, pakken, overhemden en blouses.",
@@ -139,7 +131,7 @@ const faqData = [
   {
     question: "Wat voor achtergrond hebben mijn foto's?",
     answer:
-      "We gebruiken professionele achtergronden zoals een grijze studio back-drop en achtergronden van kantoren, trendy werkplekken, bokeh en meer.",
+      "We gebruiken professionele achtergronden zoals een grijze studio back-drop en achtergronden van kantorenen en trendy werkplekken",
   },
   {
     question: "Heb ik het recht om de foto's overal te gebruiken?",
@@ -152,17 +144,17 @@ const faqData = [
   },
   {
     question: "Zijn mijn betalingsgegevens veilig?",
-    answer: "Ja, wij gebruiken Stripe als betaalplatform en slaan nooit betalingsgegevens op.",
+    answer: "Ja, wij gebruiken Stripe als betaalplatform, stripe faciliteert ideal en credit card  betalingenen, wij zelf slaan nooit betalingsgegevens op.",
   },
   {
     question: "Hoe kan ik contact met jullie opnemen?",
     answer:
-      "Stuur ons een bericht via de live chat, indien niet direct, zullen wij contact met je opnemen via het e-mailadres dat je hebt opgegeven via de chat. Ons team spreekt Nederlands.",
+      "Stuur ons een bericht via de live chat, indien niet direct, zullen wij contact met je opnemen via het e-mailadres dat je hebt opgegeven via de chat. Je kunt ook via de contact knop onder de faq contact opnemen. Ons team spreekt Nederlands.",
   },
   {
     question: "Kan ik een terugbetaling krijgen als ik niet tevreden ben?",
     answer:
-      "Net als bij  traditionele fotoshoot zijn niet alle foto's goed. Wij laten je alle resultaten zien zodat je zelf de goede uit kan kiezen. Wij beloven dat je  aankoop van AI Portret Pro 100% risicoloos is want als je niet minstens 4 bruikbare portretfoto.s in je bestelling vindt, je 100% van je betaling terugkrijgt. Voorwaarde is wel dat je geen enkele foto gedownload hebt. Om dit proces in gang te zetten stuur ons een bericht via het contact formulier  ",
+      "Net als bij  traditionele fotoshoot zijn niet alle foto's goed. Wij laten je alle resultaten zien zodat je zelf de goede uit kan kiezen. Wij beloven dat je  aankoop van AI Portret Pro 100% risicoloos is want als je niet minstens 1 bruikbare portretfoto in je bestelling vindt, je 100% van je betaling terugkrijgt. Voorwaarde is wel dat je geen enkele foto gedownload hebt. Om dit proces in gang te zetten stuur ons een bericht via het contact formulier  ",
   },
 ]
 
