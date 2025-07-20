@@ -6,7 +6,7 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { ArrowRight, X, ChevronDown, ChevronUp, Star, Upload, Zap, Download } from "lucide-react"
-import { Header } from "@/components/header"
+import  Header  from "@/components/header"
 import { Facebook, Instagram, Linkedin } from "lucide-react"
 
 const testimonials = [

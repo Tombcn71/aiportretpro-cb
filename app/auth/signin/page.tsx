@@ -38,7 +38,7 @@ export default function SignIn() {
           {Object.values(providers).map((provider: any) => (
             <Button
               key={provider.name}
-              onClick={() => signIn(provider.id, { callbackUrl })}
+              onClick={() => signIn(provider.id, { callbackUrl: "/dashboard" })}
               className="w-full linkedin-primary"
             >
               Inloggen met {provider.name}
