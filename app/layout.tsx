@@ -13,10 +13,9 @@ const inter = Inter({ subsets: ["latin"] })
 const CrispWithNoSSR = dynamic(() => import("../components/crisp"))
 
 export const metadata: Metadata = {
-  title: "AI Portret Pro - Professionele portretfoto's voor slechts €29
-",
+  title: "AI Portret Pro - Professionele Portretfoto's voor slechts 29€",
   description:
-    "Bespaar tot 75% kosten en uren tijd met onze AI op traditionele fotoshoots; Perfect voor LinkedIn, Social Media, CV, Website en Print",
+    "Bespaar tot 75% kosten en uren tijd met onze AI op traditionele fotoshoots. Perfect voor LinkedIn, Social Media, CV, Website en Print.",
   icons: {
     icon: [
       { url: "/favicon.ico" },
