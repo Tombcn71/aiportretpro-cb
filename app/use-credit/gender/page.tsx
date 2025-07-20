@@ -27,8 +27,8 @@ export default function GenderPage() {
 
   const genderOptions = [
     { id: "man", label: "Man", icon: User },
-    { id: "woman", label: "Woman", icon: User },
-    { id: "unisex", label: "Non-Binary", icon: Users },
+    { id: "woman", label: "Vrouw", icon: User },
+    { id: "unisex", label: "Unisex", icon: Users },
   ]
 
   return (
@@ -48,8 +48,8 @@ export default function GenderPage() {
               3
             </div>
           </div>
-          <CardTitle className="text-2xl">Select Your Type</CardTitle>
-          <p className="text-gray-600">This helps us optimize the headshots for the best results</p>
+          <CardTitle className="text-2xl">Type fotoshoot?</CardTitle>
+          <p className="text-gray-600">Dit helpt ons de perfecte professionele portetfotos te genereren met de juiste portetfotos</p>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

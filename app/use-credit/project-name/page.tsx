@@ -41,17 +41,17 @@ export default function ProjectNamePage() {
               3
             </div>
           </div>
-          <CardTitle className="text-2xl">Name Your Photoshoot</CardTitle>
-          <p className="text-gray-600">Give your photoshoot a name so you can easily find it later</p>
+          <CardTitle className="text-2xl">Projectnaam</CardTitle>
+          <p className="text-gray-600">Kies een naam zodat je je portetfotos later makkelijk kunt terugvinden</p>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-2">
-            <Label htmlFor="projectName">Photoshoot Name</Label>
+            <Label htmlFor="projectName">Photoshoot Naam</Label>
             <Input
               id="projectName"
               value={projectName}
               onChange={(e) => setProjectName(e.target.value)}
-              placeholder="e.g. My LinkedIn Photos"
+              placeholder="bijv. Mijn LinkedIn Foto's"
               className="text-lg"
             />
           </div>

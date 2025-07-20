@@ -32,7 +32,7 @@ export default function GenderPage() {
   const genderOptions = [
     { id: "man", label: "Man", icon: User },
     { id: "woman", label: "Vrouw", icon: User },
-    { id: "non-binary", label: "Non Binair", icon: Users },
+    { id: "non-binary", label: "Unisex", icon: Users },
   ]
 
   return (
@@ -44,9 +44,9 @@ export default function GenderPage() {
 
         <Card className="w-full">
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl">Wat is je geslacht?</CardTitle>
+            <CardTitle className="text-2xl">Type fotoshoot?</CardTitle>
             <p className="text-gray-600">
-              Dit helpt ons de perfecte professionele portetfotos te genereren met het juiste portetfotos m/v pack
+              Dit helpt ons de perfecte professionele portetfotos te genereren met de juiste portetfotos
             </p>
           </CardHeader>
           <CardContent className="space-y-6">

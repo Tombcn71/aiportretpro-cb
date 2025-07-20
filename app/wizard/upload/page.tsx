@@ -138,7 +138,7 @@ export default function UploadPage() {
               <div>
                 <h3 className="text-lg font-semibold">Foto Richtlijnen</h3>
                 <p className="text-gray-600 text-sm">
-                  Voor het beste resultaat, upload een mix van close-ups en mid-range shots met goede belichting
+                  Upload 6+ goede foto's. Foto's met verschillende achtergronden met verschillende kleding. Gezicht naar de camera, vanaf je schouders of je middel. geen hoeden of zonnebrillen.
                 </p>
               </div>
             </div>
