@@ -309,8 +309,7 @@ export default function HomePage() {
             Klaar voor je professionele portretfoto's?
           </h2>
           <p className="text-xl text-gray-600 mb-8">
-            Join duizenden professionals die al hun LinkedIn profiel hebben geüpgraded
-          </p>
+Laat zien wie je bent met een krachtige, professionele foto          </p>
           <Link href="/pricing">
             <Button size="lg" className="bg-[#0077B5] hover:bg-[#005885] text-white px-8 py-4 text-lg">
               Start nu voor €29 <ArrowRight className="ml-2 h-5 w-5" />
@@ -422,7 +421,7 @@ export default function HomePage() {
         <div className="max-w-4xl mx-auto text-center px-4">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Klaar voor je professionele headshots?</h2>
           <p className="text-xl text-gray-600 mb-8">
-            Join duizenden professionals die al hun LinkedIn profiel hebben geüpgraded
+           Laat zien wie je bent met een krachtige, professionele foto
           </p>
           <Link href="/pricing">
             <Button size="lg" className="bg-[#0077B5] hover:bg-[#005885] text-white px-8 py-4 text-lg">
