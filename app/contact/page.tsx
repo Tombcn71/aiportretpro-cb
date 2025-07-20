@@ -69,7 +69,7 @@ export default function Contact() {
         <Card className="rounded-lg shadow-lg">
           <CardHeader className="text-center pb-6">
             <CardTitle className="text-4xl font-extrabold text-gray-900">Contact</CardTitle>
-            <p className="text-justify text-lg text-gray-600 mt-2">Onze support is 5 dagen per week bereikbaar en reageert binnen 24 uur, maar meestal sneller 🙂.ontact met je op.</p>
+            <p className="text-justify text-lg text-gray-600 mt-2">Onze support is 5 dagen per week bereikbaar en reageert binnen 24 uur, maar meestal sneller 🙂.</p>
           </CardHeader>
           <CardContent className="p-6">
             <form onSubmit={handleSubmit} className="space-y-6">
