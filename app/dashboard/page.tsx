@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react"
 import { Header } from "@/components/header"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Download, Camera, CreditCard, Trash2, X, CheckCircle } from "lucide-react"
+import { Card, CardContent } from "@/components/ui/card"
+import { Download, Camera, Trash2, X, CheckCircle } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
 
@@ -222,19 +222,11 @@ export default function DashboardPage() {
         {/* Credits Overview */}
         <div className="mb-8">
           <Card className="bg-gradient-to-r from-[#0077B5] to-[#004182] text-white">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <CreditCard className="h-5 w-5" />
-                Jouw Tegoed
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
+            <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-2xl font-bold">
-                    {credits.credits} project{credits.credits !== 1 ? "en" : ""} over
-                  </p>
-                  <p className="text-blue-100">Maak professionele portetfotos</p>
+                  <p className="text-3xl font-bold">{credits.credits}</p>
+                  <p className="text-blue-100">Credits</p>
                 </div>
                 <div>
                   {credits.credits > 0 ? (
