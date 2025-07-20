@@ -74,7 +74,7 @@ const faqData = [
   {
     question: "Welke foto's moet ik uploaden voor het beste resultaat?",
     answer:
-      "Upload minimaal 6 foto's van jezelf met goede belichting.Gemmakt op verschillende dagen met verschillende kleding en verschillende achtergronden Een mix van close-ups en mid-range shots werkt het beste. Zorg ervoor dat je gezicht duidelijk zichtbaar is.",
+      "Upload minimaal 6 foto's van jezelf met goede belichting.Gemaakt op verschillende dagen met verschillende kleding en verschillende achtergronden Een mix van close-ups en mid-range shots werkt het beste. Zorg ervoor dat je gezicht duidelijk zichtbaar is.",
   },
 
   {
@@ -311,7 +311,7 @@ export default function HomePage() {
           <p className="text-xl text-gray-600 mb-8">Laat zien wie je bent met een krachtige, professionele foto </p>
           <Link href="/pricing">
             <Button size="lg" className="bg-[#0077B5] hover:bg-[#005885] text-white px-8 py-4 text-lg">
-              Start nu voor €29 <ArrowRight className="ml-2 h-5 w-5" />
+              Start nu voor slechts €29 <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
           </Link>
         </div>
@@ -422,7 +422,7 @@ export default function HomePage() {
           <p className="text-xl text-gray-600 mb-8">Laat zien wie je bent met een krachtige, professionele foto</p>
           <Link href="/pricing">
             <Button size="lg" className="bg-[#0077B5] hover:bg-[#005885] text-white px-8 py-4 text-lg">
-              Start nu voor €29 <ArrowRight className="ml-2 h-5 w-5" />
+              Start nu voor slechts €29 <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
           </Link>
         </div>
