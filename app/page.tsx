@@ -320,9 +320,7 @@ Laat zien wie je bent met een krachtige, professionele foto          </p>
 
       {/* Photo Gallery */}
       <section className="container mx-auto px-4 py-12 md:py-16">
-        <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-center mb-8 md:mb-12">
-          AI portretten portfolio
-        </h2>
+        
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
           {galleryPhotos.map((photo, index) => (
             <div
