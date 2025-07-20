@@ -49,7 +49,7 @@ export default function GenderPage() {
             </div>
           </div>
           <CardTitle className="text-2xl">Type fotoshoot?</CardTitle>
-          <p className="text-gray-600">Dit helpt ons de perfecte professionele portetfotos te genereren met de juiste portetfotos</p>
+          <p className="text-gray-600">Dit helpt ons de perfecte professionele portetfotos te genereren met de juiste portretfotos</p>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

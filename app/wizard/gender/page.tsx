@@ -46,7 +46,7 @@ export default function GenderPage() {
           <CardHeader className="text-center">
             <CardTitle className="text-2xl">Type fotoshoot?</CardTitle>
             <p className="text-gray-600">
-              Dit helpt ons de perfecte professionele portetfotos te genereren met de juiste portetfotos
+              Dit helpt ons de perfecte professionele portetfotos te genereren met de juiste portretfotos
             </p>
           </CardHeader>
           <CardContent className="space-y-6">

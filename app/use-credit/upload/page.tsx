@@ -111,7 +111,7 @@ export default function UploadPage() {
               </div>
             </div>
             <CardTitle className="text-2xl">Upload Je Foto's</CardTitle>
-            <p className="text-gray-600">Upload minimaal 4 hoge kwaliteit foto's voor het beste resultaat</p>
+            <p className="text-gray-600">Upload minimaal 6 hoge kwaliteit foto's voor het beste resultaat</p>
           </CardHeader>
         </Card>
 
@@ -122,7 +122,7 @@ export default function UploadPage() {
               <div>
                 <h3 className="text-lg font-semibold">Foto Richtlijnen</h3>
                 <p className="text-gray-600 text-sm">
-                  Upload 6+ goede foto's. Foto's met verschillende achtergronden met verschillende kleding. Gezicht naar de camera, vanaf je schouders of je middel. geen hoeden of zonnebrillen.
+                   Foto's met verschillende achtergronden met verschillende kleding. Gezicht naar de camera, vanaf je schouders of je middel. geen hoeden of zonnebrillen.
                 </p>
               </div>
             </div>
