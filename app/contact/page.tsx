@@ -49,7 +49,7 @@ export default function Contact() {
       const result = await response.json()
 
       if (result.success) {
-        setMessage("Bedankt voor je bericht! We reageren binnen 48 uur.")
+        setMessage("Bedankt voor je bericht! We reageren binnen 24 uur.")
         ;(event.target as HTMLFormElement).reset() // Reset the form after successful submission
       } else {
         setMessage("Er is iets misgegaan. Probeer het opnieuw.")
@@ -69,7 +69,7 @@ export default function Contact() {
         <Card className="rounded-lg shadow-lg">
           <CardHeader className="text-center pb-6">
             <CardTitle className="text-4xl font-extrabold text-gray-900">Contact</CardTitle>
-            <p className="text-lg text-gray-600 mt-2">Onze support is 5 dagen per week bereikbaar en reageert binnen 24 uur, maar meestal sneller 🙂.Stuur ons een bericht en vermeld het google emailadres wat je gebruikt heb om in te loggen.  Neem je in het weekend contact met ons op? We nemen maandag contact met je op.</p>
+            <p className="text-lg text-gray-600 mt-2">Onze support is 5 dagen per week bereikbaar en reageert binnen 24 uur, maar meestal sneller 🙂.<br/>Stuur ons een bericht en vermeld het google emailadres wat je gebruikt heb om in te loggen.<br/>  Neem je in het weekend contact met ons op? We nemen maandag contact met je op.</p>
           </CardHeader>
           <CardContent className="p-6">
             <form onSubmit={handleSubmit} className="space-y-6">
