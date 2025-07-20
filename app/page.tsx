@@ -162,7 +162,7 @@ const faqData = [
   {
     question: "Kan ik een terugbetaling krijgen als ik niet tevreden ben?",
     answer:
-      "Ja, we bieden een 100% geld-terug-garantie binnen 7 dagen als je niet volledig tevreden bent met je portretten.",
+      "Net als bij  traditionele fotoshoot zijn niet alle foto's goed. Wij laten je alle resultaten zien zodat je zelf de goede uit kan kiezen. Wij beloven dat je  aankoop van AI Portret Pro 100% risicoloos is want als je niet minstens 4 bruikbare portretfoto.s in je bestelling vindt, je 100% van je betaling terugkrijgt. Voorwaarde is wel dat je geen enkele foto gedownload hebt. Om dit proces in gang te zetten stuur ons een bericht via het contact formulier  ",
   },
 ]
 
