@@ -9,51 +9,6 @@ import { ArrowRight, X, ChevronDown, ChevronUp, Star, Upload, Zap, Download } fr
 import Header from "@/components/header"
 import { Facebook, Instagram, Linkedin } from "lucide-react"
 
-const testimonials = [
-  {
-    name: "Tom B .",
-    role: "Marketing Manager",
-    content:
-      "Ongelooflijk! Mijn LinkedIn profiel ziet er nu zo professioneel uit. Kreeg direct meer connectieverzoeken!",
-    rating: 5,
-    image: "/images/woman1.jpg",
-  },
-  {
-    name: "David K.",
-    role: "Software Developer",
-    content: "Perfect voor mijn job applications. De kwaliteit is beter dan verwacht en super snel geleverd.",
-    rating: 5,
-    image: "/images/man2.jpg",
-  },
-  {
-    name: "Lisa R.",
-    role: "HR Director",
-    content: "Gebruiken dit nu voor ons hele team. Consistente, professionele look voor iedereen!",
-    rating: 5,
-    image: "/images/woman3.jpg",
-  },
-  {
-    name: "Michael T.",
-    role: "Consultant",
-    content: "Bespaard me honderden euro's aan een professionele fotoshoot. Resultaat is fantastisch!",
-    rating: 5,
-    image: "/images/man4.jpg",
-  },
-  {
-    name: "Emma V.",
-    role: "Sales Manager",
-    content: "Mijn collega's vroegen waar ik deze mooie foto's had laten maken. Ze geloofden niet dat het AI was!",
-    rating: 5,
-    image: "/images/woman2.jpg",
-  },
-  {
-    name: "Tom B.",
-    role: "Entrepreneur",
-    content: "Game changer voor mijn personal branding. Professioneel, snel en betaalbaar!",
-    rating: 5,
-    image: "/images/man3.jpg",
-  },
-]
 
 // Gallery photos: Exact order provided by user
 const galleryPhotos = [
@@ -346,46 +301,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Testimonials Section */}
-      <section className="py-16 bg-gray-50">
-        <div className="max-w-6xl mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Wat onze klanten zeggen</h2>
-          </div>
-
-          <div className="relative overflow-hidden">
-            <div className="flex animate-scroll space-x-6">
-              {[...testimonials, ...testimonials].map((testimonial, index) => (
-                <Card key={index} className="flex-shrink-0 w-80 border-[#0077B5]/20">
-                  <CardContent className="p-6">
-                    <div className="flex items-center mb-4">
-                      <div className="relative w-12 h-12 rounded-full overflow-hidden mr-4">
-                        <Image
-                          src={testimonial.image || "/placeholder.svg"}
-                          alt={testimonial.name}
-                          fill
-                          className="object-cover"
-                        />
-                      </div>
-                      <div>
-                        <h4 className="font-semibold text-gray-900">{testimonial.name}</h4>
-                        <p className="text-sm text-gray-600">{testimonial.role}</p>
-                      </div>
-                    </div>
-                    <div className="flex mb-3">
-                      {[...Array(testimonial.rating)].map((_, i) => (
-                        <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                      ))}
-                    </div>
-                    <p className="text-gray-700 text-sm leading-relaxed">"{testimonial.content}"</p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
+     
       {/* CTA Section */}
       <section className="py-16">
         <div className="max-w-4xl mx-auto text-center px-4">
@@ -555,18 +471,6 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Contact Section */}
-            <div className="flex flex-col space-y-4">
-              <h4 className="text-white font-semibold text-sm uppercase tracking-wide">Contact</h4>
-              <div className="flex flex-col space-y-2">
-                <a
-                  href="mailto:info@portretpro.nl"
-                  className="text-gray-300 hover:text-white transition-colors duration-200 text-sm"
-                >
-                  info@portretpro.nl
-                </a>
-              </div>
-            </div>
 
             {/* Legal Links */}
             <div className="flex flex-col space-y-4">
