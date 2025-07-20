@@ -5,10 +5,9 @@ import Image from "next/image"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { ArrowRight, X, ChevronDown, ChevronUp, Star, Upload, Zap, Download } from "lucide-react"
+import { ArrowRight, X, ChevronDown, ChevronUp, Upload, Zap, Download } from "lucide-react"
 import Header from "@/components/header"
 import { Facebook, Instagram, Linkedin } from "lucide-react"
-
 
 // Gallery photos: Exact order provided by user
 const galleryPhotos = [
@@ -77,8 +76,7 @@ const faqData = [
     answer:
       "Upload minimaal 6 foto's van jezelf met goede belichting.Gemmakt op verschillende dagen met verschillende kleding en verschillende achtergronden Een mix van close-ups en mid-range shots werkt het beste. Zorg ervoor dat je gezicht duidelijk zichtbaar is.",
   },
-  
-  
+
   {
     question: "Wat voor kleding draag ik tijdens de fotoshoot?",
     answer: "Je draagt tijdens de fotoshoot: blazers, pakken, overhemden en blouses.",
@@ -99,7 +97,8 @@ const faqData = [
   },
   {
     question: "Zijn mijn betalingsgegevens veilig?",
-    answer: "Ja, wij gebruiken Stripe als betaalplatform, stripe faciliteert ideal en credit card  betalingenen, wij zelf slaan nooit betalingsgegevens op.",
+    answer:
+      "Ja, wij gebruiken Stripe als betaalplatform, stripe faciliteert ideal en credit card  betalingenen, wij zelf slaan nooit betalingsgegevens op.",
   },
   {
     question: "Hoe kan ik contact met jullie opnemen?",
@@ -145,7 +144,7 @@ export default function HomePage() {
         </h1>
 
         <p className="text-lg md:text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-         Onze AI bespaart je tot 75% kosten en uren tijd op traditionele fotoshoots. Perfect voor LinkedIn, Social
+          Onze AI bespaart je tot 75% kosten en uren tijd op traditionele fotoshoots. Perfect voor LinkedIn, Social
           Media, CV, Website en Print
         </p>
 
@@ -222,7 +221,8 @@ export default function HomePage() {
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-2">Upload 6+ goede foto's</h3>
               <p className="text-gray-600">
-               Foto's met verschillende achtergronden met verschillende kleding. Gezicht naar de camera, vanaf je schouders of je middel. geen hoeden of zonnebrillen. 
+                Foto's met verschillende achtergronden met verschillende kleding. Gezicht naar de camera, vanaf je
+                schouders of je middel. geen hoeden of zonnebrillen.
               </p>
             </div>
 
@@ -253,7 +253,8 @@ export default function HomePage() {
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-2">Gefeliciteerd! Je portretfoto's zijn klaar</h3>
               <p className="text-gray-600">
-                Download je 40 professionele portretfoto's en gebruik ze direct voor LinkedIn, Social Media, CV, Website of Print
+                Download je 40 professionele portretfoto's en gebruik ze direct voor LinkedIn, Social Media, CV, Website
+                of Print
               </p>
             </div>
           </div>
@@ -301,15 +302,13 @@ export default function HomePage() {
         </div>
       </section>
 
-     
       {/* CTA Section */}
       <section className="py-16">
         <div className="max-w-4xl mx-auto text-center px-4">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
             Klaar voor je professionele portretfoto's?
           </h2>
-          <p className="text-xl text-gray-600 mb-8">
-Laat zien wie je bent met een krachtige, professionele foto          </p>
+          <p className="text-xl text-gray-600 mb-8">Laat zien wie je bent met een krachtige, professionele foto </p>
           <Link href="/pricing">
             <Button size="lg" className="bg-[#0077B5] hover:bg-[#005885] text-white px-8 py-4 text-lg">
               Start nu voor €29 <ArrowRight className="ml-2 h-5 w-5" />
@@ -320,9 +319,7 @@ Laat zien wie je bent met een krachtige, professionele foto          </p>
 
       {/* Photo Gallery */}
       <section className="container mx-auto px-4 py-12 md:py-16">
-        <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-center mb-8 md:mb-12">
-          AI portfolio
-        </h2>
+        <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-center mb-8 md:mb-12">AI portfolio</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
           {galleryPhotos.map((photo, index) => (
             <div
@@ -356,7 +353,7 @@ Laat zien wie je bent met een krachtige, professionele foto          </p>
       </section>
 
       {/* FAQ Section */}
-      <section className="container mx-auto px-4 py-12 md:py-16 bg-gray-50">
+      <section id="faq" className="container mx-auto px-4 py-12 md:py-16 bg-gray-50">
         <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-center mb-8 md:mb-12">Veelgestelde Vragen</h2>
         <div className="max-w-3xl mx-auto">
           {faqData.map((faq, index) => (
@@ -419,11 +416,10 @@ Laat zien wie je bent met een krachtige, professionele foto          </p>
       {/* CTA Section */}
       <section className="py-16">
         <div className="max-w-4xl mx-auto text-center px-4">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Klaar voor je professionele portretfoto's?
-</h2>
-          <p className="text-xl text-gray-600 mb-8">
-           Laat zien wie je bent met een krachtige, professionele foto
-          </p>
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            Klaar voor je professionele portretfoto's?
+          </h2>
+          <p className="text-xl text-gray-600 mb-8">Laat zien wie je bent met een krachtige, professionele foto</p>
           <Link href="/pricing">
             <Button size="lg" className="bg-[#0077B5] hover:bg-[#005885] text-white px-8 py-4 text-lg">
               Start nu voor €29 <ArrowRight className="ml-2 h-5 w-5" />
@@ -470,7 +466,6 @@ Laat zien wie je bent met een krachtige, professionele foto          </p>
                 </Link>
               </div>
             </div>
-
 
             {/* Legal Links */}
             <div className="flex flex-col space-y-4">
