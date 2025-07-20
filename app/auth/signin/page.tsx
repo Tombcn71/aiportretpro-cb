@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 export default function SignIn() {
   const [providers, setProviders] = useState<any>(null)
   const searchParams = useSearchParams()
-  const callbackUrl = searchParams.get("callbackUrl") || "/"
+  const callbackUrl = searchParams.get("callbackUrl") || "/dashboard"
 
   useEffect(() => {
     const fetchProviders = async () => {
@@ -38,7 +38,7 @@ export default function SignIn() {
           {Object.values(providers).map((provider: any) => (
             <Button
               key={provider.name}
-              onClick={() => signIn(provider.id, { callbackUrl: "/dashboard" })}
+              onClick={() => signIn(provider.id, { callbackUrl })}
               className="w-full linkedin-primary"
             >
               Inloggen met {provider.name}
