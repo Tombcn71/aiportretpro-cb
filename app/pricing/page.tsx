@@ -106,7 +106,7 @@ export default function PricingPage() {
               </Button>
 
               <div className="text-center text-sm text-gray-500">
-                <p>✓ Veilige betaling via Stripe</p>
+                <p>✓ Veilige betaling met ideal en credit card</p>
                 <p>✓ Geld terug garantie</p>
               </div>
             </CardContent>
