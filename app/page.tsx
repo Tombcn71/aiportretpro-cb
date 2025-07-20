@@ -328,7 +328,7 @@ export default function HomePage() {
                 <Zap className="h-12 w-12 text-[#0077B5] mx-auto mb-4" />
                 <h3 className="text-xl font-semibold mb-2">Beste deal</h3>
                 <p className="text-gray-600">
-                  €29 voor AI portretfoto's. Bespaar tot wel 100 euro op een traditionele fotoshoot.
+                  €29 voor AI portretfoto's. Bespaar tot wel 75% op een traditionele fotoshoot.
                 </p>
               </CardContent>
             </Card>
