@@ -6,7 +6,7 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { ArrowRight, X, ChevronDown, ChevronUp, Star, Upload, Zap, Download } from "lucide-react"
-import  Header  from "@/components/header"
+import Header from "@/components/header"
 import { Facebook, Instagram, Linkedin } from "lucide-react"
 
 const testimonials = [
@@ -560,6 +560,19 @@ export default function HomePage() {
                 <Link href="/contact" className="text-gray-300 hover:text-white transition-colors duration-200 text-sm">
                   Contact
                 </Link>
+              </div>
+            </div>
+
+            {/* Contact Section */}
+            <div className="flex flex-col space-y-4">
+              <h4 className="text-white font-semibold text-sm uppercase tracking-wide">Contact</h4>
+              <div className="flex flex-col space-y-2">
+                <a
+                  href="mailto:info@portretpro.nl"
+                  className="text-gray-300 hover:text-white transition-colors duration-200 text-sm"
+                >
+                  info@portretpro.nl
+                </a>
               </div>
             </div>
 
