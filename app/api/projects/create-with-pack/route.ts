@@ -135,14 +135,22 @@ export async function POST(request: Request) {
       WHERE id = ${projectId}
     `
 
-    // Deduct credits PROPERLY
+    // Deduct credits PROPERLY - same as create-with-credit route
     if (stripeIsConfigured && userCredits > 0) {
-      await sql`
+      const deductResult = await sql`
         UPDATE credits 
-        SET credits = ${userCredits - 1}, updated_at = CURRENT_TIMESTAMP
-        WHERE user_id = ${user.id}
+        SET credits = credits - 1, updated_at = CURRENT_TIMESTAMP
+        WHERE user_id = ${user.id} AND credits > 0
+        RETURNING credits
       `
-      console.log(`✅ Credits deducted: ${userCredits} -> ${userCredits - 1}`)
+
+      if (deductResult.length === 0) {
+        // Rollback project if credit deduction fails
+        await sql`DELETE FROM projects WHERE id = ${projectId}`
+        return NextResponse.json({ message: "Failed to deduct credit - insufficient balance" }, { status: 500 })
+      }
+
+      console.log(`✅ Credits deducted: ${userCredits} -> ${deductResult[0].credits}`)
     }
 
     return NextResponse.json({
