@@ -11,16 +11,31 @@ export default function ProjectNamePage() {
   const [projectName, setProjectName] = useState("")
   const router = useRouter()
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     if (projectName.trim()) {
-      localStorage.setItem(
-        "wizardData",
-        JSON.stringify({
-          projectName: projectName.trim(),
-          step: 1,
-        }),
-      )
-      router.push("/use-credit/gender")
+      // Check credits before allowing to continue
+      try {
+        const response = await fetch("/api/credits/balance")
+        const data = await response.json()
+
+        if (data.credits < 1) {
+          // Redirect to pricing if no credits
+          router.push("/pricing")
+          return
+        }
+
+        localStorage.setItem(
+          "wizardData",
+          JSON.stringify({
+            projectName: projectName.trim(),
+            step: 1,
+          }),
+        )
+        router.push("/use-credit/gender")
+      } catch (error) {
+        console.error("Error checking credits:", error)
+        router.push("/pricing")
+      }
     }
   }
 
