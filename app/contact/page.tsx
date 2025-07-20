@@ -69,7 +69,7 @@ export default function Contact() {
         <Card className="rounded-lg shadow-lg">
           <CardHeader className="text-center pb-6">
             <CardTitle className="text-4xl font-extrabold text-gray-900">Contact</CardTitle>
-            <p className="text-lg text-gray-600 mt-2">Stuur ons een bericht en we reageren binnen 48 uur</p>
+            <p className="text-lg text-gray-600 mt-2">Onze support is 5 dagen per week bereikbaar en reageert binnen 24 uur, maar meestal sneller 🙂.Stuur ons een bericht en vermeld het google emailadres wat je gebruikt heb om in te loggen.  Neem je in het weekend contact met ons op? We nemen maandag contact met je op.</p>
           </CardHeader>
           <CardContent className="p-6">
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -129,7 +129,7 @@ export default function Contact() {
               <Button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-md transition duration-200 ease-in-out transform hover:scale-105"
+                className="w-full bg-blue-500 hover:bg-blue-400 text-white font-semibold py-3 rounded-md transition duration-200 ease-in-out transform hover:scale-105"
               >
                 {isSubmitting ? "Bericht wordt verzonden..." : "Verstuur bericht"}
               </Button>
