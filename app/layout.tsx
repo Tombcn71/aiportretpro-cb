@@ -7,6 +7,8 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { Providers } from "./providers"
 import { Toaster } from "@/components/ui/toaster"
 import FacebookPixel from "@/components/facebook-pixel"
+import { Analytics } from "@vercel/analytics/next"
+import { Suspense } from "react"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -24,7 +26,7 @@ export const metadata: Metadata = {
     ],
     apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
   },
-    generator: 'v0.dev'
+  generator: "v0.dev",
 }
 
 export default function RootLayout({
@@ -43,10 +45,13 @@ export default function RootLayout({
       <body className={inter.className}>
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
           <Providers>
-            <CrispWithNoSSR />
-            {children}
-            <Toaster />
-            <FacebookPixel />
+            <Suspense fallback={null}>
+              <CrispWithNoSSR />
+              {children}
+              <Toaster />
+              <FacebookPixel />
+              <Analytics />
+            </Suspense>
           </Providers>
         </ThemeProvider>
       </body>
