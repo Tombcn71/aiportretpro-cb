@@ -71,7 +71,7 @@ export default function DiscountPopup({ isOpen, onClose }: DiscountPopupProps) {
           <h2 className="text-2xl font-bold text-gray-900 mb-3">
             10% Korting op je
             <br />
-            <span className="text-[#0077B5]">AI Portretten</span>
+            <span className="text-[#0077B5]">eerste aankoop</span>
           </h2>
 
           <p className="text-gray-600 text-sm mb-4 leading-relaxed">
