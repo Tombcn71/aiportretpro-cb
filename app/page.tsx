@@ -8,6 +8,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { ArrowRight, X, ChevronDown, ChevronUp, Upload, Zap, Download } from "lucide-react"
 import Header from "@/components/header"
 import { Facebook, Instagram, Linkedin } from "lucide-react"
+import DiscountPopup from "@/components/discount-popup"
 
 // Gallery photos: Exact order provided by user
 const galleryPhotos = [
@@ -116,9 +117,17 @@ export default function HomePage() {
   const [isClient, setIsClient] = useState(false)
   const [selectedImage, setSelectedImage] = useState<string | null>(null)
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null)
+  const [showDiscountPopup, setShowDiscountPopup] = useState(false)
 
   useEffect(() => {
     setIsClient(true)
+
+    // Show discount popup after 10 seconds
+    const timer = setTimeout(() => {
+      setShowDiscountPopup(true)
+    }, 10000)
+
+    return () => clearTimeout(timer)
   }, [])
 
   const openLightbox = (imageSrc: string) => {
@@ -427,6 +436,7 @@ export default function HomePage() {
           </Link>
         </div>
       </section>
+
       {/* Footer */}
       <footer className="bg-black text-white py-8 px-6">
         <div className="container mx-auto">
@@ -521,6 +531,9 @@ export default function HomePage() {
           </div>
         </div>
       </footer>
+
+      {/* Discount Popup */}
+      <DiscountPopup isOpen={showDiscountPopup} onClose={() => setShowDiscountPopup(false)} />
 
       <style jsx>{`
         @keyframes scroll {
