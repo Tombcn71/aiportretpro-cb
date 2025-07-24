@@ -65,7 +65,7 @@ export default function DiscountPopup({ isOpen, onClose }: DiscountPopupProps) {
 
           {/* Content - Mobile */}
           <div className="inline-block bg-[#0077B5] text-white px-3 py-1 rounded-full text-xs font-semibold mb-4">
-            🎉 Tijdelijke Launch Prijs
+            🎉 Tijdelijke Launch Korting
           </div>
 
           <h2 className="text-2xl font-bold text-gray-900 mb-3">
@@ -140,7 +140,7 @@ export default function DiscountPopup({ isOpen, onClose }: DiscountPopupProps) {
           <div className="md:w-1/2 p-8 flex flex-col justify-center">
             <div className="text-center">
               <div className="inline-block bg-[#0077B5] text-white px-4 py-2 rounded-full text-sm font-semibold mb-6">
-                🎉 Tijdelijke Launch Prijs
+                🎉 Tijdelijke Launch Korting
               </div>
 
               <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
