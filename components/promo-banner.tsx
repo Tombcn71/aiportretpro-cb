@@ -27,10 +27,16 @@ export default function PromoBanner() {
             🚀 Profiteer van 20% launch korting! Vul de code{" "}
             <span className="font-bold bg-white text-[#0077B5] px-2 py-1 rounded mx-1">LAUNCH</span>
             in bij afrekenen 🎉
+          </span>
           
         </div>
 
-        
+        <button
+          onClick={() => setIsVisible(false)}
+          className="absolute right-4 top-1/2 transform -translate-y-1/2 text-white hover:text-gray-200 transition-colors"
+        >
+          <X className="h-4 w-4" />
+        </button>
       </div>
     </div>
   )
