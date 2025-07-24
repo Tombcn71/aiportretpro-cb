@@ -65,17 +65,17 @@ export default function DiscountPopup({ isOpen, onClose }: DiscountPopupProps) {
 
           {/* Content - Mobile */}
           <div className="inline-block bg-[#0077B5] text-white px-3 py-1 rounded-full text-xs font-semibold mb-4">
-            🎉 Tijdelijke Aanbieding
+            🎉 Tijdelijke Launch Prijs
           </div>
 
           <h2 className="text-2xl font-bold text-gray-900 mb-3">
-            10% Korting op je
+            20% Korting op je
             <br />
             <span className="text-[#0077B5]">eerste aankoop</span>
           </h2>
 
           <p className="text-gray-600 text-sm mb-4 leading-relaxed">
-            Start vandaag nog met professionele portretfoto's en bespaar 10% op je bestelling.
+            Start vandaag nog met professionele portretfoto's en bespaar 20%.
           </p>
 
           {/* Discount Code - Mobile */}
@@ -140,17 +140,17 @@ export default function DiscountPopup({ isOpen, onClose }: DiscountPopupProps) {
           <div className="md:w-1/2 p-8 flex flex-col justify-center">
             <div className="text-center">
               <div className="inline-block bg-[#0077B5] text-white px-4 py-2 rounded-full text-sm font-semibold mb-6">
-                🎉 Tijdelijke Aanbieding
+                🎉 Tijdelijke Launch Prijs
               </div>
 
               <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-                10% Korting op je
+                20% Korting op je
                 <br />
                 <span className="text-[#0077B5]">Professionele portretfoto's</span>
               </h2>
 
               <p className="text-gray-600 text-lg mb-6 leading-relaxed">
-                Start vandaag nog en bespaar 10% op je bestelling.
+                Start vandaag nog en bespaar 20% op je bestelling.
               </p>
 
               <div className="bg-[#F3F2EF] rounded-lg p-4 mb-6">

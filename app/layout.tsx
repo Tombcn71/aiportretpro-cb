@@ -17,7 +17,7 @@ const CrispWithNoSSR = dynamic(() => import("../components/crisp"))
 export const metadata: Metadata = {
   title: "AI Portret Pro - Professionele Portretfoto's voor slechts 29€",
   description:
-    "Bespaar tot 75% kosten en uren tijd met onze AI op traditionele fotoshoots. Perfect voor LinkedIn, Social Media, CV, Website en Print.",
+    "Upload 6 Foto's en krijg in 15 minuten portretfoto's van studiokwaliteit. Bespaar tientallen euro's en uren tijd",
   icons: {
     icon: [
       { url: "/favicon.ico" },
