@@ -80,7 +80,7 @@ export default function DiscountPopup({ isOpen, onClose }: DiscountPopupProps) {
 
           {/* Discount Code - Mobile */}
           <div className="bg-[#F3F2EF] rounded-lg p-3 mb-4">
-            <p className="text-xs text-gray-600 mb-2">Gebruik kortingscode:</p>
+            <p className="text-xs text-gray-600 mb-2">Gebruik kortingscode op betaalpagina:</p>
             <div className="flex items-center justify-center gap-2">
               <span className="text-xl font-bold text-[#0077B5] tracking-wider">LAUNCH</span>
               <button
@@ -154,7 +154,7 @@ export default function DiscountPopup({ isOpen, onClose }: DiscountPopupProps) {
               </p>
 
               <div className="bg-[#F3F2EF] rounded-lg p-4 mb-6">
-                <p className="text-sm text-gray-600 mb-2">Gebruik kortingscode:</p>
+                <p className="text-sm text-gray-600 mb-2">Gebruik kortingscode op betaalpagina:</p>
                 <div className="flex items-center justify-center gap-3">
                   <span className="text-2xl font-bold text-[#0077B5] tracking-wider">LAUNCH</span>
                   <button
