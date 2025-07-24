@@ -146,11 +146,11 @@ export default function DiscountPopup({ isOpen, onClose }: DiscountPopupProps) {
               <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
                 10% Korting op je
                 <br />
-                <span className="text-[#0077B5]">AI Portretten</span>
+                <span className="text-[#0077B5]">Professionele portretfoto's</span>
               </h2>
 
               <p className="text-gray-600 text-lg mb-6 leading-relaxed">
-                Start vandaag nog met professionele portretfoto's en bespaar 10% op je bestelling.
+                Start vandaag nog en bespaar 10% op je bestelling.
               </p>
 
               <div className="bg-[#F3F2EF] rounded-lg p-4 mb-6">
