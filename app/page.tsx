@@ -138,7 +138,7 @@ export default function HomePage() {
         </h1>
 
         <p className="text-lg md:text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-          Upload 6 Foto's en krijg in 15 minuten portretfoto's van studiokwaliteit. Bespaar tientallen euro's en uren
+          Upload 6 Foto's en krijg in 15 minuten 40 portretfoto's van studiokwaliteit. Bespaar tientallen euro's en uren
           tijd.{" "}
         </p>
 
