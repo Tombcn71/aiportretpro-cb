@@ -31,21 +31,16 @@ const galleryPhotos = [
 ]
 
 // Carousel photos: Same exact order as gallery
-const carouselPhotos = [
-  { id: 1, photo: "/images/carousel10.jpg", name: "Professional Portrait" },
-  { id: 2, photo: "/images/carousel6.jpg", name: "Professional Portrait" },
+const carouselPhotos = [  
+
+{ id: 6, photo: "/images/new-man2.jpg", name: "Professional Man Portrait" },
   { id: 3, photo: "/images/new-woman3.jpg", name: "Professional Woman Portrait" },
   { id: 4, photo: "/images/new-man4.jpg", name: "Professional Man Portrait" },
-  { id: 5, photo: "/images/carousel2.jpg", name: "Professional Portrait" },
-  { id: 6, photo: "/images/new-man2.jpg", name: "Professional Man Portrait" },
   { id: 7, photo: "/images/new-woman2.jpg", name: "Professional Woman Portrait" },
   { id: 8, photo: "/images/new-man5.jpg", name: "Professional Man Portrait" },
-  { id: 9, photo: "/images/carousel4.jpg", name: "Professional Portrait" },
   { id: 10, photo: "/images/new-man3.jpg", name: "Professional Man Portrait" },
   { id: 11, photo: "/images/new-woman4.jpg", name: "Professional Woman Portrait" },
   { id: 12, photo: "/images/new-man6.jpg", name: "Professional Man Portrait" },
-  { id: 13, photo: "/images/tina3.jpg", name: "Professional Woman Portrait" },
-  { id: 14, photo: "/images/carousel5.jpg", name: "Professional Portrait" },
   { id: 15, photo: "/images/new-woman1.jpg", name: "Professional Woman Portrait" },
   { id: 16, photo: "/images/new-man1.jpg", name: "Professional Man Portrait" },
 ]
