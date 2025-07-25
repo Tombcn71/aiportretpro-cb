@@ -10,38 +10,36 @@ import Header from "@/components/header"
 import { Facebook, Instagram, Linkedin } from "lucide-react"
 import PromoBanner from "@/components/promo-banner"
 
-// Gallery photos: Exact order provided by user
+// Gallery photos: New 16 professional photos in man-woman alternating order
 const galleryPhotos = [
-  "/images/carousel10.jpg", // Position 1
-  "/images/carousel6.jpg", // Position 2
-  "/images/new-woman3.jpg", // Position 3
-  "/images/new-man4.jpg", // Position 4
-  "/images/carousel2.jpg", // Position 5
-  "/images/new-man2.jpg", // Position 6
-  "/images/new-woman2.jpg", // Position 7
-  "/images/new-man5.jpg", // Position 8
-  "/images/carousel4.jpg", // Position 9
-  "/images/new-man3.jpg", // Position 10
-  "/images/new-woman4.jpg", // Position 11
-  "/images/new-man6.jpg", // Position 12
-  "/images/tina3.jpg", // Position 13
-  "/images/carousel5.jpg", // Position 14
-  "/images/new-woman1.jpg", // Position 15
-  "/images/new-man1.jpg", // Position 16
+  "/images/professional-man-1.jpg", // Position 1 - Man
+  "/images/professional-woman-1.jpg", // Position 2 - Woman
+  "/images/professional-man-2.jpg", // Position 3 - Man
+  "/images/professional-woman-2.jpg", // Position 4 - Woman
+  "/images/professional-man-3.jpg", // Position 5 - Man
+  "/images/professional-woman-3.jpg", // Position 6 - Woman
+  "/images/professional-man-4.jpg", // Position 7 - Man
+  "/images/professional-woman-4.jpg", // Position 8 - Woman
+  "/images/professional-man-5.jpg", // Position 9 - Man
+  "/images/professional-woman-5.jpg", // Position 10 - Woman
+  "/images/professional-man-6.jpg", // Position 11 - Man
+  "/images/professional-woman-6.jpg", // Position 12 - Woman
+  "/images/professional-man-7.jpg", // Position 13 - Man
+  "/images/professional-woman-7.jpg", // Position 14 - Woman
+  "/images/professional-man-8.jpg", // Position 15 - Man
+  "/images/professional-woman-8.jpg", // Position 16 - Woman
 ]
 
 // Carousel photos: Same exact order as gallery
-const carouselPhotos = [  
-
-
-  { id: 3, photo: "/images/new-woman3.jpg", name: "Professional Woman Portrait" },
-  { id: 4, photo: "/images/new-man4.jpg", name: "Professional Man Portrait" },
-  { id: 7, photo: "/images/new-woman2.jpg", name: "Professional Woman Portrait" },
-  { id: 8, photo: "/images/new-man5.jpg", name: "Professional Man Portrait" },
-  { id: 11, photo: "/images/new-woman4.jpg", name: "Professional Woman Portrait" },
-  { id: 12, photo: "/images/new-man6.jpg", name: "Professional Man Portrait" },
-  { id: 15, photo: "/images/new-woman1.jpg", name: "Professional Woman Portrait" },
-  { id: 16, photo: "/images/new-man1.jpg", name: "Professional Man Portrait" },
+const carouselPhotos = [
+  { id: 1, photo: "/images/professional-man-1.jpg", name: "Professional Man Portrait" },
+  { id: 2, photo: "/images/professional-woman-1.jpg", name: "Professional Woman Portrait" },
+  { id: 3, photo: "/images/professional-man-2.jpg", name: "Professional Man Portrait" },
+  { id: 4, photo: "/images/professional-woman-2.jpg", name: "Professional Woman Portrait" },
+  { id: 5, photo: "/images/professional-man-3.jpg", name: "Professional Man Portrait" },
+  { id: 6, photo: "/images/professional-woman-3.jpg", name: "Professional Woman Portrait" },
+  { id: 7, photo: "/images/professional-man-4.jpg", name: "Professional Man Portrait" },
+  { id: 8, photo: "/images/professional-woman-4.jpg", name: "Professional Woman Portrait" },
 ]
 
 const companies = [
