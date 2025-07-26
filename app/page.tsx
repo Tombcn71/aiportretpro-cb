@@ -148,7 +148,7 @@ export default function HomePage() {
           className="bg-[#0077B5] hover:bg-[#004182] text-white px-6 md:px-8 py-3 md:py-4 text-base md:text-lg mb-8"
         >
           <Link href="/pricing">
-            Maak nu je zakelijke portretten <ArrowRight className="ml-2 h-4 md:h-5 w-4 md:w-5" />
+            Start Nu-29€ <ArrowRight className="ml-2 h-4 md:h-5 w-4 md:w-5" />
           </Link>
         </Button>
       </section>
