@@ -201,7 +201,7 @@ export default function HomePage() {
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Hoe werkt het?</h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              In 3 eenvoudige stappen naar professionele portretfoto's
+              In 3 eenvoudige stappen met uw telefoon of laptop
             </p>
           </div>
 
@@ -213,10 +213,9 @@ export default function HomePage() {
               <div className="w-12 h-12 bg-[#0077B5] text-white rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">
                 1
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Upload 6+ goede foto's</h3>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">Upload 6 goede foto's</h3>
               <p className="text-gray-600">
-                Foto's met verschillende achtergronden met verschillende kleding. Gezicht naar de camera, vanaf je
-                schouders of je middel. geen hoeden of zonnebrillen.
+              6 verschillende foto's met uw ezicht naar de camera,
               </p>
             </div>
 
@@ -227,9 +226,9 @@ export default function HomePage() {
               <div className="w-12 h-12 bg-[#0077B5] text-white rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">
                 2
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Onze AI gaat aan de slag voor je</h3>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">Onze AI gaat aan de slag voor u</h3>
               <p className="text-gray-600">
-                Onze geavanceerde AI analyseert je foto's en creëert professionele portretfoto's
+               U kunt nu rustig afwachten de foto, verschijnen binnen een kwartier in uw dashboard
               </p>
             </div>
 
@@ -247,7 +246,7 @@ export default function HomePage() {
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-2">Gefeliciteerd! Je portretfoto's zijn klaar</h3>
               <p className="text-gray-600">
-                Download je 40 professionele portretfoto's en gebruik ze direct voor LinkedIn, Social Media, CV, Website
+              U kunt nu uw 40 professionele portretfoto's downloaden en direct gebruiken voor  voor LinkedIn, Social Media, CV, Website
                 of Print
               </p>
             </div>
@@ -255,65 +254,11 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="py-16">
-        <div className="max-w-6xl mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Waarom kiezen voor AI Portret Pro?</h2>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            <Card className="border-[#0077B5]/20 hover:border-[#0077B5]/40 transition-colors">
-              <CardContent className="p-6 text-center">
-                <Upload className="h-12 w-12 text-[#0077B5] mx-auto mb-4" />
-                <h3 className="text-xl font-semibold mb-2">Supersnel</h3>
-                <p className="text-gray-600">
-                  Resultaten binnen 15 minuten. Makkelijk vanuit thuis, geen reistijd geen studio..
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-[#0077B5]/20 hover:border-[#0077B5]/40 transition-colors">
-              <CardContent className="p-6 text-center">
-                <Zap className="h-12 w-12 text-[#0077B5] mx-auto mb-4" />
-                <h3 className="text-xl font-semibold mb-2">Beste deal</h3>
-                <p className="text-gray-600">
-                  €29 voor AI portretfoto's. Bespaar tot wel 75% op een traditionele fotoshoot.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-[#0077B5]/20 hover:border-[#0077B5]/40 transition-colors">
-              <CardContent className="p-6 text-center">
-                <Download className="h-12 w-12 text-[#0077B5] mx-auto mb-4" />
-                <h3 className="text-xl font-semibold mb-2">Hoge kwaliteit</h3>
-                <p className="text-gray-600">
-                  Professionele kwaliteit die niet te onderscheiden is van traditionele fotoshoots.
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="py-16">
-        <div className="max-w-4xl mx-auto text-center px-4">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            Klaar voor je professionele portretfoto's?
-          </h2>
-          <p className="text-xl text-gray-600 mb-8">Laat zien wie je bent met een krachtige, professionele foto </p>
-          <Link href="/pricing">
-            <Button size="lg" className="bg-[#0077B5] hover:bg-[#005885] text-white px-8 py-4 text-lg">
-              Start nu voor slechts €29 <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
-          </Link>
-        </div>
-      </section>
+      
 
       {/* Photo Gallery */}
       <section className="container mx-auto px-4 py-12 md:py-16">
-        <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-center mb-8 md:mb-12">AI portfolio</h2>
+        <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-center mb-8 md:mb-12">AI portretfoto's voorbeelden</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
           {galleryPhotos.map((photo, index) => (
             <div
