@@ -13,12 +13,13 @@ const HeroSection = () => {
           {/* Text Content */}
           <div className="space-y-6 max-w-4xl">
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-black leading-tight">
-              Transformeer uw foto naar een <span className="text-[#0077B5]">professionele LinkedIn profielfoto</span>
+             Onze AI fotoshoot t<span className="text-[#0077B5]">die uw professionele uitstraling versterk/span>
             </h1>
 
             <p className="text-base sm:text-lg lg:text-xl text-[#666666] leading-relaxed max-w-2xl mx-auto">
-              Binnen 30 seconden krijgt u studio-kwaliteit headshots die uw professionele uitstraling versterken.
-              Perfect voor LinkedIn, CV's en zakelijke profielen.
+             Binnen 15 minuten krijgt u 40 studio-kwaliteit portretfoto's. Perfect voor LinkedIn, CV's en zakelijke profielen.
+
+
             </p>
           </div>
 
