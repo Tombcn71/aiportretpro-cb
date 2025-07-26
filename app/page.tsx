@@ -134,7 +134,7 @@ export default function HomePage() {
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-6 text-center">
         <h1 className="tracking-tight text-2xl md:text-4xl font-bold mb-6">
-        Professionele portretfoto's gemaakt door AI<span className="text-[#0077B5]"></span>
+          Professionele portretfoto's gemaakt door AI<span className="text-[#0077B5]"></span>
         </h1>
 
         <p className="text-lg md:text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
@@ -551,10 +551,10 @@ export default function HomePage() {
 
         @keyframes carousel {
           0% {
-            transform: translateX(0);
+            transform: translateX(calc(-100% / 2));
           }
           100% {
-            transform: translateX(calc(-100% / 2));
+            transform: translateX(0);
           }
         }
 

@@ -116,10 +116,10 @@ const PhotoCarousel = ({ autoPlay = true, interval = 3000, showDots = true }: Ph
 
         @keyframes carousel {
           0% {
-            transform: translateX(0);
+            transform: translateX(calc(-100% / 2));
           }
           100% {
-            transform: translateX(calc(-100% / 2));
+            transform: translateX(0);
           }
         }
 
