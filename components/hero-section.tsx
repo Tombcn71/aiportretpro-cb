@@ -30,7 +30,7 @@ const HeroSection = () => {
             </div>
           </div>
 
-          {/* Before/After Photos - Closer Together, Bigger */}
+          {/* Before/After Photos - Closer Together, Bigger with Box Shadow */}
           <div className="w-full flex items-center justify-center px-1">
             <div className="flex items-center gap-1 sm:gap-2 w-full max-w-lg">
               {/* Before Photo */}
@@ -38,7 +38,7 @@ const HeroSection = () => {
                 <div className="bg-[#E74C3C]/10 text-[#E74C3C] px-2 py-1 rounded-full text-xs sm:text-sm font-medium inline-block">
                   VOOR
                 </div>
-                <div className="w-full h-56 sm:h-64 md:h-72 lg:h-80 overflow-hidden rounded-xl sm:rounded-2xl relative shadow-xl border-2 sm:border-4 border-white">
+                <div className="w-full h-56 sm:h-64 md:h-72 lg:h-80 overflow-hidden rounded-xl sm:rounded-2xl relative shadow-2xl border-2 sm:border-4 border-white">
                   <Image src="/images/before-casual.jpg" alt="Voor: Amateur foto" fill className="object-cover" />
                 </div>
                 <p className="text-xs sm:text-sm text-[#666666]">Smartphone foto</p>
@@ -54,7 +54,7 @@ const HeroSection = () => {
                 <div className="bg-[#057642]/10 text-[#057642] px-2 py-1 rounded-full text-xs sm:text-sm font-medium inline-block">
                   NA
                 </div>
-                <div className="w-full h-56 sm:h-64 md:h-72 lg:h-80 overflow-hidden rounded-xl sm:rounded-2xl relative shadow-xl border-2 sm:border-4 border-white">
+                <div className="w-full h-56 sm:h-64 md:h-72 lg:h-80 overflow-hidden rounded-xl sm:rounded-2xl relative shadow-2xl border-2 sm:border-4 border-white">
                   <Image
                     src="/images/after-professional.jpg"
                     alt="Na: Professionele AI headshot"
