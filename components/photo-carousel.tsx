@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import Image from "next/image"
 
-// Carousel photos: Same exact order as gallery
+// Carousel photos: 8 professional photos in man-woman alternating order
 const carouselPhotos = [
   { id: 1, photo: "/images/professional-man-1.jpg", name: "Professional Man Portrait" },
   { id: 2, photo: "/images/professional-woman-1.jpg", name: "Professional Woman Portrait" },
@@ -21,14 +21,14 @@ interface PhotoCarouselProps {
   showDots?: boolean
 }
 
-export default function PhotoCarousel({ autoPlay = true, interval = 3000, showDots = true }: PhotoCarouselProps) {
+const PhotoCarousel = ({ autoPlay = true, interval = 3000, showDots = true }: PhotoCarouselProps) => {
   const [currentIndex, setCurrentIndex] = useState(0)
 
   useEffect(() => {
     if (!autoPlay) return
 
     const timer = setInterval(() => {
-      setCurrentIndex((prevIndex) => (prevIndex === carouselPhotos.length - 1 ? 0 : prevIndex + 1))
+      setCurrentIndex((prevIndex) => (prevIndex + 1) % carouselPhotos.length)
     }, interval)
 
     return () => clearInterval(timer)
@@ -136,3 +136,5 @@ export default function PhotoCarousel({ autoPlay = true, interval = 3000, showDo
     </section>
   )
 }
+
+export default PhotoCarousel

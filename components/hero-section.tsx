@@ -13,13 +13,12 @@ const HeroSection = () => {
           {/* Text Content */}
           <div className="space-y-6 max-w-4xl">
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-black leading-tight">
-             Onze AI fotoshoot t<span className="text-[#0077B5]">die uw professionele uitstraling versterk/span>
+              Onze AI fotoshoot <span className="text-[#0077B5]">die uw professionele uitstraling versterkt</span>
             </h1>
 
             <p className="text-base sm:text-lg lg:text-xl text-[#666666] leading-relaxed max-w-2xl mx-auto">
-             Binnen 15 minuten krijgt u 40 studio-kwaliteit portretfoto's. Perfect voor LinkedIn, CV's en zakelijke profielen.
-
-
+              Binnen 15 minuten krijgt u 40 studio-kwaliteit portretfoto's. Perfect voor LinkedIn, CV's en zakelijke
+              profielen.
             </p>
           </div>
 
@@ -30,7 +29,7 @@ const HeroSection = () => {
                 size="lg"
                 className="bg-[#0077B5] hover:bg-[#004182] text-white text-base sm:text-lg px-6 sm:px-8 py-4 sm:py-6"
               >
-                Start Nu - €9,99
+                Start Nu - €29,99
                 <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2" />
               </Button>
             </Link>
