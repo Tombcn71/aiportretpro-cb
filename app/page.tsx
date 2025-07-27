@@ -9,7 +9,7 @@ import Header from "@/components/header"
 import { Facebook, Instagram, Linkedin } from "lucide-react"
 import PromoBanner from "@/components/promo-banner"
 import AIHeadshotsShowcase from "@/components/ai-headshots-showcase"
-import HowItWorks from "@/components/how-it-works"
+import {HowItWorks} from "@/components/how-it-works"
 
 // Gallery photos: New 16 professional photos in man-woman alternating order
 const galleryPhotos = [

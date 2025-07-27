@@ -19,12 +19,21 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: "Missing photoUrl or projectId" }, { status: 400 })
     }
 
+    // First get the user_id from the users table
+    const users = await sql`
+      SELECT id FROM users WHERE email = ${session.user.email}
+    `
+
+    if (users.length === 0) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 })
+    }
+
+    const userId = users[0].id
+
     // Get the project to verify ownership
     const projects = await sql`
       SELECT * FROM projects 
-      WHERE id = ${projectId} AND user_id = (
-        SELECT id FROM users WHERE email = ${session.user.email}
-      )
+      WHERE id = ${projectId} AND user_id = ${userId}
     `
 
     if (projects.length === 0) {
@@ -59,9 +68,7 @@ export async function DELETE(request: NextRequest) {
     await sql`
       UPDATE projects 
       SET generated_photos = ${JSON.stringify(updatedPhotos)}
-      WHERE id = ${projectId} AND user_id = (
-        SELECT id FROM users WHERE email = ${session.user.email}
-      )
+      WHERE id = ${projectId} AND user_id = ${userId}
     `
 
     return NextResponse.json({

@@ -1,33 +1,43 @@
-"use client"
-
 import { TbCameraSelfie, TbDownload } from "react-icons/tb"
 import { LuBot } from "react-icons/lu"
 
-export default function HowItWorks() {
+export function HowItWorks() {
+  const steps = [
+    {
+      icon: TbCameraSelfie,
+      title: "Upload een paar selfies",
+    },
+    {
+      icon: LuBot,
+      title: "Onze AI gaat aan het werk",
+    },
+    {
+      icon: TbDownload,
+      title: "Download je foto's",
+    },
+  ]
+
   return (
-    <section className="py-16 bg-gray-50">
-      <div className="max-w-6xl mx-auto px-4">
-        <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
-          <div className="flex items-center gap-4 justify-center md:justify-start">
-            <div className="w-12 h-12 flex items-center justify-center flex-shrink-0">
-              <TbCameraSelfie className="w-10 h-10 text-[#0077B5]" />
-            </div>
-            <h3 className="font-semibold text-gray-900">Upload een paar selfies</h3>
-          </div>
+    <section className="py-16 bg-white">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">Hoe het werkt</h2>
 
-          <div className="flex items-center gap-4 justify-center md:justify-start">
-            <div className="w-12 h-12 flex items-center justify-center flex-shrink-0">
-              <LuBot className="w-10 h-10 text-[#0077B5]" />
-            </div>
-            <h3 className="font-semibold text-gray-900">Onze AI gaat aan het werk</h3>
-          </div>
-
-          <div className="flex items-center gap-4 justify-center md:justify-start">
-            <div className="w-12 h-12 flex items-center justify-center flex-shrink-0">
-              <TbDownload className="w-10 h-10 text-[#0077B5]" />
-            </div>
-            <h3 className="font-semibold text-gray-900">Download je foto's</h3>
-          </div>
+        <div className="flex flex-col md:flex-row items-center justify-center space-y-8 md:space-y-0 md:space-x-12">
+          {steps.map((step, index) => {
+            const IconComponent = step.icon
+            return (
+              <div key={index} className="flex items-center space-x-4 md:flex-col md:space-x-0 md:space-y-4">
+                <div className="flex-shrink-0 md:mx-auto">
+                  <div className="w-16 h-16 flex items-center justify-center">
+                    <IconComponent className="w-12 h-12 text-blue-600" />
+                  </div>
+                </div>
+                <div className="md:text-center">
+                  <h3 className="text-lg font-semibold text-gray-900">{step.title}</h3>
+                </div>
+              </div>
+            )
+          })}
         </div>
       </div>
     </section>
