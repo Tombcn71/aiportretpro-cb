@@ -372,7 +372,7 @@ export default function HomePage() {
     }
 
     .animate-scroll {
-      animation: scroll 15s linear infinite;
+      animation: scroll 40s linear infinite;
     }
 
     .animate-scroll:hover {
@@ -388,7 +388,7 @@ export default function HomePage() {
     .carousel-track {
       display: flex;
       width: fit-content;
-      animation: carousel 60s linear infinite;
+      animation: carousel 120s linear infinite;
     }
 
     .carousel-item {
