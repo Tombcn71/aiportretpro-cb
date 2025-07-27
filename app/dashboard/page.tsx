@@ -4,9 +4,10 @@ import { useEffect, useState } from "react"
 import { Header } from "@/components/header"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { Download, Camera, Trash2, X, CheckCircle } from "lucide-react"
+import { Download, Camera, Trash2, X, CheckCircle, DownloadIcon } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
+import JSZip from "jszip"
 
 interface Project {
   id: number
@@ -35,6 +36,8 @@ export default function DashboardPage() {
   const [imageErrors, setImageErrors] = useState<Set<string>>(new Set())
   const [deletingPhotos, setDeletingPhotos] = useState<Set<string>>(new Set())
   const [showDeleteMode, setShowDeleteMode] = useState(false)
+  const [selectedPhotos, setSelectedPhotos] = useState<Set<string>>(new Set())
+  const [bulkDownloading, setBulkDownloading] = useState(false)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -188,6 +191,13 @@ export default function DashboardPage() {
         }),
       )
 
+      // Remove from selected photos if it was selected
+      setSelectedPhotos((prev) => {
+        const newSet = new Set(prev)
+        newSet.delete(photo.key)
+        return newSet
+      })
+
       console.log("Photo deleted successfully")
     } catch (error) {
       console.error("Error deleting photo:", error)
@@ -201,6 +211,66 @@ export default function DashboardPage() {
     }
   }
 
+  const togglePhotoSelection = (photoKey: string) => {
+    setSelectedPhotos((prev) => {
+      const newSet = new Set(prev)
+      if (newSet.has(photoKey)) {
+        newSet.delete(photoKey)
+      } else {
+        newSet.add(photoKey)
+      }
+      return newSet
+    })
+  }
+
+  const selectAllPhotos = () => {
+    const validPhotoKeys = uniquePhotos.filter((photo) => !imageErrors.has(photo.key)).map((photo) => photo.key)
+    setSelectedPhotos(new Set(validPhotoKeys))
+  }
+
+  const deselectAllPhotos = () => {
+    setSelectedPhotos(new Set())
+  }
+
+  const bulkDownloadPhotos = async () => {
+    if (selectedPhotos.size === 0) return
+
+    setBulkDownloading(true)
+    const zip = new JSZip()
+
+    try {
+      const selectedPhotoItems = uniquePhotos.filter((photo) => selectedPhotos.has(photo.key))
+
+      for (const photo of selectedPhotoItems) {
+        try {
+          const response = await fetch(photo.url)
+          const blob = await response.blob()
+          const filename = `${photo.projectName}_portretfoto_${photo.index + 1}.jpg`
+          zip.file(filename, blob)
+        } catch (error) {
+          console.error(`Failed to download ${photo.url}:`, error)
+        }
+      }
+
+      const zipBlob = await zip.generateAsync({ type: "blob" })
+      const link = document.createElement("a")
+      link.href = URL.createObjectURL(zipBlob)
+      link.download = `portretfotos_${new Date().toISOString().split("T")[0]}.zip`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(link.href)
+
+      // Clear selection after download
+      setSelectedPhotos(new Set())
+    } catch (error) {
+      console.error("Error creating zip file:", error)
+      alert("Er ging iets mis bij het maken van het zip bestand.")
+    } finally {
+      setBulkDownloading(false)
+    }
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -211,6 +281,8 @@ export default function DashboardPage() {
       </div>
     )
   }
+
+  const validPhotos = uniquePhotos.filter((photo) => !imageErrors.has(photo.key))
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -250,24 +322,53 @@ export default function DashboardPage() {
         <div>
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-semibold">Jouw Portetfotos</h2>
-            {uniquePhotos.length > 0 && (
-              <Button
-                onClick={() => setShowDeleteMode(!showDeleteMode)}
-                variant={showDeleteMode ? "destructive" : "outline"}
-                className="flex items-center gap-2"
-              >
-                {showDeleteMode ? (
-                  <>
-                    <X className="h-4 w-4" />
-                    Annuleren
-                  </>
-                ) : (
-                  <>
-                    <Trash2 className="h-4 w-4" />
-                    Foto's Verwijderen
-                  </>
+            {validPhotos.length > 0 && (
+              <div className="flex items-center gap-4">
+                {/* Bulk Download Controls */}
+                {!showDeleteMode && (
+                  <div className="flex items-center gap-2">
+                    <Button
+                      onClick={selectedPhotos.size === validPhotos.length ? deselectAllPhotos : selectAllPhotos}
+                      variant="outline"
+                      size="sm"
+                    >
+                      {selectedPhotos.size === validPhotos.length ? "Deselecteer Alles" : "Selecteer Alles"}
+                    </Button>
+                    {selectedPhotos.size > 0 && (
+                      <Button
+                        onClick={bulkDownloadPhotos}
+                        disabled={bulkDownloading}
+                        className="bg-[#0077B5] hover:bg-[#004182] text-white"
+                        size="sm"
+                      >
+                        <DownloadIcon className="h-4 w-4 mr-2" />
+                        {bulkDownloading ? "Downloaden..." : `Download ${selectedPhotos.size} foto's`}
+                      </Button>
+                    )}
+                  </div>
                 )}
-              </Button>
+
+                <Button
+                  onClick={() => {
+                    setShowDeleteMode(!showDeleteMode)
+                    setSelectedPhotos(new Set()) // Clear selection when toggling modes
+                  }}
+                  variant={showDeleteMode ? "destructive" : "outline"}
+                  className="flex items-center gap-2"
+                >
+                  {showDeleteMode ? (
+                    <>
+                      <X className="h-4 w-4" />
+                      Annuleren
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 className="h-4 w-4" />
+                      Foto's Verwijderen
+                    </>
+                  )}
+                </Button>
+              </div>
             )}
           </div>
 
@@ -279,7 +380,7 @@ export default function DashboardPage() {
             </div>
           )}
 
-          {uniquePhotos.length === 0 ? (
+          {validPhotos.length === 0 ? (
             <div className="text-center py-20">
               <Camera className="h-16 w-16 text-gray-400 mx-auto mb-6" />
               <h3 className="text-xl font-semibold mb-4">Nog geen portetfotos</h3>
@@ -300,68 +401,77 @@ export default function DashboardPage() {
             </div>
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-              {uniquePhotos
-                .filter((photo) => !imageErrors.has(photo.key))
-                .map((photo) => (
-                  <div key={photo.key} className="group relative">
-                    <div
-                      className={`aspect-[3/4] rounded-lg overflow-hidden bg-gray-100 shadow-md hover:shadow-lg transition-all ${
-                        showDeleteMode ? "cursor-pointer hover:ring-2 hover:ring-red-500" : ""
-                      } ${deletingPhotos.has(photo.key) ? "opacity-50" : ""}`}
-                      onClick={showDeleteMode ? () => deletePhoto(photo) : undefined}
-                    >
-                      <Image
-                        src={photo.url || "/placeholder.svg"}
-                        alt={`Portretfoto ${photo.index + 1} van ${photo.projectName}`}
-                        width={300}
-                        height={400}
-                        className="w-full h-full object-cover"
-                        onError={() => handleImageError(photo.key)}
-                        unoptimized
-                        crossOrigin="anonymous"
-                      />
+              {validPhotos.map((photo) => (
+                <div key={photo.key} className="group relative">
+                  <div
+                    className={`aspect-[3/4] rounded-lg overflow-hidden bg-gray-100 shadow-md hover:shadow-lg transition-all ${
+                      showDeleteMode ? "cursor-pointer hover:ring-2 hover:ring-red-500" : ""
+                    } ${deletingPhotos.has(photo.key) ? "opacity-50" : ""} ${
+                      !showDeleteMode && selectedPhotos.has(photo.key) ? "ring-2 ring-[#0077B5]" : ""
+                    }`}
+                    onClick={showDeleteMode ? () => deletePhoto(photo) : () => togglePhotoSelection(photo.key)}
+                  >
+                    <Image
+                      src={photo.url || "/placeholder.svg"}
+                      alt={`Portretfoto ${photo.index + 1} van ${photo.projectName}`}
+                      width={300}
+                      height={400}
+                      className="w-full h-full object-cover"
+                      onError={() => handleImageError(photo.key)}
+                      unoptimized
+                      crossOrigin="anonymous"
+                    />
 
-                      {/* Delete overlay */}
-                      {showDeleteMode && (
-                        <div className="absolute inset-0 bg-red-500 bg-opacity-0 hover:bg-opacity-20 transition-all flex items-center justify-center">
-                          <Trash2 className="h-8 w-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
-                        </div>
-                      )}
+                    {/* Selection indicator */}
+                    {!showDeleteMode && selectedPhotos.has(photo.key) && (
+                      <div className="absolute top-2 right-2 bg-[#0077B5] text-white rounded-full p-1">
+                        <CheckCircle className="h-4 w-4" />
+                      </div>
+                    )}
 
-                      {/* Loading overlay */}
-                      {deletingPhotos.has(photo.key) && (
-                        <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
-                        </div>
-                      )}
-                    </div>
+                    {/* Delete overlay */}
+                    {showDeleteMode && (
+                      <div className="absolute inset-0 bg-red-500 bg-opacity-0 hover:bg-opacity-20 transition-all flex items-center justify-center">
+                        <Trash2 className="h-8 w-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </div>
+                    )}
 
-                    {!showDeleteMode && (
-                      <Button
-                        onClick={() => downloadPhoto(photo.url, photo.projectName, photo.index)}
-                        size="sm"
-                        variant="outline"
-                        className="w-full mt-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                        disabled={deletingPhotos.has(photo.key)}
-                      >
-                        <Download className="h-4 w-4 mr-2" />
-                        Download
-                      </Button>
+                    {/* Loading overlay */}
+                    {deletingPhotos.has(photo.key) && (
+                      <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+                      </div>
                     )}
                   </div>
-                ))}
+
+                  {!showDeleteMode && (
+                    <Button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        downloadPhoto(photo.url, photo.projectName, photo.index)
+                      }}
+                      size="sm"
+                      variant="outline"
+                      className="w-full mt-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                      disabled={deletingPhotos.has(photo.key)}
+                    >
+                      <Download className="h-4 w-4 mr-2" />
+                      Download
+                    </Button>
+                  )}
+                </div>
+              ))}
             </div>
           )}
         </div>
 
         {/* Success message */}
-        {uniquePhotos.filter((photo) => !imageErrors.has(photo.key)).length > 0 && !showDeleteMode && (
+        {validPhotos.length > 0 && !showDeleteMode && (
           <div className="mt-8 p-4 bg-green-50 border border-green-200 rounded-lg">
             <div className="flex items-center">
               <CheckCircle className="h-5 w-5 text-green-600 mr-2" />
               <p className="text-green-800 font-medium">
-                Geweldig! Je hebt {uniquePhotos.filter((photo) => !imageErrors.has(photo.key)).length} professionele
-                portetfotos klaar voor download.
+                Geweldig! Je hebt {validPhotos.length} professionele portetfotos klaar voor download.
               </p>
             </div>
           </div>
