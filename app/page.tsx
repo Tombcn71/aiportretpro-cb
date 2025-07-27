@@ -414,7 +414,7 @@ export default function HomePage() {
         animation: scroll 10s linear infinite;
       }
       .carousel-track {
-        animation: carousel 40s linear infinite;
+        animation: carousel 120s linear infinite;
       }
     }
   `}</style>
