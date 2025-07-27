@@ -32,13 +32,13 @@ export default function PhotoCarousel() {
   }, [])
 
   useEffect(() => {
-    // Much slower auto-advance
+    // Slower auto-advance on mobile
     const interval = setInterval(
       () => {
         setCurrentIndex((prevIndex) => (prevIndex + 1) % photos.length)
       },
-      isMobile ? 6000 : 5000, // 6 seconds on mobile, 5 seconds on desktop
-    )
+      isMobile ? 4000 : 3000,
+    ) // 4 seconds on mobile, 3 seconds on desktop
 
     return () => clearInterval(interval)
   }, [isMobile])
@@ -66,7 +66,7 @@ export default function PhotoCarousel() {
                 src={photos[currentIndex].src || "/placeholder.svg"}
                 alt={photos[currentIndex].alt}
                 fill
-                className="object-cover transition-opacity duration-700"
+                className="object-cover transition-opacity duration-500"
               />
             </div>
           </div>
@@ -94,7 +94,7 @@ export default function PhotoCarousel() {
           {photos.map((_, index) => (
             <button
               key={index}
-              className={`w-3 h-3 rounded-full transition-colors duration-300 ${
+              className={`w-3 h-3 rounded-full transition-colors duration-200 ${
                 index === currentIndex ? "bg-blue-600" : "bg-gray-300"
               }`}
               onClick={() => setCurrentIndex(index)}
