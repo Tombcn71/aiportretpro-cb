@@ -143,7 +143,7 @@ export default function HomePage() {
       </section>
 
       {/* Photo Carousel - FIXED: Smooth continuous scrolling */}
-      <section className="w-full overflow-hidden mb-16 md:mb-24 bg-gradient-to-r from-blue-50 via-white to-blue-50">
+      <section className="w-full overflow-hidden mb-16 md:mb-24 ">
         <div className="relative">
           <div className="carousel-container">
             <div className="carousel-track">
