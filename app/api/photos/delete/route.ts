@@ -43,31 +43,20 @@ export async function DELETE(request: NextRequest) {
     const project = projects[0]
     let currentPhotos: string[] = []
 
-    // Parse current photos
+    // Parse current photos - handle PostgreSQL ARRAY type
     if (project.generated_photos) {
-      try {
-        if (typeof project.generated_photos === "string") {
-          if (project.generated_photos.startsWith("[")) {
-            currentPhotos = JSON.parse(project.generated_photos)
-          } else {
-            currentPhotos = [project.generated_photos]
-          }
-        } else if (Array.isArray(project.generated_photos)) {
-          currentPhotos = project.generated_photos
-        }
-      } catch (e) {
-        console.error("Error parsing photos:", e)
-        currentPhotos = []
+      if (Array.isArray(project.generated_photos)) {
+        currentPhotos = project.generated_photos.filter(Boolean)
       }
     }
 
     // Remove the photo from the array
     const updatedPhotos = currentPhotos.filter((photo) => photo !== photoUrl)
 
-    // Update the database
+    // Update the database with PostgreSQL array syntax
     await sql`
       UPDATE projects 
-      SET generated_photos = ${JSON.stringify(updatedPhotos)}
+      SET generated_photos = ${updatedPhotos}
       WHERE id = ${projectId} AND user_id = ${userId}
     `
 
