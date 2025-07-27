@@ -22,7 +22,9 @@ export async function DELETE(request: NextRequest) {
     // Get the project to verify ownership
     const projects = await sql`
       SELECT * FROM projects 
-      WHERE id = ${projectId} AND user_email = ${session.user.email}
+      WHERE id = ${projectId} AND user_id = (
+        SELECT id FROM users WHERE email = ${session.user.email}
+      )
     `
 
     if (projects.length === 0) {
@@ -57,7 +59,9 @@ export async function DELETE(request: NextRequest) {
     await sql`
       UPDATE projects 
       SET generated_photos = ${JSON.stringify(updatedPhotos)}
-      WHERE id = ${projectId} AND user_email = ${session.user.email}
+      WHERE id = ${projectId} AND user_id = (
+        SELECT id FROM users WHERE email = ${session.user.email}
+      )
     `
 
     return NextResponse.json({
