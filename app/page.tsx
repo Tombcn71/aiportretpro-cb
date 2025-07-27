@@ -4,11 +4,12 @@ import { useState, useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { ArrowRight, X, ChevronDown, ChevronUp, Upload, Zap, Download } from "lucide-react"
+import { ArrowRight, X, ChevronDown, ChevronUp } from "lucide-react"
 import Header from "@/components/header"
 import { Facebook, Instagram, Linkedin } from "lucide-react"
 import PromoBanner from "@/components/promo-banner"
+import AIHeadshotsShowcase from "@/components/ai-headshots-showcase"
+import HowItWorks from "@/components/how-it-works"
 
 // Gallery photos: New 16 professional photos in man-woman alternating order
 const galleryPhotos = [
@@ -28,18 +29,6 @@ const galleryPhotos = [
   "/images/professional-woman-7.jpg", // Position 14 - Woman
   "/images/professional-man-8.jpg", // Position 15 - Man
   "/images/professional-woman-8.jpg", // Position 16 - Woman
-]
-
-// Carousel photos: Same exact order as gallery
-const carouselPhotos = [
-  { id: 1, photo: "/images/professional-man-1.jpg", name: "Professional Man Portrait" },
-  { id: 2, photo: "/images/professional-woman-1.jpg", name: "Professional Woman Portrait" },
-  { id: 3, photo: "/images/professional-man-2.jpg", name: "Professional Man Portrait" },
-  { id: 4, photo: "/images/professional-woman-2.jpg", name: "Professional Woman Portrait" },
-  { id: 5, photo: "/images/professional-man-3.jpg", name: "Professional Man Portrait" },
-  { id: 6, photo: "/images/professional-woman-3.jpg", name: "Professional Woman Portrait" },
-  { id: 7, photo: "/images/professional-man-4.jpg", name: "Professional Man Portrait" },
-  { id: 8, photo: "/images/professional-woman-4.jpg", name: "Professional Woman Portrait" },
 ]
 
 const companies = [
@@ -158,13 +147,13 @@ export default function HomePage() {
         <div className="relative">
           <div className="carousel-container">
             <div className="carousel-track">
-              {carouselPhotos.map((item, index) => (
-                <div key={`carousel-${item.id}-${index}`} className="carousel-item">
+              {galleryPhotos.map((photo, index) => (
+                <div key={`carousel-${index}`} className="carousel-item">
                   <div className="relative">
                     <div className="w-40 h-52 md:w-64 md:h-80 rounded-xl md:rounded-2xl overflow-hidden bg-gray-100 shadow-md md:shadow-lg">
                       <Image
-                        src={item.photo || "/placeholder.svg"}
-                        alt={`${item.name} professioneel portret`}
+                        src={photo || "/placeholder.svg"}
+                        alt={`AI portret voorbeeld ${index + 1}`}
                         width={256}
                         height={320}
                         className="w-full h-full object-cover brightness-110 contrast-105"
@@ -175,13 +164,13 @@ export default function HomePage() {
                 </div>
               ))}
               {/* Duplicate items for seamless looping */}
-              {carouselPhotos.map((item, index) => (
-                <div key={`carousel-dup-${item.id}-${index}`} className="carousel-item">
+              {galleryPhotos.map((photo, index) => (
+                <div key={`carousel-dup-${index}`} className="carousel-item">
                   <div className="relative">
                     <div className="w-40 h-52 md:w-64 md:h-80 rounded-xl md:rounded-2xl overflow-hidden bg-gray-100 shadow-md md:shadow-lg">
                       <Image
-                        src={item.photo || "/placeholder.svg"}
-                        alt={`${item.name} professioneel portret`}
+                        src={photo || "/placeholder.svg"}
+                        alt={`AI portret voorbeeld ${index + 1}`}
                         width={256}
                         height={320}
                         className="w-full h-full object-cover brightness-110 contrast-105"
@@ -195,153 +184,11 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* How it Works */}
-      <section className="py-16 bg-gray-50">
-        <div className="max-w-6xl mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Hoe werkt het?</h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">In 3 eenvoudige stappen met uw telefoon of laptop</p>
-          </div>
+      {/* How It Works - New Component */}
+      <HowItWorks />
 
-          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            <div className="text-center">
-              <div className="relative mb-6 mx-auto w-64 h-48">
-                <Image src="/images/voorbeeld1.png" alt="Upload selfies" fill className="object-contain rounded-lg" />
-              </div>
-              <div className="w-12 h-12 bg-[#0077B5] text-white rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">
-                1
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Upload 6 goede foto's</h3>
-              <p className="text-gray-600">6 verschillende foto's met uw gezicht naar de camera,</p>
-            </div>
-
-            <div className="text-center">
-              <div className="relative mb-6 mx-auto w-64 h-48">
-                <Image src="/images/wazig1.png" alt="AI processing" fill className="object-contain rounded-lg" />
-              </div>
-              <div className="w-12 h-12 bg-[#0077B5] text-white rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">
-                2
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Onze AI gaat aan de slag voor u</h3>
-              <p className="text-gray-600">
-                U kunt nu rustig afwachten de foto, verschijnen binnen een kwartier in uw dashboard
-              </p>
-            </div>
-
-            <div className="text-center">
-              <div className="relative mb-6 mx-auto w-64 h-48">
-                <Image
-                  src="/images/resultaat1.png"
-                  alt="Professional results"
-                  fill
-                  className="object-contain rounded-lg"
-                />
-              </div>
-              <div className="w-12 h-12 bg-[#0077B5] text-white rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">
-                3
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Gefeliciteerd! Je portretfoto's zijn klaar</h3>
-              <p className="text-gray-600">
-                U kunt nu uw 40 professionele portretfoto's downloaden en direct gebruiken voor voor LinkedIn, Social
-                Media, CV, Website of Print
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Features Section */}
-      <section className="py-16">
-        <div className="max-w-6xl mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Waarom kiezen voor AI Portret Pro?</h2>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            <Card className="border-[#0077B5]/20 hover:border-[#0077B5]/40 transition-colors">
-              <CardContent className="p-6 text-center">
-                <Upload className="h-12 w-12 text-[#0077B5] mx-auto mb-4" />
-                <h3 className="text-xl font-semibold mb-2">Supersnel</h3>
-                <p className="text-gray-600">
-                  Resultaten binnen 15 minuten. Makkelijk vanuit thuis, geen reistijd geen studio..
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-[#0077B5]/20 hover:border-[#0077B5]/40 transition-colors">
-              <CardContent className="p-6 text-center">
-                <Zap className="h-12 w-12 text-[#0077B5] mx-auto mb-4" />
-                <h3 className="text-xl font-semibold mb-2">Beste deal</h3>
-                <p className="text-gray-600">
-                  €29 voor AI portretfoto's. Bespaar tot wel 75% op een traditionele fotoshoot.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-[#0077B5]/20 hover:border-[#0077B5]/40 transition-colors">
-              <CardContent className="p-6 text-center">
-                <Download className="h-12 w-12 text-[#0077B5] mx-auto mb-4" />
-                <h3 className="text-xl font-semibold mb-2">Hoge kwaliteit</h3>
-                <p className="text-gray-600">
-                  Professionele kwaliteit die niet te onderscheiden is van traditionele fotoshoots.
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="py-16">
-        <div className="max-w-4xl mx-auto text-center px-4">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            Klaar voor je professionele portretfoto's?
-          </h2>
-          <p className="text-xl text-gray-600 mb-8">Laat zien wie je bent met een krachtige, professionele foto </p>
-          <Link href="/pricing">
-            <Button size="lg" className="bg-[#0077B5] hover:bg-[#005885] text-white px-8 py-4 text-lg">
-              Start nu voor slechts €29 <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
-          </Link>
-        </div>
-      </section>
-
-      {/* Photo Gallery */}
-      <section className="container mx-auto px-4 py-12 md:py-16">
-        <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-center mb-8 md:mb-12">
-          AI portretfoto's voorbeelden
-        </h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-          {galleryPhotos.map((photo, index) => (
-            <div
-              key={index}
-              className="aspect-[3/4] rounded-lg overflow-hidden bg-gray-100 shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer group relative"
-              onClick={() => openLightbox(photo)}
-            >
-              <Image
-                src={photo || "/placeholder.svg"}
-                alt={`AI portret voorbeeld ${index + 1}`}
-                width={300}
-                height={400}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 brightness-110 contrast-105"
-              />
-              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all duration-300 flex items-center justify-center">
-                <span className="text-white font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-center px-4 text-sm md:text-base">
-                  Klik om te vergroten
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
-        <div className="text-center mt-6 md:mt-8">
-          <p className="text-gray-600 mb-4 text-sm md:text-base">Klik op een foto om te vergroten</p>
-          <Button asChild className="bg-[#0077B5] hover:bg-[#004182] text-white">
-            <Link href="/pricing">
-              Maak jouw portretten <ArrowRight className="ml-2 h-4 w-4" />
-            </Link>
-          </Button>
-        </div>
-      </section>
+      {/* AI Headshots Showcase - Replaces Photo Gallery */}
+      <AIHeadshotsShowcase />
 
       {/* FAQ Section */}
       <section id="faq" className="container mx-auto px-4 py-12 md:py-16 bg-gray-50">
@@ -380,6 +227,21 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* CTA Section */}
+      <section className="py-16">
+        <div className="max-w-4xl mx-auto text-center px-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            Klaar voor je professionele portretfoto's?
+          </h2>
+          <p className="text-xl text-gray-600 mb-8">Laat zien wie je bent met een krachtige, professionele foto</p>
+          <Link href="/pricing">
+            <Button size="lg" className="bg-[#0077B5] hover:bg-[#005885] text-white px-8 py-4 text-lg">
+              Start nu voor slechts €29 <ArrowRight className="ml-2 h-5 w-5" />
+            </Button>
+          </Link>
+        </div>
+      </section>
+
       {/* Lightbox Modal */}
       {selectedImage && (
         <div
@@ -403,21 +265,6 @@ export default function HomePage() {
           </div>
         </div>
       )}
-
-      {/* CTA Section */}
-      <section className="py-16">
-        <div className="max-w-4xl mx-auto text-center px-4">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            Klaar voor je professionele portretfoto's?
-          </h2>
-          <p className="text-xl text-gray-600 mb-8">Laat zien wie je bent met een krachtige, professionele foto</p>
-          <Link href="/pricing">
-            <Button size="lg" className="bg-[#0077B5] hover:bg-[#005885] text-white px-8 py-4 text-lg">
-              Start nu voor slechts €29 <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
-          </Link>
-        </div>
-      </section>
 
       {/* Footer */}
       <footer className="bg-black text-white py-8 px-6">
@@ -515,62 +362,62 @@ export default function HomePage() {
       </footer>
 
       <style jsx>{`
-        @keyframes scroll {
-          0% {
-            transform: translateX(0);
-          }
-          100% {
-            transform: translateX(-50%);
-          }
-        }
+    @keyframes scroll {
+      0% {
+        transform: translateX(0);
+      }
+      100% {
+        transform: translateX(-50%);
+      }
+    }
 
-        .animate-scroll {
-          animation: scroll 15s linear infinite;
-        }
+    .animate-scroll {
+      animation: scroll 15s linear infinite;
+    }
 
-        .animate-scroll:hover {
-          animation-play-state: paused;
-        }
+    .animate-scroll:hover {
+      animation-play-state: paused;
+    }
 
-        .carousel-container {
-          width: 100%;
-          overflow: hidden;
-          position: relative;
-        }
+    .carousel-container {
+      width: 100%;
+      overflow: hidden;
+      position: relative;
+    }
 
-        .carousel-track {
-          display: flex;
-          width: fit-content;
-          animation: carousel 60s linear infinite;
-        }
+    .carousel-track {
+      display: flex;
+      width: fit-content;
+      animation: carousel 60s linear infinite;
+    }
 
-        .carousel-item {
-          flex-shrink: 0;
-          margin: 0 0.5rem;
-        }
+    .carousel-item {
+      flex-shrink: 0;
+      margin: 0 0.5rem;
+    }
 
-        @keyframes carousel {
-          0% {
-            transform: translateX(calc(-100% / 2));
-          }
-          100% {
-            transform: translateX(0);
-          }
-        }
+    @keyframes carousel {
+      0% {
+        transform: translateX(calc(-100% / 2));
+      }
+      100% {
+        transform: translateX(0);
+      }
+    }
 
-        .carousel-track:hover {
-          animation-play-state: paused;
-        }
+    .carousel-track:hover {
+      animation-play-state: paused;
+    }
 
-        @media (max-width: 768px) {
-          .animate-scroll {
-            animation: scroll 10s linear infinite;
-          }
-          .carousel-track {
-            animation: carousel 40s linear infinite;
-          }
-        }
-      `}</style>
+    @media (max-width: 768px) {
+      .animate-scroll {
+        animation: scroll 10s linear infinite;
+      }
+      .carousel-track {
+        animation: carousel 40s linear infinite;
+      }
+    }
+  `}</style>
     </div>
   )
 }
