@@ -66,13 +66,13 @@ export default function AIHeadshotsShowcase() {
                 </div>
               </div>
 
-              {/* Arrow */}
+              {/* Curved Arrow */}
               <div className="flex justify-center">
                 <Image
-                  src="/images/arrow.png"
+                  src="/images/curved-arrow.png"
                   alt="Transformation arrow"
-                  width={60}
-                  height={80}
+                  width={80}
+                  height={100}
                   className="object-contain"
                 />
               </div>
