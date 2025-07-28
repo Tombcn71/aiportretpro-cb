@@ -135,7 +135,9 @@ export default function HomePage() {
         </p>
 
         <Button
-          className=" bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded"
+          asChild
+          size="lg"
+          className="bg-orange-500 hover:bg-orange-400 text-white px-6 md:px-8 py-3 md:py-4 text-base md:text-lg mb-8"
         >
           <Link href="/pricing">
            
@@ -237,7 +239,7 @@ export default function HomePage() {
           </h2>
           <p className="text-xl text-gray-600 mb-8">Laat zien wie je bent met een krachtige, professionele foto</p>
           <Link href="/pricing">
-            <Button size="lg" className="bg-[#0077B5] hover:bg-[#005885] text-white px-8 py-4 text-lg">
+            <Button size="lg" className="bg-orange-500 hover:bg-orange-400 text-white px-8 py-4 text-lg">
               Start nu voor slechts €29 <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
           </Link>
