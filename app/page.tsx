@@ -120,7 +120,7 @@ export default function HomePage() {
 
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-6 text-center">
-        <h1 className="tracking-tight text-4xl md:text-4xl font-bold mb-6">
+        <h1 className="tracking-tight text-2xl md:text-4xl font-bold mb-6">
           Professionele portretfoto's
           <br />
           <span className="text-[#0077B5]"> slim en simpel </span>geregeld
