@@ -135,9 +135,7 @@ export default function HomePage() {
         </p>
 
         <Button
-          asChild
-          size="lg"
-          className="bg-[#FFA800] hover:bg-[#FF8C00] text-white px-6 md:px-8 py-3 md:py-4 text-base md:text-lg mb-8"
+          className=" bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded"
         >
           <Link href="/pricing">
            
