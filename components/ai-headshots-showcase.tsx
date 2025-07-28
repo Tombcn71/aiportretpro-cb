@@ -48,10 +48,10 @@ export default function AIHeadshotsShowcase() {
 
         <div className="lg:grid-cols-2 gap-20 max-w-6xl mx-auto grid">
           {profiles.map((profile, profileIndex) => (
-            <div key={profileIndex} className="space-y-2">
+            <div key={profileIndex} className="space-y-8">
               {/* Small photos row */}
               <div className="flex justify-center">
-                <div className="grid grid-cols-4 gap-1">
+                <div className="grid grid-cols-4 gap-3">
                   {profile.beforeImages.map((image, index) => (
                     <div key={index} className="relative">
                       <Image
@@ -66,19 +66,19 @@ export default function AIHeadshotsShowcase() {
                 </div>
               </div>
 
-              {/* Curved Arrow */}
-              <div className="flex justify-center pb-4 ">
+              {/* Arrow */}
+              <div className="flex justify-center">
                 <Image
-                  src="/images/curved-arrow.png"
+                  src="/images/arrow.png"
                   alt="Transformation arrow"
-                  width={80}
-                  height={140}
+                  width={60}
+                  height={80}
                   className="object-contain"
                 />
               </div>
 
               {/* Large professional photos */}
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 gap-6">
                 {profile.afterImages.map((image, index) => (
                   <div key={index} className="relative group">
                     <div className="aspect-[3/4] rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow">

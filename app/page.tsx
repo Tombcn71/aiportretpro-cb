@@ -143,7 +143,7 @@ export default function HomePage() {
       </section>
 
       {/* Photo Carousel - FIXED: Smooth continuous scrolling */}
-      <section className="w-full overflow-hidden mb-16 md:mb-24 ">
+      <section className="w-full overflow-hidden mb-16 md:mb-24 bg-gradient-to-r from-blue-50 via-white to-blue-50">
         <div className="relative">
           <div className="carousel-container">
             <div className="carousel-track">
@@ -372,7 +372,7 @@ export default function HomePage() {
     }
 
     .animate-scroll {
-      animation: scroll 40s linear infinite;
+      animation: scroll 15s linear infinite;
     }
 
     .animate-scroll:hover {
@@ -388,7 +388,7 @@ export default function HomePage() {
     .carousel-track {
       display: flex;
       width: fit-content;
-      animation: carousel 120s linear infinite;
+      animation: carousel 60s linear infinite;
     }
 
     .carousel-item {
@@ -414,7 +414,7 @@ export default function HomePage() {
         animation: scroll 10s linear infinite;
       }
       .carousel-track {
-        animation: carousel 120s linear infinite;
+        animation: carousel 40s linear infinite;
       }
     }
   `}</style>
