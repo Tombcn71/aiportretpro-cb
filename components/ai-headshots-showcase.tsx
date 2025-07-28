@@ -48,7 +48,7 @@ export default function AIHeadshotsShowcase() {
 
         <div className="lg:grid-cols-2 gap-20 max-w-6xl mx-auto grid">
           {profiles.map((profile, profileIndex) => (
-            <div key={profileIndex} className="space-y-8">
+            <div key={profileIndex} className="space-y-2">
               {/* Small photos row */}
               <div className="flex justify-center">
                 <div className="grid grid-cols-4 gap-3">
@@ -66,13 +66,13 @@ export default function AIHeadshotsShowcase() {
                 </div>
               </div>
 
-              {/* New Curved Arrow */}
-              <div className="flex justify-center">
+              {/*  Curved Arrow */}
+              <div className="flex justify-center pb-4">
                 <Image
-                  src="/images/curved-arrow-new.png"
+                  src="/images/curved-arrow.png"
                   alt="Transformation arrow"
-                  width={100}
-                  height={140}
+                  width={80}
+                  height={120}
                   className="object-contain"
                 />
               </div>
