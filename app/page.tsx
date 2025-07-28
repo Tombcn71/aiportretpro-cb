@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button"
 import { ArrowRight, X, ChevronDown, ChevronUp, Camera } from "lucide-react"
 import Header from "@/components/header"
 import { Facebook, Instagram, Linkedin } from "lucide-react"
-import PromoBanner from "@/components/promo-banner"
 import AIHeadshotsShowcase from "@/components/ai-headshots-showcase"
 import HowItWorks from "@/components/how-it-works"
 
@@ -117,7 +116,6 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen ">
-      <PromoBanner />
       <Header />
 
       {/* Hero Section */}
@@ -125,7 +123,7 @@ export default function HomePage() {
         <h1 className="tracking-tight text-2xl md:text-4xl font-bold mb-6">
           Professionele portretfoto's
           <br />
-           slim en simpel geregeld
+          <span className="text-[#0077B5]"> slim en simpel </span>geregeld
         </h1>
 
         <p className="text-lg md:text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
