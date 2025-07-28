@@ -125,7 +125,7 @@ export default function HomePage() {
         <h1 className="tracking-tight text-2xl md:text-4xl font-bold mb-6">
          Professionele portretfoto's<br/>
 
-<span className="text-[#0077B5]"> slim en simpel </span>geregeld.
+<span className="text-[#0077B5]"> slim en simpel </span>geregeld
         </h1>
 
         <p className="text-lg md:text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
@@ -415,7 +415,7 @@ export default function HomePage() {
         animation: scroll 10s linear infinite;
       }
       .carousel-track {
-        animation: carousel 140s linear infinite;
+        animation: carousel 120s linear infinite;
       }
     }
   `}</style>
