@@ -123,12 +123,13 @@ export default function HomePage() {
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-6 text-center">
         <h1 className="tracking-tight text-2xl md:text-4xl font-bold mb-6">
-          Professionele portretfoto's gemaakt door AI<span className="text-[#0077B5]"></span>
+         Professionele portretfoto's met AI<br/>
+
+<span className="text-[#0077B5]"> slim en simpel </span>geregeld.
         </h1>
 
         <p className="text-lg md:text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-          Upload 6 Foto's en krijg in 15 minuten 40 portretfoto's van studiokwaliteit. Bespaar tientallen euro's en uren
-          tijd.{" "}
+          Geen gedoe met studio's, direct 40 AI-portretten in 15 min.<br/>Makkelijk vanaf je telefoon of laptop, bespaar tijd en geld.
         </p>
 
         <Button
@@ -137,7 +138,7 @@ export default function HomePage() {
           className="bg-[#0077B5] hover:bg-[#004182] text-white px-6 md:px-8 py-3 md:py-4 text-base md:text-lg mb-8"
         >
           <Link href="/pricing">
-            Start Nu-29€ <ArrowRight className="ml-2 h-4 md:h-5 w-4 md:w-5" />
+            Start Jouw Fotoshoot Nu - 29€ <ArrowRight className="ml-2 h-4 md:h-5 w-4 md:w-5" />
           </Link>
         </Button>
       </section>
@@ -388,7 +389,7 @@ export default function HomePage() {
     .carousel-track {
       display: flex;
       width: fit-content;
-      animation: carousel 60s linear infinite;
+      animation: carousel 140s linear infinite;
     }
 
     .carousel-item {
@@ -414,7 +415,7 @@ export default function HomePage() {
         animation: scroll 10s linear infinite;
       }
       .carousel-track {
-        animation: carousel 40s linear infinite;
+        animation: carousel 140s linear infinite;
       }
     }
   `}</style>
