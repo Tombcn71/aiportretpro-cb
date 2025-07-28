@@ -121,12 +121,12 @@ export default function HomePage() {
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-6 text-center">
         <h1 className="tracking-tight text-2xl md:text-4xl font-bold mb-6">
-          Professionele portretfoto's
+          Professionele portretfoto's,
           <br />
           <span className="text-[#0077B5]"> slim en simpel </span>geregeld
         </h1>
 
-        <p className="text-md md:text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+        <p className="text-md md:text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
           Geen gedoe met studio's, direct 40 AI-portretten in 15 min.
           <br />
           Makkelijk vanaf je telefoon of laptop, bespaar tijd en geld.
