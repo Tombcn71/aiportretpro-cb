@@ -126,7 +126,7 @@ export default function HomePage() {
           <span className="text-[#0077B5]"> slim en simpel </span>geregeld
         </h1>
 
-        <p className="text-lg md:text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+        <p className="text-md md:text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
           Geen gedoe met studio's, direct 40 AI-portretten in 15 min.
           <br />
           Makkelijk vanaf je telefoon of laptop, bespaar tijd en geld.
