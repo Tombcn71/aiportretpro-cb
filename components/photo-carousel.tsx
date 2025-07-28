@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
@@ -18,6 +18,30 @@ const photos = [
 
 export default function PhotoCarousel() {
   const [currentIndex, setCurrentIndex] = useState(0)
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+
+    checkMobile()
+    window.addEventListener("resize", checkMobile)
+
+    return () => window.removeEventListener("resize", checkMobile)
+  }, [])
+
+  useEffect(() => {
+    // Much slower auto-advance
+    const interval = setInterval(
+      () => {
+        setCurrentIndex((prevIndex) => (prevIndex + 1) % photos.length)
+      },
+      isMobile ? 6000 : 5000, // 6 seconds on mobile, 5 seconds on desktop
+    )
+
+    return () => clearInterval(interval)
+  }, [isMobile])
 
   const nextSlide = () => {
     setCurrentIndex((prevIndex) => (prevIndex + 1) % photos.length)
@@ -42,7 +66,7 @@ export default function PhotoCarousel() {
                 src={photos[currentIndex].src || "/placeholder.svg"}
                 alt={photos[currentIndex].alt}
                 fill
-                className="object-cover"
+                className="object-cover transition-opacity duration-700"
               />
             </div>
           </div>
@@ -70,7 +94,9 @@ export default function PhotoCarousel() {
           {photos.map((_, index) => (
             <button
               key={index}
-              className={`w-3 h-3 rounded-full ${index === currentIndex ? "bg-blue-600" : "bg-gray-300"}`}
+              className={`w-3 h-3 rounded-full transition-colors duration-300 ${
+                index === currentIndex ? "bg-blue-600" : "bg-gray-300"
+              }`}
               onClick={() => setCurrentIndex(index)}
             />
           ))}
