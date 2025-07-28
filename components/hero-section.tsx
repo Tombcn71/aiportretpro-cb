@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
 import Link from "next/link"
-import { ArrowRight, Shield } from "lucide-react"
+import { ArrowRight, Shield, Camera } from "lucide-react"
 
 const HeroSection = () => {
   return (
@@ -29,6 +29,7 @@ const HeroSection = () => {
                 size="lg"
                 className="bg-[#0077B5] hover:bg-[#004182] text-white text-base sm:text-lg px-6 sm:px-8 py-4 sm:py-6"
               >
+                <Camera className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
                 Start Nu - €29,99
                 <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2" />
               </Button>
