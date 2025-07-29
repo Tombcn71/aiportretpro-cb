@@ -4,11 +4,12 @@ import { useState, useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { ArrowRight, X, ChevronDown, ChevronUp, Camera } from "lucide-react"
+import { ArrowRight, X, ChevronDown, ChevronUp } from "lucide-react"
 import Header from "@/components/header"
 import { Facebook, Instagram, Linkedin } from "lucide-react"
 import AIHeadshotsShowcase from "@/components/ai-headshots-showcase"
 import HowItWorks from "@/components/how-it-works"
+import FloatingCTAButton from "@/components/floating-cta-button"
 
 // Gallery photos: New 16 professional photos in man-woman alternating order
 const galleryPhotos = [
@@ -45,27 +46,27 @@ const faqData = [
   {
     question: "Hoe werkt deze app precies?",
     answer:
-      "Onze app gebruikt slimme computerprogramma's (we noemen dat Artificiële Intelligentie of AI) om jouw gewone foto's om te toveren in professionele portetfotos. Je uploadt een paar van je eigen foto's – hoe meer, hoe beter! De AI leert van deze foto's hoe jij eruitziet. Daarna kan het nieuwe foto's van jou maken in allerlei stijlen, alsof je bij een professionele fotograaf bent geweest.",
+      "Onze app gebruikt slimme computerprogramma's (we noemen dat Artificiële Intelligentie of AI) om jouw gewone foto's om te toveren in professionele portretfoto's. Je uploadt een paar van je eigen foto's – hoe meer, hoe beter! De AI leert van deze foto's hoe jij eruitziet. Daarna kan het nieuwe foto's van jou maken in allerlei stijlen, alsof je bij een professionele fotograaf bent geweest.",
   },
   {
     question: "Maakt de app dan allemaal 'nieuwe' foto's van mijn gezicht?",
     answer:
-      "Ja, dat klopt! De app maakt helemaal nieuwe foto's van jou. Het werkt zo: de AI is als een super slimme leerling die precies onthoudt hoe jouw ogen, neus, mond en haar eruitzien en hoe ze bewegen. Wanneer je jouw foto's uploadt, bestudeert de AI jou van top tot teen. Het leert jouw unieke kenmerken en stijl. Vervolgens combineert de AI deze kennis van jou met alles wat het al heeft geleerd van talloze andere professionele foto's (denk aan poses, belichting, en achtergronden). Hierdoor kan de AI compleet nieuwe, realistische beelden van jou genereren die er professioneel uitzien, zonder dat die beelden ooit echt zijn genomen. Het is een beetje alsof de AI een portret van jou schildert, maar dan op basis van data in plaats van verf!",
+      "Ja, dat klopt! De app maakt allemaal nieuwe foto's van jou. Het werkt zo: de AI is als een super slimme leerling die precies onthoudt hoe jouw ogen, neus, mond en haar eruitzien en hoe ze bewegen. Wanneer je jouw foto's uploadt, bestudeert de AI jou van top tot teen. Het leert jouw unieke kenmerken en stijl. Vervolgens combineert de AI deze kennis van jou met alles wat het al heeft geleerd van talloze andere professionele foto's (denk aan poses, belichting, en achtergronden). Hierdoor kan de AI compleet nieuwe, realistische beelden van jou genereren die er professioneel uitzien, zonder dat die beelden ooit echt zijn genomen.",
   },
   {
     question: "Is het veilig om mijn foto's te uploaden? Wat gebeurt ermee?",
     answer:
-      "Ja, veiligheid is onze topprioriteit! Je foto's worden alleen gebruikt om de AI te trainen zodat deze de beste portetfotos van jou kan maken. Zodra jouw portetfotos klaar zijn en jij ze hebt gedownload, worden je originele foto's en de getrainde modellen binnen 30 dagen van onze servers verwijderd. We delen je foto's nooit met derden.",
+      "Ja, veiligheid is onze topprioriteit! Je foto's worden alleen gebruikt om de AI te trainen zodat deze de beste headshots van jou kan maken. Zodra jouw headshots klaar zijn en jij ze hebt gedownload, worden de getrainde modellen binnen 30 dagen van onze servers verwijderd, de originele foto's slaan we nooit op. We delen je foto's nooit met derden.",
   },
   {
     question: "Hoeveel foto's moet ik uploaden voor het beste resultaat?",
     answer:
-      "Om de AI zo goed mogelijk te laten leren hoe jij eruitziet, raden we aan om minimaal 6 tot 10 foto's te uploaden. Hoe meer variatie in de foto's (verschillende achtergronden, belichting, gezichtsuitdrukkingen), hoe beter de AI jou kan begrijpen en hoe professioneler en realistischer je portetfotos zullen zijn.",
+      "Om de AI zo goed mogelijk te laten leren hoe jij eruitziet, raden we aan om minimaal 6 foto's te uploaden. Upload foto's met goede belichting, gemaakt op verschillende dagen met verschillende kleding en verschillende achtergronden. Een mix van close-ups en mid-range shots werkt het beste. Zorg ervoor dat je gezicht duidelijk zichtbaar is.",
   },
   {
-    question: "Kan ik de gegenereerde portetfotos nog aanpassen?",
+    question: "Kan ik de gegenereerde portretfoto's nog aanpassen?",
     answer:
-      "De app maakt de portetfotos automatisch, en je kunt ze niet direct in de app bewerken. Je krijgt een hele reeks opties waaruit je kunt kiezen. Als je daarna nog kleine aanpassingen wilt doen, kun je daarvoor een aparte fotobewerkingsapp gebruiken.",
+      "De app maakt de headshots automatisch, en je kunt ze niet direct in de app bewerken. Je krijgt 40 verschillende professionele headshots waaruit je kunt kiezen. Als je daarna nog kleine aanpassingen wilt doen, kun je daarvoor een aparte fotobewerkingsapp gebruiken.",
   },
   {
     question: "Werkt de app ook met groepsfoto's of foto's waar ik niet duidelijk op sta?",
@@ -73,9 +74,9 @@ const faqData = [
       "Nee, voor de beste resultaten is het belangrijk dat jij het hoofdonderwerp bent op de foto's die je uploadt. Zorg ervoor dat je gezicht duidelijk zichtbaar is en dat er zo min mogelijk andere mensen op de foto staan. Selfies en close-ups werken vaak het beste!",
   },
   {
-    question: "Hoe lang duurt het voordat mijn portetfotos klaar zijn?",
+    question: "Hoe lang duurt het voordat mijn headshots klaar zijn?",
     answer:
-      "De tijd kan variëren afhankelijk van hoe druk het is en hoeveel foto's je hebt geüpload, maar meestal zijn je portetfotos binnen 15-30 minuten klaar. Je krijgt een melding zodra ze beschikbaar zijn!",
+      "De AI training en het genereren van je professionele headshots duurt ongeveer 15 minuten. Ze verschijnen automatisch in je dashboard. De tijd kan soms iets variëren afhankelijk van hoe druk het is.",
   },
   {
     question: "Wat voor kleding draag ik tijdens de fotoshoot?",
@@ -98,7 +99,7 @@ const faqData = [
   {
     question: "Hoe kan ik contact met jullie opnemen?",
     answer:
-      "Stuur ons een bericht via de live chat of het contactformulier, indien niet direct, zullen wij contact met je opnemen via het e-mailadres dat je hebt opgegeven via de chat. Je kunt ook via de contact knop onder de faq contact opnemen. Ons team spreekt Nederlands.",
+      "Stuur ons een bericht via de live chat of het sontactformulier, indien niet direct, zullen wij contact met je opnemen via het e-mailadres dat je hebt opgegeven via de chat. Je kunt ook via de contact knop onder de faq contact opnemen. Ons team spreekt Nederlands.",
   },
   {
     question: "Kan ik een terugbetaling krijgen als ik niet tevreden ben?",
@@ -111,22 +112,9 @@ export default function HomePage() {
   const [isClient, setIsClient] = useState(false)
   const [selectedImage, setSelectedImage] = useState<string | null>(null)
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null)
-  const [showFloatingCTA, setShowFloatingCTA] = useState(false)
 
   useEffect(() => {
     setIsClient(true)
-
-    // Handle floating CTA visibility on scroll
-    const handleScroll = () => {
-      const scrollY = window.scrollY
-      const windowHeight = window.innerHeight
-
-      // Show floating CTA after scrolling down 100vh (one screen height)
-      setShowFloatingCTA(scrollY > windowHeight)
-    }
-
-    window.addEventListener("scroll", handleScroll)
-    return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
   const openLightbox = (imageSrc: string) => {
@@ -159,15 +147,15 @@ export default function HomePage() {
           Makkelijk vanaf je telefoon of laptop, bespaar tijd en geld.
         </p>
 
-        {/* Large Hero Button - Responsive */}
-        <div className="mb-8">
+        <Button
+          asChild
+          size="lg"
+          className="bg-orange-500 hover:bg-orange-400 text-white px-6 md:px-8 py-3 md:py-4 text-base md:text-lg mb-8"
+        >
           <Link href="/pricing">
-            <button className="w-full max-w-xs sm:max-w-sm md:max-w-sm mx-auto bg-orange-500 hover:bg-orange-400 text-white font-semibold sm:text-lg md:text-xl px-2 sm:px-2 py-5 sm:py-5 rounded-xl transition-colors duration-200 flex items-center justify-center gap-2 sm:gap-3 shadow-lg">
-              Start jouw fotoshoot nu - 29€
-              <ArrowRight className="h-7 w-7 font-semibold sm:h-7 sm:w-7" />
-            </button>
+            Start Jouw Fotoshoot Nu - 29€ <ArrowRight className="ml-2 h-4 md:h-5 w-4 md:w-5" />
           </Link>
-        </div>
+        </Button>
       </section>
 
       {/* Photo Carousel - FIXED: Smooth continuous scrolling */}
@@ -220,9 +208,7 @@ export default function HomePage() {
 
       {/* FAQ Section */}
       <section id="faq" className="container mx-auto px-4 py-12 md:py-16 bg-gray-50">
-        <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-center mb-4">
-          Veelgestelde Vragen (FAQ) over jouw AI Portret App
-        </h2>
+        <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-center mb-4">Veelgestelde Vragen</h2>
         <p className="text-lg text-gray-600 text-center mb-8 md:mb-12 max-w-2xl mx-auto">
           Hier beantwoorden we de meest voorkomende vragen over onze app, zodat je precies weet hoe het werkt!
         </p>
@@ -274,22 +260,6 @@ export default function HomePage() {
           </Link>
         </div>
       </section>
-
-      {/* Floating CTA Button - Mobile Only */}
-      {showFloatingCTA && (
-        <div className="fixed bottom-4 left-4 right-4 z-50 md:hidden">
-          <Link href="/pricing">
-            <Button
-              size="lg"
-              className="w-full bg-orange-500 hover:bg-orange-400 text-white px-6 py-3 text-base font-semibold shadow-lg animate-in slide-in-from-bottom-2 duration-300"
-            >
-              <Camera className="mr-2 h-4 w-4" />
-              Start Jouw Fotoshoot Nu - 29€
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-          </Link>
-        </div>
-      )}
 
       {/* Lightbox Modal */}
       {selectedImage && (
@@ -410,63 +380,66 @@ export default function HomePage() {
         </div>
       </footer>
 
+      {/* Floating CTA Button - Mobile Only */}
+      <FloatingCTAButton />
+
       <style jsx>{`
-        @keyframes scroll {
-          0% {
-            transform: translateX(0);
-          }
-          100% {
-            transform: translateX(-50%);
-          }
-        }
+    @keyframes scroll {
+      0% {
+        transform: translateX(0);
+      }
+      100% {
+        transform: translateX(-50%);
+      }
+    }
 
-        .animate-scroll {
-          animation: scroll 15s linear infinite;
-        }
+    .animate-scroll {
+      animation: scroll 15s linear infinite;
+    }
 
-        .animate-scroll:hover {
-          animation-play-state: paused;
-        }
+    .animate-scroll:hover {
+      animation-play-state: paused;
+    }
 
-        .carousel-container {
-          width: 100%;
-          overflow: hidden;
-          position: relative;
-        }
+    .carousel-container {
+      width: 100%;
+      overflow: hidden;
+      position: relative;
+    }
 
-        .carousel-track {
-          display: flex;
-          width: fit-content;
-          animation: carousel 140s linear infinite;
-        }
+    .carousel-track {
+      display: flex;
+      width: fit-content;
+      animation: carousel 140s linear infinite;
+    }
 
-        .carousel-item {
-          flex-shrink: 0;
-          margin: 0 0.5rem;
-        }
+    .carousel-item {
+      flex-shrink: 0;
+      margin: 0 0.5rem;
+    }
 
-        @keyframes carousel {
-          0% {
-            transform: translateX(calc(-100% / 2));
-          }
-          100% {
-            transform: translateX(0);
-          }
-        }
+    @keyframes carousel {
+      0% {
+        transform: translateX(calc(-100% / 2));
+      }
+      100% {
+        transform: translateX(0);
+      }
+    }
 
-        .carousel-track:hover {
-          animation-play-state: paused;
-        }
+    .carousel-track:hover {
+      animation-play-state: paused;
+    }
 
-        @media (max-width: 768px) {
-          .animate-scroll {
-            animation: scroll 10s linear infinite;
-          }
-          .carousel-track {
-            animation: carousel 140s linear infinite;
-          }
-        }
-      `}</style>
+    @media (max-width: 768px) {
+      .animate-scroll {
+        animation: scroll 10s linear infinite;
+      }
+      .carousel-track {
+        animation: carousel 140s linear infinite;
+      }
+    }
+  `}</style>
     </div>
   )
 }
