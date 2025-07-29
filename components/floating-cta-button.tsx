@@ -28,7 +28,7 @@ export default function FloatingCTAButton() {
   }
 
   return (
-    <div className="fixed bottom-16 left-0 right-0 bg-white z-50 md:hidden py-4 px-4">
+    <div className="fixed bottom-0 left-0 right-0 bg-white z-50 md:hidden py-4 px-4">
       <Button
         asChild
         size="lg"
