@@ -32,7 +32,7 @@ export default function FloatingCTAButton() {
       <Button
         asChild
         size="lg"
-         className="bg-orange-500 hover:bg-orange-400 text-white px-6 md:px-8 py-8 md:py-8 text-base md:text-lg mb-8"
+         className="bg-orange-500 hover:bg-orange-400 text-white px-6 md:px-8 py-8 md:py-8 text-base md:text-lg mb-2"
       >
         <Link href="/pricing">
           Start jouw fotoshoot nu - 29€
