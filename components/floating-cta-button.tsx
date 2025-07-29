@@ -23,7 +23,7 @@ export default function FloatingCTAButton() {
   }, [])
 
   return (
-    <div // De div is nu ALTIJD wit en op zijn plek. // De animatie (transparantie en vertaling) is hier weggehaald. className="fixed bottom-0 left-0 right-0 bg-white px-4 py-4 z-[9999] md:hidden" >
+    <div className="fixed bottom-0 left-0 right-0 bg-white px-4 py-4 z-[9999] md:hidden" >
 
       <Button
         asChild
