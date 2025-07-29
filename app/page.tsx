@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { ArrowRight, X, ChevronDown, ChevronUp, Camera } from "lucide-react"
+import { ArrowRight, X, ChevronDown, ChevronUp } from "lucide-react"
 import Header from "@/components/header"
 import { Facebook, Instagram, Linkedin } from "lucide-react"
 import AIHeadshotsShowcase from "@/components/ai-headshots-showcase"
@@ -167,7 +167,6 @@ export default function HomePage() {
           className="bg-[#FFA500] hover:bg-[#FF8C00] text-white px-6 md:px-8 py-3 md:py-4 text-base md:text-lg mb-8"
         >
           <Link href="/pricing">
-            <Camera className="mr-2 h-4 md:h-5 w-4 md:w-5" />
             Start Jouw Fotoshoot Nu - 29€ <ArrowRight className="ml-2 h-4 md:h-5 w-4 md:w-5" />
           </Link>
         </Button>
@@ -407,7 +406,6 @@ export default function HomePage() {
           className="w-full bg-[#FFA500] hover:bg-[#FF8C00] text-white px-4 py-3 text-base font-semibold shadow-lg"
         >
           <Link href="/pricing">
-            <Camera className="mr-2 h-4 w-4" />
             Start Nu - 29€
             <ArrowRight className="ml-2 h-4 w-4" />
           </Link>
