@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { ArrowRight, X, ChevronDown, ChevronUp } from "lucide-react"
+import { ArrowRight, X, ChevronDown, ChevronUp, Camera } from "lucide-react"
 import Header from "@/components/header"
 import { Facebook, Instagram, Linkedin } from "lucide-react"
 import AIHeadshotsShowcase from "@/components/ai-headshots-showcase"
@@ -111,24 +111,9 @@ export default function HomePage() {
   const [isClient, setIsClient] = useState(false)
   const [selectedImage, setSelectedImage] = useState<string | null>(null)
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null)
-  const [isVisible, setIsVisible] = useState(false)
 
   useEffect(() => {
     setIsClient(true)
-  }, [])
-
-  useEffect(() => {
-    const toggleVisibility = () => {
-      if (window.pageYOffset > 300) {
-        setIsVisible(true)
-      } else {
-        setIsVisible(false)
-      }
-    }
-
-    window.addEventListener("scroll", toggleVisibility)
-
-    return () => window.removeEventListener("scroll", toggleVisibility)
   }, [])
 
   const openLightbox = (imageSrc: string) => {
@@ -164,9 +149,10 @@ export default function HomePage() {
         <Button
           asChild
           size="lg"
-          className="bg-[#FFA500] hover:bg-[#FF8C00] text-white px-6 md:px-8 py-3 md:py-4 text-base md:text-lg mb-8"
+          className="bg-[#FFA500] hover:bg-[#FF8C00] text-white px-8 md:px-10 py-6 md:py-6 text-base md:text-lg mb-8"
         >
           <Link href="/pricing">
+            <Camera className="mr-2 h-4 md:h-5 w-4 md:w-5" />
             Start Jouw Fotoshoot Nu - 29€ <ArrowRight className="ml-2 h-4 md:h-5 w-4 md:w-5" />
           </Link>
         </Button>
@@ -393,24 +379,6 @@ export default function HomePage() {
           </div>
         </div>
       </footer>
-
-      {/* Floating CTA Button - Mobile Only */}
-      <div
-        className={`fixed bottom-4 left-4 right-4 z-[9999] md:hidden transition-all duration-300 ${
-          isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none"
-        }`}
-      >
-        <Button
-          asChild
-          size="lg"
-          className="w-full bg-[#FFA500] hover:bg-[#FF8C00] text-white px-4 py-3 text-base font-semibold shadow-lg"
-        >
-          <Link href="/pricing">
-            Start Nu - 29€
-            <ArrowRight className="ml-2 h-4 w-4" />
-          </Link>
-        </Button>
-      </div>
 
       <style jsx>{`
     @keyframes scroll {
