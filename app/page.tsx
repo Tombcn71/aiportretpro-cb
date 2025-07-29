@@ -4,12 +4,11 @@ import { useState, useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { ArrowRight, X, ChevronDown, ChevronUp } from "lucide-react"
+import { ArrowRight, X, ChevronDown, ChevronUp, Camera } from "lucide-react"
 import Header from "@/components/header"
 import { Facebook, Instagram, Linkedin } from "lucide-react"
 import AIHeadshotsShowcase from "@/components/ai-headshots-showcase"
 import HowItWorks from "@/components/how-it-works"
-import FloatingCTAButton from "@/components/floating-cta-button"
 
 // Gallery photos: New 16 professional photos in man-woman alternating order
 const galleryPhotos = [
@@ -150,9 +149,10 @@ export default function HomePage() {
         <Button
           asChild
           size="lg"
-          className="bg-orange-500 hover:bg-orange-400 text-white px-6 md:px-8 py-3 md:py-4 text-base md:text-lg mb-8"
+          className="bg-[#FFA500] hover:bg-[#FF8C00] text-white px-6 md:px-8 py-3 md:py-4 text-base md:text-lg mb-8"
         >
           <Link href="/pricing">
+            <Camera className="mr-2 h-4 md:h-5 w-4 md:w-5" />
             Start Jouw Fotoshoot Nu - 29€ <ArrowRight className="ml-2 h-4 md:h-5 w-4 md:w-5" />
           </Link>
         </Button>
@@ -254,7 +254,7 @@ export default function HomePage() {
           </h2>
           <p className="text-xl text-gray-600 mb-8">Laat zien wie je bent met een krachtige, professionele foto</p>
           <Link href="/pricing">
-            <Button size="lg" className="bg-orange-500 hover:bg-orange-400 text-white px-8 py-4 text-lg">
+            <Button size="lg" className="bg-[#FFA500] hover:bg-[#FF8C00] text-white px-8 py-4 text-lg">
               Start nu voor slechts €29 <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
           </Link>
@@ -379,9 +379,6 @@ export default function HomePage() {
           </div>
         </div>
       </footer>
-
-      {/* Floating CTA Button - Mobile Only */}
-      <FloatingCTAButton />
 
       <style jsx>{`
     @keyframes scroll {
