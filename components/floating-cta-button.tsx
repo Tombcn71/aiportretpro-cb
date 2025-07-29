@@ -28,11 +28,11 @@ export default function FloatingCTAButton() {
   }
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-white z-50 md:hidden py-4">
+    <div className="fixed bottom-0 left-0 right-0 bg-white z-50 md:hidden py-4 px-4">
       <Button
         asChild
         size="lg"
-         className="bg-orange-500 hover:bg-orange-400 text-white w-full max-w-sm mx-auto px-6 md:px-8 py-8 md:py-8 text-base md:text-lg mb-2"
+         className="bg-orange-500 hover:bg-orange-400 text-white w-full max-w-sm mx-auto py-8 text-base md:text-lg"
       >
         <Link href="/pricing">
           Start jouw fotoshoot nu - 29€
