@@ -395,23 +395,21 @@ export default function HomePage() {
       </footer>
 
       {/* Floating CTA Button - Mobile Only */}
-      <div
-        className={`fixed bottom-4 left-4 right-4 z-[9999] md:hidden transition-all duration-300 ${
-          isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none"
-        }`}
-      >
-        <div className="bg-white rounded-lg shadow-lg p-2">
-          <Button
-            asChild
-            size="lg"
-            className="w-full bg-[#FF8C00] hover:bg-[#FFA500] text-white px-6 py-8 text-base font-semibold"
-          >
-            <Link href="/pricing" className="flex items-center justify-center">
-              Start jouw fotoshoot nu - 29€ <ArrowRight className="ml-2 h-6 w-6" />
-            </Link>
-          </Button>
+      {isVisible && (
+        <div className="fixed bottom-4 left-4 right-4 z-[2147483647] md:hidden">
+          <div className="bg-white rounded-lg shadow-lg p-2">
+            <Button
+              asChild
+              size="lg"
+              className="w-full bg-[#FF8C00] hover:bg-[#FFA500] text-white px-6 py-8 text-base font-semibold"
+            >
+              <Link href="/pricing" className="flex items-center justify-center">
+                Start jouw fotoshoot nu - 29€ <ArrowRight className="ml-2 h-6 w-6" />
+              </Link>
+            </Button>
+          </div>
         </div>
-      </div>
+      )}
 
       <style jsx>{`
     @keyframes scroll {
