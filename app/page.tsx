@@ -400,15 +400,17 @@ export default function HomePage() {
           isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none"
         }`}
       >
-        <Button
-          asChild
-          size="lg"
-          className=" bg-[#FF8C00] hover:bg-[#FFA500] text-white px-6 md:px-10 py-8 md:py-8 text-base md:text-lg mb-8 md:max-w-sm"
-        >
-          <Link href="/pricing">
-            Start jouw fotoshoot nu - 29€ <ArrowRight className="ml-2 h-6 md:h-7 w-6 md:w-7" />
-          </Link>
-        </Button>
+        <div className="bg-white rounded-lg shadow-lg p-2">
+          <Button
+            asChild
+            size="lg"
+            className="w-full bg-[#FF8C00] hover:bg-[#FFA500] text-white px-6 py-4 text-base font-semibold"
+          >
+            <Link href="/pricing" className="flex items-center justify-center">
+              Start jouw fotoshoot nu - 29€ <ArrowRight className="ml-2 h-6 w-6" />
+            </Link>
+          </Button>
+        </div>
       </div>
 
       <style jsx>{`
