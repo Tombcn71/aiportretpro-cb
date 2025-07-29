@@ -23,7 +23,11 @@ export default function FloatingCTAButton() {
   }, [])
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-white px-4 py-4 z-[9999] md:hidden" >
+<div
+  // Deze div creëert de witte balk onderaan en is ALTIJD zichtbaar.
+  // De animatie (opacity, translate) is HIER WEGGEHAald.
+  className="fixed bottom-0 left-0 right-0 bg-white px-4 py-4 z-[9999] md:hidden"
+>
 
       <Button
         asChild
