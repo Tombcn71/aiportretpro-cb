@@ -404,7 +404,7 @@ export default function HomePage() {
           <Button
             asChild
             size="lg"
-            className="w-full bg-[#FF8C00] hover:bg-[#FFA500] text-white px-6 py-4 text-base font-semibold"
+            className="w-full bg-[#FF8C00] hover:bg-[#FFA500] text-white px-6 py-8 text-base font-semibold"
           >
             <Link href="/pricing" className="flex items-center justify-center">
               Start jouw fotoshoot nu - 29€ <ArrowRight className="ml-2 h-6 w-6" />
