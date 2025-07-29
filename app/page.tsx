@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { ArrowRight, X, ChevronDown, ChevronUp, Camera } from "lucide-react"
+import { ArrowRight, X, ChevronDown, ChevronUp } from "lucide-react"
 import Header from "@/components/header"
 import { Facebook, Instagram, Linkedin } from "lucide-react"
 import AIHeadshotsShowcase from "@/components/ai-headshots-showcase"
@@ -43,53 +43,67 @@ const companies = [
 
 const faqData = [
   {
-    question: "Waarom AI Portret Pro?",
+    question: "Hoe werkt deze app precies?",
     answer:
-      "AI Portret Pro maakt zakelijke portret-fotografie supersimpel voor iedereen, je kan dit gewoon vanaf overal met je laptop of telefoon doen. Met AI Portret Pro reduceren we de kosten en de tijd die je kwijt bent aan traditionele fotoshoots aanzienlijk.",
+      "Onze app gebruikt slimme computerprogramma's (we noemen dat Artificiële Intelligentie of AI) om jouw gewone foto's om te toveren in professionele portretfoto's. Je uploadt een paar van je eigen foto's – hoe meer, hoe beter! De AI leert van deze foto's hoe jij eruitziet. Daarna kan het nieuwe foto's van jou maken in allerlei stijlen, alsof je bij een professionele fotograaf bent geweest.",
   },
   {
-    question: "Kan dit een echte fotoshoot vervangen?",
+    question: "Maakt de app dan allemaal 'nieuwe' foto's van mijn gezicht?",
     answer:
-      "Ja, wij gebruiken FLUX AI technologie dit is de beste AI wat er bestaat en dit is niet meer van een traditionele fotoshoot te onderscheiden. Je kunt onze foto's overal gebruiken waar je traditionele foto's zou gebruiken.",
+      "Ja, dat klopt! De app maakt allemaal nieuwe foto's van jou. Het werkt zo: de AI is als een super slimme leerling die precies onthoudt hoe jouw ogen, neus, mond en haar eruitzien en hoe ze bewegen. Wanneer je jouw foto's uploadt, bestudeert de AI jou van top tot teen. Het leert jouw unieke kenmerken en stijl. Vervolgens combineert de AI deze kennis van jou met alles wat het al heeft geleerd van talloze andere professionele foto's (denk aan poses, belichting, en achtergronden). Hierdoor kan de AI compleet nieuwe, realistische beelden van jou genereren die er professioneel uitzien, zonder dat die beelden ooit echt zijn genomen.",
   },
   {
-    question: "Welke foto's moet ik uploaden voor het beste resultaat?",
+    question: "Is het veilig om mijn foto's te uploaden? Wat gebeurt ermee?",
     answer:
-      "Upload minimaal 6 foto's van jezelf met goede belichting.Gemaakt op verschillende dagen met verschillende kleding en verschillende achtergronden Een mix van close-ups en mid-range shots werkt het beste. Zorg ervoor dat je gezicht duidelijk zichtbaar is.",
+      "Ja, veiligheid is onze topprioriteit! Je foto's worden alleen gebruikt om de AI te trainen zodat deze de beste headshots van jou kan maken. Zodra jouw headshots klaar zijn en jij ze hebt gedownload, worden de getrainde modellen binnen 30 dagen van onze servers verwijderd, de originele foto's slaan we nooit op. We delen je foto's nooit met derden.",
   },
-
+  {
+    question: "Hoeveel foto's moet ik uploaden voor het beste resultaat?",
+    answer:
+      "Om de AI zo goed mogelijk te laten leren hoe jij eruitziet, raden we aan om minimaal 6 foto's te uploaden. Upload foto's met goede belichting, gemaakt op verschillende dagen met verschillende kleding en verschillende achtergronden. Een mix van close-ups en mid-range shots werkt het beste. Zorg ervoor dat je gezicht duidelijk zichtbaar is.",
+  },
+  {
+    question: "Kan ik de gegenereerde portretfoto's nog aanpassen?",
+    answer:
+      "De app maakt de headshots automatisch, en je kunt ze niet direct in de app bewerken. Je krijgt 40 verschillende professionele headshots waaruit je kunt kiezen. Als je daarna nog kleine aanpassingen wilt doen, kun je daarvoor een aparte fotobewerkingsapp gebruiken.",
+  },
+  {
+    question: "Werkt de app ook met groepsfoto's of foto's waar ik niet duidelijk op sta?",
+    answer:
+      "Nee, voor de beste resultaten is het belangrijk dat jij het hoofdonderwerp bent op de foto's die je uploadt. Zorg ervoor dat je gezicht duidelijk zichtbaar is en dat er zo min mogelijk andere mensen op de foto staan. Selfies en close-ups werken vaak het beste!",
+  },
+  {
+    question: "Hoe lang duurt het voordat mijn headshots klaar zijn?",
+    answer:
+      "De AI training en het genereren van je professionele headshots duurt ongeveer 15 minuten. Ze verschijnen automatisch in je dashboard. De tijd kan soms iets variëren afhankelijk van hoe druk het is.",
+  },
   {
     question: "Wat voor kleding draag ik tijdens de fotoshoot?",
-    answer: "Je draagt tijdens de fotoshoot: blazers, pakken, overhemden en blouses.",
+    answer: "Je draagt tijdens de fotoshoot professionele outfits zoals; blazers, pakken, overhemden en blouses.",
   },
   {
     question: "Wat voor achtergrond hebben mijn foto's?",
     answer:
-      "We gebruiken professionele achtergronden zoals een grijze studio back-drop en achtergronden van kantorenen en trendy werkplekken",
+      "We gebruiken professionele achtergronden zoals een grijze studio back-drop en achtergronden van kantoren en trendy werkplekken",
   },
   {
     question: "Heb ik het recht om de foto's overal te gebruiken?",
     answer: "Ja, je hebt alle commerciële en persoonlijke rechten op jouw foto's.",
   },
   {
-    question: "Is mijn data veilig?",
-    answer:
-      "Wij slaan geen trainingsfoto's op de server op, jouw resultaten worden na 30 dagen automatisch verwijderd. Zodat je genoeg tijd hebt om ze te downloaden.",
-  },
-  {
     question: "Zijn mijn betalingsgegevens veilig?",
     answer:
-      "Ja, wij gebruiken Stripe als betaalplatform, stripe faciliteert ideal en credit card  betalingenen, wij zelf slaan nooit betalingsgegevens op.",
+      "Ja, wij gebruiken Stripe als betaalplatform, stripe faciliteert ideal en credit card betalingen, wij zelf slaan nooit betalingsgegevens op.",
   },
   {
     question: "Hoe kan ik contact met jullie opnemen?",
     answer:
-      "Stuur ons een bericht via de live chat, indien niet direct, zullen wij contact met je opnemen via het e-mailadres dat je hebt opgegeven via de chat. Je kunt ook via de contact knop onder de faq contact opnemen. Ons team spreekt Nederlands.",
+      "Stuur ons een bericht via de live chat of het sontactformulier, indien niet direct, zullen wij contact met je opnemen via het e-mailadres dat je hebt opgegeven via de chat. Je kunt ook via de contact knop onder de faq contact opnemen. Ons team spreekt Nederlands.",
   },
   {
     question: "Kan ik een terugbetaling krijgen als ik niet tevreden ben?",
     answer:
-      "Net als bij  traditionele fotoshoots zijn niet alle foto's goed. Wij laten je alle resultaten zien zodat je zelf de goede uit kan kiezen. Wij beloven dat je  aankoop van AI Portret Pro 100% risicoloos is want als je niet minstens 1 bruikbare portretfoto in je bestelling vindt, je 100% van je betaling terugkrijgt. Voorwaarde is wel dat je geen enkele foto gedownload hebt. Om dit proces in gang te zetten stuur ons een bericht via het contact formulier  ",
+      "Net als bij traditionele fotoshoots zijn niet alle foto's goed. Wij laten je alle resultaten zien zodat je zelf de goede uit kan kiezen. Wij beloven dat je aankoop van AI Portret Pro 100% risicoloos is want als je niet minstens 1 bruikbare portretfoto in je bestelling vindt, je 100% van je betaling terugkrijgt. Voorwaarde is wel dat je geen enkele foto gedownload hebt. Om dit proces in gang te zetten stuur ons een bericht via het contact formulier.",
   },
 ]
 
@@ -138,7 +152,6 @@ export default function HomePage() {
           className="bg-orange-500 hover:bg-orange-400 text-white px-6 md:px-8 py-3 md:py-4 text-base md:text-lg mb-8"
         >
           <Link href="/pricing">
-           
             Start Jouw Fotoshoot Nu - 29€ <ArrowRight className="ml-2 h-4 md:h-5 w-4 md:w-5" />
           </Link>
         </Button>
@@ -194,7 +207,10 @@ export default function HomePage() {
 
       {/* FAQ Section */}
       <section id="faq" className="container mx-auto px-4 py-12 md:py-16 bg-gray-50">
-        <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-center mb-8 md:mb-12">Veelgestelde Vragen</h2>
+        <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-center mb-4">Veelgestelde Vragen</h2>
+        <p className="text-lg text-gray-600 text-center mb-8 md:mb-12 max-w-2xl mx-auto">
+          Hier beantwoorden we de meest voorkomende vragen over onze app, zodat je precies weet hoe het werkt!
+        </p>
         <div className="max-w-3xl mx-auto">
           {faqData.map((faq, index) => (
             <div key={index} className="mb-4">
