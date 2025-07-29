@@ -24,14 +24,14 @@ export default function FloatingCTAButton() {
 
   return (
     <div
-      className={`fixed bottom-4 left-4 right-4 z-[9999] md:hidden transition-all duration-300 ${
+      className={`fixed bottom-0 left-0 right-0 bg-white px-4 py-4 z-[9999] md:hidden transition-all duration-300 ${
         isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none"
       }`}
     >
       <Button
         asChild
         size="lg"
-        className="w-full bg-[#FFA500] hover:bg-[#FF8C00] text-white px-4 py-3 text-base font-semibold shadow-lg"
+        className="w-full max-w-sm mx-auto bg-[#FFA500] hover:bg-[#FF8C00] text-white py-3 text-base font-semibold shadow-lg"
       >
         <Link href="/pricing">
           <Camera className="mr-2 h-4 w-4" />
