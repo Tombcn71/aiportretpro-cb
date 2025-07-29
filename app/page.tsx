@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { ArrowRight, X, ChevronDown, ChevronUp, Camera } from "lucide-react"
+import { ArrowRight, X, ChevronDown, ChevronUp } from "lucide-react"
 import Header from "@/components/header"
 import { Facebook, Instagram, Linkedin } from "lucide-react"
 import AIHeadshotsShowcase from "@/components/ai-headshots-showcase"
@@ -111,9 +111,24 @@ export default function HomePage() {
   const [isClient, setIsClient] = useState(false)
   const [selectedImage, setSelectedImage] = useState<string | null>(null)
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null)
+  const [isVisible, setIsVisible] = useState(false)
 
   useEffect(() => {
     setIsClient(true)
+  }, [])
+
+  useEffect(() => {
+    const toggleVisibility = () => {
+      if (window.pageYOffset > 300) {
+        setIsVisible(true)
+      } else {
+        setIsVisible(false)
+      }
+    }
+
+    window.addEventListener("scroll", toggleVisibility)
+
+    return () => window.removeEventListener("scroll", toggleVisibility)
   }, [])
 
   const openLightbox = (imageSrc: string) => {
@@ -147,14 +162,14 @@ export default function HomePage() {
         </p>
 
         <Button
-  asChild
-  size="lg"
-  className=" bg-[#FF8C00] hover:bg-[#FFA500] text-white px-6 md:px-10 py-8 md:py-8 text-base md:text-lg mb-8 md:max-w-sm"
->
-  <Link href="/pricing">
-    Start jouw fotoshoot nu - 29€ <ArrowRight className="ml-2 h-6 md:h-7 w-6 md:w-7" />
-  </Link>
-</Button>
+          asChild
+          size="lg"
+          className=" bg-[#FF8C00] hover:bg-[#FFA500] text-white px-6 md:px-10 py-8 md:py-8 text-base md:text-lg mb-8 md:max-w-sm"
+        >
+          <Link href="/pricing">
+            Start jouw fotoshoot nu - 29€ <ArrowRight className="ml-2 h-6 md:h-7 w-6 md:w-7" />
+          </Link>
+        </Button>
       </section>
 
       {/* Photo Carousel - FIXED: Smooth continuous scrolling */}
@@ -378,6 +393,23 @@ export default function HomePage() {
           </div>
         </div>
       </footer>
+
+      {/* Floating CTA Button - Mobile Only */}
+      <div
+        className={`fixed bottom-4 left-4 right-4 z-[9999] md:hidden transition-all duration-300 ${
+          isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none"
+        }`}
+      >
+        <Button
+          asChild
+          size="lg"
+          className=" bg-[#FF8C00] hover:bg-[#FFA500] text-white px-6 md:px-10 py-8 md:py-8 text-base md:text-lg mb-8 md:max-w-sm"
+        >
+          <Link href="/pricing">
+            Start jouw fotoshoot nu - 29€ <ArrowRight className="ml-2 h-6 md:h-7 w-6 md:w-7" />
+          </Link>
+        </Button>
+      </div>
 
       <style jsx>{`
     @keyframes scroll {
