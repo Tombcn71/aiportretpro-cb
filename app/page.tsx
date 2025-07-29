@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { ArrowRight, X, ChevronDown, ChevronUp } from "lucide-react"
+import { ArrowRight, X, ChevronDown, ChevronUp, Camera } from "lucide-react"
 import Header from "@/components/header"
 import { Facebook, Instagram, Linkedin } from "lucide-react"
 import AIHeadshotsShowcase from "@/components/ai-headshots-showcase"
@@ -111,9 +111,22 @@ export default function HomePage() {
   const [isClient, setIsClient] = useState(false)
   const [selectedImage, setSelectedImage] = useState<string | null>(null)
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null)
+  const [showFloatingCTA, setShowFloatingCTA] = useState(false)
 
   useEffect(() => {
     setIsClient(true)
+
+    // Handle floating CTA visibility on scroll
+    const handleScroll = () => {
+      const scrollY = window.scrollY
+      const windowHeight = window.innerHeight
+
+      // Show floating CTA after scrolling down 100vh (one screen height)
+      setShowFloatingCTA(scrollY > windowHeight)
+    }
+
+    window.addEventListener("scroll", handleScroll)
+    return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
   const openLightbox = (imageSrc: string) => {
@@ -146,15 +159,15 @@ export default function HomePage() {
           Makkelijk vanaf je telefoon of laptop, bespaar tijd en geld.
         </p>
 
-        <Button
-          asChild
-          size="lg"
-          className="bg-orange-500 hover:bg-orange-400 text-white px-6 md:px-8 py-3 md:py-4 text-base md:text-lg mb-8"
-        >
+        {/* Large Hero Button - 20% smaller than before */}
+        <div className="mb-8">
           <Link href="/pricing">
-            Start Jouw Fotoshoot Nu - 29€ <ArrowRight className="ml-2 h-4 md:h-5 w-4 md:w-5" />
+            <button className="w-full max-w-sm mx-auto bg-orange-500 hover:bg-orange-400 text-white  text-xl px-6 py-5 rounded-2xl transition-colors duration-200 flex items-center justify-center gap-3 shadow-lg">
+              Start Jouw Fotoshoot Nu - 29€
+              <ArrowRight className="h-5 w-5" />
+            </button>
           </Link>
-        </Button>
+        </div>
       </section>
 
       {/* Photo Carousel - FIXED: Smooth continuous scrolling */}
@@ -261,6 +274,22 @@ export default function HomePage() {
           </Link>
         </div>
       </section>
+
+      {/* Floating CTA Button - Mobile Only */}
+      {showFloatingCTA && (
+        <div className="fixed bottom-4 left-4 right-4 z-50 md:hidden">
+          <Link href="/pricing">
+            <Button
+              size="lg"
+              className="w-full bg-orange-500 hover:bg-orange-400 text-white px-6 py-3 text-base font-semibold shadow-lg animate-in slide-in-from-bottom-2 duration-300"
+            >
+              <Camera className="mr-2 h-4 w-4" />
+              Start Jouw Fotoshoot Nu - 29€
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          </Link>
+        </div>
+      )}
 
       {/* Lightbox Modal */}
       {selectedImage && (
