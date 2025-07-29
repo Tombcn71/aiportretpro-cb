@@ -150,7 +150,7 @@ export default function HomePage() {
         <Button
           asChild
           size="lg"
-          className="bg-orange-500 hover:bg-orange-400 text-white px-6 md:px-8 py-3 md:py-4 text-base md:text-lg mb-8"
+          className="bg-orange-500 hover:bg-orange-400 text-white px-6 md:px-8 py-6 md:py-6 text-base md:text-lg mb-8"
         >
           <Link href="/pricing">
             Start Jouw Fotoshoot Nu - 29€ <ArrowRight className="ml-2 h-4 md:h-5 w-4 md:w-5" />
