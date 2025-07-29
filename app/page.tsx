@@ -162,9 +162,9 @@ export default function HomePage() {
         {/* Large Hero Button - Responsive */}
         <div className="mb-8">
           <Link href="/pricing">
-            <button className="w-full max-w-xs sm:max-w-sm md:max-w-md mx-auto bg-orange-500 hover:bg-orange-400 text-white  sm:text-lg md:text-xl px-2 sm:px-2 py-5 sm:py-5 rounded-xl transition-colors duration-200 flex items-center justify-center gap-2 sm:gap-3 shadow-lg">
-              Start Jouw Fotoshoot Nu - 29€
-              <ArrowRight className="h-5 w-5 font-semibold sm:h-5 sm:w-5" />
+            <button className="w-full max-w-xs sm:max-w-sm md:max-w-md mx-auto bg-orange-500 hover:bg-orange-400 text-white font-semibold sm:text-lg md:text-xl px-2 sm:px-2 py-5 sm:py-5 rounded-xl transition-colors duration-200 flex items-center justify-center gap-2 sm:gap-3 shadow-lg">
+              Start jouw fotoshoot nu - 29€
+              <ArrowRight className="h-7 w-7 font-semibold sm:h-7 sm:w-7" />
             </button>
           </Link>
         </div>
