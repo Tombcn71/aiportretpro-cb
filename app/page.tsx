@@ -111,9 +111,24 @@ export default function HomePage() {
   const [isClient, setIsClient] = useState(false)
   const [selectedImage, setSelectedImage] = useState<string | null>(null)
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null)
+  const [isVisible, setIsVisible] = useState(false)
 
   useEffect(() => {
     setIsClient(true)
+  }, [])
+
+  useEffect(() => {
+    const toggleVisibility = () => {
+      if (window.pageYOffset > 300) {
+        setIsVisible(true)
+      } else {
+        setIsVisible(false)
+      }
+    }
+
+    window.addEventListener("scroll", toggleVisibility)
+
+    return () => window.removeEventListener("scroll", toggleVisibility)
   }, [])
 
   const openLightbox = (imageSrc: string) => {
@@ -379,6 +394,25 @@ export default function HomePage() {
           </div>
         </div>
       </footer>
+
+      {/* Floating CTA Button - Mobile Only */}
+      <div
+        className={`fixed bottom-4 left-4 right-4 z-[9999] md:hidden transition-all duration-300 ${
+          isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none"
+        }`}
+      >
+        <Button
+          asChild
+          size="lg"
+          className="w-full bg-[#FFA500] hover:bg-[#FF8C00] text-white px-4 py-3 text-base font-semibold shadow-lg"
+        >
+          <Link href="/pricing">
+            <Camera className="mr-2 h-4 w-4" />
+            Start Nu - 29€
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </Link>
+        </Button>
+      </div>
 
       <style jsx>{`
     @keyframes scroll {
