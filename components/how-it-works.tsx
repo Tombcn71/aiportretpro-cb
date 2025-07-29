@@ -20,7 +20,7 @@ export default function HowItWorks() {
             </div>
             <h3 className="text-xl font-semibold mb-2">Upload een paar selfies</h3>
             <p className="text-gray-600 text-sm">
-              Kijk naar de camera met verschillende kleding verschillende achtergrond.
+              Kijkend naar de camera met verschillende kleding en verschillende achtergronden.
             </p>
           </div>
 
