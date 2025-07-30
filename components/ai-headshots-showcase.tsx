@@ -103,9 +103,7 @@ export default function AIHeadshotsShowcase() {
                       />
                     </div>
                     {/* AI Generated badge */}
-                    <div className="absolute bottom-3 right-3 bg-[#0077B5] text-white text-xs px-2 py-1 rounded-full font-medium">
-                      AI
-                    </div>
+                    
                     {/* Hover overlay for large photos */}
                     <div className="absolute inset-0 bg-black bg-opacity-50 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                       <span className="text-white text-lg font-medium">Klik om te vergroten</span>
