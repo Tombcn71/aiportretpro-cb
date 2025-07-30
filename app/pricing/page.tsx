@@ -71,8 +71,8 @@ export default function PricingPage() {
       <Header />
       <div className="container mx-auto px-4 py-16">
         <div className="text-center mb-12">
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">👋 Welkom! Dit is je pakket. Na een snelle en veilige betaling kun je direct aan de slag!</h1>
-          
+          <h1 className="text-3xl font-bold text-gray-900 mb-4">👋 Welkom! Dit is je pakket. !</h1>
+          <p className="text-xl text-gray-600">Na een snelle en veilige betaling kun je direct aan de slag</p>
         </div>
 
         <div className="max-w-md mx-auto">
