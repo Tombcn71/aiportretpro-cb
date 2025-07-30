@@ -71,7 +71,7 @@ export default function PricingPage() {
       <Header />
       <div className="container mx-auto px-4 py-20">
         <div className="text-center mb-6">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">👋 Welkom! Dit is je pakket.</h1>
+          <h1 className="text-2xl md:text-4xl font-bold text-gray-900 mb-2">👋 Welkom! Dit is je pakket.</h1>
           <p className="text-md text-gray-600">Na een snelle en veilige betaling kun je direct aan de slag</p>
         </div>
 
@@ -84,7 +84,7 @@ export default function PricingPage() {
               <div className="mt-4">
                 <span className="text-2xl font-bold text-[#0077B5]">€29</span>
               </div>
-              <p className="text-gray-600 mt-2">40 professionele portetfotos</p>
+              <p className="text-gray-600 mt-2">40 professionele portretfoto's</p>
             </CardHeader>
 
             <CardContent className="space-y-6">
