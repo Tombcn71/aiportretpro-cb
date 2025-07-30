@@ -102,7 +102,7 @@ export default function PricingPage() {
                 disabled={loading}
                 className="w-full bg-[#0077B5] hover:bg-[#004182] text-white py-4 text-lg font-semibold"
               >
-                {loading ? "Laden..." : "Start nu - €29"}
+                {loading ? "Laden..." : "Betaal Veilig & Start Direct"}
               </Button>
 
               <div className="text-center text-sm text-gray-500">
