@@ -82,7 +82,7 @@ export default function PricingPage() {
             <CardHeader className="text-center pt-8">
               <CardTitle className="text-2xl font-bold">Professional</CardTitle>
               <div className="mt-4">
-                <span className="text-2xl font-bold text-[#0077B5]">€29</span>
+                <span className="text-2xl md:text-4xl font-bold text-[#0077B5]">€29</span>
               </div>
               <p className="text-gray-600 mt-2">40 professionele portretfoto's</p>
             </CardHeader>
