@@ -156,8 +156,8 @@ export default function HomePage() {
         </h1>
 
         <p className="text-md md:text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
-          Geen gedoe met studio's, direct 40 AI-portretten in 15 min.
-          <br />
+          Geen gedoe met studio's, direct 40 AI-portretten in 15 min. <span className="font-bold"> Tijdelijk voor slechts €19,99</span>.
+      
           Makkelijk vanaf je telefoon of laptop, bespaar tijd en geld.
         </p>
 
