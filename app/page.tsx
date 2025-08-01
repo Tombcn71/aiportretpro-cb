@@ -156,7 +156,7 @@ export default function HomePage() {
         </h1>
 
         <p className="text-md md:text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
-          Geen gedoe met studio's, direct 40 AI-portretten in 15 min.
+          Geen gedoe met studio's, direct 40 AI-portretten in 15 min.<span className="text-[#0077B5] font-bold"> Tijdelijk voor slechts. </span>
           <br />
           Makkelijk vanaf je telefoon of laptop, bespaar tijd en geld.
         </p>
@@ -167,7 +167,7 @@ export default function HomePage() {
           className=" bg-[#FF8C00] hover:bg-[#FFA500] text-white px-6 md:px-10 py-8 md:py-8 text-base md:text-lg mb-8 md:max-w-sm"
         >
           <Link href="/pricing">
-            Start jouw fotoshoot nu - 29€ <ArrowRight className="ml-2 h-6 md:h-7 w-6 md:w-7" />
+            Start jouw fotoshoot nu - 19,99€ <ArrowRight className="ml-2 h-6 md:h-7 w-6 md:w-7" />
           </Link>
         </Button>
       </section>
