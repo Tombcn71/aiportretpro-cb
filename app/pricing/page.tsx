@@ -16,7 +16,7 @@ export default function PricingPage() {
 
   // Track pricing page view
   useEffect(() => {
-    trackViewContent("Pricing Page", 19,99)
+    trackViewContent("Pricing Page", 19.99)
   }, [])
 
   const handlePlanSelect = () => {
