@@ -4,9 +4,9 @@ import { authOptions } from "@/lib/auth"
 
 const PRICING_PLAN = {
   name: "Professional",
-  price: 19,
+  price: 19.99,
   photos: 40,
-  priceId: "price_1RrHNcDswbEJWagVNYti8EEM",
+  priceId: "price_1RrFsbDswbEJWagVsEytA8rs",
 }
 
 export async function POST(request: NextRequest) {
