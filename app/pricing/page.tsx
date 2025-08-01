@@ -21,7 +21,7 @@ export default function PricingPage() {
 
   const handlePlanSelect = () => {
     // Track checkout initiation
-    trackInitiateCheckout(19,99)
+    trackInitiateCheckout(19.99)
 
     if (!session) {
       router.push(`/login?plan=professional`)
