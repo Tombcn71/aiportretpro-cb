@@ -80,8 +80,7 @@ export async function POST(request: NextRequest) {
       userId: user.id,
       stripeSessionId: checkoutSession.id,
       planType: "professional",
-      amount: plan.price * 100,
-      headshotsIncluded: plan.photos,
+amount: Math.round(plan.price * 100),  // ← Math.round() toevoegen      headshotsIncluded: plan.photos,
     })
 
     console.log("Purchase created:", purchase)
