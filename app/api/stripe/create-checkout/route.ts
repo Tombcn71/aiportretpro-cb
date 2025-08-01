@@ -4,7 +4,7 @@ import { authOptions } from "@/lib/auth"
 
 const PRICING_PLAN = {
   name: "Professional",
-  price: 29,
+  price: 19.99,
   photos: 40,
   priceId: "price_1Rg5zQDswbEJWagV1UkgNsID",
 }
