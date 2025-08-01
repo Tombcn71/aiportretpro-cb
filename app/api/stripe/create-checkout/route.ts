@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 
 const PRICING_PLAN = {
-  name: "Professional",
+  name: "Pro",
   price: 19.99,
   photos: 40,
   priceId: "price_1RrFTnDswbEJWagVnjXYvNwh",
