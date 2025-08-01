@@ -3,10 +3,10 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 
 const PRICING_PLAN = {
-  name: "Pro",
-  price: 19.99,
+  name: "Professional",
+  price: 29,
   photos: 40,
-  priceId: "price_1RrFTnDswbEJWagVnjXYvNwh",
+  priceId: "price_1Rg5zQDswbEJWagV1UkgNsID",
 }
 
 export async function POST(request: NextRequest) {
@@ -80,8 +80,8 @@ export async function POST(request: NextRequest) {
       userId: user.id,
       stripeSessionId: checkoutSession.id,
       planType: "professional",
-
-amount: plan.price * 100,
+      amount: plan.price * 100,
+      headshotsIncluded: plan.photos,
     })
 
     console.log("Purchase created:", purchase)

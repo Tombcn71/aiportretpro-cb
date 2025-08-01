@@ -1,8 +1,6 @@
 "use client"
 
 import Image from "next/image"
-import { useState } from "react"
-import { X } from "lucide-react"
 
 const profiles = [
   {
@@ -36,16 +34,6 @@ const profiles = [
 ]
 
 export default function AIHeadshotsShowcase() {
-  const [lightboxImage, setLightboxImage] = useState<string | null>(null)
-
-  const openLightbox = (imageSrc: string) => {
-    setLightboxImage(imageSrc)
-  }
-
-  const closeLightbox = () => {
-    setLightboxImage(null)
-  }
-
   return (
     <section className="py-16 bg-white">
       <div className="max-w-7xl mx-auto px-4">
@@ -92,7 +80,7 @@ export default function AIHeadshotsShowcase() {
               {/* Large professional photos */}
               <div className="grid grid-cols-2 gap-6">
                 {profile.afterImages.map((image, index) => (
-                  <div key={index} className="relative group cursor-pointer" onClick={() => openLightbox(image)}>
+                  <div key={index} className="relative group">
                     <div className="aspect-[3/4] rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow">
                       <Image
                         src={image || "/placeholder.svg"}
@@ -103,10 +91,8 @@ export default function AIHeadshotsShowcase() {
                       />
                     </div>
                     {/* AI Generated badge */}
-                    
-                    {/* Hover overlay for large photos */}
-                    <div className="absolute inset-0 bg-black bg-opacity-50 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                      <span className="text-white text-lg font-medium">Klik om te vergroten</span>
+                    <div className="absolute bottom-3 right-3 bg-[#0077B5] text-white text-xs px-2 py-1 rounded-full font-medium">
+                      AI GENERATED
                     </div>
                   </div>
                 ))}
@@ -115,32 +101,6 @@ export default function AIHeadshotsShowcase() {
           ))}
         </div>
       </div>
-
-      {/* Lightbox Modal */}
-      {lightboxImage && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center p-4"
-          onClick={closeLightbox}
-        >
-          <div className="relative max-w-4xl max-h-full">
-            <button
-              onClick={closeLightbox}
-              className="absolute -top-12 right-0 text-white hover:text-gray-300 transition-colors"
-              aria-label="Sluiten"
-            >
-              <X size={32} />
-            </button>
-            <Image
-              src={lightboxImage || "/placeholder.svg"}
-              alt="Vergrote foto"
-              width={800}
-              height={1000}
-              className="max-w-full max-h-[90vh] object-contain rounded-lg"
-              onClick={(e) => e.stopPropagation()}
-            />
-          </div>
-        </div>
-      )}
     </section>
   )
 }
