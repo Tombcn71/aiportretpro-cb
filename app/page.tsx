@@ -111,9 +111,24 @@ export default function HomePage() {
   const [isClient, setIsClient] = useState(false)
   const [selectedImage, setSelectedImage] = useState<string | null>(null)
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null)
+  const [isVisible, setIsVisible] = useState(false)
 
   useEffect(() => {
     setIsClient(true)
+  }, [])
+
+  useEffect(() => {
+    const toggleVisibility = () => {
+      if (window.pageYOffset > 300) {
+        setIsVisible(true)
+      } else {
+        setIsVisible(false)
+      }
+    }
+
+    window.addEventListener("scroll", toggleVisibility)
+
+    return () => window.removeEventListener("scroll", toggleVisibility)
   }, [])
 
   const openLightbox = (imageSrc: string) => {
@@ -129,7 +144,7 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen ">
+    <div className="min-h-screen pt-20">
       <Header />
 
       {/* Hero Section */}
@@ -149,10 +164,10 @@ export default function HomePage() {
         <Button
           asChild
           size="lg"
-          className="bg-orange-500 hover:bg-orange-400 text-white px-6 md:px-8 py-3 md:py-4 text-base md:text-lg mb-8"
+          className=" bg-[#FF8C00] hover:bg-[#FFA500] text-white px-6 md:px-10 py-8 md:py-8 text-base md:text-lg mb-8 md:max-w-sm"
         >
           <Link href="/pricing">
-            Start Jouw Fotoshoot Nu - 29€ <ArrowRight className="ml-2 h-4 md:h-5 w-4 md:w-5" />
+            Start jouw fotoshoot nu - 29€ <ArrowRight className="ml-2 h-6 md:h-7 w-6 md:w-7" />
           </Link>
         </Button>
       </section>
@@ -253,7 +268,7 @@ export default function HomePage() {
           </h2>
           <p className="text-xl text-gray-600 mb-8">Laat zien wie je bent met een krachtige, professionele foto</p>
           <Link href="/pricing">
-            <Button size="lg" className="bg-orange-500 hover:bg-orange-400 text-white px-8 py-4 text-lg">
+            <Button size="lg" className="bg-[#FFA500] hover:bg-[#FF8C00] text-white px-8 py-4 text-lg">
               Start nu voor slechts €29 <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
           </Link>
@@ -378,6 +393,23 @@ export default function HomePage() {
           </div>
         </div>
       </footer>
+
+      {/* Floating CTA Button - Mobile Only */}
+      {isVisible && (
+        <div className="fixed bottom-4 left-4 right-4 z-[2147483647] md:hidden">
+          <div className="bg-white rounded-lg shadow-lg p-2">
+            <Button
+              asChild
+              size="lg"
+              className="w-full bg-[#FF8C00] hover:bg-[#FFA500] text-white px-6 py-8 text-base font-semibold"
+            >
+              <Link href="/pricing" className="flex items-center justify-center">
+                Start jouw fotoshoot nu - 29€ <ArrowRight className="ml-2 h-6 w-6" />
+              </Link>
+            </Button>
+          </div>
+        </div>
+      )}
 
       <style jsx>{`
     @keyframes scroll {

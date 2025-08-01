@@ -67,12 +67,12 @@ export default function PricingPage() {
   ]
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen ">
       <Header />
-      <div className="container mx-auto px-4 py-16">
-        <div className="text-center mb-12">
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">Professionele Zakelijke Portretfotos </h1>
-          <p className="text-xl text-gray-600">Bespaar tijd en geld, supersimpel vanaf laptop of telefoon, geen gedoe</p>
+      <div className="container mx-auto px-4 py-20">
+        <div className="text-center mb-6">
+          <h1 className="text-2xl md:text-4xl font-bold text-gray-900 mb-2">👋 Welkom! Dit is je pakket.</h1>
+          <p className="text-md text-gray-600">Na een snelle en veilige betaling kun je direct aan de slag</p>
         </div>
 
         <div className="max-w-md mx-auto">
@@ -80,11 +80,11 @@ export default function PricingPage() {
             
 
             <CardHeader className="text-center pt-8">
-              <CardTitle className="text-3xl font-bold">Professional</CardTitle>
+              <CardTitle className="text-2xl font-bold">Professional</CardTitle>
               <div className="mt-4">
-                <span className="text-5xl font-bold text-[#0077B5]">€29</span>
+                <span className="text-2xl md:text-4xl font-bold text-[#0077B5]">€29</span>
               </div>
-              <p className="text-gray-600 mt-2">40 professionele portetfotos</p>
+              <p className="text-gray-600 mt-2">40 professionele portretfoto's</p>
             </CardHeader>
 
             <CardContent className="space-y-6">
@@ -102,7 +102,7 @@ export default function PricingPage() {
                 disabled={loading}
                 className="w-full bg-[#0077B5] hover:bg-[#004182] text-white py-4 text-lg font-semibold"
               >
-                {loading ? "Laden..." : "Start nu - €29"}
+                {loading ? "Laden..." : "Betaal Veilig & Start Direct"}
               </Button>
 
               <div className="text-center text-sm text-gray-500">
@@ -113,9 +113,7 @@ export default function PricingPage() {
           </Card>
         </div>
 
-        <div className="text-center mt-12">
-          <p className="text-gray-600">Perfecte portetfotos voor LinkedIn, CV's en professionele profielen</p>
-        </div>
+        
       </div>
     </div>
   )
