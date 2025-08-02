@@ -1,52 +1,56 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
 
-// In-memory storage for wizard sessions (in production, use Redis or database)
+// In-memory storage for wizard sessions - SHARED WITH WEBHOOK
 const wizardSessions = new Map<string, any>()
 
-export async function POST(req: NextRequest) {
-  try {
-    const session = await getServerSession(authOptions)
-
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
-
-    const { projectName, gender, photos } = await req.json()
-
-    // Generate unique session ID
-    const sessionId = `wizard_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-
-    // Store wizard data in memory
-    wizardSessions.set(sessionId, {
-      userEmail: session.user.email,
-      projectName,
-      gender,
-      uploadedPhotos: photos,
-      createdAt: new Date().toISOString(),
-    })
-
-    console.log("✅ Wizard data saved:", {
-      sessionId,
-      userEmail: session.user.email,
-      projectName,
-      gender,
-      photoCount: photos.length,
-    })
-
-    return NextResponse.json({ sessionId })
-  } catch (error) {
-    console.error("Error saving wizard data:", error)
-    return NextResponse.json({ error: "Failed to save wizard data" }, { status: 500 })
-  }
+export function getWizardData(sessionId: string) {
+  const data = wizardSessions.get(sessionId)
+  console.log("📖 Getting wizard data for session:", sessionId, !!data)
+  return data
 }
 
-// Export function to get wizard data (used by webhook)
-export function getWizardData(sessionId: string) {
-  return wizardSessions.get(sessionId)
+export function setWizardData(sessionId: string, data: any) {
+  console.log("💾 Setting wizard data for session:", sessionId, data)
+  wizardSessions.set(sessionId, data)
 }
 
 export function deleteWizardData(sessionId: string) {
+  console.log("🗑️ Deleting wizard data for session:", sessionId)
   wizardSessions.delete(sessionId)
+}
+
+export async function POST(req: NextRequest) {
+  try {
+    const { sessionId, projectName, gender, uploadedPhotos, userEmail } = await req.json()
+
+    console.log("💾 SAVING WIZARD DATA:", {
+      sessionId,
+      projectName,
+      gender,
+      photoCount: uploadedPhotos?.length,
+      userEmail,
+      photos: uploadedPhotos,
+    })
+
+    if (!sessionId || !projectName || !gender || !uploadedPhotos || !userEmail) {
+      console.error("❌ Missing required wizard data")
+      return NextResponse.json({ error: "Missing required data" }, { status: 400 })
+    }
+
+    // Store wizard data in memory for webhook to retrieve
+    setWizardData(sessionId, {
+      projectName,
+      gender,
+      uploadedPhotos, // VERCEL BLOB URLS FROM UPLOAD API
+      userEmail,
+      timestamp: Date.now(),
+    })
+
+    console.log("✅ WIZARD DATA SAVED SUCCESSFULLY - READY FOR WEBHOOK")
+
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    console.error("❌ ERROR SAVING WIZARD DATA:", error)
+    return NextResponse.json({ error: "Failed to save data" }, { status: 500 })
+  }
 }

@@ -1,6 +1,4 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
 import Stripe from "stripe"
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
@@ -9,16 +7,11 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 
 export async function POST(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
-
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
-
     const { priceId, successUrl, cancelUrl, metadata } = await req.json()
 
-    const checkoutSession = await stripe.checkout.sessions.create({
-      mode: "payment",
+    console.log("🛒 Creating checkout session:", { priceId, metadata })
+
+    const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card", "ideal"],
       line_items: [
         {
@@ -26,19 +19,18 @@ export async function POST(req: NextRequest) {
           quantity: 1,
         },
       ],
+      mode: "payment",
       success_url: successUrl,
       cancel_url: cancelUrl,
-      customer_email: session.user.email,
-      metadata: metadata,
-      allow_promotion_codes: true, // ENABLE COUPONS
-      automatic_tax: {
-        enabled: false,
-      },
+      allow_promotion_codes: true,
+      metadata: metadata || {},
     })
 
-    return NextResponse.json({ url: checkoutSession.url })
+    console.log("✅ Checkout session created:", session.id)
+
+    return NextResponse.json({ url: session.url })
   } catch (error) {
-    console.error("Stripe checkout error:", error)
+    console.error("❌ Error creating checkout session:", error)
     return NextResponse.json({ error: "Failed to create checkout session" }, { status: 500 })
   }
 }

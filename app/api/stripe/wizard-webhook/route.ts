@@ -2,21 +2,11 @@ import { type NextRequest, NextResponse } from "next/server"
 import Stripe from "stripe"
 import { headers } from "next/headers"
 import { sql } from "@/lib/db"
+import { getWizardData, deleteWizardData } from "@/app/api/wizard/save-data/route"
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2024-06-20",
 })
-
-// Import wizard data functions
-const wizardSessions = new Map<string, any>()
-
-function getWizardData(sessionId: string) {
-  return wizardSessions.get(sessionId)
-}
-
-function deleteWizardData(sessionId: string) {
-  wizardSessions.delete(sessionId)
-}
 
 export async function POST(req: NextRequest) {
   console.log("🔔 WIZARD WEBHOOK RECEIVED")
@@ -27,6 +17,7 @@ export async function POST(req: NextRequest) {
     const signature = headersList.get("stripe-signature")
 
     if (!signature) {
+      console.error("❌ No signature")
       return NextResponse.json({ error: "No signature" }, { status: 400 })
     }
 
@@ -71,9 +62,17 @@ export async function POST(req: NextRequest) {
           photoCount: wizardData.uploadedPhotos.length,
         })
 
+        // Get customer email from session
+        const customerEmail = session.customer_email || wizardData.userEmail
+
+        if (!customerEmail) {
+          console.error("❌ No customer email")
+          return NextResponse.json({ error: "No customer email" }, { status: 400 })
+        }
+
         // Get or create user in existing users table
         const userResult = await sql`
-          SELECT * FROM users WHERE email = ${session.customer_email}
+          SELECT * FROM users WHERE email = ${customerEmail}
         `
 
         let user = userResult[0]
@@ -81,11 +80,13 @@ export async function POST(req: NextRequest) {
           // Create user if doesn't exist
           const createUserResult = await sql`
             INSERT INTO users (email, name, image, created_at, updated_at)
-            VALUES (${session.customer_email}, '', '', NOW(), NOW())
+            VALUES (${customerEmail}, '', '', NOW(), NOW())
             RETURNING *
           `
           user = createUserResult[0]
         }
+
+        console.log("👤 User:", user.id, user.email)
 
         // Create purchase record in existing purchases table
         const purchaseResult = await sql`
@@ -129,6 +130,8 @@ export async function POST(req: NextRequest) {
         try {
           const { createTuneWithPack } = await import("@/lib/astria")
 
+          console.log("🚀 Starting Astria training...")
+
           const astriaResult = await createTuneWithPack("clx1qvimu0001hf0jdn5xdlr4", {
             title: `${wizardData.projectName} - ${wizardData.gender}`,
             name: `project_${project.id}_${Date.now()}`,
@@ -137,7 +140,7 @@ export async function POST(req: NextRequest) {
             userId: user.id,
           })
 
-          console.log("🚀 Astria training started:", astriaResult.id)
+          console.log("🎯 Astria training started:", astriaResult.id)
 
           // Update project with tune_id
           await sql`
@@ -146,10 +149,12 @@ export async function POST(req: NextRequest) {
             WHERE id = ${project.id}
           `
 
+          console.log("✅ Project updated with tune_id:", astriaResult.id)
+
           // Clean up wizard session from memory
           deleteWizardData(wizardSessionId)
 
-          console.log("✅ Wizard flow completed successfully")
+          console.log("🎉 Wizard flow completed successfully!")
         } catch (astriaError) {
           console.error("❌ Error starting Astria training:", astriaError)
 
