@@ -1,5 +1,7 @@
 "use client"
 
+import type React from "react"
+
 import { useState, useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
@@ -144,6 +146,17 @@ export default function HomePage() {
     setOpenFaqIndex(openFaqIndex === index ? null : index)
   }
 
+  const scrollToPricing = (e: React.MouseEvent) => {
+    e.preventDefault()
+    const pricingSection = document.getElementById("prijzen")
+    if (pricingSection) {
+      pricingSection.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      })
+    }
+  }
+
   return (
     <div className="min-h-screen pt-20">
       <Header />
@@ -163,13 +176,11 @@ export default function HomePage() {
         </p>
 
         <Button
-          asChild
           size="lg"
           className=" bg-[#FF8C00] hover:bg-[#FFA500] text-white px-6 md:px-10 py-8 md:py-8 text-base md:text-lg mb-8 md:max-w-sm"
+          onClick={scrollToPricing}
         >
-          <Link href="/login">
-            Start jouw fotoshoot nu - €19,99 <ArrowRight className="ml-2 h-6 md:h-7 w-6 md:w-7" />
-          </Link>
+          Start jouw fotoshoot nu - €19,99 <ArrowRight className="ml-2 h-6 md:h-7 w-6 md:w-7" />
         </Button>
       </section>
 
@@ -406,13 +417,13 @@ export default function HomePage() {
         <div className="fixed bottom-4 left-4 right-4 z-[2147483647] md:hidden">
           <div className="bg-white rounded-lg shadow-lg p-2">
             <Button
-              asChild
               size="lg"
               className="w-full bg-[#FF8C00] hover:bg-[#FFA500] text-white px-6 py-8 text-base font-semibold"
+              onClick={scrollToPricing}
             >
-              <Link href="/login" className="flex items-center justify-center">
+              <span className="flex items-center justify-center">
                 Start jouw fotoshoot nu - €19,99 <ArrowRight className="ml-2 h-6 w-6" />
-              </Link>
+              </span>
             </Button>
           </div>
         </div>

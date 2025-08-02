@@ -1,64 +1,8 @@
-"use client"
-
-import { useState } from "react"
-import { useSession } from "next-auth/react"
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Check } from "lucide-react"
-import { useRouter } from "next/navigation"
-import { trackInitiateCheckout } from "@/lib/facebook-pixel"
+import { ArrowRight, Check } from "lucide-react"
 
 export default function PricingSection() {
-  const { data: session } = useSession()
-  const [loading, setLoading] = useState(false)
-  const router = useRouter()
-
-  const handlePlanSelect = () => {
-    // Track checkout initiation
-    trackInitiateCheckout(29)
-
-    if (!session) {
-      router.push(`/login?plan=professional`)
-      return
-    }
-    handleCheckout()
-  }
-
-  const handleCheckout = async () => {
-    setLoading(true)
-
-    try {
-      const response = await fetch("/api/stripe/create-checkout", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ planId: "professional" }),
-      })
-
-      const data = await response.json()
-
-      if (data.url) {
-        window.location.href = data.url
-      } else {
-        alert("Er is een fout opgetreden. Probeer het opnieuw.")
-      }
-    } catch (error) {
-      console.error("Error:", error)
-      alert("Er is een fout opgetreden. Probeer het opnieuw.")
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const features = [
-    "Verschillende zakelijke outfits",
-    "Verschillende poses en achtergronden",
-    "HD kwaliteit downloads",
-    "Klaar binnen 15 minuten",
-    "Perfect voor LinkedIn, Social Media, CV, Website en Print",
-  ]
-
   return (
     <section id="prijzen" className="py-16 bg-gradient-to-br from-blue-50 to-white">
       <div className="container mx-auto px-4">
@@ -68,39 +12,67 @@ export default function PricingSection() {
         </div>
 
         <div className="max-w-md mx-auto">
-          <Card className="relative border-2 border-[#0077B5] shadow-xl">
-            <CardHeader className="text-center pt-8">
-              <CardTitle className="text-2xl font-bold">Professional</CardTitle>
-              <div className="mt-4">
-                <span className="text-2xl md:text-4xl font-bold text-[#0077B5]">€19,99</span>
+          <div className="bg-white rounded-2xl shadow-xl border-2 border-[#0077B5] relative overflow-hidden">
+            <div className="p-8">
+              <div className="text-center mb-6">
+                <h3 className="text-2xl font-bold text-gray-900 mb-2">Professional</h3>
+                <div className="flex items-center justify-center mb-4">
+                  <span className="text-5xl font-bold text-[#0077B5]">€19,99</span>
+                </div>
               </div>
-              <p className="text-gray-600 mt-2">40 professionele portretfoto's</p>
-            </CardHeader>
 
-            <CardContent className="space-y-6">
-              <ul className="space-y-4">
-                {features.map((feature, index) => (
-                  <li key={index} className="flex items-center">
-                    <Check className="h-5 w-5 text-green-500 mr-3 flex-shrink-0" />
-                    <span className="text-gray-700">{feature}</span>
-                  </li>
-                ))}
+              <ul className="space-y-4 mb-8">
+                <li className="flex items-center">
+                  <Check className="h-5 w-5 text-green-500 mr-3 flex-shrink-0" />
+                  <span className="text-gray-700">40 professionele portretfoto's</span>
+                </li>
+                <li className="flex items-center">
+                  <Check className="h-5 w-5 text-green-500 mr-3 flex-shrink-0" />
+                  <span className="text-gray-700">Verschillende zakelijke outfits</span>
+                </li>
+                <li className="flex items-center">
+                  <Check className="h-5 w-5 text-green-500 mr-3 flex-shrink-0" />
+                  <span className="text-gray-700">Verschillende poses en achtergronden</span>
+                </li>
+                <li className="flex items-center">
+                  <Check className="h-5 w-5 text-green-500 mr-3 flex-shrink-0" />
+                  <span className="text-gray-700">HD kwaliteit downloads</span>
+                </li>
+                <li className="flex items-center">
+                  <Check className="h-5 w-5 text-green-500 mr-3 flex-shrink-0" />
+                  <span className="text-gray-700">Klaar binnen 15 minuten</span>
+                </li>
+                <li className="flex items-center">
+                  <Check className="h-5 w-5 text-green-500 mr-3 flex-shrink-0" />
+                  <span className="text-gray-700">Perfect voor LinkedIn, Social Media, CV, Website en Print</span>
+                </li>
               </ul>
 
-              <Button
-                onClick={handlePlanSelect}
-                disabled={loading}
-                className="w-full bg-[#0077B5] hover:bg-[#004182] text-white py-4 text-lg font-semibold"
-              >
-                {loading ? "Laden..." : "Betaal Veilig & Start Direct"}
-              </Button>
-
-              <div className="text-center text-sm text-gray-500">
-                <p>✓ Veilige betaling met ideal en credit card</p>
-                <p>✓ Geld terug garantie</p>
+              <div className="mb-6">
+                <h4 className="text-lg font-semibold text-gray-900 mb-3">Betaal Veilig & Start Direct</h4>
+                <div className="space-y-2">
+                  <div className="flex items-center">
+                    <Check className="h-4 w-4 text-green-500 mr-2 flex-shrink-0" />
+                    <span className="text-sm text-gray-600">Veilige betaling met ideal en credit card</span>
+                  </div>
+                  <div className="flex items-center">
+                    <Check className="h-4 w-4 text-green-500 mr-2 flex-shrink-0" />
+                    <span className="text-sm text-gray-600">Geld terug garantie</span>
+                  </div>
+                </div>
               </div>
-            </CardContent>
-          </Card>
+
+              <Button
+                asChild
+                size="lg"
+                className="w-full bg-[#0077B5] hover:bg-[#005885] text-white py-4 text-lg font-semibold"
+              >
+                <Link href="/login">
+                  Start Nu <ArrowRight className="ml-2 h-5 w-5" />
+                </Link>
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
     </section>
