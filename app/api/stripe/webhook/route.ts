@@ -2,23 +2,13 @@ import { type NextRequest, NextResponse } from "next/server"
 import Stripe from "stripe"
 import { headers } from "next/headers"
 import { neon } from "@neondatabase/serverless"
+import { getWizardData, deleteWizardData } from "../../wizard/save-data/route"
 
 const sql = neon(process.env.DATABASE_URL!)
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2024-06-20",
 })
-
-// In-memory storage for wizard sessions
-const wizardSessions = new Map<string, any>()
-
-export function getWizardData(sessionId: string) {
-  return wizardSessions.get(sessionId)
-}
-
-export function deleteWizardData(sessionId: string) {
-  wizardSessions.delete(sessionId)
-}
 
 export async function POST(req: NextRequest) {
   console.log("🔔 STRIPE WEBHOOK RECEIVED")
@@ -54,7 +44,7 @@ export async function POST(req: NextRequest) {
       // Handle wizard flow
       if (session.metadata?.type === "wizard") {
         const wizardSessionId = session.metadata.session_id
-        const customerEmail = session.customer_email // EMAIL VAN STRIPE!
+        const customerEmail = session.customer_email
 
         if (!wizardSessionId) {
           console.error("❌ No wizard session ID in metadata")
@@ -82,7 +72,7 @@ export async function POST(req: NextRequest) {
           photoCount: wizardData.uploadedPhotos.length,
         })
 
-        // Get or create user - EMAIL VAN STRIPE
+        // Get or create user
         const userResult = await sql`
           SELECT * FROM users WHERE email = ${customerEmail}
         `
@@ -140,6 +130,7 @@ export async function POST(req: NextRequest) {
         // 🚀 START ASTRIA TRAINING!
         try {
           console.log("🎯 STARTING ASTRIA TRAINING...")
+          console.log("📸 Using photos:", wizardData.uploadedPhotos)
 
           const ASTRIA_API_URL = process.env.ASTRIA_API_URL || "https://api.astria.ai"
           const ASTRIA_API_KEY = process.env.ASTRIA_API_KEY
@@ -197,7 +188,7 @@ export async function POST(req: NextRequest) {
         }
       }
 
-      // Handle regular pricing flow (UNCHANGED)
+      // Handle regular pricing flow
       else {
         console.log("💳 Processing regular purchase")
         const customerEmail = session.customer_email

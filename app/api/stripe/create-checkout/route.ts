@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
       mode: "payment",
       success_url: successUrl,
       cancel_url: cancelUrl,
-      customer_email: customerEmail, // EMAIL WORDT DOORGEGEVEN!
+      customer_email: customerEmail,
       metadata: metadata,
       allow_promotion_codes: true,
     })

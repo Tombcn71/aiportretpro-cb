@@ -87,7 +87,7 @@ export default function CheckoutPage() {
           priceId: "price_1RrFsbDswbEJWagVsEytA8rs",
           successUrl: `${window.location.origin}/generate/processing`,
           cancelUrl: `${window.location.origin}/wizard/checkout`,
-          customerEmail: session.user.email, // EMAIL WORDT DOORGEGEVEN!
+          customerEmail: session.user.email,
           metadata: {
             type: "wizard",
             session_id: sessionId,
