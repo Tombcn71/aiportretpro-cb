@@ -38,16 +38,16 @@ export default function WizardCheckoutPage() {
     setLoading(true)
 
     try {
-      console.log("🛒 Starting checkout with PRICING_PLAN.priceId:", PRICING_PLAN.priceId)
+      console.log("🛒 Starting checkout with correct price ID")
 
-      // Use existing create-checkout API with wizard metadata
+      // Use the same API as pricing page but with wizard data
       const response = await fetch("/api/stripe/create-checkout", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          priceId: PRICING_PLAN.priceId,
+          priceId: "price_1RrFTnDswbEJWagVnjXYvNwh", // Use the working price ID
           wizardData,
           successUrl: `${window.location.origin}/wizard/welcome?success=true`,
           cancelUrl: `${window.location.origin}/wizard/checkout?canceled=true`,

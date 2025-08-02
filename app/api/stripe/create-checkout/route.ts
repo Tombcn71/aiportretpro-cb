@@ -1,7 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 import Stripe from "stripe"
 import { trackInitiateCheckout } from "@/lib/facebook-pixel"
-import { PRICING_PLAN } from "@/lib/stripe"
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2024-06-20",
@@ -10,18 +9,21 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const { priceId = PRICING_PLAN.priceId, wizardData, successUrl, cancelUrl } = body
+    const { planId, priceId, wizardData, successUrl, cancelUrl } = body
 
-    console.log("🛒 Creating checkout session with price ID:", priceId)
+    // Use the correct price ID from your existing system
+    const finalPriceId = priceId || "price_1RrFTnDswbEJWagVnjXYvNwh"
+
+    console.log("🛒 Creating checkout session with price ID:", finalPriceId)
     console.log("🛒 Wizard data:", wizardData)
 
     // Track Facebook Pixel event
     if (typeof window !== "undefined") {
       trackInitiateCheckout({
-        content_ids: [priceId],
+        content_ids: [finalPriceId],
         content_type: "product",
         currency: "EUR",
-        value: PRICING_PLAN.price,
+        value: 19.99,
       })
     }
 
@@ -29,13 +31,13 @@ export async function POST(req: NextRequest) {
       payment_method_types: ["card", "ideal"],
       line_items: [
         {
-          price: priceId,
+          price: finalPriceId,
           quantity: 1,
         },
       ],
       mode: "payment",
-      success_url: successUrl || `${process.env.NEXTAUTH_URL}/wizard/welcome?success=true`,
-      cancel_url: cancelUrl || `${process.env.NEXTAUTH_URL}/wizard/checkout?canceled=true`,
+      success_url: successUrl || `${process.env.NEXTAUTH_URL}/dashboard`,
+      cancel_url: cancelUrl || `${process.env.NEXTAUTH_URL}/pricing`,
       metadata: wizardData
         ? {
             flow: "wizard",
