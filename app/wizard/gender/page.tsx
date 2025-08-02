@@ -3,9 +3,9 @@
 import { useState, useEffect } from "react"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { User, Users, ArrowLeft, ArrowRight } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { ArrowRight, ArrowLeft, User } from "lucide-react"
 import { ProgressBar } from "@/components/ui/progress-bar"
 
 export default function GenderPage() {
@@ -14,44 +14,53 @@ export default function GenderPage() {
   const [selectedGender, setSelectedGender] = useState("")
   const [loading, setLoading] = useState(false)
 
+  const genderOptions = [
+    { id: "man", label: "Man", icon: User },
+    { id: "woman", label: "Vrouw", icon: User },
+    { id: "unisex", label: "Unisex", icon: User },
+  ]
+
   useEffect(() => {
+    console.log("🔍 Gender page - Session status:", status)
+
     if (status === "loading") return
+
     if (!session) {
+      console.log("❌ No session, redirecting to welcome")
       router.push("/wizard/welcome")
       return
     }
 
-    // Check if previous step is completed
+    // Check if project name exists
     const projectName = localStorage.getItem("wizard_project_name")
     if (!projectName) {
+      console.log("❌ No project name, redirecting to project-name")
       router.push("/wizard/project-name")
       return
     }
+
+    console.log("✅ Session and project name found, staying on gender page")
 
     // Load existing gender if available
     const savedGender = localStorage.getItem("wizard_gender")
     if (savedGender) {
       setSelectedGender(savedGender)
+      console.log("📝 Loaded saved gender:", savedGender)
     }
   }, [session, status, router])
 
-  const handleContinue = () => {
+  const handleNext = () => {
     if (!selectedGender) return
 
     setLoading(true)
 
-    // Save gender with consistent key
+    // Save to localStorage
     localStorage.setItem("wizard_gender", selectedGender)
+    console.log("💾 Saved gender:", selectedGender)
 
     // Navigate to upload
     router.push("/wizard/upload")
   }
-
-  const genderOptions = [
-    { id: "man", label: "Man", icon: User },
-    { id: "woman", label: "Vrouw", icon: User },
-    { id: "unisex", label: "Unisex", icon: Users },
-  ]
 
   if (status === "loading") {
     return (
@@ -68,39 +77,34 @@ export default function GenderPage() {
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="container mx-auto px-4 max-w-2xl">
+        {/* Progress Bar */}
         <div className="mb-8">
           <ProgressBar currentStep={2} totalSteps={4} />
         </div>
 
-        <Card className="w-full">
+        <Card>
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl">Type fotoshoot?</CardTitle>
-            <p className="text-gray-600">
-              Dit helpt ons de perfecte professionele portetfotos te genereren met de juiste portretfotos
-            </p>
+            <CardTitle className="text-2xl">Kies je geslacht</CardTitle>
+            <p className="text-gray-600">Dit helpt ons om de beste headshots voor je te genereren</p>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {genderOptions.map((option) => {
-                const IconComponent = option.icon
-                return (
-                  <button
-                    key={option.id}
-                    onClick={() => setSelectedGender(option.id)}
-                    className={`p-6 rounded-lg border-2 transition-all text-center ${
-                      selectedGender === option.id
-                        ? "border-[#0077B5] bg-blue-50"
-                        : "border-gray-200 hover:border-gray-300"
-                    }`}
-                  >
-                    <IconComponent className="h-8 w-8 text-gray-600 mx-auto mb-2" />
-                    <div className="font-medium">{option.label}</div>
-                    {selectedGender === option.id && (
-                      <div className="w-4 h-4 bg-[#0077B5] rounded-full mx-auto mt-2"></div>
-                    )}
-                  </button>
-                )
-              })}
+              {genderOptions.map((option) => (
+                <button
+                  key={option.id}
+                  onClick={() => setSelectedGender(option.id)}
+                  className={`p-6 rounded-lg border-2 transition-all duration-200 ${
+                    selectedGender === option.id
+                      ? "border-[#0077B5] bg-blue-50 text-[#0077B5]"
+                      : "border-gray-200 hover:border-gray-300 text-gray-700"
+                  }`}
+                >
+                  <div className="flex flex-col items-center space-y-3">
+                    <option.icon className="h-12 w-12" />
+                    <span className="text-lg font-medium">{option.label}</span>
+                  </div>
+                </button>
+              ))}
             </div>
 
             <div className="flex justify-between">
@@ -110,7 +114,7 @@ export default function GenderPage() {
               </Button>
 
               <Button
-                onClick={handleContinue}
+                onClick={handleNext}
                 disabled={!selectedGender || loading}
                 className="bg-[#0077B5] hover:bg-[#004182] text-white"
               >

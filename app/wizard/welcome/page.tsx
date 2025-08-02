@@ -32,6 +32,7 @@ export default function WizardWelcomePage() {
 
     // Als ingelogd en geen success, ga naar project-name
     if (session && !success) {
+      console.log("✅ User logged in, redirecting to project-name")
       router.push("/wizard/project-name")
     }
   }, [session, status, success, router])
@@ -39,12 +40,12 @@ export default function WizardWelcomePage() {
   const handleGoogleSignIn = async () => {
     setLoading(true)
     try {
+      console.log("🔐 Starting Google sign in...")
       await signIn("google", {
         callbackUrl: "/wizard/project-name",
       })
     } catch (error) {
       console.error("Sign in error:", error)
-    } finally {
       setLoading(false)
     }
   }
