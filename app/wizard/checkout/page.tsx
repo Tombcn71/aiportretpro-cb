@@ -22,7 +22,6 @@ export default function CheckoutPage() {
   const [error, setError] = useState("")
 
   useEffect(() => {
-    // Load wizard data from localStorage
     const projectName = localStorage.getItem("wizard_project_name")
     const gender = localStorage.getItem("wizard_gender")
     const uploadedPhotos = localStorage.getItem("wizard_uploaded_photos")
@@ -56,11 +55,9 @@ export default function CheckoutPage() {
     setError("")
 
     try {
-      // Generate unique session ID
       const sessionId = `wizard_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
       console.log("💾 Saving wizard data with session ID:", sessionId)
 
-      // Save wizard data to server
       const saveResponse = await fetch("/api/wizard/save-data", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -79,7 +76,6 @@ export default function CheckoutPage() {
 
       console.log("✅ Wizard data saved, creating checkout session")
 
-      // Create Stripe checkout session
       const checkoutResponse = await fetch("/api/stripe/create-checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
