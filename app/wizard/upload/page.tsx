@@ -1,148 +1,113 @@
 "use client"
 
 import type React from "react"
-
-import { useState, useEffect, useCallback } from "react"
-import { useSession } from "next-auth/react"
+import { useState, useCallback, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { ArrowLeft, ArrowRight, Upload, X, Check } from "lucide-react"
+import { Upload, X, Camera } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
 import { ProgressBar } from "@/components/ui/progress-bar"
 import Image from "next/image"
 
+interface WizardData {
+  projectName: string
+  gender: string
+}
+
 export default function UploadPage() {
-  const { data: session, status } = useSession()
-  const router = useRouter()
-  const [uploadedPhotos, setUploadedPhotos] = useState<string[]>([])
+  const [uploadedPhotos, setUploadedPhotos] = useState<File[]>([])
   const [uploading, setUploading] = useState(false)
+  const [wizardData, setWizardData] = useState<WizardData | null>(null)
+  const router = useRouter()
 
   useEffect(() => {
-    if (status === "loading") return
-
-    if (!session) {
-      console.log("❌ No session, redirecting to welcome")
-      router.push("/wizard/welcome")
-      return
-    }
-
-    // Check if previous steps are completed
-    const projectName = localStorage.getItem("wizard_project_name")
-    const gender = localStorage.getItem("wizard_gender")
-
-    if (!projectName) {
-      console.log("❌ No project name, redirecting to project-name")
+    // Get wizard data from localStorage
+    const data = JSON.parse(localStorage.getItem("wizardData") || "{}")
+    if (!data.projectName || !data.gender) {
       router.push("/wizard/project-name")
       return
     }
+    setWizardData(data)
+  }, [router])
 
-    if (!gender) {
-      console.log("❌ No gender, redirecting to gender")
-      router.push("/wizard/gender")
-      return
-    }
-
-    // Load existing photos if available
-    const savedPhotos = localStorage.getItem("wizard_uploaded_photos")
-    if (savedPhotos) {
-      try {
-        const photos = JSON.parse(savedPhotos)
-        setUploadedPhotos(photos)
-        console.log("✅ Loaded existing photos:", photos.length)
-      } catch (error) {
-        console.error("Error parsing saved photos:", error)
-      }
-    }
-  }, [session, status, router])
-
-  const handleFileUpload = useCallback(
-    async (files: FileList) => {
-      if (files.length === 0) return
-
-      setUploading(true)
-
-      try {
-        const newPhotos: string[] = []
-
-        for (let i = 0; i < files.length; i++) {
-          const file = files[i]
-
-          // Check file type
-          if (!file.type.startsWith("image/")) {
-            console.error("Invalid file type:", file.type)
-            continue
-          }
-
-          // Check file size (max 10MB)
-          if (file.size > 10 * 1024 * 1024) {
-            console.error("File too large:", file.size)
-            continue
-          }
-
-          const formData = new FormData()
-          formData.append("file", file)
-
-          const response = await fetch("/api/upload", {
-            method: "POST",
-            body: formData,
-          })
-
-          if (response.ok) {
-            const data = await response.json()
-            newPhotos.push(data.url)
-            console.log("✅ Photo uploaded:", data.url)
-          } else {
-            console.error("Upload failed for file:", file.name)
-          }
-        }
-
-        if (newPhotos.length > 0) {
-          const updatedPhotos = [...uploadedPhotos, ...newPhotos]
-          setUploadedPhotos(updatedPhotos)
-          localStorage.setItem("wizard_uploaded_photos", JSON.stringify(updatedPhotos))
-          console.log("✅ All photos saved to localStorage:", updatedPhotos.length)
-        }
-      } catch (error) {
-        console.error("Upload error:", error)
-      } finally {
-        setUploading(false)
-      }
-    },
-    [uploadedPhotos],
-  )
+  const handleFileSelect = useCallback((files: FileList | null) => {
+    if (!files) return
+    const newFiles = Array.from(files).filter(
+      (file) => file.type.startsWith("image/") && file.size <= 120 * 1024 * 1024,
+    )
+    setUploadedPhotos((prev) => [...prev, ...newFiles].slice(0, 10))
+  }, [])
 
   const handleDrop = useCallback(
     (e: React.DragEvent) => {
       e.preventDefault()
-      const files = e.dataTransfer.files
-      handleFileUpload(files)
+      handleFileSelect(e.dataTransfer.files)
     },
-    [handleFileUpload],
+    [handleFileSelect],
   )
 
-  const handleFileInput = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      if (e.target.files) {
-        handleFileUpload(e.target.files)
-      }
-    },
-    [handleFileUpload],
-  )
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+  }, [])
 
   const removePhoto = (index: number) => {
-    const updatedPhotos = uploadedPhotos.filter((_, i) => i !== index)
-    setUploadedPhotos(updatedPhotos)
-    localStorage.setItem("wizard_uploaded_photos", JSON.stringify(updatedPhotos))
-    console.log("✅ Photo removed, remaining:", updatedPhotos.length)
+    setUploadedPhotos((prev) => prev.filter((_, i) => i !== index))
   }
 
-  const handleNext = () => {
-    if (uploadedPhotos.length >= 6) {
-      router.push("/wizard/checkout")
+  const handleContinue = async () => {
+    if (uploadedPhotos.length < 4 || !wizardData) return
+    setUploading(true)
+
+    try {
+      // Upload photos to Vercel Blob
+      const uploadPromises = uploadedPhotos.map(async (photo) => {
+        const formData = new FormData()
+        formData.append("file", photo)
+
+        const response = await fetch("/api/upload", {
+          method: "POST",
+          body: formData,
+        })
+
+        const result = await response.json()
+        return result.url
+      })
+
+      const uploadedUrls = await Promise.all(uploadPromises)
+
+      // Create project with default pack 928 (portetfotos m/v)
+      const response = await fetch("/api/projects/create-with-pack", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          projectName: wizardData.projectName,
+          gender: wizardData.gender,
+          selectedPackId: "928", // Portetfotos m/v pack
+          uploadedPhotos: uploadedUrls,
+        }),
+      })
+
+      const result = await response.json()
+
+      if (result.projectId) {
+        // Clear wizard data
+        localStorage.removeItem("wizardData")
+        router.push(`/generate/${result.projectId}`)
+      } else {
+        throw new Error(result.error || "Failed to create project")
+      }
+    } catch (error) {
+      console.error("Error:", error)
+      alert("Er is een fout opgetreden. Probeer het opnieuw.")
+    } finally {
+      setUploading(false)
     }
   }
 
-  if (status === "loading") {
+  if (!wizardData) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0077B5]"></div>
@@ -150,114 +115,113 @@ export default function UploadPage() {
     )
   }
 
-  if (!session) {
-    return null
-  }
-
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="container mx-auto px-4 max-w-4xl">
-        {/* Progress Bar */}
+    <div className="min-h-screen bg-gray-50 p-4">
+      <div className="max-w-4xl mx-auto">
         <div className="mb-8">
-          <ProgressBar currentStep={3} totalSteps={4} />
+          <ProgressBar currentStep={3} totalSteps={3} />
         </div>
 
-        <Card>
+        <Card className="mb-8">
           <CardHeader className="text-center">
+            
+
             <CardTitle className="text-2xl">Upload je foto's</CardTitle>
-            <p className="text-gray-600">Upload minimaal 6 foto's van jezelf. Meer foto's = betere resultaten!</p>
+            <p className="text-gray-600">Upload minimaal 6 foto's van hoge kwaliteit voor het beste resultaat</p>
           </CardHeader>
-          <CardContent className="space-y-6">
-            {/* Upload Area */}
+        </Card>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="space-y-6">
+            <div className="flex items-center space-x-4">
+              <Camera className="h-8 w-8 text-[#0077B5]" />
+              <div>
+                <h3 className="text-lg font-semibold">Foto Richtlijnen</h3>
+                <p className="text-gray-600 text-sm">
+                 Foto's met verschillende achtergronden met verschillende kleding. Gezicht naar de camera, vanaf je schouders of je middel. geen hoeden of zonnebrillen.
+                </p>
+              </div>
+            </div>
+
             <div
               onDrop={handleDrop}
-              onDragOver={(e) => e.preventDefault()}
-              className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-[#0077B5] transition-colors"
+              onDragOver={handleDragOver}
+              className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-gray-400 transition-colors relative"
             >
-              <Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-              <p className="text-lg font-medium text-gray-700 mb-2">Sleep foto's hierheen of klik om te uploaden</p>
-              <p className="text-sm text-gray-500 mb-4">JPG, PNG of WEBP - Max 10MB per foto</p>
+              <Upload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <Button className="bg-[#0077B5] hover:bg-[#004182] text-white mb-4">
+                <Upload className="h-4 w-4 mr-2" />
+                Selecteer Foto's
+              </Button>
+              <p className="text-gray-600">
+                of <span className="text-[#0077B5] font-medium">sleep en zet neer</span> je foto's hier
+              </p>
+              <p className="text-sm text-gray-500 mt-2">PNG, JPG, HEIC, WEBP tot 120MB</p>
               <input
                 type="file"
                 multiple
                 accept="image/*"
-                onChange={handleFileInput}
-                className="hidden"
-                id="file-upload"
+                onChange={(e) => handleFileSelect(e.target.files)}
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
               />
-              <Button
-                onClick={() => document.getElementById("file-upload")?.click()}
-                disabled={uploading}
-                className="bg-[#0077B5] hover:bg-[#004182] text-white"
-              >
-                {uploading ? "Uploaden..." : "Selecteer foto's"}
-              </Button>
+            </div>
+          </div>
+
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold">Geüploade Foto's</h3>
+              <div className="flex items-center space-x-2">
+                <div
+                  className={`w-3 h-3 rounded-full ${uploadedPhotos.length >= 4 ? "bg-green-500" : "bg-gray-300"}`}
+                ></div>
+                <span className="text-sm font-medium">{uploadedPhotos.length} van 10</span>
+              </div>
             </div>
 
-            {/* Photo Grid */}
-            {uploadedPhotos.length > 0 && (
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-medium">Geüploade foto's ({uploadedPhotos.length})</h3>
-                  {uploadedPhotos.length >= 6 && (
-                    <div className="flex items-center text-green-600">
-                      <Check className="h-5 w-5 mr-1" />
-                      <span className="text-sm font-medium">Klaar om door te gaan!</span>
-                    </div>
-                  )}
-                </div>
-
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                  {uploadedPhotos.map((photo, index) => (
-                    <div key={index} className="relative group">
-                      <div className="aspect-square rounded-lg overflow-hidden bg-gray-100">
-                        <Image
-                          src={photo || "/placeholder.svg"}
-                          alt={`Upload ${index + 1}`}
-                          width={200}
-                          height={200}
-                          className="w-full h-full object-cover"
-                        />
+            <Card>
+              <CardContent className="p-4">
+                {uploadedPhotos.length === 0 ? (
+                  <div className="text-center py-8 text-gray-500">Nog geen foto's geüpload</div>
+                ) : (
+                  <div className="grid grid-cols-2 gap-4">
+                    {uploadedPhotos.map((photo, index) => (
+                      <div key={index} className="relative group">
+                        <div className="aspect-square rounded-lg overflow-hidden bg-gray-100">
+                          <Image
+                            src={URL.createObjectURL(photo) || "/placeholder.svg"}
+                            alt={`Upload ${index + 1}`}
+                            fill
+                            className="object-cover"
+                          />
+                        </div>
+                        <button
+                          onClick={() => removePhoto(index)}
+                          className="absolute top-2 right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
                       </div>
-                      <button
-                        onClick={() => removePhoto(index)}
-                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        <X className="h-4 w-4" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
 
-            {/* Progress indicator */}
-            {uploadedPhotos.length > 0 && uploadedPhotos.length < 6 && (
-              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                <p className="text-yellow-800 text-sm">
-                  Je hebt nog {6 - uploadedPhotos.length} foto's nodig om door te kunnen gaan. Meer foto's geven betere
-                  resultaten!
-                </p>
-              </div>
-            )}
-
-            <div className="flex justify-between">
-              <Button variant="ghost" onClick={() => router.push("/wizard/gender")} className="text-gray-600">
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Terug
+            <div className="space-y-4">
+              <Button
+                onClick={handleContinue}
+                disabled={uploadedPhotos.length < 4 || uploading}
+                className="w-full bg-[#0077B5] hover:bg-[#004182] text-white"
+              >
+                {uploading ? "Portetfotos worden gemaakt..." : "Genereer 40 Professionele Portetfotos"}
               </Button>
 
-              <Button
-                onClick={handleNext}
-                disabled={uploadedPhotos.length < 6}
-                className="bg-[#0077B5] hover:bg-[#004182] text-white"
-              >
-                Naar betaling
-                <ArrowRight className="ml-2 h-4 w-4" />
+              <Button variant="ghost" onClick={() => router.back()} className="w-full" disabled={uploading}>
+                ← Terug
               </Button>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
     </div>
   )

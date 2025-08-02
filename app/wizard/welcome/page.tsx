@@ -1,120 +1,86 @@
 "use client"
 
-import { useEffect } from "react"
-import { useSession, signIn } from "next-auth/react"
-import { useRouter } from "next/navigation"
+import { useState } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Chrome } from "lucide-react"
+import { Card, CardContent } from "@/components/ui/card"
+import { ArrowRight, CheckCircle } from "lucide-react"
 import Image from "next/image"
 
-export default function WizardWelcomePage() {
-  const { data: session, status } = useSession()
+export default function WelcomePage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const [isLoading, setIsLoading] = useState(false)
 
-  useEffect(() => {
-    // Clear any existing wizard data when starting fresh
-    localStorage.removeItem("wizard_project_name")
-    localStorage.removeItem("wizard_gender")
-    localStorage.removeItem("wizard_uploaded_photos")
-
-    if (session) {
-      console.log("✅ User already logged in, redirecting to project name")
-      router.push("/wizard/project-name")
-    }
-  }, [session, router])
-
-  const handleGoogleSignIn = () => {
-    signIn("google", {
-      callbackUrl: "/wizard/project-name",
-    })
+  const handleContinue = () => {
+    setIsLoading(true)
+    router.push("/wizard/project-name")
   }
 
-  if (status === "loading") {
-    return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-      </div>
-    )
-  }
+  // Headshot images for collage - reduced to 6 photos
+  const headshotImages = [
+    "/images/man1.jpg",
+    "/images/woman1.jpg",
+    "/images/man2.jpg",
+    "/images/woman2.jpg",
+    "/images/man3.jpg",
+    "/images/woman3.jpg",
+  ]
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="container mx-auto px-6 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-          {/* Left side - Content */}
-          <div className="space-y-8">
-            <div className="flex items-center space-x-3">
-              <Image src="/images/logo-icon.png" alt="Aragon AI" width={40} height={40} />
-              <span className="text-2xl font-bold">Aragon AI</span>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white flex items-center justify-center p-4">
+      <div className="w-full max-w-2xl">
+        
+
+        <Card className="border-[#0077B5]/20 shadow-xl">
+          <CardContent className="p-6 md:p-8 text-center">
+            {/* Success Icon */}
+            <div className="flex justify-center mb-4">
+              <CheckCircle className="h-12 w-12 text-green-500" />
             </div>
 
-            <div className="space-y-6">
-              <h1 className="text-5xl font-bold text-gray-900 leading-tight">
-                Professionele headshots in <span className="text-orange-500">15 minuten</span>
-              </h1>
+            {/* Welcome Text */}
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3">Welkom!</h1>
 
-              <p className="text-xl text-gray-600">
-                Upload je foto's, betaal €19,99 en ontvang 40 professionele headshots. Perfect voor LinkedIn, CV en
-                zakelijke doeleinden.
-              </p>
+            <p className="text-base text-gray-600 mb-6 max-w-xl mx-auto">
+              Je betaling is succesvol verwerkt. Laten we beginnen met het maken van je professionele headshots!
+            </p>
 
-              <div className="space-y-4">
-                <div className="flex items-center space-x-3">
-                  <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
-                    <span className="text-white text-sm">✓</span>
+            {/* Headshot Collage - 2x3 grid with 6 photos */}
+            <div className="mb-6">
+              
+
+              <div className="grid grid-cols-3 gap-2 md:gap-3 max-w-md mx-auto">
+                {headshotImages.map((image, index) => (
+                  <div
+                    key={index}
+                    className="relative aspect-square rounded-md overflow-hidden shadow-sm border border-[#0077B5]/20 hover:border-[#0077B5]/40 transition-colors"
+                  >
+                    <Image
+                      src={image || "/placeholder.svg"}
+                      alt={`Professional headshot example ${index + 1}`}
+                      fill
+                      className="object-cover"
+                    />
                   </div>
-                  <span className="text-gray-700">40 professionele headshots</span>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
-                    <span className="text-white text-sm">✓</span>
-                  </div>
-                  <span className="text-gray-700">Klaar binnen 15 minuten</span>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
-                    <span className="text-white text-sm">✓</span>
-                  </div>
-                  <span className="text-gray-700">HD kwaliteit downloads</span>
-                </div>
+                ))}
               </div>
             </div>
-          </div>
 
-          {/* Right side - Login Card */}
-          <div className="flex justify-center">
-            <Card className="w-full max-w-md">
-              <CardHeader className="text-center">
-                <CardTitle className="text-2xl">Welkom bij Aragon AI</CardTitle>
-                <p className="text-gray-600">Log in om je professionele headshots te maken</p>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <Button
-                  onClick={handleGoogleSignIn}
-                  className="w-full bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 py-3"
-                  disabled={status === "loading"}
-                >
-                  <Chrome className="mr-2 h-5 w-5" />
-                  Inloggen met Google
-                </Button>
+            
 
-                <div className="text-center text-sm text-gray-500">
-                  <p>Door in te loggen ga je akkoord met onze</p>
-                  <div className="space-x-2">
-                    <a href="/terms" className="text-blue-600 hover:underline">
-                      Algemene Voorwaarden
-                    </a>
-                    <span>en</span>
-                    <a href="/privacy" className="text-blue-600 hover:underline">
-                      Privacybeleid
-                    </a>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
+            {/* Continue Button */}
+            <Button
+              onClick={handleContinue}
+              disabled={isLoading}
+              size="lg"
+              className="bg-[#0077B5] hover:bg-[#004182] text-white px-6 py-3 text-base font-semibold"
+            >
+              {isLoading ? "Laden..." : "Laten we beginnen"}
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     </div>
   )

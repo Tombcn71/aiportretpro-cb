@@ -16,12 +16,12 @@ export default function PricingPage() {
 
   // Track pricing page view
   useEffect(() => {
-    trackViewContent("Pricing Page", 29)
+    trackViewContent("Pricing Page", 19,99)
   }, [])
 
   const handlePlanSelect = () => {
     // Track checkout initiation
-    trackInitiateCheckout(29)
+    trackInitiateCheckout(19,99)
 
     if (!session) {
       router.push(`/login?plan=professional`)

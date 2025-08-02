@@ -32,198 +32,81 @@ export async function POST(request: NextRequest) {
       const session = event.data.object
       console.log("💳 Processing checkout session:", session.id)
 
-      // Check if this is wizard flow
-      const isWizardFlow = session.metadata?.flow === "wizard"
+      // Find and update the purchase
+      const purchaseResult = await sql`
+        UPDATE purchases 
+        SET status = 'completed', updated_at = CURRENT_TIMESTAMP
+        WHERE stripe_session_id = ${session.id}
+        RETURNING user_id, id
+      `
 
-      if (isWizardFlow) {
-        console.log("🧙‍♂️ Processing wizard flow")
+      if (purchaseResult[0]) {
+        const userId = purchaseResult[0].user_id
+        console.log(`👤 Adding credit for user ${userId}`)
 
-        // Get wizard data from metadata
-        const wizardDataString = session.metadata?.wizardData
-        if (!wizardDataString) {
-          console.error("❌ No wizard data in metadata")
-          return NextResponse.json({ error: "No wizard data" }, { status: 400 })
-        }
-
-        let wizardData
+        // Add 1 credit - using INSERT with proper conflict handling
         try {
-          wizardData = JSON.parse(wizardDataString)
-        } catch (err) {
-          console.error("❌ Failed to parse wizard data:", err)
-          return NextResponse.json({ error: "Invalid wizard data" }, { status: 400 })
-        }
-
-        // Get user by email
-        const userResult = await sql`
-          SELECT * FROM users WHERE email = ${session.customer_email}
-        `
-
-        let userId
-        if (userResult[0]) {
-          userId = userResult[0].id
-        } else {
-          // Create user if doesn't exist
-          const newUser = await sql`
-            INSERT INTO users (email, name, image, created_at, updated_at)
-            VALUES (${session.customer_email}, ${session.customer_details?.name || "User"}, '', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-            RETURNING id
-          `
-          userId = newUser[0].id
-        }
-
-        console.log("👤 User ID:", userId)
-
-        // Create project with wizard data
-        const projectResult = await sql`
-          INSERT INTO projects (
-            user_id, 
-            name, 
-            gender, 
-            outfits, 
-            backgrounds, 
-            uploaded_photos, 
-            status, 
-            credits_used,
-            created_at,
-            updated_at
-          )
-          VALUES (
-            ${userId}, 
-            ${wizardData.projectName}, 
-            ${wizardData.gender}, 
-            ${JSON.stringify([])}, 
-            ${JSON.stringify([])}, 
-            ${JSON.stringify(wizardData.uploadedPhotos)}, 
-            'training', 
-            0,
-            CURRENT_TIMESTAMP,
-            CURRENT_TIMESTAMP
-          )
-          RETURNING id
-        `
-
-        const projectId = projectResult[0].id
-        console.log("📁 Project created:", projectId)
-
-        // Start Astria training using existing pack system
-        try {
-          const { trainWithPack } = await import("@/lib/astria-packs")
-
-          const packId = "clx1qf18h0001mf088cjmehkz" // Use existing pack ID
-
-          const astriaResult = await trainWithPack({
-            packId: packId,
-            images: wizardData.uploadedPhotos,
-            projectName: wizardData.projectName,
-            gender: wizardData.gender,
-            projectId: projectId,
-          })
-
-          console.log("🚀 Astria training started:", astriaResult.id)
-
-          // Update project with tune_id
-          await sql`
-            UPDATE projects 
-            SET tune_id = ${astriaResult.id.toString()}, updated_at = CURRENT_TIMESTAMP
-            WHERE id = ${projectId}
+          const creditResult = await sql`
+            INSERT INTO credits (user_id, credits, created_at, updated_at)
+            VALUES (${userId}, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+            ON CONFLICT (user_id) 
+            DO UPDATE SET 
+              credits = credits.credits + 1,
+              updated_at = CURRENT_TIMESTAMP
+            RETURNING credits
           `
 
-          console.log("✅ Wizard project created and training started")
+          console.log(`✅ User ${userId} now has ${creditResult[0]?.credits} credits`)
 
           return NextResponse.json({
             received: true,
-            projectId,
-            tuneId: astriaResult.id,
-            message: "Wizard project created and training started",
+            userId,
+            creditsAdded: 1,
+            totalCredits: creditResult[0]?.credits,
           })
-        } catch (error) {
-          console.error("❌ Error starting training:", error)
+        } catch (creditError) {
+          console.error("❌ Credit error:", creditError)
 
-          // Update project status to failed
-          await sql`
-            UPDATE projects 
-            SET status = 'failed', updated_at = CURRENT_TIMESTAMP
-            WHERE id = ${projectId}
+          // Fallback: try to update existing or create new
+          const existingCredit = await sql`
+            SELECT credits FROM credits WHERE user_id = ${userId}
           `
 
-          return NextResponse.json({ error: "Training failed to start" }, { status: 500 })
-        }
-      } else {
-        console.log("💳 Processing regular credit flow")
-
-        // Original credit-based flow (unchanged)
-        const purchaseResult = await sql`
-          UPDATE purchases 
-          SET status = 'completed', updated_at = CURRENT_TIMESTAMP
-          WHERE stripe_session_id = ${session.id}
-          RETURNING user_id, id
-        `
-
-        if (purchaseResult[0]) {
-          const userId = purchaseResult[0].user_id
-          console.log(`👤 Adding credit for user ${userId}`)
-
-          try {
-            const creditResult = await sql`
-              INSERT INTO credits (user_id, credits, created_at, updated_at)
-              VALUES (${userId}, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-              ON CONFLICT (user_id) 
-              DO UPDATE SET 
-                credits = credits.credits + 1,
-                updated_at = CURRENT_TIMESTAMP
+          if (existingCredit[0]) {
+            // Update existing
+            const updateResult = await sql`
+              UPDATE credits 
+              SET credits = credits + 1, updated_at = CURRENT_TIMESTAMP
+              WHERE user_id = ${userId}
               RETURNING credits
             `
-
-            console.log(`✅ User ${userId} now has ${creditResult[0]?.credits} credits`)
+            console.log(`✅ Updated credits for user ${userId}: ${updateResult[0]?.credits}`)
 
             return NextResponse.json({
               received: true,
               userId,
               creditsAdded: 1,
-              totalCredits: creditResult[0]?.credits,
+              totalCredits: updateResult[0]?.credits,
             })
-          } catch (creditError) {
-            console.error("❌ Credit error:", creditError)
-
-            // Fallback: try to update existing or create new
-            const existingCredit = await sql`
-              SELECT credits FROM credits WHERE user_id = ${userId}
+          } else {
+            // Create new
+            const newCredit = await sql`
+              INSERT INTO credits (user_id, credits, created_at, updated_at)
+              VALUES (${userId}, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+              RETURNING credits
             `
+            console.log(`✅ Created new credits for user ${userId}: ${newCredit[0]?.credits}`)
 
-            if (existingCredit[0]) {
-              const updateResult = await sql`
-                UPDATE credits 
-                SET credits = credits + 1, updated_at = CURRENT_TIMESTAMP
-                WHERE user_id = ${userId}
-                RETURNING credits
-              `
-              console.log(`✅ Updated credits for user ${userId}: ${updateResult[0]?.credits}`)
-
-              return NextResponse.json({
-                received: true,
-                userId,
-                creditsAdded: 1,
-                totalCredits: updateResult[0]?.credits,
-              })
-            } else {
-              const newCredit = await sql`
-                INSERT INTO credits (user_id, credits, created_at, updated_at)
-                VALUES (${userId}, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-                RETURNING credits
-              `
-              console.log(`✅ Created new credits for user ${userId}: ${newCredit[0]?.credits}`)
-
-              return NextResponse.json({
-                received: true,
-                userId,
-                creditsAdded: 1,
-                totalCredits: newCredit[0]?.credits,
-              })
-            }
+            return NextResponse.json({
+              received: true,
+              userId,
+              creditsAdded: 1,
+              totalCredits: newCredit[0]?.credits,
+            })
           }
-        } else {
-          console.log("❌ No purchase found for session:", session.id)
         }
+      } else {
+        console.log("❌ No purchase found for session:", session.id)
       }
     }
 

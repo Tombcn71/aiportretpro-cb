@@ -35,7 +35,7 @@ const profiles = [
   },
 ]
 
-export function AIHeadshotsShowcase() {
+export default function AIHeadshotsShowcase() {
   const [lightboxImage, setLightboxImage] = useState<string | null>(null)
 
   const openLightbox = (imageSrc: string) => {
@@ -61,6 +61,7 @@ export function AIHeadshotsShowcase() {
         <div className="lg:grid-cols-2 gap-20 max-w-6xl mx-auto grid">
           {profiles.map((profile, profileIndex) => (
             <div key={profileIndex} className="space-y-2">
+              {/* Small photos row */}
               <div className="flex justify-center">
                 <div className="grid grid-cols-4 gap-3">
                   {profile.beforeImages.map((image, index) => (
@@ -77,6 +78,7 @@ export function AIHeadshotsShowcase() {
                 </div>
               </div>
 
+              {/*  Curved Arrow */}
               <div className="flex justify-center pb-4">
                 <Image
                   src="/images/curved-arrow.png"
@@ -87,6 +89,7 @@ export function AIHeadshotsShowcase() {
                 />
               </div>
 
+              {/* Large professional photos */}
               <div className="grid grid-cols-2 gap-6">
                 {profile.afterImages.map((image, index) => (
                   <div key={index} className="relative group cursor-pointer" onClick={() => openLightbox(image)}>
@@ -99,6 +102,9 @@ export function AIHeadshotsShowcase() {
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       />
                     </div>
+                    {/* AI Generated badge */}
+                    
+                    {/* Hover overlay for large photos */}
                     <div className="absolute inset-0 bg-black bg-opacity-50 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                       <span className="text-white text-lg font-medium">Klik om te vergroten</span>
                     </div>
@@ -110,6 +116,7 @@ export function AIHeadshotsShowcase() {
         </div>
       </div>
 
+      {/* Lightbox Modal */}
       {lightboxImage && (
         <div
           className="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center p-4"
