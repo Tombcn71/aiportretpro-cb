@@ -30,8 +30,8 @@ export default function PricingSection() {
     trackViewContent(plan.price, "EUR")
     trackInitiateCheckout(plan.price, "EUR")
 
-    // Always go to start page for new flow
-    router.push("/start")
+    // Go directly to wizard welcome
+    router.push("/wizard/welcome")
   }
 
   return (

@@ -1,100 +1,57 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
+import Stripe from "stripe"
+import { trackInitiateCheckout } from "@/lib/facebook-pixel"
 
-const PRICING_PLAN = {
-  name: "Professional",
-  price: 19.99,
-  photos: 40,
-  priceId: "price_1RrFTnDswbEJWagVnjXYvNwh",
-}
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+  apiVersion: "2024-06-20",
+})
 
-export async function POST(request: NextRequest) {
+export async function POST(req: NextRequest) {
   try {
-    console.log("Starting checkout session creation...")
+    const body = await req.json()
+    const { priceId = "price_1QSqJhP5vTfZHjfvJhKJQqLs", wizardData, successUrl, cancelUrl } = body
 
-    const session = await getServerSession(authOptions)
-    console.log("Session:", session)
+    console.log("🛒 Creating checkout session with wizard data:", wizardData)
 
-    if (!session?.user?.email) {
-      console.log("No session or email found")
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
-
-    const { planId } = await request.json()
-    console.log("Plan ID:", planId)
-
-    // Use single plan
-    const plan = PRICING_PLAN
-    console.log("Using plan:", plan)
-
-    // Import database functions
-    const { getUserByEmail, createUser, createPurchase } = await import("@/lib/db")
-
-    // Get or create user in database
-    let user = await getUserByEmail(session.user.email)
-    console.log("Existing user:", user)
-
-    if (!user) {
-      console.log("Creating new user...")
-      user = await createUser({
-        email: session.user.email,
-        name: session.user.name || "",
-        image: session.user.image || "",
+    // Track Facebook Pixel event
+    if (typeof window !== "undefined") {
+      trackInitiateCheckout({
+        content_ids: [priceId],
+        content_type: "product",
+        currency: "EUR",
+        value: 29.0,
       })
-      console.log("Created user:", user)
     }
 
-    if (!user || !user.id) {
-      console.log("Failed to get or create user")
-      return NextResponse.json({ error: "Failed to create user" }, { status: 500 })
-    }
-
-    // Initialize Stripe
-    const { stripe } = await import("@/lib/stripe")
-    console.log("Creating Stripe checkout session...")
-
-    const checkoutSession = await stripe.checkout.sessions.create({
+    const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card", "ideal"],
       line_items: [
         {
-          price: plan.priceId,
+          price: priceId,
           quantity: 1,
         },
       ],
       mode: "payment",
-      success_url: `${process.env.NEXTAUTH_URL}/wizard/welcome?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXTAUTH_URL}/pricing`,
-      metadata: {
-        userId: user.id.toString(),
-        planId: "professional",
-      },
-      customer_email: session.user.email,
+      success_url: successUrl || `${process.env.NEXTAUTH_URL}/wizard/welcome?success=true`,
+      cancel_url: cancelUrl || `${process.env.NEXTAUTH_URL}/wizard/checkout?canceled=true`,
+      metadata: wizardData
+        ? {
+            wizardData: JSON.stringify(wizardData),
+          }
+        : {},
       allow_promotion_codes: true,
+      billing_address_collection: "required",
+      customer_creation: "always",
     })
 
-    console.log("Stripe session created:", checkoutSession.id)
+    console.log("✅ Checkout session created:", session.id)
 
-    // Create purchase record
-    const purchase = await createPurchase({
-      userId: user.id,
-      stripeSessionId: checkoutSession.id,
-      planType: "professional",
-amount: Math.round(plan.price * 100),
-      headshotsIncluded: plan.photos,
+    return NextResponse.json({
+      sessionId: session.id,
+      url: session.url,
     })
-
-    console.log("Purchase created:", purchase)
-
-    return NextResponse.json({ url: checkoutSession.url })
   } catch (error) {
-    console.error("Detailed error creating checkout session:", error)
-    return NextResponse.json(
-      {
-        error: "Internal server error",
-        details: error instanceof Error ? error.message : "Unknown error",
-      },
-      { status: 500 },
-    )
+    console.error("❌ Error creating checkout session:", error)
+    return NextResponse.json({ error: "Failed to create checkout session" }, { status: 500 })
   }
 }
