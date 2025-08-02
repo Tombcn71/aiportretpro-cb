@@ -200,6 +200,16 @@ export default function WizardCheckoutPage() {
                 </Button>
               </CardContent>
             </Card>
+
+            <div className="text-center">
+              <div className="flex items-center justify-center space-x-2 text-sm text-gray-500">
+                <div className="w-8 h-1 bg-[#0077B5] rounded"></div>
+                <div className="w-8 h-1 bg-[#0077B5] rounded"></div>
+                <div className="w-8 h-1 bg-[#0077B5] rounded"></div>
+                <div className="w-8 h-1 bg-[#0077B5] rounded"></div>
+              </div>
+              <p className="text-xs text-gray-500 mt-2">Stap 4 van 4</p>
+            </div>
           </div>
 
           {/* Right side - Example photos */}

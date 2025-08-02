@@ -1,207 +1,104 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useEffect, useState } from "react"
 import { useSession, signIn } from "next-auth/react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { ArrowRight, Check, Star, Shield, RefreshCw } from "lucide-react"
-import Image from "next/image"
+import { CheckCircle } from "lucide-react"
 
 export default function WizardWelcomePage() {
   const { data: session, status } = useSession()
   const router = useRouter()
   const searchParams = useSearchParams()
-  const [loading, setLoading] = useState(false)
-  const success = searchParams.get("success")
+  const [isSuccess, setIsSuccess] = useState(false)
 
   useEffect(() => {
-    // Clear all wizard data when starting fresh (not coming from success)
+    // Check if this is a success redirect from Stripe
+    const success = searchParams.get("success")
+    if (success === "true") {
+      setIsSuccess(true)
+      // Clear localStorage after successful payment
+      localStorage.removeItem("wizard_project_name")
+      localStorage.removeItem("wizard_gender")
+      localStorage.removeItem("wizard_uploaded_photos")
+      return
+    }
+
+    // Clear localStorage when starting fresh wizard flow
     if (!success) {
       localStorage.removeItem("wizard_project_name")
       localStorage.removeItem("wizard_gender")
       localStorage.removeItem("wizard_uploaded_photos")
     }
 
-    if (status === "loading") return
-
-    // Show success page if coming from Stripe
-    if (success === "true") {
-      return
-    }
-
-    // If logged in and no success, go to next step
+    // If user is logged in and no success, continue to next step
     if (session && !success) {
       router.push("/wizard/project-name")
     }
-  }, [session, status, success, router])
+  }, [session, searchParams, router])
 
-  const handleGoogleSignIn = async () => {
-    setLoading(true)
-    try {
-      await signIn("google", {
-        callbackUrl: "/wizard/project-name",
-      })
-    } catch (error) {
-      console.error("Sign in error:", error)
-    } finally {
-      setLoading(false)
-    }
+  const handleGoogleSignIn = () => {
+    signIn("google", {
+      callbackUrl: "/wizard/project-name",
+    })
   }
 
-  // Success page after payment
-  if (session && success === "true") {
+  if (status === "loading") {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="container mx-auto px-4 max-w-2xl">
-          <Card className="text-center">
-            <CardHeader>
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Check className="h-8 w-8 text-green-600" />
-              </div>
-              <CardTitle className="text-2xl">Betaling Succesvol!</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-4">
-                <div className="flex items-center justify-center space-x-2">
-                  <RefreshCw className="h-5 w-5 animate-spin text-[#0077B5]" />
-                  <span className="text-lg">AI training gestart...</span>
-                </div>
-                <p className="text-gray-600">Je headshots worden nu gegenereerd. Dit duurt ongeveer 15-20 minuten.</p>
-                <p className="text-sm text-gray-500">
-                  Je krijgt een email wanneer ze klaar zijn, of check je dashboard.
-                </p>
-              </div>
-              <Button onClick={() => router.push("/dashboard")} className="bg-[#0077B5] hover:bg-[#004182] text-white">
-                Ga naar Dashboard
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0077B5]"></div>
       </div>
     )
   }
 
-  // Login page
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto px-4 py-8">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
-          {/* Left side - Hero */}
-          <div className="space-y-8">
-            <div>
-              <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
-                Get your headshots in <span className="text-orange-500">minutes</span>, not days
-              </h1>
-              <p className="text-xl text-gray-600">
-                Professional AI headshots ready in 15 minutes. Perfect for LinkedIn, resumes, and professional profiles.
-              </p>
-            </div>
-
-            {/* Photo grid */}
-            <div className="grid grid-cols-4 gap-3">
-              {[
-                "/images/professional-man-1.jpg",
-                "/images/professional-woman-1.jpg",
-                "/images/professional-man-2.jpg",
-                "/images/professional-woman-2.jpg",
-                "/images/professional-man-3.jpg",
-                "/images/professional-woman-3.jpg",
-                "/images/professional-man-4.jpg",
-                "/images/professional-woman-4.jpg",
-              ].map((src, index) => (
-                <div key={index} className="aspect-square rounded-lg overflow-hidden">
-                  <Image
-                    src={src || "/placeholder.svg"}
-                    alt={`Professional headshot ${index + 1}`}
-                    width={120}
-                    height={120}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              ))}
-            </div>
-
-            {/* Trust indicators */}
-            <div className="flex items-center space-x-6 text-sm">
-              <div className="flex items-center">
-                <Star className="w-4 h-4 text-yellow-500 mr-1" />
-                <span>4.8/5 (2,000+ reviews)</span>
-              </div>
-              <div className="flex items-center">
-                <Shield className="w-4 h-4 text-green-500 mr-1" />
-                <span>100% Money Back</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Right side - Login form */}
-          <div className="space-y-6">
-            <Card className="p-8">
-              <div className="space-y-6">
-                <div className="text-center">
-                  <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-                    <span className="text-2xl">🔥</span>
-                  </div>
-                  <h2 className="text-2xl font-bold text-gray-900">Aragon.ai</h2>
-                </div>
-
-                <div className="space-y-4">
-                  <Button
-                    onClick={handleGoogleSignIn}
-                    disabled={loading}
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 text-lg font-medium"
-                  >
-                    {loading ? (
-                      <div className="flex items-center">
-                        <RefreshCw className="animate-spin h-5 w-5 mr-2" />
-                        Loading...
-                      </div>
-                    ) : (
-                      <>
-                        <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
-                          <path
-                            fill="currentColor"
-                            d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                          />
-                          <path
-                            fill="currentColor"
-                            d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                          />
-                          <path
-                            fill="currentColor"
-                            d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                          />
-                          <path
-                            fill="currentColor"
-                            d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                          />
-                        </svg>
-                        Continue with Google
-                      </>
-                    )}
-                  </Button>
-                </div>
-
-                <div className="text-center text-xs text-gray-500">
-                  <p>
-                    New accounts are subject to our{" "}
-                    <a href="/terms" className="text-orange-500 hover:underline">
-                      Terms
-                    </a>{" "}
-                    and{" "}
-                    <a href="/privacy" className="text-orange-500 hover:underline">
-                      Privacy Policy
-                    </a>
-                    .
-                  </p>
-                </div>
-              </div>
-            </Card>
-          </div>
-        </div>
+  // Success state after payment
+  if (isSuccess) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
+            <CardTitle className="text-2xl text-green-600">Betaling Succesvol!</CardTitle>
+          </CardHeader>
+          <CardContent className="text-center space-y-4">
+            <p className="text-gray-600">
+              Je betaling is verwerkt en we zijn begonnen met het trainen van je AI model.
+            </p>
+            <p className="text-sm text-gray-500">
+              Je ontvangt binnen 15 minuten een email met je professionele headshots.
+            </p>
+            <Button
+              onClick={() => router.push("/dashboard")}
+              className="w-full bg-[#0077B5] hover:bg-[#005885] text-white"
+            >
+              Ga naar Dashboard
+            </Button>
+          </CardContent>
+        </Card>
       </div>
-    </div>
-  )
+    )
+  }
+
+  // Login state
+  if (!session) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <CardTitle className="text-2xl">Welkom bij AI PortretPro</CardTitle>
+            <p className="text-gray-600 mt-2">Log in om je professionele headshots te maken</p>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Button onClick={handleGoogleSignIn} className="w-full bg-[#0077B5] hover:bg-[#005885] text-white">
+              Inloggen met Google
+            </Button>
+            <p className="text-xs text-gray-500 text-center">Door in te loggen ga je akkoord met onze voorwaarden</p>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  return null
 }
