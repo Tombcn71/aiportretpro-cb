@@ -2,41 +2,33 @@
 
 import { useState, useEffect } from "react"
 import { useSession } from "next-auth/react"
-import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { ArrowLeft, Check, Star } from "lucide-react"
-import { PRICING_PLAN } from "@/lib/stripe"
+import { Check, Star, ArrowLeft } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { trackViewContent, trackInitiateCheckout } from "@/lib/facebook-pixel"
 import Image from "next/image"
 
 export default function WizardCheckoutPage() {
   const { data: session } = useSession()
-  const router = useRouter()
   const [loading, setLoading] = useState(false)
-  const [wizardData, setWizardData] = useState({
-    projectName: "My Project",
-    gender: "man",
-    uploadedPhotos: ["photo1.jpg", "photo2.jpg", "photo3.jpg", "photo4.jpg", "photo5.jpg", "photo6.jpg"],
-  })
+  const router = useRouter()
 
+  // Track pricing page view
   useEffect(() => {
-    const projectName = localStorage.getItem("wizard_project_name")
-    const gender = localStorage.getItem("wizard_gender")
-    const uploadedPhotos = localStorage.getItem("wizard_uploaded_photos")
-
-    if (projectName && gender && uploadedPhotos) {
-      try {
-        const parsedPhotos = JSON.parse(uploadedPhotos)
-        setWizardData({
-          projectName,
-          gender,
-          uploadedPhotos: parsedPhotos,
-        })
-      } catch (error) {
-        console.log("Using default data")
-      }
-    }
+    trackViewContent("Wizard Checkout Page", 29)
   }, [])
+
+  const handlePlanSelect = () => {
+    // Track checkout initiation
+    trackInitiateCheckout(29)
+
+    if (!session) {
+      router.push(`/login?plan=professional`)
+      return
+    }
+    handleCheckout()
+  }
 
   const handleCheckout = async () => {
     setLoading(true)
@@ -47,12 +39,7 @@ export default function WizardCheckoutPage() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          priceId: PRICING_PLAN.priceId,
-          wizardData: wizardData,
-          successUrl: `${window.location.origin}/dashboard`,
-          cancelUrl: `${window.location.origin}/wizard/checkout`,
-        }),
+        body: JSON.stringify({ planId: "professional" }),
       })
 
       const data = await response.json()
@@ -63,17 +50,26 @@ export default function WizardCheckoutPage() {
         alert("Er is een fout opgetreden. Probeer het opnieuw.")
       }
     } catch (error) {
-      console.error("Checkout error:", error)
+      console.error("Error:", error)
       alert("Er is een fout opgetreden. Probeer het opnieuw.")
     } finally {
       setLoading(false)
     }
   }
 
+  const features = [
+    "Verschillende zakelijke outfits",
+    "Verschillende poses en achtergronden",
+    "HD kwaliteit downloads",
+    "Klaar binnen 15 minuten",
+    "Perfect voor LinkedIn, Social Media, CV, Website en Print",
+  ]
+
   return (
     <div className="min-h-screen bg-white">
       <div className="container mx-auto px-6 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
+          {/* Left side - Photos grid */}
           <div className="space-y-8">
             <div>
               <Button variant="ghost" onClick={() => router.push("/wizard/upload")} className="mb-6 p-0 h-auto">
@@ -85,6 +81,7 @@ export default function WizardCheckoutPage() {
               </h1>
             </div>
 
+            {/* Photos grid - 2x4 layout */}
             <div className="grid grid-cols-2 gap-4">
               <div className="aspect-square rounded-2xl overflow-hidden">
                 <Image
@@ -160,6 +157,7 @@ export default function WizardCheckoutPage() {
               </div>
             </div>
 
+            {/* Trustpilot */}
             <div className="flex items-center space-x-2">
               <div className="flex">
                 <Star className="w-4 h-4 text-green-500 fill-current" />
@@ -171,6 +169,7 @@ export default function WizardCheckoutPage() {
               <span className="text-sm font-medium">Trustpilot</span>
             </div>
 
+            {/* Testimonial */}
             <div className="bg-gray-50 p-6 rounded-xl">
               <p className="text-gray-700 italic mb-4">
                 "Some of my family initially worried that I was wasting time and money, but after seeing the results,
@@ -183,6 +182,7 @@ export default function WizardCheckoutPage() {
               </div>
             </div>
 
+            {/* Company logos */}
             <div className="space-y-4">
               <p className="text-center text-gray-600 font-medium">Trusted by teams at</p>
               <div className="flex items-center justify-center space-x-8 opacity-60 text-xs">
@@ -196,6 +196,7 @@ export default function WizardCheckoutPage() {
             </div>
           </div>
 
+          {/* Right side - Pricing (copied from pricing page) */}
           <div className="flex flex-col justify-center max-w-md mx-auto w-full">
             <div className="mb-8 text-right">
               <div className="inline-flex items-center space-x-2">
@@ -206,89 +207,44 @@ export default function WizardCheckoutPage() {
               </div>
             </div>
 
-            <div className="bg-gray-50 p-4 rounded-lg mb-6">
-              <h3 className="font-semibold mb-2">Je bestelling:</h3>
-              <div className="space-y-1 text-sm">
-                <div className="flex justify-between">
-                  <span>Project:</span>
-                  <span>{wizardData.projectName}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Type:</span>
-                  <span>
-                    {wizardData.gender === "man" ? "Man" : wizardData.gender === "woman" ? "Vrouw" : "Unisex"}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Foto's:</span>
-                  <span>{wizardData.uploadedPhotos.length} geüpload</span>
-                </div>
-              </div>
+            <div className="text-center mb-6">
+              <h1 className="text-2xl md:text-4xl font-bold text-gray-900 mb-2">👋 Welkom! Dit is je pakket.</h1>
+              <p className="text-md text-gray-600">Na een snelle en veilige betaling kun je direct aan de slag</p>
             </div>
 
-            <Card className="border-2 border-orange-500 mb-6">
-              <CardHeader>
-                <div className="flex justify-between items-start">
-                  <div>
-                    <CardTitle className="text-2xl">Professional</CardTitle>
-                    <div className="flex items-baseline mt-2">
-                      <span className="text-4xl font-bold">€{PRICING_PLAN.price}</span>
-                      <span className="text-gray-500 line-through ml-2">€39</span>
-                    </div>
-                  </div>
-                  <div className="bg-orange-100 text-orange-600 px-3 py-1 rounded-full text-sm font-medium">
-                    Best Value
-                  </div>
+            <Card className="relative border-2 border-[#0077B5] shadow-xl">
+              <CardHeader className="text-center pt-8">
+                <CardTitle className="text-2xl font-bold">Professional</CardTitle>
+                <div className="mt-4">
+                  <span className="text-2xl md:text-4xl font-bold text-[#0077B5]">€19,99</span>
                 </div>
+                <p className="text-gray-600 mt-2">40 professionele portretfoto's</p>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-3">
-                  <div className="flex items-center">
-                    <Check className="w-5 h-5 text-green-500 mr-3" />
-                    <span>{PRICING_PLAN.photos} headshots</span>
-                  </div>
-                  <div className="flex items-center">
-                    <Check className="w-5 h-5 text-green-500 mr-3" />
-                    <span>15 mins generation time</span>
-                  </div>
-                  <div className="flex items-center">
-                    <Check className="w-5 h-5 text-green-500 mr-3" />
-                    <span>All attires included</span>
-                  </div>
-                  <div className="flex items-center">
-                    <Check className="w-5 h-5 text-green-500 mr-3" />
-                    <span>All backgrounds included</span>
-                  </div>
-                  <div className="flex items-center">
-                    <Check className="w-5 h-5 text-green-500 mr-3" />
-                    <span>Enhanced image resolution</span>
-                  </div>
-                </div>
+
+              <CardContent className="space-y-6">
+                <ul className="space-y-4">
+                  {features.map((feature, index) => (
+                    <li key={index} className="flex items-center">
+                      <Check className="h-5 w-5 text-green-500 mr-3 flex-shrink-0" />
+                      <span className="text-gray-700">{feature}</span>
+                    </li>
+                  ))}
+                </ul>
 
                 <Button
-                  onClick={handleCheckout}
+                  onClick={handlePlanSelect}
                   disabled={loading}
-                  className="w-full bg-orange-500 hover:bg-orange-600 text-white py-4 text-lg font-semibold"
+                  className="w-full bg-[#0077B5] hover:bg-[#004182] text-white py-4 text-lg font-semibold"
                 >
-                  {loading ? "Creating checkout..." : "Get My Headshots"}
+                  {loading ? "Laden..." : "Betaal Veilig & Start Direct"}
                 </Button>
+
+                <div className="text-center text-sm text-gray-500">
+                  <p>✓ Veilige betaling met ideal en credit card</p>
+                  <p>✓ Geld terug garantie</p>
+                </div>
               </CardContent>
             </Card>
-
-            <div className="space-y-2 text-sm text-gray-600">
-              <div className="flex items-center justify-center">
-                <div className="w-4 h-4 border border-gray-400 rounded-full mr-2 flex items-center justify-center">
-                  <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
-                </div>
-                <span>Security built for Fortune 500 companies</span>
-              </div>
-              <div className="flex items-center justify-center">
-                <div className="w-4 h-4 border border-green-500 rounded-full mr-2 flex items-center justify-center">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                </div>
-                <span>100% Money Back Guarantee</span>
-              </div>
-            </div>
           </div>
         </div>
       </div>
