@@ -13,5 +13,5 @@ export const PRICING_PLAN = {
   name: "Pro",
   price: 19.99,
   photos: 40,
-  priceId: "price_1RrFTnDswbEJWagVnjXYvNwh",
+  priceId: "price_1RrFsbDswbEJWagVsEytA8rs",
 }
