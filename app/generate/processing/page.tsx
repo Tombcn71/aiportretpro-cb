@@ -13,41 +13,71 @@ export default function ProcessingPage() {
   const router = useRouter()
 
   useEffect(() => {
-    const processPayment = async () => {
+    const processWizardOrder = async () => {
       try {
-        // Simulate processing steps
+        // Stap 1: Betaling verwerkt
         setStatus("Betaling geverifieerd...")
-        setProgress(25)
-        await new Promise((resolve) => setTimeout(resolve, 1500))
+        setProgress(20)
+        await new Promise((resolve) => setTimeout(resolve, 1000))
+
+        // Stap 2: Haal wizard data op
+        const projectName = localStorage.getItem("wizard_project_name")
+        const gender = localStorage.getItem("wizard_gender")
+        const uploadedPhotos = localStorage.getItem("wizard_uploaded_photos")
+
+        if (!projectName || !gender || !uploadedPhotos) {
+          throw new Error("Wizard data niet gevonden")
+        }
 
         setStatus("Project wordt aangemaakt...")
-        setProgress(50)
-        await new Promise((resolve) => setTimeout(resolve, 1500))
+        setProgress(40)
+        await new Promise((resolve) => setTimeout(resolve, 1000))
+
+        // Stap 3: Maak project aan met bestaande API
+        const response = await fetch("/api/projects/create-with-pack", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            projectName,
+            gender,
+            selectedPackId: "clx1qvimu0001hf0jdn5xdlr4", // Professional pack
+            uploadedPhotos: JSON.parse(uploadedPhotos),
+          }),
+        })
+
+        if (!response.ok) {
+          const errorData = await response.json()
+          throw new Error(errorData.message || "Failed to create project")
+        }
+
+        const result = await response.json()
+        console.log("✅ Project created:", result)
 
         setStatus("AI training gestart...")
-        setProgress(75)
+        setProgress(80)
         await new Promise((resolve) => setTimeout(resolve, 1500))
 
         setStatus("Voltooid! Je wordt doorgestuurd...")
         setProgress(100)
         setIsComplete(true)
-        await new Promise((resolve) => setTimeout(resolve, 2000))
 
-        // Clear any wizard data from localStorage
+        // Clear wizard data
         localStorage.removeItem("wizard_project_name")
         localStorage.removeItem("wizard_gender")
         localStorage.removeItem("wizard_uploaded_photos")
 
-        // Redirect to dashboard
+        await new Promise((resolve) => setTimeout(resolve, 2000))
         router.push("/dashboard")
       } catch (error) {
-        console.error("❌ Error processing payment:", error)
+        console.error("❌ Error processing wizard order:", error)
         setStatus("Er is een fout opgetreden. Je wordt doorgestuurd...")
         setTimeout(() => router.push("/dashboard"), 3000)
       }
     }
 
-    processPayment()
+    processWizardOrder()
   }, [router])
 
   return (
@@ -63,7 +93,7 @@ export default function ProcessingPage() {
               </div>
             )}
             <h1 className="text-2xl font-bold text-gray-900 mb-2">
-              {isComplete ? "Betaling Voltooid!" : "Bezig met verwerken..."}
+              {isComplete ? "Bestelling Voltooid!" : "Bezig met verwerken..."}
             </h1>
             <p className="text-gray-600 mb-6">{status}</p>
           </div>

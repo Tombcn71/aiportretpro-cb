@@ -16,11 +16,16 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json()
-    const { planId, priceId, wizardSessionId } = body
+    const { planId, priceId, successUrl, cancelUrl, wizardFlow } = body
 
+    // Use the correct price ID
     const finalPriceId = priceId || "price_1RrFTnDswbEJWagVnjXYvNwh"
 
-    console.log("🛒 Creating checkout with wizard session ID:", wizardSessionId)
+    console.log("🛒 Creating checkout session:", {
+      priceId: finalPriceId,
+      email: session.user.email,
+      wizardFlow,
+    })
 
     const checkoutSession = await stripe.checkout.sessions.create({
       payment_method_types: ["card", "ideal"],
@@ -31,17 +36,19 @@ export async function POST(req: NextRequest) {
         },
       ],
       mode: "payment",
-      success_url: `${process.env.NEXTAUTH_URL}/generate/processing`,
-      cancel_url: `${process.env.NEXTAUTH_URL}/wizard/checkout`,
-      metadata: {
-        flow: "wizard",
-        planId: planId || "professional",
-        wizardSessionId: wizardSessionId, // Store session ID in metadata
-      },
+      success_url: successUrl || `${process.env.NEXTAUTH_URL}/dashboard`,
+      cancel_url: cancelUrl || `${process.env.NEXTAUTH_URL}/pricing`,
+      customer_email: session.user.email, // Pre-fill email
+      metadata: wizardFlow
+        ? {
+            flow: "wizard",
+            planId: planId || "professional",
+          }
+        : {
+            planId: planId || "professional",
+          },
       allow_promotion_codes: true,
-      billing_address_collection: "auto",
-      customer_creation: "always",
-      customer_email: session.user.email,
+      // Geen billing_address_collection = alleen email vereist
     })
 
     console.log("✅ Checkout session created:", checkoutSession.id)
