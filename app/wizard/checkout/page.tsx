@@ -34,6 +34,7 @@ export default function WizardCheckoutPage() {
     setLoading(true)
 
     try {
+      // EXACT SAME AS PRICING PAGE - NO WIZARD METADATA
       const response = await fetch("/api/stripe/create-checkout", {
         method: "POST",
         headers: {
@@ -42,13 +43,6 @@ export default function WizardCheckoutPage() {
         body: JSON.stringify({
           planId: "professional",
           priceId: "price_1RrFTnDswbEJWagVnjXYvNwh",
-          wizardData: {
-            projectName: localStorage.getItem("wizard_project_name") || "My Project",
-            gender: localStorage.getItem("wizard_gender") || "man",
-            uploadedPhotos: JSON.parse(localStorage.getItem("wizard_uploaded_photos") || "[]"),
-          },
-          successUrl: `${window.location.origin}/generate/processing`,
-          cancelUrl: `${window.location.origin}/wizard/checkout`,
         }),
       })
 
