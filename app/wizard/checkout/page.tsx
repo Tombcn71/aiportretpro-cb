@@ -105,6 +105,7 @@ export default function CheckoutPage() {
       const { sessionId } = await saveResponse.json()
       console.log("✅ Wizard data saved with session ID:", sessionId)
 
+      // Use the same checkout creation as the existing app - with coupons enabled
       const response = await fetch("/api/stripe/create-checkout", {
         method: "POST",
         headers: {
@@ -112,7 +113,6 @@ export default function CheckoutPage() {
         },
         body: JSON.stringify({
           priceId: "price_1RrFsbDswbEJWagVsEytA8rs",
-          customer_email: session.user.email,
           successUrl: `${window.location.origin}/generate/processing`,
           cancelUrl: `${window.location.origin}/wizard/checkout`,
           metadata: {
@@ -281,7 +281,7 @@ export default function CheckoutPage() {
               </div>
             </div>
 
-            {/* Payment Button - NOW ALWAYS ENABLED when wizardData exists */}
+            {/* Payment Button */}
             <div className="space-y-4">
               <Button
                 onClick={handlePayment}

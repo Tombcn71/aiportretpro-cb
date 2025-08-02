@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
 
     const checkoutSession = await stripe.checkout.sessions.create({
       mode: "payment",
-      payment_method_types: ["card"],
+      payment_method_types: ["card", "ideal"],
       line_items: [
         {
           price: priceId,
@@ -30,6 +30,10 @@ export async function POST(req: NextRequest) {
       cancel_url: cancelUrl,
       customer_email: session.user.email,
       metadata: metadata,
+      allow_promotion_codes: true, // ENABLE COUPONS
+      automatic_tax: {
+        enabled: false,
+      },
     })
 
     return NextResponse.json({ url: checkoutSession.url })
