@@ -43,7 +43,6 @@
     "@sveltejs/kit": "latest",
     "@vercel/analytics": "latest",
     "@vercel/blob": "latest",
-    "@vercel/postgres": "latest",
     "autoprefixer": "^10.4.20",
     "axios": "latest",
     "class-variance-authority": "^0.7.1",

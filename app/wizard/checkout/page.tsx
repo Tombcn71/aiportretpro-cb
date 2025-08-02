@@ -1,38 +1,33 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { useSession } from "next-auth/react"
-import { useRouter } from "next/navigation"
+import { useEffect, useState } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Check, Star, ArrowLeft } from "lucide-react"
-import { trackViewContent, trackInitiateCheckout } from "@/lib/facebook-pixel"
-import Image from "next/image"
+import { Badge } from "@/components/ui/badge"
+import { Loader2, CreditCard, Shield, Zap } from "lucide-react"
 
-export default function WizardCheckoutPage() {
-  const { data: session } = useSession()
-  const [loading, setLoading] = useState(false)
+export default function CheckoutPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const [isLoading, setIsLoading] = useState(false)
+  const [wizardData, setWizardData] = useState<any>(null)
 
-  // Track pricing page view
   useEffect(() => {
-    trackViewContent("Wizard Checkout Page", 19.99)
-  }, [])
-
-  const handlePlanSelect = () => {
-    // Track checkout initiation
-    trackInitiateCheckout(19.99)
-
-    if (!session) {
-      router.push(`/login?plan=professional`)
-      return
+    // Get wizard data from localStorage
+    const data = localStorage.getItem("wizardData")
+    if (data) {
+      setWizardData(JSON.parse(data))
+    } else {
+      // If no wizard data, redirect back to start
+      router.push("/wizard/welcome")
     }
-    handleCheckout()
-  }
+  }, [router])
 
-  const handleCheckout = async () => {
-    setLoading(true)
+  const handlePayment = async () => {
+    if (!wizardData) return
 
+    setIsLoading(true)
     try {
       const response = await fetch("/api/stripe/create-checkout", {
         method: "POST",
@@ -40,219 +35,126 @@ export default function WizardCheckoutPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          planId: "professional",
-          priceId: "price_1RrFTnDswbEJWagVnjXYvNwh",
+          priceId: "price_1QZJhJP5pjHFvKQqxvZ8YZAB", // €19 price
           successUrl: `${window.location.origin}/generate/processing`,
           cancelUrl: `${window.location.origin}/wizard/checkout`,
+          metadata: {
+            projectName: wizardData.projectName,
+            gender: wizardData.gender,
+            uploadedPhotos: JSON.stringify(wizardData.uploadedPhotos),
+            packId: wizardData.packId || "",
+          },
         }),
       })
 
-      const data = await response.json()
-
-      if (data.url) {
-        window.location.href = data.url
-      } else {
-        alert("Er is een fout opgetreden. Probeer het opnieuw.")
+      const { url } = await response.json()
+      if (url) {
+        window.location.href = url
       }
     } catch (error) {
-      console.error("Error:", error)
-      alert("Er is een fout opgetreden. Probeer het opnieuw.")
+      console.error("Payment error:", error)
     } finally {
-      setLoading(false)
+      setIsLoading(false)
     }
   }
 
-  const features = [
-    "40 professionele portretfoto's",
-    "Verschillende zakelijke outfits",
-    "Verschillende poses en achtergronden",
-    "HD kwaliteit downloads",
-    "Klaar binnen 15 minuten",
-    "Perfect voor LinkedIn, Social Media, CV, Website en Print",
-  ]
+  if (!wizardData) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    )
+  }
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="container mx-auto px-6 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
-          {/* Left side - Photos grid */}
-          <div className="space-y-8">
-            <div>
-              <Button variant="ghost" onClick={() => router.push("/wizard/upload")} className="mb-6 p-0 h-auto">
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Back
-              </Button>
-              <h1 className="text-5xl font-bold text-gray-900 mb-4 leading-tight">
-                Get your headshots in <span className="text-orange-500">minutes</span>, not days
-              </h1>
-            </div>
-
-            {/* Photos grid - 2x4 layout */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="aspect-square rounded-2xl overflow-hidden">
-                <Image
-                  src="/images/professional-man-1.jpg"
-                  alt="Professional headshot"
-                  width={200}
-                  height={200}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="aspect-square rounded-2xl overflow-hidden">
-                <Image
-                  src="/images/professional-woman-1.jpg"
-                  alt="Professional headshot"
-                  width={200}
-                  height={200}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="aspect-square rounded-2xl overflow-hidden">
-                <Image
-                  src="/images/professional-man-2.jpg"
-                  alt="Professional headshot"
-                  width={200}
-                  height={200}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="aspect-square rounded-2xl overflow-hidden">
-                <Image
-                  src="/images/professional-woman-2.jpg"
-                  alt="Professional headshot"
-                  width={200}
-                  height={200}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="aspect-square rounded-2xl overflow-hidden">
-                <Image
-                  src="/images/professional-man-3.jpg"
-                  alt="Professional headshot"
-                  width={200}
-                  height={200}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="aspect-square rounded-2xl overflow-hidden">
-                <Image
-                  src="/images/professional-woman-3.jpg"
-                  alt="Professional headshot"
-                  width={200}
-                  height={200}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="aspect-square rounded-2xl overflow-hidden">
-                <Image
-                  src="/images/professional-man-4.jpg"
-                  alt="Professional headshot"
-                  width={200}
-                  height={200}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="aspect-square rounded-2xl overflow-hidden">
-                <Image
-                  src="/images/professional-woman-4.jpg"
-                  alt="Professional headshot"
-                  width={200}
-                  height={200}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            </div>
-
-            {/* Trustpilot */}
-            <div className="flex items-center space-x-2">
-              <div className="flex">
-                <Star className="w-4 h-4 text-green-500 fill-current" />
-                <Star className="w-4 h-4 text-green-500 fill-current" />
-                <Star className="w-4 h-4 text-green-500 fill-current" />
-                <Star className="w-4 h-4 text-green-500 fill-current" />
-                <Star className="w-4 h-4 text-green-500 fill-current" />
-              </div>
-              <span className="text-sm font-medium">Trustpilot</span>
-            </div>
-
-            {/* Testimonial */}
-            <div className="bg-gray-50 p-6 rounded-xl">
-              <p className="text-gray-700 italic mb-4">
-                "Some of my family initially worried that I was wasting time and money, but after seeing the results,
-                they were amazed. I had been dreading the task of getting a great photo for my author bio in my upcoming
-                book, and now that worry is gone. Thank you!"
-              </p>
-              <div className="flex items-center">
-                <div className="w-10 h-10 bg-gray-300 rounded-full mr-3"></div>
-                <span className="font-medium">Adam Weygandt</span>
-              </div>
-            </div>
-
-            {/* Company logos */}
-            <div className="space-y-4">
-              <p className="text-center text-gray-600 font-medium">Trusted by teams at</p>
-              <div className="flex items-center justify-center space-x-8 opacity-60 text-xs">
-                <span>Trinity College</span>
-                <span>NEW YORK UNIVERSITY</span>
-                <span>ASU</span>
-                <span>UC Berkeley</span>
-                <span>Microsoft</span>
-                <span>PWC</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Right side - Pricing */}
-          <div className="flex flex-col justify-center max-w-md mx-auto w-full">
-            <div className="mb-8 text-right">
-              <div className="inline-flex items-center space-x-2">
-                <div className="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-sm">A</span>
-                </div>
-                <span className="font-bold text-lg">Aragon.ai</span>
-              </div>
-            </div>
-
-            <div className="text-center mb-6">
-              <h1 className="text-2xl md:text-4xl font-bold text-gray-900 mb-2">👋 Welkom! Dit is je pakket.</h1>
-              <p className="text-md text-gray-600">Na een snelle en veilige betaling kun je direct aan de slag</p>
-            </div>
-
-            <Card className="relative border-2 border-[#0077B5] shadow-xl">
-              <CardHeader className="text-center pt-8">
-                <CardTitle className="text-2xl font-bold">Professional</CardTitle>
-                <div className="mt-4">
-                  <span className="text-2xl md:text-4xl font-bold text-[#0077B5]">€19,99</span>
-                </div>
-                <p className="text-gray-600 mt-2">40 professionele portretfoto's</p>
-              </CardHeader>
-
-              <CardContent className="space-y-6">
-                <ul className="space-y-4">
-                  {features.map((feature, index) => (
-                    <li key={index} className="flex items-center">
-                      <Check className="h-5 w-5 text-green-500 mr-3 flex-shrink-0" />
-                      <span className="text-gray-700">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-
-                <Button
-                  onClick={handlePlanSelect}
-                  disabled={loading}
-                  className="w-full bg-[#0077B5] hover:bg-[#004182] text-white py-4 text-lg font-semibold"
-                >
-                  {loading ? "Laden..." : "Betaal Veilig & Start Direct"}
-                </Button>
-
-                <div className="text-center text-sm text-gray-500">
-                  <p>✓ Veilige betaling met ideal en credit card</p>
-                  <p>✓ Geld terug garantie</p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4">
+      <div className="max-w-2xl mx-auto">
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Complete Your Order</h1>
+          <p className="text-gray-600">Generate professional AI headshots in minutes</p>
         </div>
+
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Zap className="h-5 w-5 text-yellow-500" />
+              Order Summary
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex justify-between items-center">
+              <span className="font-medium">Project Name:</span>
+              <span className="text-gray-600">{wizardData.projectName}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="font-medium">Gender:</span>
+              <Badge variant="secondary" className="capitalize">
+                {wizardData.gender}
+              </Badge>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="font-medium">Photos Uploaded:</span>
+              <span className="text-gray-600">{wizardData.uploadedPhotos?.length || 0} photos</span>
+            </div>
+            <div className="border-t pt-4">
+              <div className="flex justify-between items-center text-lg font-semibold">
+                <span>Total:</span>
+                <span className="text-green-600">€19.00</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="mb-6">
+          <CardContent className="pt-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+              <div className="flex flex-col items-center">
+                <Shield className="h-8 w-8 text-green-500 mb-2" />
+                <h3 className="font-semibold">Secure Payment</h3>
+                <p className="text-sm text-gray-600">256-bit SSL encryption</p>
+              </div>
+              <div className="flex flex-col items-center">
+                <Zap className="h-8 w-8 text-yellow-500 mb-2" />
+                <h3 className="font-semibold">Fast Processing</h3>
+                <p className="text-sm text-gray-600">Results in 10-15 minutes</p>
+              </div>
+              <div className="flex flex-col items-center">
+                <CreditCard className="h-8 w-8 text-blue-500 mb-2" />
+                <h3 className="font-semibold">Money Back</h3>
+                <p className="text-sm text-gray-600">30-day guarantee</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Button
+          onClick={handlePayment}
+          disabled={isLoading}
+          className="w-full h-12 text-lg font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+        >
+          {isLoading ? (
+            <>
+              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+              Processing...
+            </>
+          ) : (
+            <>
+              <CreditCard className="mr-2 h-5 w-5" />
+              Pay €19.00 & Generate Headshots
+            </>
+          )}
+        </Button>
+
+        <p className="text-center text-sm text-gray-500 mt-4">
+          By proceeding, you agree to our{" "}
+          <a href="/terms" className="text-blue-600 hover:underline">
+            Terms of Service
+          </a>{" "}
+          and{" "}
+          <a href="/privacy" className="text-blue-600 hover:underline">
+            Privacy Policy
+          </a>
+        </p>
       </div>
     </div>
   )

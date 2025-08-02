@@ -1,8 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server"
-import Stripe from "stripe"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
-import { trackInitiateCheckout } from "@/lib/facebook-pixel"
+import Stripe from "stripe"
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2024-06-20",
@@ -13,55 +12,29 @@ export async function POST(req: NextRequest) {
     const session = await getServerSession(authOptions)
 
     if (!session?.user?.email) {
-      return NextResponse.json({ error: "Not authenticated" }, { status: 401 })
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const body = await req.json()
-    const { planId, priceId, successUrl, cancelUrl } = body
-
-    // Use the correct price ID from your existing system
-    const finalPriceId = priceId || "price_1RrFTnDswbEJWagVnjXYvNwh"
-
-    console.log("🛒 Creating checkout session with price ID:", finalPriceId)
-    console.log("👤 User email:", session.user.email)
-
-    // Track Facebook Pixel event
-    if (typeof window !== "undefined") {
-      trackInitiateCheckout({
-        content_ids: [finalPriceId],
-        content_type: "product",
-        currency: "EUR",
-        value: 19.99,
-      })
-    }
+    const { priceId, successUrl, cancelUrl, metadata } = await req.json()
 
     const checkoutSession = await stripe.checkout.sessions.create({
-      payment_method_types: ["card", "ideal"],
+      mode: "payment",
+      payment_method_types: ["card"],
       line_items: [
         {
-          price: finalPriceId,
+          price: priceId,
           quantity: 1,
         },
       ],
-      mode: "payment",
-      success_url: successUrl || `${process.env.NEXTAUTH_URL}/dashboard`,
-      cancel_url: cancelUrl || `${process.env.NEXTAUTH_URL}/pricing`,
-      customer_email: session.user.email, // EMAIL WORDT AUTOMATISCH INGEVULD
-      metadata: {
-        planId: planId || "professional",
-      },
-      allow_promotion_codes: true,
-      customer_creation: "always",
+      success_url: successUrl,
+      cancel_url: cancelUrl,
+      customer_email: session.user.email,
+      metadata: metadata,
     })
 
-    console.log("✅ Checkout session created:", checkoutSession.id)
-
-    return NextResponse.json({
-      sessionId: checkoutSession.id,
-      url: checkoutSession.url,
-    })
+    return NextResponse.json({ url: checkoutSession.url })
   } catch (error) {
-    console.error("❌ Error creating checkout session:", error)
+    console.error("Stripe checkout error:", error)
     return NextResponse.json({ error: "Failed to create checkout session" }, { status: 500 })
   }
 }

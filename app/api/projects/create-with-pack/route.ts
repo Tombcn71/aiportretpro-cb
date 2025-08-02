@@ -1,8 +1,10 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
-import { sql } from "@vercel/postgres"
+import { neon } from "@neondatabase/serverless"
 import { createTuneWithPack } from "@/lib/astria"
+
+const sql = neon(process.env.DATABASE_URL!)
 
 export async function POST(req: NextRequest) {
   try {
@@ -32,11 +34,11 @@ export async function POST(req: NextRequest) {
       SELECT id FROM users WHERE email = ${session.user.email}
     `
 
-    if (userResult.rows.length === 0) {
+    if (userResult.length === 0) {
       return NextResponse.json({ error: "User not found" }, { status: 404 })
     }
 
-    const userId = userResult.rows[0].id
+    const userId = userResult[0].id
 
     // Create project in database
     const projectResult = await sql`
@@ -57,19 +59,22 @@ export async function POST(req: NextRequest) {
       ) RETURNING id
     `
 
-    const projectId = projectResult.rows[0].id
+    const projectId = projectResult[0].id
     console.log("✅ Project created with ID:", projectId)
 
-    // Start Astria training
+    // Start Astria training with CORRECT parameters
     try {
       console.log("🎯 Starting Astria training...")
-      const astriaResult = await createTuneWithPack({
-        projectId,
-        packId: packId || (gender === "man" ? "clkv6uxh40001l608ovk7lhpx" : "clkv6uy8g0003l608rk8d5vc6"),
-        uploadedPhotos,
-        projectName,
-        gender,
-      })
+      const astriaResult = await createTuneWithPack(
+        packId || (gender === "man" ? "clkv6uxh40001l608ovk7lhpx" : "clkv6uy8g0003l608rk8d5vc6"),
+        {
+          title: projectName,
+          name: `project_${projectId}_${Date.now()}`,
+          imageUrls: uploadedPhotos,
+          projectId: projectId,
+          userId: userId,
+        },
+      )
 
       console.log("✅ Astria training started:", astriaResult)
 
@@ -77,8 +82,8 @@ export async function POST(req: NextRequest) {
       await sql`
         UPDATE projects 
         SET 
-          tune_id = ${astriaResult.tune_id},
-          astria_model_id = ${astriaResult.model_id},
+          tune_id = ${astriaResult.id},
+          astria_model_id = ${astriaResult.id},
           updated_at = NOW()
         WHERE id = ${projectId}
       `
@@ -86,8 +91,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({
         success: true,
         projectId,
-        tuneId: astriaResult.tune_id,
-        modelId: astriaResult.model_id,
+        tuneId: astriaResult.id,
+        modelId: astriaResult.id,
       })
     } catch (astriaError) {
       console.error("❌ Astria training failed:", astriaError)
