@@ -1,126 +1,94 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { useSession } from "next-auth/react"
 import { Button } from "@/components/ui/button"
-import { User, Users, ArrowLeft, ArrowRight } from "lucide-react"
-import { ProgressBar } from "@/components/ui/progress-bar"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { ArrowLeft, ArrowRight } from "lucide-react"
 
 export default function GenderPage() {
-  const { data: session, status } = useSession()
   const router = useRouter()
+  const { data: session } = useSession()
   const [selectedGender, setSelectedGender] = useState("")
-  const [loading, setLoading] = useState(false)
+  const [projectName, setProjectName] = useState("")
 
   useEffect(() => {
-    if (status === "loading") return
     if (!session) {
-      router.push("/wizard/welcome")
+      router.push("/login")
       return
     }
 
-    // Check if previous step is completed
-    const projectName = localStorage.getItem("wizard_project_name")
-    if (!projectName) {
+    // Check if we have project name from previous step
+    const savedProjectName = localStorage.getItem("wizard_project_name")
+    if (!savedProjectName) {
       router.push("/wizard/project-name")
       return
     }
 
-    // Load existing gender if available
-    const savedGender = localStorage.getItem("wizard_gender")
-    if (savedGender) {
-      setSelectedGender(savedGender)
-    }
-  }, [session, status, router])
+    setProjectName(savedProjectName)
+    console.log("📋 Loaded project name:", savedProjectName)
+  }, [session, router])
 
-  const handleContinue = () => {
+  const handleNext = () => {
     if (!selectedGender) return
 
-    setLoading(true)
-
-    // Save gender with consistent key
+    // Save gender to localStorage
     localStorage.setItem("wizard_gender", selectedGender)
+    console.log("💾 Saved gender:", selectedGender)
 
-    // Navigate to upload
     router.push("/wizard/upload")
   }
 
   const genderOptions = [
-    { id: "man", label: "Man", icon: User },
-    { id: "woman", label: "Vrouw", icon: User },
-    { id: "non-binary", label: "Unisex", icon: Users },
+    { value: "man", label: "Man", icon: "👨" },
+    { value: "woman", label: "Woman", icon: "👩" },
   ]
 
-  if (status === "loading") {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0077B5]"></div>
-      </div>
-    )
-  }
-
-  if (!session) {
-    return null
-  }
-
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="container mx-auto px-4 max-w-2xl">
-        <div className="mb-8">
-          <ProgressBar currentStep={2} totalSteps={4} />
-        </div>
-
-        <Card className="w-full">
-          <CardHeader className="text-center">
-            <CardTitle className="text-2xl">Type fotoshoot?</CardTitle>
-            <p className="text-gray-600">
-              Dit helpt ons de perfecte professionele portetfotos te genereren met de juiste portretfotos
-            </p>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {genderOptions.map((option) => {
-                const IconComponent = option.icon
-                return (
-                  <button
-                    key={option.id}
-                    onClick={() => setSelectedGender(option.id)}
-                    className={`p-6 rounded-lg border-2 transition-all text-center ${
-                      selectedGender === option.id
-                        ? "border-[#0077B5] bg-blue-50"
-                        : "border-gray-200 hover:border-gray-300"
-                    }`}
-                  >
-                    <IconComponent className="h-8 w-8 text-gray-600 mx-auto mb-2" />
-                    <div className="font-medium">{option.label}</div>
-                    {selectedGender === option.id && (
-                      <div className="w-4 h-4 bg-[#0077B5] rounded-full mx-auto mt-2"></div>
-                    )}
-                  </button>
-                )
-              })}
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+      <Card className="w-full max-w-md">
+        <CardHeader>
+          <div className="flex items-center gap-4 mb-4">
+            <Button variant="ghost" size="sm" onClick={() => router.push("/wizard/project-name")}>
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+            <div className="flex-1">
+              <div className="flex space-x-2">
+                <div className="h-2 bg-blue-600 rounded-full flex-1"></div>
+                <div className="h-2 bg-blue-600 rounded-full flex-1"></div>
+                <div className="h-2 bg-gray-200 rounded-full flex-1"></div>
+              </div>
+              <p className="text-sm text-gray-600 mt-2">Step 2 of 3</p>
             </div>
-
-            <div className="flex justify-between">
-              <Button variant="ghost" onClick={() => router.push("/wizard/project-name")} disabled={loading}>
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Terug
-              </Button>
-
-              <Button
-                onClick={handleContinue}
-                disabled={!selectedGender || loading}
-                className="bg-[#0077B5] hover:bg-[#004182] text-white"
+          </div>
+          <CardTitle className="text-2xl">Select your gender</CardTitle>
+          <p className="text-gray-600">This helps us choose the right AI model for you</p>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="grid grid-cols-2 gap-4">
+            {genderOptions.map((option) => (
+              <button
+                key={option.value}
+                onClick={() => setSelectedGender(option.value)}
+                className={`p-6 rounded-lg border-2 transition-all ${
+                  selectedGender === option.value
+                    ? "border-blue-600 bg-blue-50"
+                    : "border-gray-200 hover:border-gray-300"
+                }`}
               >
-                {loading ? "Bezig..." : "Volgende"}
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+                <div className="text-4xl mb-2">{option.icon}</div>
+                <div className="font-medium">{option.label}</div>
+              </button>
+            ))}
+          </div>
+
+          <Button onClick={handleNext} disabled={!selectedGender} className="w-full">
+            Continue
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </Button>
+        </CardContent>
+      </Card>
     </div>
   )
 }
