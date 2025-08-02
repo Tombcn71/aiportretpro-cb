@@ -16,14 +16,13 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json()
-    const { planId, priceId, successUrl, cancelUrl, wizardFlow } = body
+    const { planId, priceId, successUrl, cancelUrl, customerEmail, wizardFlow } = body
 
-    // Use the correct price ID
     const finalPriceId = priceId || "price_1RrFTnDswbEJWagVnjXYvNwh"
 
     console.log("🛒 Creating checkout session:", {
       priceId: finalPriceId,
-      email: session.user.email,
+      customerEmail,
       wizardFlow,
     })
 
@@ -38,7 +37,7 @@ export async function POST(req: NextRequest) {
       mode: "payment",
       success_url: successUrl || `${process.env.NEXTAUTH_URL}/dashboard`,
       cancel_url: cancelUrl || `${process.env.NEXTAUTH_URL}/pricing`,
-      customer_email: session.user.email, // Pre-fill email
+      customer_email: customerEmail,
       metadata: wizardFlow
         ? {
             flow: "wizard",
@@ -48,7 +47,8 @@ export async function POST(req: NextRequest) {
             planId: planId || "professional",
           },
       allow_promotion_codes: true,
-      // Geen billing_address_collection = alleen email vereist
+      billing_address_collection: "auto", // Niet verplicht
+      customer_creation: "always",
     })
 
     console.log("✅ Checkout session created:", checkoutSession.id)
