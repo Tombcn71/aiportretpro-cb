@@ -19,8 +19,6 @@ export default function CheckoutPage() {
   } | null>(null)
 
   useEffect(() => {
-    console.log("🔍 Checkout page - Session status:", status)
-
     if (status === "loading") return
 
     if (!session) {
@@ -87,8 +85,10 @@ export default function CheckoutPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          priceId: "price_1QSjJhP5Y0d8AjBJKJGJKJGJ", // Replace with actual price ID
+          priceId: "price_1RrFTnDswbEJWagVnjXYvNwh", // ECHTE PRICE ID UIT BESTAANDE CODE
           customer_email: session.user.email,
+          successUrl: `${window.location.origin}/generate/processing`,
+          cancelUrl: `${window.location.origin}/wizard/checkout`,
           metadata: {
             type: "wizard",
             project_name: wizardData.projectName,
@@ -170,7 +170,7 @@ export default function CheckoutPage() {
             <div className="bg-blue-50 p-6 rounded-lg">
               <div className="flex justify-between items-center mb-4">
                 <span className="text-lg font-semibold">AI Headshot Package</span>
-                <span className="text-2xl font-bold text-[#0077B5]">€29</span>
+                <span className="text-2xl font-bold text-[#0077B5]">€19,99</span>
               </div>
 
               <ul className="space-y-2 text-sm text-gray-700">
@@ -208,7 +208,7 @@ export default function CheckoutPage() {
                 ) : (
                   <>
                     <CreditCard className="mr-2 h-5 w-5" />
-                    Betaal €29 en start training
+                    Betaal €19,99 en start training
                   </>
                 )}
               </Button>

@@ -21,8 +21,6 @@ export default function GenderPage() {
   ]
 
   useEffect(() => {
-    console.log("🔍 Gender page - Session status:", status)
-
     if (status === "loading") return
 
     if (!session) {
@@ -39,14 +37,13 @@ export default function GenderPage() {
       return
     }
 
-    console.log("✅ Session and project name found, staying on gender page")
-
     // Load existing gender if available
     const savedGender = localStorage.getItem("wizard_gender")
     if (savedGender) {
       setSelectedGender(savedGender)
-      console.log("📝 Loaded saved gender:", savedGender)
     }
+
+    console.log("✅ Gender page loaded")
   }, [session, status, router])
 
   const handleNext = () => {
@@ -56,16 +53,15 @@ export default function GenderPage() {
 
     // Save to localStorage
     localStorage.setItem("wizard_gender", selectedGender)
-    console.log("💾 Saved gender:", selectedGender)
 
-    // Navigate to upload
+    console.log("✅ Gender saved:", selectedGender)
     router.push("/wizard/upload")
   }
 
   if (status === "loading") {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0077B5]"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
       </div>
     )
   }
@@ -85,23 +81,30 @@ export default function GenderPage() {
         <Card>
           <CardHeader className="text-center">
             <CardTitle className="text-2xl">Kies je geslacht</CardTitle>
-            <p className="text-gray-600">Dit helpt ons om de beste headshots voor je te genereren</p>
+            <p className="text-gray-600">Dit helpt ons om de juiste stijl en poses voor je headshots te kiezen.</p>
           </CardHeader>
+
           <CardContent className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {genderOptions.map((option) => (
                 <button
                   key={option.id}
                   onClick={() => setSelectedGender(option.id)}
-                  className={`p-6 rounded-lg border-2 transition-all duration-200 ${
-                    selectedGender === option.id
-                      ? "border-[#0077B5] bg-blue-50 text-[#0077B5]"
-                      : "border-gray-200 hover:border-gray-300 text-gray-700"
+                  className={`p-6 rounded-lg border-2 transition-all hover:border-blue-300 ${
+                    selectedGender === option.id ? "border-blue-600 bg-blue-50" : "border-gray-200 bg-white"
                   }`}
                 >
                   <div className="flex flex-col items-center space-y-3">
-                    <option.icon className="h-12 w-12" />
-                    <span className="text-lg font-medium">{option.label}</span>
+                    <option.icon
+                      className={`w-12 h-12 ${selectedGender === option.id ? "text-blue-600" : "text-gray-400"}`}
+                    />
+                    <span
+                      className={`text-lg font-medium ${
+                        selectedGender === option.id ? "text-blue-600" : "text-gray-700"
+                      }`}
+                    >
+                      {option.label}
+                    </span>
                   </div>
                 </button>
               ))}
@@ -116,10 +119,16 @@ export default function GenderPage() {
               <Button
                 onClick={handleNext}
                 disabled={!selectedGender || loading}
-                className="bg-[#0077B5] hover:bg-[#004182] text-white"
+                className="bg-blue-600 hover:bg-blue-700"
               >
-                {loading ? "Bezig..." : "Volgende"}
-                <ArrowRight className="ml-2 h-4 w-4" />
+                {loading ? (
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                ) : (
+                  <>
+                    Volgende
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </>
+                )}
               </Button>
             </div>
           </CardContent>

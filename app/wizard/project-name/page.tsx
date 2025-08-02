@@ -17,9 +17,6 @@ export default function ProjectNamePage() {
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    console.log("🔍 Project name page - Session status:", status)
-    console.log("🔍 Project name page - Session:", session)
-
     if (status === "loading") return
 
     if (!session) {
@@ -28,14 +25,13 @@ export default function ProjectNamePage() {
       return
     }
 
-    console.log("✅ Session found, staying on project-name page")
-
     // Load existing project name if available
     const savedName = localStorage.getItem("wizard_project_name")
     if (savedName) {
       setProjectName(savedName)
-      console.log("📝 Loaded saved project name:", savedName)
     }
+
+    console.log("✅ Project name page loaded")
   }, [session, status, router])
 
   const handleNext = () => {
@@ -45,16 +41,15 @@ export default function ProjectNamePage() {
 
     // Save to localStorage
     localStorage.setItem("wizard_project_name", projectName.trim())
-    console.log("💾 Saved project name:", projectName.trim())
 
-    // Navigate to gender selection
+    console.log("✅ Project name saved:", projectName.trim())
     router.push("/wizard/gender")
   }
 
   if (status === "loading") {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0077B5]"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
       </div>
     )
   }
@@ -74,15 +69,18 @@ export default function ProjectNamePage() {
         <Card>
           <CardHeader className="text-center">
             <CardTitle className="text-2xl">Geef je project een naam</CardTitle>
-            <p className="text-gray-600">Kies een naam zodat je je project makkelijk kunt terugvinden</p>
+            <p className="text-gray-600">
+              Kies een naam voor je headshot project. Dit helpt je later om je foto's terug te vinden.
+            </p>
           </CardHeader>
+
           <CardContent className="space-y-6">
             <div className="space-y-2">
               <Label htmlFor="projectName">Project naam</Label>
               <Input
                 id="projectName"
                 type="text"
-                placeholder="Bijv. LinkedIn Headshots, CV Foto's, Bedrijfsprofiel"
+                placeholder="Bijv. LinkedIn Headshots, Zakelijke Foto's..."
                 value={projectName}
                 onChange={(e) => setProjectName(e.target.value)}
                 className="text-lg py-3"
@@ -100,10 +98,16 @@ export default function ProjectNamePage() {
               <Button
                 onClick={handleNext}
                 disabled={!projectName.trim() || loading}
-                className="bg-[#0077B5] hover:bg-[#004182] text-white"
+                className="bg-blue-600 hover:bg-blue-700"
               >
-                {loading ? "Bezig..." : "Volgende"}
-                <ArrowRight className="ml-2 h-4 w-4" />
+                {loading ? (
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                ) : (
+                  <>
+                    Volgende
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </>
+                )}
               </Button>
             </div>
           </CardContent>
