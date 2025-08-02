@@ -38,17 +38,23 @@ export default function WizardCheckoutPage() {
     setLoading(true)
 
     try {
-      console.log("🛒 Starting checkout with correct price ID")
+      console.log("🛒 Starting wizard checkout with PRICING_PLAN.priceId:", PRICING_PLAN.priceId)
+      console.log("🛒 Wizard data:", wizardData)
 
-      // Use the same API as pricing page but with wizard data
+      // Use existing create-checkout API with wizard metadata
       const response = await fetch("/api/stripe/create-checkout", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          priceId: "price_1RrFTnDswbEJWagVnjXYvNwh", // Use the working price ID
-          wizardData,
+          priceId: PRICING_PLAN.priceId, // Use correct price ID from lib/stripe.ts
+          wizardData: {
+            flow: "wizard",
+            projectName: wizardData.projectName,
+            gender: wizardData.gender,
+            uploadedPhotos: wizardData.uploadedPhotos,
+          },
           successUrl: `${window.location.origin}/wizard/welcome?success=true`,
           cancelUrl: `${window.location.origin}/wizard/checkout?canceled=true`,
         }),
@@ -59,10 +65,11 @@ export default function WizardCheckoutPage() {
       if (data.url) {
         window.location.href = data.url
       } else {
+        console.error("❌ No checkout URL received:", data)
         alert("Er is een fout opgetreden. Probeer het opnieuw.")
       }
     } catch (error) {
-      console.error("Error:", error)
+      console.error("❌ Checkout error:", error)
       alert("Er is een fout opgetreden. Probeer het opnieuw.")
     } finally {
       setLoading(false)
