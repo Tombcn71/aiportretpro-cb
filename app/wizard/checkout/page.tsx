@@ -10,28 +10,71 @@ import { PRICING_PLAN } from "@/lib/stripe"
 import Image from "next/image"
 
 export default function WizardCheckoutPage() {
-  const { data: session } = useSession()
+  const { data: session, status } = useSession()
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [wizardData, setWizardData] = useState<any>(null)
 
   useEffect(() => {
-    // Get all wizard data from localStorage
-    const projectName = localStorage.getItem("wizard_project_name")
-    const gender = localStorage.getItem("wizard_gender")
-    const uploadedPhotos = localStorage.getItem("wizard_uploaded_photos")
-
-    if (!projectName || !gender || !uploadedPhotos) {
+    if (status === "loading") return
+    if (!session) {
       router.push("/wizard/welcome")
       return
     }
 
-    setWizardData({
-      projectName,
-      gender,
-      uploadedPhotos: JSON.parse(uploadedPhotos),
-    })
-  }, [router])
+    // Get all wizard data from localStorage with consistent keys
+    const projectName = localStorage.getItem("wizard_project_name")
+    const gender = localStorage.getItem("wizard_gender")
+    const uploadedPhotos = localStorage.getItem("wizard_uploaded_photos")
+
+    console.log("🔍 Checking wizard data:")
+    console.log("Project name:", projectName)
+    console.log("Gender:", gender)
+    console.log("Uploaded photos:", uploadedPhotos)
+
+    if (!projectName) {
+      console.log("❌ No project name, redirecting to project-name")
+      router.push("/wizard/project-name")
+      return
+    }
+
+    if (!gender) {
+      console.log("❌ No gender, redirecting to gender")
+      router.push("/wizard/gender")
+      return
+    }
+
+    if (!uploadedPhotos) {
+      console.log("❌ No uploaded photos, redirecting to upload")
+      router.push("/wizard/upload")
+      return
+    }
+
+    try {
+      const parsedPhotos = JSON.parse(uploadedPhotos)
+      if (!Array.isArray(parsedPhotos) || parsedPhotos.length === 0) {
+        console.log("❌ Invalid photos array, redirecting to upload")
+        router.push("/wizard/upload")
+        return
+      }
+
+      setWizardData({
+        projectName,
+        gender,
+        uploadedPhotos: parsedPhotos,
+      })
+
+      console.log("✅ All wizard data loaded:", {
+        projectName,
+        gender,
+        uploadedPhotos: parsedPhotos,
+      })
+    } catch (error) {
+      console.error("❌ Error parsing uploaded photos:", error)
+      router.push("/wizard/upload")
+      return
+    }
+  }, [session, status, router])
 
   const handleCheckout = async () => {
     if (!wizardData) return
@@ -50,7 +93,6 @@ export default function WizardCheckoutPage() {
         body: JSON.stringify({
           priceId: PRICING_PLAN.priceId, // Use correct price ID from lib/stripe.ts
           wizardData: {
-            flow: "wizard",
             projectName: wizardData.projectName,
             gender: wizardData.gender,
             uploadedPhotos: wizardData.uploadedPhotos,
@@ -63,6 +105,11 @@ export default function WizardCheckoutPage() {
       const data = await response.json()
 
       if (data.url) {
+        // Clear localStorage before redirect (data is now in Stripe metadata)
+        localStorage.removeItem("wizard_project_name")
+        localStorage.removeItem("wizard_gender")
+        localStorage.removeItem("wizard_uploaded_photos")
+
         window.location.href = data.url
       } else {
         console.error("❌ No checkout URL received:", data)
@@ -74,6 +121,18 @@ export default function WizardCheckoutPage() {
     } finally {
       setLoading(false)
     }
+  }
+
+  if (status === "loading") {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0077B5]"></div>
+      </div>
+    )
+  }
+
+  if (!session) {
+    return null
   }
 
   if (!wizardData) {
@@ -91,9 +150,9 @@ export default function WizardCheckoutPage() {
           {/* Left side - Pricing */}
           <div className="space-y-8">
             <div>
-              <Button variant="ghost" onClick={() => router.back()} className="mb-4">
+              <Button variant="ghost" onClick={() => router.push("/wizard/upload")} className="mb-4">
                 <ArrowLeft className="mr-2 h-4 w-4" />
-                Back
+                Terug
               </Button>
               <h1 className="text-4xl font-bold text-gray-900 mb-2">Amazing headshots are waiting for you!</h1>
               <p className="text-gray-600">
@@ -114,6 +173,27 @@ export default function WizardCheckoutPage() {
               <div className="flex items-center">
                 <Star className="w-4 h-4 text-green-500 mr-1" />
                 <span>TrustPilot 4.8</span>
+              </div>
+            </div>
+
+            {/* Order summary */}
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <h3 className="font-semibold mb-2">Je bestelling:</h3>
+              <div className="space-y-1 text-sm">
+                <div className="flex justify-between">
+                  <span>Project:</span>
+                  <span>{wizardData.projectName}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Type:</span>
+                  <span>
+                    {wizardData.gender === "man" ? "Man" : wizardData.gender === "woman" ? "Vrouw" : "Unisex"}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Foto's:</span>
+                  <span>{wizardData.uploadedPhotos.length} geüpload</span>
+                </div>
               </div>
             </div>
 

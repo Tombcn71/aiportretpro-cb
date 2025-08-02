@@ -1,32 +1,50 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { User, Users } from "lucide-react"
+import { User, Users, ArrowLeft, ArrowRight } from "lucide-react"
 import { ProgressBar } from "@/components/ui/progress-bar"
 
 export default function GenderPage() {
+  const { data: session, status } = useSession()
   const [selectedGender, setSelectedGender] = useState("")
+  const [loading, setLoading] = useState(false)
   const router = useRouter()
 
-  const handleContinue = () => {
-    if (selectedGender) {
-      const existingData = JSON.parse(localStorage.getItem("wizardData") || "{}")
-      localStorage.setItem(
-        "wizardData",
-        JSON.stringify({
-          ...existingData,
-          gender: selectedGender,
-          // Set default values for outfit and background since we're skipping those steps
-          outfits: ["business-professional"], // Default outfit
-          backgrounds: ["office"], // Default background
-        }),
-      )
-      // Skip outfit and background steps, go directly to upload
-      router.push("/wizard/upload")
+  useEffect(() => {
+    if (status === "loading") return
+    if (!session) {
+      router.push("/wizard/welcome")
+      return
     }
+
+    // Check if previous step is completed
+    const projectName = localStorage.getItem("wizard_project_name")
+    if (!projectName) {
+      router.push("/wizard/project-name")
+      return
+    }
+
+    // Load existing gender if available
+    const savedGender = localStorage.getItem("wizard_gender")
+    if (savedGender) {
+      setSelectedGender(savedGender)
+    }
+  }, [session, status, router])
+
+  const handleContinue = () => {
+    if (!selectedGender) return
+
+    setLoading(true)
+
+    // Save gender with consistent key
+    localStorage.setItem("wizard_gender", selectedGender)
+
+    // Navigate to upload
+    router.push("/wizard/upload")
   }
 
   const genderOptions = [
@@ -35,11 +53,23 @@ export default function GenderPage() {
     { id: "non-binary", label: "Unisex", icon: Users },
   ]
 
+  if (status === "loading") {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0077B5]"></div>
+      </div>
+    )
+  }
+
+  if (!session) {
+    return null
+  }
+
   return (
-    <div className="min-h-screen bg-gray-50 p-4">
-      <div className="max-w-2xl mx-auto">
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="container mx-auto px-4 max-w-2xl">
         <div className="mb-8">
-          <ProgressBar currentStep={2} totalSteps={3} />
+          <ProgressBar currentStep={2} totalSteps={4} />
         </div>
 
         <Card className="w-full">
@@ -72,13 +102,22 @@ export default function GenderPage() {
                 )
               })}
             </div>
-            <Button
-              onClick={handleContinue}
-              disabled={!selectedGender}
-              className="w-full bg-[#0077B5] hover:bg-[#004182] text-white"
-            >
-              Doorgaan
-            </Button>
+
+            <div className="flex justify-between">
+              <Button variant="ghost" onClick={() => router.push("/wizard/project-name")} disabled={loading}>
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Terug
+              </Button>
+
+              <Button
+                onClick={handleContinue}
+                disabled={!selectedGender || loading}
+                className="bg-[#0077B5] hover:bg-[#004182] text-white"
+              >
+                {loading ? "Bezig..." : "Volgende"}
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>
