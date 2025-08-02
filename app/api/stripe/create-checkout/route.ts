@@ -7,9 +7,9 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 
 export async function POST(req: NextRequest) {
   try {
-    const { priceId, successUrl, cancelUrl, metadata, customerEmail } = await req.json()
+    const { priceId, successUrl, cancelUrl, customerEmail, metadata } = await req.json()
 
-    console.log("🛒 Creating Stripe checkout session:", {
+    console.log("💳 Creating Stripe checkout session:", {
       priceId,
       customerEmail,
       metadata,
@@ -27,11 +27,11 @@ export async function POST(req: NextRequest) {
       success_url: successUrl,
       cancel_url: cancelUrl,
       customer_email: customerEmail,
-      metadata: metadata,
+      metadata: metadata || {},
       allow_promotion_codes: true,
     })
 
-    console.log("✅ Checkout session created:", session.id)
+    console.log("✅ Stripe checkout session created:", session.id)
 
     return NextResponse.json({ url: session.url })
   } catch (error) {
