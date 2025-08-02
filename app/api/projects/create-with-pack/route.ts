@@ -1,142 +1,119 @@
-import { NextResponse } from "next/server"
-import axios from "axios"
+import { type NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
-import { getUserByEmail, sql } from "@/lib/db"
-import { CreditManager } from "@/lib/credits"
+import { neon } from "@neondatabase/serverless"
+import { createTuneWithPack } from "@/lib/astria"
 
-export const dynamic = "force-dynamic"
+const sql = neon(process.env.DATABASE_URL!)
 
-const astriaApiKey = process.env.ASTRIA_API_KEY
-const appWebhookSecret = process.env.APP_WEBHOOK_SECRET
-
-if (!appWebhookSecret) {
-  throw new Error("MISSING APP_WEBHOOK_SECRET!")
-}
-
-export async function POST(request: Request) {
-  const payload = await request.json()
-  const { projectName, gender, selectedPackId, uploadedPhotos } = payload
-
-  console.log("Creating project with pack:", {
-    projectName,
-    gender,
-    selectedPackId,
-    photoCount: uploadedPhotos?.length,
-  })
-
-  const session = await getServerSession(authOptions)
-  if (!session?.user?.email) {
-    return NextResponse.json({ message: "Unauthorized" }, { status: 401 })
-  }
-
-  if (!astriaApiKey) {
-    return NextResponse.json(
-      { message: "Missing API Key: Add your Astria API Key to generate headshots" },
-      { status: 500 },
-    )
-  }
-
-  if (!uploadedPhotos || uploadedPhotos.length < 4) {
-    return NextResponse.json({ message: "Upload at least 4 sample images" }, { status: 500 })
-  }
-
-  if (!selectedPackId) {
-    return NextResponse.json({ message: "Pack ID is required" }, { status: 400 })
-  }
-
-  // Get user from Neon database
-  const user = await getUserByEmail(session.user.email)
-  if (!user) {
-    return NextResponse.json({ error: "User not found" }, { status: 404 })
-  }
-
-  // Check credits using CreditManager - SAME AS USE-CREDITS
-  const currentCredits = await CreditManager.getUserCredits(user.id)
-  if (currentCredits < 1) {
-    return NextResponse.json(
-      { message: "Not enough credits, please purchase some credits and try again." },
-      { status: 500 },
-    )
-  }
-
-  // Create a project in database
-  let projectId
+export async function POST(req: NextRequest) {
   try {
-    const result = await sql`
-      INSERT INTO projects (user_id, name, gender, outfits, backgrounds, uploaded_photos, status, credits_used)
-      VALUES (${user.id}, ${projectName}, ${gender}, ${[]}, ${[]}, ${uploadedPhotos}, 'training', 0)
-      RETURNING id
+    const session = await getServerSession(authOptions)
+
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
+    const body = await req.json()
+    const { projectName, gender, uploadedPhotos, packId } = body
+
+    console.log("🚀 Creating project with pack:", {
+      projectName,
+      gender,
+      photosCount: uploadedPhotos?.length,
+      packId,
+      userEmail: session.user.email,
+    })
+
+    if (!projectName || !gender || !uploadedPhotos || !Array.isArray(uploadedPhotos)) {
+      return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
+    }
+
+    // Get user ID from email
+    const userResult = await sql`
+      SELECT id FROM users WHERE email = ${session.user.email}
     `
-    projectId = result[0].id
-    console.log(`✅ Project created with ID ${projectId}`)
-  } catch (error) {
-    console.error("Project creation error:", error)
-    return NextResponse.json({ message: "Something went wrong!" }, { status: 500 })
-  }
 
-  try {
-    const baseUrl = process.env.NEXTAUTH_URL || `https://${process.env.VERCEL_URL}`
-    const DOMAIN = "https://api.astria.ai"
+    if (userResult.length === 0) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 })
+    }
 
-    const tuneBody = {
-      tune: {
-        title: `${projectName}_${projectId}`,
-        name: gender,
-        image_urls: uploadedPhotos,
-        callback: `${baseUrl}/api/astria/train-webhook?user_id=${user.id}&model_id=${projectId}&webhook_secret=${appWebhookSecret}`,
-        prompt_attributes: {
-          callback: `${baseUrl}/api/astria/prompt-webhook?user_id=${user.id}&model_id=${projectId}&webhook_secret=${appWebhookSecret}`,
+    const userId = userResult[0].id
+
+    // Create project in database
+    const projectResult = await sql`
+      INSERT INTO projects (
+        user_id,
+        name,
+        gender,
+        status,
+        created_at,
+        updated_at
+      ) VALUES (
+        ${userId},
+        ${projectName},
+        ${gender},
+        'training',
+        NOW(),
+        NOW()
+      ) RETURNING id
+    `
+
+    const projectId = projectResult[0].id
+    console.log("✅ Project created with ID:", projectId)
+
+    // Start Astria training with CORRECT parameters
+    try {
+      console.log("🎯 Starting Astria training...")
+      const astriaResult = await createTuneWithPack(
+        packId || (gender === "man" ? "clkv6uxh40001l608ovk7lhpx" : "clkv6uy8g0003l608rk8d5vc6"),
+        {
+          title: projectName,
+          name: `project_${projectId}_${Date.now()}`,
+          imageUrls: uploadedPhotos,
+          projectId: projectId,
+          userId: userId,
         },
-      },
-    }
+      )
 
-    console.log(`Creating tune with pack ${selectedPackId}`)
+      console.log("✅ Astria training started:", astriaResult)
 
-    const response = await axios.post(`${DOMAIN}/p/${selectedPackId}/tunes`, tuneBody, {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${astriaApiKey}`,
-      },
-    })
+      // Update project with Astria details
+      await sql`
+        UPDATE projects 
+        SET 
+          tune_id = ${astriaResult.id},
+          astria_model_id = ${astriaResult.id},
+          updated_at = NOW()
+        WHERE id = ${projectId}
+      `
 
-    if (response.status !== 201) {
-      console.error("Astria error:", response.status, response.data)
-      await sql`DELETE FROM projects WHERE id = ${projectId}`
-      return NextResponse.json({ message: "Astria API error" }, { status: response.status })
-    }
-
-    // Update project with tune ID
-    await sql`
-      UPDATE projects 
-      SET tune_id = ${response.data.id.toString()}, status = 'training'
-      WHERE id = ${projectId}
-    `
-
-    // Use credit - EXACT SAME AS USE-CREDITS ROUTE
-    await CreditManager.useCredit(user.id, projectId)
-    console.log(`✅ Credit used successfully for project ${projectId}`)
-
-    return NextResponse.json({
-      message: "success",
-      projectId: projectId,
-      tuneId: response.data.id,
-    })
-  } catch (error) {
-    console.error("Tune creation error:", error)
-
-    // Rollback project
-    if (projectId) {
-      await sql`DELETE FROM projects WHERE id = ${projectId}`
-    }
-
-    if (axios.isAxiosError(error)) {
-      console.error("Axios error details:", {
-        status: error.response?.status,
-        data: error.response?.data,
+      return NextResponse.json({
+        success: true,
+        projectId,
+        tuneId: astriaResult.id,
+        modelId: astriaResult.id,
       })
-    }
+    } catch (astriaError) {
+      console.error("❌ Astria training failed:", astriaError)
 
-    return NextResponse.json({ message: "Something went wrong!" }, { status: 500 })
+      // Update project status to failed
+      await sql`
+        UPDATE projects 
+        SET status = 'failed', updated_at = NOW()
+        WHERE id = ${projectId}
+      `
+
+      return NextResponse.json(
+        {
+          error: "Failed to start AI training",
+          projectId,
+        },
+        { status: 500 },
+      )
+    }
+  } catch (error) {
+    console.error("❌ Error creating project with pack:", error)
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }
