@@ -28,57 +28,24 @@ export default function WizardCheckoutPage() {
       return
     }
 
-    // Get all wizard data from localStorage with consistent keys
     const projectName = localStorage.getItem("wizard_project_name")
     const gender = localStorage.getItem("wizard_gender")
     const uploadedPhotos = localStorage.getItem("wizard_uploaded_photos")
 
-    console.log("🔍 Checking wizard data:")
-    console.log("Project name:", projectName)
-    console.log("Gender:", gender)
-    console.log("Uploaded photos:", uploadedPhotos)
-
-    if (!projectName) {
-      console.log("❌ No project name, redirecting to project-name")
-      router.push("/wizard/project-name")
-      return
-    }
-
-    if (!gender) {
-      console.log("❌ No gender, redirecting to gender")
-      router.push("/wizard/gender")
-      return
-    }
-
-    if (!uploadedPhotos) {
-      console.log("❌ No uploaded photos, redirecting to upload")
-      router.push("/wizard/upload")
+    if (!projectName || !gender || !uploadedPhotos) {
+      router.push("/wizard/welcome")
       return
     }
 
     try {
       const parsedPhotos = JSON.parse(uploadedPhotos)
-      if (!Array.isArray(parsedPhotos) || parsedPhotos.length === 0) {
-        console.log("❌ Invalid photos array, redirecting to upload")
-        router.push("/wizard/upload")
-        return
-      }
-
       setWizardData({
         projectName,
         gender,
         uploadedPhotos: parsedPhotos,
       })
-
-      console.log("✅ All wizard data loaded:", {
-        projectName,
-        gender,
-        uploadedPhotos: parsedPhotos,
-      })
     } catch (error) {
-      console.error("❌ Error parsing uploaded photos:", error)
       router.push("/wizard/upload")
-      return
     }
   }, [session, status, router])
 
@@ -87,103 +54,187 @@ export default function WizardCheckoutPage() {
     setLoading(true)
 
     try {
-      console.log("🛒 Starting wizard checkout with PRICING_PLAN.priceId:", PRICING_PLAN.priceId)
-      console.log("🛒 Wizard data:", wizardData)
-
-      // Use existing create-checkout API with wizard metadata
       const response = await fetch("/api/stripe/create-checkout", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          priceId: PRICING_PLAN.priceId, // Use correct price ID from lib/stripe.ts
-          wizardData: {
-            projectName: wizardData.projectName,
-            gender: wizardData.gender,
-            uploadedPhotos: wizardData.uploadedPhotos,
-          },
-          successUrl: `${window.location.origin}/wizard/welcome?success=true`,
-          cancelUrl: `${window.location.origin}/wizard/checkout?canceled=true`,
+          priceId: PRICING_PLAN.priceId,
+          wizardData: wizardData,
+          successUrl: `${window.location.origin}/dashboard`,
+          cancelUrl: `${window.location.origin}/wizard/checkout`,
         }),
       })
 
       const data = await response.json()
 
       if (data.url) {
-        // Clear localStorage before redirect (data is now in Stripe metadata)
         localStorage.removeItem("wizard_project_name")
         localStorage.removeItem("wizard_gender")
         localStorage.removeItem("wizard_uploaded_photos")
-
         window.location.href = data.url
       } else {
-        console.error("❌ No checkout URL received:", data)
         alert("Er is een fout opgetreden. Probeer het opnieuw.")
       }
     } catch (error) {
-      console.error("❌ Checkout error:", error)
+      console.error("Checkout error:", error)
       alert("Er is een fout opgetreden. Probeer het opnieuw.")
     } finally {
       setLoading(false)
     }
   }
 
-  if (status === "loading") {
+  if (status === "loading" || !wizardData) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0077B5]"></div>
-      </div>
-    )
-  }
-
-  if (!session) {
-    return null
-  }
-
-  if (!wizardData) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0077B5]"></div>
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          {/* Left side - Pricing */}
+    <div className="min-h-screen bg-white">
+      <div className="container mx-auto px-6 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
+          {/* Left side - Photos grid */}
           <div className="space-y-8">
             <div>
-              <Button variant="ghost" onClick={() => router.push("/wizard/upload")} className="mb-4">
+              <Button variant="ghost" onClick={() => router.push("/wizard/upload")} className="mb-6 p-0 h-auto">
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Back
               </Button>
-              <h1 className="text-4xl font-bold text-gray-900 mb-2">Amazing headshots are waiting for you!</h1>
-              <p className="text-gray-600">
-                We offer a package for every budget. Pay once, no subscriptions or hidden fees.
-              </p>
+              <h1 className="text-5xl font-bold text-gray-900 mb-4 leading-tight">
+                Get your headshots in <span className="text-orange-500">minutes</span>, not days
+              </h1>
             </div>
 
-            {/* Trust badges */}
-            <div className="flex items-center space-x-6 text-sm">
-              <div className="flex items-center">
-                <Check className="w-4 h-4 text-green-500 mr-2" />
-                <span>100% Money Back Guarantee</span>
+            {/* Photos grid - 2x4 layout */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="aspect-square rounded-2xl overflow-hidden">
+                <Image
+                  src="/images/professional-man-1.jpg"
+                  alt="Professional headshot"
+                  width={200}
+                  height={200}
+                  className="w-full h-full object-cover"
+                />
               </div>
-              <div className="flex items-center">
-                <Star className="w-4 h-4 text-yellow-500 mr-1" />
-                <span>Google Reviews 4.8</span>
+              <div className="aspect-square rounded-2xl overflow-hidden">
+                <Image
+                  src="/images/professional-woman-1.jpg"
+                  alt="Professional headshot"
+                  width={200}
+                  height={200}
+                  className="w-full h-full object-cover"
+                />
               </div>
+              <div className="aspect-square rounded-2xl overflow-hidden">
+                <Image
+                  src="/images/professional-man-2.jpg"
+                  alt="Professional headshot"
+                  width={200}
+                  height={200}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="aspect-square rounded-2xl overflow-hidden">
+                <Image
+                  src="/images/professional-woman-2.jpg"
+                  alt="Professional headshot"
+                  width={200}
+                  height={200}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="aspect-square rounded-2xl overflow-hidden">
+                <Image
+                  src="/images/professional-man-3.jpg"
+                  alt="Professional headshot"
+                  width={200}
+                  height={200}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="aspect-square rounded-2xl overflow-hidden">
+                <Image
+                  src="/images/professional-woman-3.jpg"
+                  alt="Professional headshot"
+                  width={200}
+                  height={200}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="aspect-square rounded-2xl overflow-hidden">
+                <Image
+                  src="/images/professional-man-4.jpg"
+                  alt="Professional headshot"
+                  width={200}
+                  height={200}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="aspect-square rounded-2xl overflow-hidden">
+                <Image
+                  src="/images/professional-woman-4.jpg"
+                  alt="Professional headshot"
+                  width={200}
+                  height={200}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            </div>
+
+            {/* Trustpilot */}
+            <div className="flex items-center space-x-2">
+              <div className="flex">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} className="w-4 h-4 text-green-500 fill-current" />
+                ))}
+              </div>
+              <span className="text-sm font-medium">Trustpilot</span>
+            </div>
+
+            {/* Testimonial */}
+            <div className="bg-gray-50 p-6 rounded-xl">
+              <p className="text-gray-700 italic mb-4">
+                "Some of my family initially worried that I was wasting time and money, but after seeing the results,
+                they were amazed. I had been dreading the task of getting a great photo for my author bio in my upcoming
+                book, and now that worry is gone. Thank you!"
+              </p>
               <div className="flex items-center">
-                <Star className="w-4 h-4 text-green-500 mr-1" />
-                <span>TrustPilot 4.8</span>
+                <div className="w-10 h-10 bg-gray-300 rounded-full mr-3"></div>
+                <span className="font-medium">Adam Weygandt</span>
+              </div>
+            </div>
+
+            {/* Company logos */}
+            <div className="space-y-4">
+              <p className="text-center text-gray-600 font-medium">Trusted by teams at</p>
+              <div className="flex items-center justify-center space-x-8 opacity-60 text-xs">
+                <span>Trinity College</span>
+                <span>NEW YORK UNIVERSITY</span>
+                <span>ASU</span>
+                <span>UC Berkeley</span>
+                <span>Microsoft</span>
+                <span>PWC</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Right side - Pricing */}
+          <div className="flex flex-col justify-center max-w-md mx-auto w-full">
+            <div className="mb-8 text-right">
+              <div className="inline-flex items-center space-x-2">
+                <div className="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center">
+                  <span className="text-white font-bold text-sm">A</span>
+                </div>
+                <span className="font-bold text-lg">Aragon.ai</span>
               </div>
             </div>
 
             {/* Order summary */}
-            <div className="bg-gray-50 p-4 rounded-lg">
+            <div className="bg-gray-50 p-4 rounded-lg mb-6">
               <h3 className="font-semibold mb-2">Je bestelling:</h3>
               <div className="space-y-1 text-sm">
                 <div className="flex justify-between">
@@ -203,8 +254,8 @@ export default function WizardCheckoutPage() {
               </div>
             </div>
 
-            {/* Single pricing card */}
-            <Card className="border-2 border-orange-500">
+            {/* Pricing Card */}
+            <Card className="border-2 border-orange-500 mb-6">
               <CardHeader>
                 <div className="flex justify-between items-start">
                   <div>
@@ -222,33 +273,23 @@ export default function WizardCheckoutPage() {
               <CardContent className="space-y-4">
                 <div className="space-y-3">
                   <div className="flex items-center">
-                    <div className="w-5 h-5 bg-orange-100 rounded-full flex items-center justify-center mr-3">
-                      <span className="text-orange-600 text-sm">👤</span>
-                    </div>
+                    <Check className="w-5 h-5 text-green-500 mr-3" />
                     <span>{PRICING_PLAN.photos} headshots</span>
                   </div>
                   <div className="flex items-center">
-                    <div className="w-5 h-5 bg-orange-100 rounded-full flex items-center justify-center mr-3">
-                      <span className="text-orange-600 text-sm">⏱️</span>
-                    </div>
+                    <Check className="w-5 h-5 text-green-500 mr-3" />
                     <span>15 mins generation time</span>
                   </div>
                   <div className="flex items-center">
-                    <div className="w-5 h-5 bg-orange-100 rounded-full flex items-center justify-center mr-3">
-                      <span className="text-orange-600 text-sm">👔</span>
-                    </div>
+                    <Check className="w-5 h-5 text-green-500 mr-3" />
                     <span>All attires included</span>
                   </div>
                   <div className="flex items-center">
-                    <div className="w-5 h-5 bg-orange-100 rounded-full flex items-center justify-center mr-3">
-                      <span className="text-orange-600 text-sm">🖼️</span>
-                    </div>
+                    <Check className="w-5 h-5 text-green-500 mr-3" />
                     <span>All backgrounds included</span>
                   </div>
                   <div className="flex items-center">
-                    <div className="w-5 h-5 bg-orange-100 rounded-full flex items-center justify-center mr-3">
-                      <span className="text-orange-600 text-sm">📸</span>
-                    </div>
+                    <Check className="w-5 h-5 text-green-500 mr-3" />
                     <span>Enhanced image resolution</span>
                   </div>
                 </div>
@@ -258,62 +299,24 @@ export default function WizardCheckoutPage() {
                   disabled={loading}
                   className="w-full bg-orange-500 hover:bg-orange-600 text-white py-4 text-lg font-semibold"
                 >
-                  {loading ? "Loading..." : "Get My Headshots"}
+                  {loading ? "Creating checkout..." : "Get My Headshots"}
                 </Button>
               </CardContent>
             </Card>
-          </div>
 
-          {/* Right side - Example photos */}
-          <div className="space-y-6">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-4">
-                <div className="aspect-square rounded-lg overflow-hidden relative">
-                  <Image
-                    src="/images/professional-woman-1.jpg"
-                    alt="Professional headshot"
-                    fill
-                    className="object-cover"
-                  />
-                  <div className="absolute top-2 right-2 bg-orange-500 text-white px-2 py-1 rounded text-xs">
-                    🔥 AI Generated by Aragon
-                  </div>
+            {/* Security badges */}
+            <div className="space-y-2 text-sm text-gray-600">
+              <div className="flex items-center justify-center">
+                <div className="w-4 h-4 border border-gray-400 rounded-full mr-2 flex items-center justify-center">
+                  <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
                 </div>
-                <div className="aspect-square rounded-lg overflow-hidden relative">
-                  <Image
-                    src="/images/professional-man-1.jpg"
-                    alt="Professional headshot"
-                    fill
-                    className="object-cover"
-                  />
-                  <div className="absolute top-2 right-2 bg-orange-500 text-white px-2 py-1 rounded text-xs">
-                    🔥 AI Generated by Aragon
-                  </div>
-                </div>
+                <span>Security built for Fortune 500 companies</span>
               </div>
-              <div className="space-y-4 mt-8">
-                <div className="aspect-square rounded-lg overflow-hidden relative">
-                  <Image
-                    src="/images/professional-man-2.jpg"
-                    alt="Professional headshot"
-                    fill
-                    className="object-cover"
-                  />
-                  <div className="absolute top-2 right-2 bg-orange-500 text-white px-2 py-1 rounded text-xs">
-                    🔥 AI Generated by Aragon
-                  </div>
+              <div className="flex items-center justify-center">
+                <div className="w-4 h-4 border border-green-500 rounded-full mr-2 flex items-center justify-center">
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                 </div>
-                <div className="aspect-square rounded-lg overflow-hidden relative">
-                  <Image
-                    src="/images/professional-woman-2.jpg"
-                    alt="Professional headshot"
-                    fill
-                    className="object-cover"
-                  />
-                  <div className="absolute top-2 right-2 bg-orange-500 text-white px-2 py-1 rounded text-xs">
-                    🔥 AI Generated by Aragon
-                  </div>
-                </div>
+                <span>100% Money Back Guarantee</span>
               </div>
             </div>
           </div>
