@@ -1,5 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server"
 import Stripe from "stripe"
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/lib/auth"
 import { trackInitiateCheckout } from "@/lib/facebook-pixel"
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
@@ -8,6 +10,12 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 
 export async function POST(req: NextRequest) {
   try {
+    const session = await getServerSession(authOptions)
+
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: "Not authenticated" }, { status: 401 })
+    }
+
     const body = await req.json()
     const { planId, priceId, wizardData, successUrl, cancelUrl } = body
 
@@ -15,7 +23,7 @@ export async function POST(req: NextRequest) {
     const finalPriceId = priceId || "price_1RrFTnDswbEJWagVnjXYvNwh"
 
     console.log("🛒 Creating checkout session with price ID:", finalPriceId)
-    console.log("🛒 Wizard data:", wizardData)
+    console.log("🛒 User email:", session.user.email)
 
     // Track Facebook Pixel event
     if (typeof window !== "undefined") {
@@ -27,7 +35,7 @@ export async function POST(req: NextRequest) {
       })
     }
 
-    const session = await stripe.checkout.sessions.create({
+    const checkoutSession = await stripe.checkout.sessions.create({
       payment_method_types: ["card", "ideal"],
       line_items: [
         {
@@ -38,10 +46,10 @@ export async function POST(req: NextRequest) {
       mode: "payment",
       success_url: successUrl || `${process.env.NEXTAUTH_URL}/dashboard`,
       cancel_url: cancelUrl || `${process.env.NEXTAUTH_URL}/pricing`,
+      customer_email: session.user.email, // EMAIL AUTOMATISCH INVULLEN
       metadata: wizardData
         ? {
             flow: "wizard",
-            wizardData: JSON.stringify(wizardData),
           }
         : {},
       allow_promotion_codes: true,
@@ -49,11 +57,11 @@ export async function POST(req: NextRequest) {
       customer_creation: "always",
     })
 
-    console.log("✅ Checkout session created:", session.id)
+    console.log("✅ Checkout session created:", checkoutSession.id)
 
     return NextResponse.json({
-      sessionId: session.id,
-      url: session.url,
+      sessionId: checkoutSession.id,
+      url: checkoutSession.url,
     })
   } catch (error) {
     console.error("❌ Error creating checkout session:", error)
