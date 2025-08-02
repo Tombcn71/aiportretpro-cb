@@ -6,7 +6,6 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ArrowRight, CheckCircle, Sparkles, Camera, Zap, Clock } from "lucide-react"
-import { ProgressBar } from "@/components/ui/progress-bar"
 
 export default function WelcomePage() {
   const { data: session, status } = useSession()
@@ -118,18 +117,9 @@ export default function WelcomePage() {
                     <div className="w-6 h-6 bg-gray-300 rounded-full flex items-center justify-center">
                       <span className="text-xs text-gray-600">4</span>
                     </div>
-                    <span className="text-gray-500">Email notificatie versturen</span>
+                    <span className="text-gray-500">Resultaten beschikbaar in dashboard</span>
                   </div>
                 </div>
-              </div>
-
-              {/* Email notification info */}
-              <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
-                <h4 className="font-medium text-blue-900 mb-2">📧 Email Notificatie</h4>
-                <p className="text-sm text-blue-800">
-                  Je krijgt een email op <strong>{session?.user?.email}</strong> zodra je headshots klaar zijn. Check
-                  ook je spam folder!
-                </p>
               </div>
 
               <div className="flex flex-col sm:flex-row gap-3">
@@ -153,11 +143,6 @@ export default function WelcomePage() {
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="container mx-auto px-4 max-w-2xl">
-        {/* Progress Bar */}
-        <div className="mb-8">
-          <ProgressBar currentStep={1} totalSteps={4} />
-        </div>
-
         {/* Welcome Card */}
         <Card className="mb-8">
           <CardHeader className="text-center">

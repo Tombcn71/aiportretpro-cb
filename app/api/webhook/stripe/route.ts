@@ -1,20 +1,16 @@
 import { type NextRequest, NextResponse } from "next/server"
-import Stripe from "stripe"
-import { headers } from "next/headers"
-import { getUserByEmail, createUser, sql } from "@/lib/db"
-import { CreditManager } from "@/lib/credits"
-import { trainWithPack } from "@/lib/astria-packs"
+import { sql } from "@/lib/db"
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2024-06-20",
-})
+async function getStripe() {
+  const { stripe } = await import("@/lib/stripe")
+  return stripe
+}
 
-export async function POST(req: NextRequest) {
+export async function POST(request: NextRequest) {
   console.log("🔔 WEBHOOK RECEIVED at", new Date().toISOString())
 
-  const body = await req.text()
-  const headersList = await headers()
-  const signature = headersList.get("stripe-signature")
+  const body = await request.text()
+  const signature = request.headers.get("stripe-signature")
 
   if (!signature) {
     console.log("❌ No signature")
@@ -26,124 +22,220 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Webhook secret not configured" }, { status: 500 })
   }
 
-  let event: Stripe.Event
-
   try {
-    event = stripe.webhooks.constructEvent(body, signature, process.env.STRIPE_WEBHOOK_SECRET!)
-  } catch (err: any) {
-    console.error(`Webhook signature verification failed: ${err.message}`)
-    return NextResponse.json({ error: "Invalid signature" }, { status: 400 })
-  }
+    const stripe = await getStripe()
+    const event = stripe.webhooks.constructEvent(body, signature, process.env.STRIPE_WEBHOOK_SECRET!)
 
-  console.log("✅ Event type:", event.type)
+    console.log("✅ Event type:", event.type)
 
-  if (event.type === "checkout.session.completed") {
-    const session = event.data.object as Stripe.Checkout.Session
+    if (event.type === "checkout.session.completed") {
+      const session = event.data.object
+      console.log("💳 Processing checkout session:", session.id)
 
-    console.log("💳 Checkout completed:", session.id)
-    console.log("📧 Customer email:", session.customer_email)
-    console.log("🗃️ Metadata:", session.metadata)
+      // Check if this is wizard flow
+      const isWizardFlow = session.metadata?.flow === "wizard"
 
-    if (!session.customer_email) {
-      console.error("❌ No customer email in session")
-      return NextResponse.json({ error: "No customer email" }, { status: 400 })
-    }
+      if (isWizardFlow) {
+        console.log("🧙‍♂️ Processing wizard flow")
 
-    // Check if this is wizard flow
-    const isWizardFlow = session.metadata?.flow === "wizard"
+        // Get wizard data from metadata
+        const wizardDataString = session.metadata?.wizardData
+        if (!wizardDataString) {
+          console.error("❌ No wizard data in metadata")
+          return NextResponse.json({ error: "No wizard data" }, { status: 400 })
+        }
 
-    if (isWizardFlow) {
-      console.log("🧙‍♂️ Processing wizard flow")
+        let wizardData
+        try {
+          wizardData = JSON.parse(wizardDataString)
+        } catch (err) {
+          console.error("❌ Failed to parse wizard data:", err)
+          return NextResponse.json({ error: "Invalid wizard data" }, { status: 400 })
+        }
 
-      // Get wizard data from metadata
-      const wizardDataString = session.metadata?.wizardData
-      if (!wizardDataString) {
-        console.error("❌ No wizard data in metadata")
-        return NextResponse.json({ error: "No wizard data" }, { status: 400 })
-      }
-
-      let wizardData
-      try {
-        wizardData = JSON.parse(wizardDataString)
-      } catch (err) {
-        console.error("❌ Failed to parse wizard data:", err)
-        return NextResponse.json({ error: "Invalid wizard data" }, { status: 400 })
-      }
-
-      // Get or create user
-      let user = await getUserByEmail(session.customer_email)
-      if (!user) {
-        user = await createUser({
-          email: session.customer_email,
-          name: session.customer_details?.name || "",
-          image: "",
-        })
-      }
-
-      console.log("👤 User:", user.id)
-
-      // Create project
-      const result = await sql`
-        INSERT INTO projects (user_id, name, gender, outfits, backgrounds, uploaded_photos, status, credits_used)
-        VALUES (${user.id}, ${wizardData.projectName}, ${wizardData.gender}, ${JSON.stringify([])}, ${JSON.stringify([])}, ${JSON.stringify(wizardData.uploadedPhotos)}, 'training', 0)
-        RETURNING id
-      `
-      const projectId = result[0].id
-
-      console.log("📁 Project created:", projectId)
-
-      // Start pack-based training using existing system
-      try {
-        const packId = "clx1qf18h0001mf088cjmehkz" // Use existing pack ID
-
-        const astriaResult = await trainWithPack({
-          packId: packId,
-          images: wizardData.uploadedPhotos,
-          projectName: wizardData.projectName,
-          gender: wizardData.gender,
-          projectId: projectId,
-        })
-
-        console.log("🚀 Astria training started:", astriaResult.id)
-
-        // Update project with tune_id
-        await sql`
-          UPDATE projects 
-          SET tune_id = ${astriaResult.id.toString()}, status = 'training'
-          WHERE id = ${projectId}
+        // Get user by email
+        const userResult = await sql`
+          SELECT * FROM users WHERE email = ${session.customer_email}
         `
 
-        console.log("✅ Wizard project created and training started")
-      } catch (error) {
-        console.error("❌ Error starting training:", error)
+        let userId
+        if (userResult[0]) {
+          userId = userResult[0].id
+        } else {
+          // Create user if doesn't exist
+          const newUser = await sql`
+            INSERT INTO users (email, name, image, created_at, updated_at)
+            VALUES (${session.customer_email}, ${session.customer_details?.name || "User"}, '', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+            RETURNING id
+          `
+          userId = newUser[0].id
+        }
 
-        // Update project status to failed
-        await sql`
-          UPDATE projects 
-          SET status = 'failed'
-          WHERE id = ${projectId}
+        console.log("👤 User ID:", userId)
+
+        // Create project with wizard data
+        const projectResult = await sql`
+          INSERT INTO projects (
+            user_id, 
+            name, 
+            gender, 
+            outfits, 
+            backgrounds, 
+            uploaded_photos, 
+            status, 
+            credits_used,
+            created_at,
+            updated_at
+          )
+          VALUES (
+            ${userId}, 
+            ${wizardData.projectName}, 
+            ${wizardData.gender}, 
+            ${JSON.stringify([])}, 
+            ${JSON.stringify([])}, 
+            ${JSON.stringify(wizardData.uploadedPhotos)}, 
+            'training', 
+            0,
+            CURRENT_TIMESTAMP,
+            CURRENT_TIMESTAMP
+          )
+          RETURNING id
         `
+
+        const projectId = projectResult[0].id
+        console.log("📁 Project created:", projectId)
+
+        // Start Astria training using existing pack system
+        try {
+          const { trainWithPack } = await import("@/lib/astria-packs")
+
+          const packId = "clx1qf18h0001mf088cjmehkz" // Use existing pack ID
+
+          const astriaResult = await trainWithPack({
+            packId: packId,
+            images: wizardData.uploadedPhotos,
+            projectName: wizardData.projectName,
+            gender: wizardData.gender,
+            projectId: projectId,
+          })
+
+          console.log("🚀 Astria training started:", astriaResult.id)
+
+          // Update project with tune_id
+          await sql`
+            UPDATE projects 
+            SET tune_id = ${astriaResult.id.toString()}, updated_at = CURRENT_TIMESTAMP
+            WHERE id = ${projectId}
+          `
+
+          console.log("✅ Wizard project created and training started")
+
+          return NextResponse.json({
+            received: true,
+            projectId,
+            tuneId: astriaResult.id,
+            message: "Wizard project created and training started",
+          })
+        } catch (error) {
+          console.error("❌ Error starting training:", error)
+
+          // Update project status to failed
+          await sql`
+            UPDATE projects 
+            SET status = 'failed', updated_at = CURRENT_TIMESTAMP
+            WHERE id = ${projectId}
+          `
+
+          return NextResponse.json({ error: "Training failed to start" }, { status: 500 })
+        }
+      } else {
+        console.log("💳 Processing regular credit flow")
+
+        // Original credit-based flow (unchanged)
+        const purchaseResult = await sql`
+          UPDATE purchases 
+          SET status = 'completed', updated_at = CURRENT_TIMESTAMP
+          WHERE stripe_session_id = ${session.id}
+          RETURNING user_id, id
+        `
+
+        if (purchaseResult[0]) {
+          const userId = purchaseResult[0].user_id
+          console.log(`👤 Adding credit for user ${userId}`)
+
+          try {
+            const creditResult = await sql`
+              INSERT INTO credits (user_id, credits, created_at, updated_at)
+              VALUES (${userId}, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+              ON CONFLICT (user_id) 
+              DO UPDATE SET 
+                credits = credits.credits + 1,
+                updated_at = CURRENT_TIMESTAMP
+              RETURNING credits
+            `
+
+            console.log(`✅ User ${userId} now has ${creditResult[0]?.credits} credits`)
+
+            return NextResponse.json({
+              received: true,
+              userId,
+              creditsAdded: 1,
+              totalCredits: creditResult[0]?.credits,
+            })
+          } catch (creditError) {
+            console.error("❌ Credit error:", creditError)
+
+            // Fallback: try to update existing or create new
+            const existingCredit = await sql`
+              SELECT credits FROM credits WHERE user_id = ${userId}
+            `
+
+            if (existingCredit[0]) {
+              const updateResult = await sql`
+                UPDATE credits 
+                SET credits = credits + 1, updated_at = CURRENT_TIMESTAMP
+                WHERE user_id = ${userId}
+                RETURNING credits
+              `
+              console.log(`✅ Updated credits for user ${userId}: ${updateResult[0]?.credits}`)
+
+              return NextResponse.json({
+                received: true,
+                userId,
+                creditsAdded: 1,
+                totalCredits: updateResult[0]?.credits,
+              })
+            } else {
+              const newCredit = await sql`
+                INSERT INTO credits (user_id, credits, created_at, updated_at)
+                VALUES (${userId}, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+                RETURNING credits
+              `
+              console.log(`✅ Created new credits for user ${userId}: ${newCredit[0]?.credits}`)
+
+              return NextResponse.json({
+                received: true,
+                userId,
+                creditsAdded: 1,
+                totalCredits: newCredit[0]?.credits,
+              })
+            }
+          }
+        } else {
+          console.log("❌ No purchase found for session:", session.id)
+        }
       }
-    } else {
-      console.log("💳 Processing regular credit flow")
-
-      // Original credit-based flow (unchanged)
-      let user = await getUserByEmail(session.customer_email)
-      if (!user) {
-        user = await createUser({
-          email: session.customer_email,
-          name: session.customer_details?.name || "",
-          image: "",
-        })
-      }
-
-      console.log("👤 User found/created:", user.id)
-
-      // Add credits using existing system
-      await CreditManager.addCredits(user.id, 1, `Stripe payment: ${session.id}`)
-      console.log("✅ Credit added successfully")
     }
-  }
 
-  return NextResponse.json({ received: true })
+    return NextResponse.json({ received: true })
+  } catch (error) {
+    console.error("❌ Webhook error:", error)
+    return NextResponse.json(
+      {
+        error: "Webhook error",
+        details: error instanceof Error ? error.message : "Unknown error",
+      },
+      { status: 400 },
+    )
+  }
 }

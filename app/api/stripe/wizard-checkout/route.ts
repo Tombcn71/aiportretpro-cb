@@ -20,6 +20,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Missing wizard data" }, { status: 400 })
     }
 
+    console.log("🛒 Creating wizard checkout with data:", wizardData)
+
     // Create Stripe checkout session
     const checkoutSession = await stripe.checkout.sessions.create({
       payment_method_types: ["card", "ideal"],

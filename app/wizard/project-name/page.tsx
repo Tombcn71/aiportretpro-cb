@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { ArrowLeft } from "lucide-react"
 import { ProgressBar } from "@/components/ui/progress-bar"
 
 export default function ProjectNamePage() {
@@ -14,14 +15,8 @@ export default function ProjectNamePage() {
 
   const handleContinue = () => {
     if (projectName.trim()) {
-      localStorage.setItem(
-        "wizardData",
-        JSON.stringify({
-          projectName: projectName.trim(),
-          selectedPackId: "928", // Portetfotos m/v pack
-          step: 1,
-        }),
-      )
+      // Save project name to localStorage
+      localStorage.setItem("wizard_project_name", projectName.trim())
       router.push("/wizard/gender")
     }
   }
@@ -30,7 +25,7 @@ export default function ProjectNamePage() {
     <div className="min-h-screen bg-gray-50 p-4">
       <div className="max-w-md mx-auto">
         <div className="mb-8">
-          <ProgressBar currentStep={1} totalSteps={3} />
+          <ProgressBar currentStep={1} totalSteps={4} />
         </div>
 
         <Card className="w-full">
@@ -50,17 +45,18 @@ export default function ProjectNamePage() {
               />
             </div>
 
-            <div className="space-y-4">
+            <div className="flex justify-between">
+              <Button variant="ghost" onClick={() => router.back()}>
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Terug
+              </Button>
+
               <Button
                 onClick={handleContinue}
                 disabled={!projectName.trim()}
-                className="w-full bg-[#0077B5] hover:bg-[#004182] text-white"
+                className="bg-[#0077B5] hover:bg-[#004182] text-white"
               >
                 Doorgaan
-              </Button>
-
-              <Button variant="ghost" onClick={() => router.back()} className="w-full">
-                ← Terug
               </Button>
             </div>
           </CardContent>

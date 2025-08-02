@@ -4,7 +4,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { User, Users } from "lucide-react"
+import { User, Users, ArrowLeft } from "lucide-react"
 import { ProgressBar } from "@/components/ui/progress-bar"
 
 export default function GenderPage() {
@@ -13,18 +13,8 @@ export default function GenderPage() {
 
   const handleContinue = () => {
     if (selectedGender) {
-      const existingData = JSON.parse(localStorage.getItem("wizardData") || "{}")
-      localStorage.setItem(
-        "wizardData",
-        JSON.stringify({
-          ...existingData,
-          gender: selectedGender,
-          // Set default values for outfit and background since we're skipping those steps
-          outfits: ["business-professional"], // Default outfit
-          backgrounds: ["office"], // Default background
-        }),
-      )
-      // Skip outfit and background steps, go directly to upload
+      // Save gender to localStorage
+      localStorage.setItem("wizard_gender", selectedGender)
       router.push("/wizard/upload")
     }
   }
@@ -39,7 +29,7 @@ export default function GenderPage() {
     <div className="min-h-screen bg-gray-50 p-4">
       <div className="max-w-2xl mx-auto">
         <div className="mb-8">
-          <ProgressBar currentStep={2} totalSteps={3} />
+          <ProgressBar currentStep={2} totalSteps={4} />
         </div>
 
         <Card className="w-full">
@@ -72,13 +62,21 @@ export default function GenderPage() {
                 )
               })}
             </div>
-            <Button
-              onClick={handleContinue}
-              disabled={!selectedGender}
-              className="w-full bg-[#0077B5] hover:bg-[#004182] text-white"
-            >
-              Doorgaan
-            </Button>
+
+            <div className="flex justify-between">
+              <Button variant="ghost" onClick={() => router.back()}>
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Terug
+              </Button>
+
+              <Button
+                onClick={handleContinue}
+                disabled={!selectedGender}
+                className="bg-[#0077B5] hover:bg-[#004182] text-white"
+              >
+                Doorgaan
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>
