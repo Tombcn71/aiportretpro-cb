@@ -12,34 +12,12 @@ import Image from "next/image"
 export default function WizardCheckoutPage() {
   const { data: session } = useSession()
   const [loading, setLoading] = useState(false)
-  const [wizardData, setWizardData] = useState<any>(null)
   const router = useRouter()
 
   // Track pricing page view
   useEffect(() => {
     trackViewContent("Wizard Checkout Page", 19.99)
   }, [])
-
-  useEffect(() => {
-    // Check if we have wizard data
-    const projectName = localStorage.getItem("wizard_project_name")
-    const gender = localStorage.getItem("wizard_gender")
-    const uploadedPhotos = localStorage.getItem("wizard_uploaded_photos")
-
-    console.log("🧙‍♂️ Checking wizard data:", { projectName, gender, photosLength: uploadedPhotos?.length })
-
-    if (!projectName || !gender || !uploadedPhotos) {
-      console.error("Missing wizard data, redirecting to start")
-      router.push("/wizard/welcome")
-      return
-    }
-
-    setWizardData({
-      projectName,
-      gender,
-      uploadedPhotos: JSON.parse(uploadedPhotos),
-    })
-  }, [router])
 
   const handlePlanSelect = () => {
     // Track checkout initiation
@@ -53,18 +31,9 @@ export default function WizardCheckoutPage() {
   }
 
   const handleCheckout = async () => {
-    if (!session?.user?.email || !wizardData) {
-      console.error("Missing session or wizard data")
-      return
-    }
-
     setLoading(true)
 
     try {
-      console.log("🛒 Starting checkout process...")
-      console.log("👤 User email:", session.user.email)
-      console.log("🧙‍♂️ Wizard data:", wizardData)
-
       const response = await fetch("/api/stripe/create-checkout", {
         method: "POST",
         headers: {
@@ -75,45 +44,22 @@ export default function WizardCheckoutPage() {
           priceId: "price_1RrFTnDswbEJWagVnjXYvNwh",
           successUrl: `${window.location.origin}/generate/processing`,
           cancelUrl: `${window.location.origin}/wizard/checkout`,
-          wizardFlow: true,
         }),
       })
 
-      console.log("📡 Checkout response status:", response.status)
-
-      if (!response.ok) {
-        const errorText = await response.text()
-        console.error("❌ Checkout response error:", errorText)
-        throw new Error(`Checkout failed: ${response.status}`)
-      }
-
       const data = await response.json()
-      console.log("✅ Checkout data received:", data)
 
       if (data.url) {
-        console.log("🔗 Redirecting to Stripe checkout:", data.url)
         window.location.href = data.url
       } else {
-        console.error("❌ No checkout URL in response")
-        throw new Error("No checkout URL received")
+        alert("Er is een fout opgetreden. Probeer het opnieuw.")
       }
     } catch (error) {
-      console.error("❌ Checkout error:", error)
+      console.error("Error:", error)
       alert("Er is een fout opgetreden. Probeer het opnieuw.")
     } finally {
       setLoading(false)
     }
-  }
-
-  if (!wizardData) {
-    return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p>Loading...</p>
-        </div>
-      </div>
-    )
   }
 
   const features = [
