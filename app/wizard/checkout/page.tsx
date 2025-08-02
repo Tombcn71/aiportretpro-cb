@@ -22,7 +22,7 @@ export default function WizardCheckoutPage() {
 
   useEffect(() => {
     if (!session) {
-      router.push("/login")
+      router.push("/wizard/welcome")
       return
     }
 
@@ -75,12 +75,6 @@ export default function WizardCheckoutPage() {
 
     try {
       console.log("🛒 Starting checkout process...")
-      console.log("👤 User email:", session.user.email)
-      console.log("🧙‍♂️ Wizard data:", {
-        projectName: wizardData.projectName,
-        gender: wizardData.gender,
-        photoCount: wizardData.uploadedPhotos.length,
-      })
 
       const response = await fetch("/api/stripe/create-checkout", {
         method: "POST",
@@ -102,22 +96,15 @@ export default function WizardCheckoutPage() {
         }),
       })
 
-      console.log("📡 Checkout response status:", response.status)
-
       if (!response.ok) {
-        const errorText = await response.text()
-        console.error("❌ Checkout response error:", errorText)
         throw new Error(`Checkout failed: ${response.status}`)
       }
 
       const data = await response.json()
-      console.log("✅ Checkout data received:", data)
 
       if (data.url) {
-        console.log("🔗 Redirecting to Stripe checkout:", data.url)
         window.location.href = data.url
       } else {
-        console.error("❌ No checkout URL in response")
         throw new Error("No checkout URL received")
       }
     } catch (error) {
