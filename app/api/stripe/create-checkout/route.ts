@@ -9,13 +9,14 @@ export async function POST(req: NextRequest) {
   try {
     const { priceId, successUrl, cancelUrl, customerEmail, metadata } = await req.json()
 
-    console.log("🛒 Creating Stripe checkout session:", {
+    console.log("🛒 Creating checkout session:", {
       priceId,
       customerEmail,
       metadata,
     })
 
     const session = await stripe.checkout.sessions.create({
+      mode: "payment",
       payment_method_types: ["card", "ideal"],
       line_items: [
         {
@@ -23,7 +24,6 @@ export async function POST(req: NextRequest) {
           quantity: 1,
         },
       ],
-      mode: "payment",
       success_url: successUrl,
       cancel_url: cancelUrl,
       customer_email: customerEmail,
@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
       allow_promotion_codes: true,
     })
 
-    console.log("✅ Stripe checkout session created:", session.id)
+    console.log("✅ Checkout session created:", session.id)
 
     return NextResponse.json({ url: session.url })
   } catch (error) {

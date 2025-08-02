@@ -25,6 +25,23 @@ export function deleteWizardData(sessionId: string) {
   wizardSessions.delete(sessionId)
 }
 
+// Function to sanitize name for Astria API
+function sanitizeAstriaName(name: string): string {
+  // Remove non-English characters, keep only letters, numbers, and spaces
+  const sanitized = name
+    .replace(/[^a-zA-Z0-9\s]/g, "") // Remove special characters
+    .replace(/\s+/g, " ") // Replace multiple spaces with single space
+    .trim() // Remove leading/trailing spaces
+
+  // If empty or too short, use default
+  if (sanitized.length < 2) {
+    return "Professional Headshots"
+  }
+
+  // Limit length to 50 characters
+  return sanitized.substring(0, 50)
+}
+
 export async function POST(req: NextRequest) {
   console.log("🔔 STRIPE WEBHOOK RECEIVED")
 
@@ -238,6 +255,10 @@ export async function POST(req: NextRequest) {
                 throw new Error("ASTRIA_API_KEY not configured")
               }
 
+              // Sanitize project name for Astria API
+              const sanitizedName = sanitizeAstriaName(wizardData.projectName)
+              console.log("🧹 Sanitized name:", sanitizedName)
+
               // DIRECT POST TO ASTRIA
               const astriaResponse = await fetch(`${ASTRIA_API_URL}/tunes`, {
                 method: "POST",
@@ -247,8 +268,8 @@ export async function POST(req: NextRequest) {
                 },
                 body: JSON.stringify({
                   tune: {
-                    title: `${wizardData.projectName} - ${wizardData.gender}`,
-                    name: `project_${project.id}_${Date.now()}`,
+                    title: `${sanitizedName} ${wizardData.gender}`,
+                    name: sanitizedName,
                     image_urls: wizardData.uploadedPhotos,
                     callback: `${process.env.NEXTAUTH_URL}/api/astria/wizard-webhook/${project.id}?webhookSecret=${process.env.APP_WEBHOOK_SECRET}`,
                   },
