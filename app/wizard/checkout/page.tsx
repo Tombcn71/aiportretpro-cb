@@ -79,22 +79,42 @@ export default function CheckoutPage() {
     try {
       console.log("💳 Starting payment process...")
 
+      // Save wizard data to database BEFORE payment
+      const saveResponse = await fetch("/api/wizard/save-data", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          projectName: wizardData.projectName,
+          gender: wizardData.gender,
+          photos: wizardData.photos,
+        }),
+      })
+
+      if (!saveResponse.ok) {
+        throw new Error("Failed to save wizard data")
+      }
+
+      const { sessionId } = await saveResponse.json()
+      console.log("✅ Wizard data saved with session ID:", sessionId)
+
       const response = await fetch("/api/stripe/create-checkout", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          priceId: "price_1RrFTnDswbEJWagVnjXYvNwh", // ECHTE PRICE ID UIT BESTAANDE CODE
+          priceId: "price_1RrFTnDswbEJWagVnjXYvNwh",
           customer_email: session.user.email,
           successUrl: `${window.location.origin}/generate/processing`,
           cancelUrl: `${window.location.origin}/wizard/checkout`,
           metadata: {
             type: "wizard",
+            session_id: sessionId,
             project_name: wizardData.projectName,
             gender: wizardData.gender,
             photo_count: wizardData.photos.length.toString(),
-            photos: JSON.stringify(wizardData.photos),
           },
         }),
       })
@@ -104,7 +124,8 @@ export default function CheckoutPage() {
         console.log("✅ Checkout session created, redirecting to Stripe")
         window.location.href = url
       } else {
-        console.error("❌ Failed to create checkout session")
+        const errorText = await response.text()
+        console.error("❌ Failed to create checkout session:", errorText)
         setLoading(false)
       }
     } catch (error) {

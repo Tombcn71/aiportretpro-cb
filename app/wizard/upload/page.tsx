@@ -1,11 +1,13 @@
 "use client"
 
+import type React from "react"
+
 import { useState, useEffect, useCallback } from "react"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { ArrowRight, ArrowLeft, Upload, X, Check } from "lucide-react"
+import { ArrowLeft, ArrowRight, Upload, X, Check } from "lucide-react"
 import { ProgressBar } from "@/components/ui/progress-bar"
 import Image from "next/image"
 
@@ -14,7 +16,6 @@ export default function UploadPage() {
   const router = useRouter()
   const [uploadedPhotos, setUploadedPhotos] = useState<string[]>([])
   const [uploading, setUploading] = useState(false)
-  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
     if (status === "loading") return
@@ -47,12 +48,11 @@ export default function UploadPage() {
       try {
         const photos = JSON.parse(savedPhotos)
         setUploadedPhotos(photos)
+        console.log("✅ Loaded existing photos:", photos.length)
       } catch (error) {
         console.error("Error parsing saved photos:", error)
       }
     }
-
-    console.log("✅ Upload page loaded")
   }, [session, status, router])
 
   const handleFileUpload = useCallback(
@@ -62,12 +62,20 @@ export default function UploadPage() {
       setUploading(true)
 
       try {
-        const newPhotoUrls: string[] = []
+        const newPhotos: string[] = []
 
         for (let i = 0; i < files.length; i++) {
           const file = files[i]
 
+          // Check file type
           if (!file.type.startsWith("image/")) {
+            console.error("Invalid file type:", file.type)
+            continue
+          }
+
+          // Check file size (max 10MB)
+          if (file.size > 10 * 1024 * 1024) {
+            console.error("File too large:", file.size)
             continue
           }
 
@@ -81,17 +89,19 @@ export default function UploadPage() {
 
           if (response.ok) {
             const data = await response.json()
-            newPhotoUrls.push(data.url)
+            newPhotos.push(data.url)
+            console.log("✅ Photo uploaded:", data.url)
+          } else {
+            console.error("Upload failed for file:", file.name)
           }
         }
 
-        const updatedPhotos = [...uploadedPhotos, ...newPhotoUrls].slice(0, 10) // Max 10 photos
-        setUploadedPhotos(updatedPhotos)
-
-        // Save to localStorage
-        localStorage.setItem("wizard_uploaded_photos", JSON.stringify(updatedPhotos))
-
-        console.log("✅ Photos uploaded:", updatedPhotos.length)
+        if (newPhotos.length > 0) {
+          const updatedPhotos = [...uploadedPhotos, ...newPhotos]
+          setUploadedPhotos(updatedPhotos)
+          localStorage.setItem("wizard_uploaded_photos", JSON.stringify(updatedPhotos))
+          console.log("✅ All photos saved to localStorage:", updatedPhotos.length)
+        }
       } catch (error) {
         console.error("Upload error:", error)
       } finally {
@@ -101,24 +111,41 @@ export default function UploadPage() {
     [uploadedPhotos],
   )
 
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault()
+      const files = e.dataTransfer.files
+      handleFileUpload(files)
+    },
+    [handleFileUpload],
+  )
+
+  const handleFileInput = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (e.target.files) {
+        handleFileUpload(e.target.files)
+      }
+    },
+    [handleFileUpload],
+  )
+
   const removePhoto = (index: number) => {
     const updatedPhotos = uploadedPhotos.filter((_, i) => i !== index)
     setUploadedPhotos(updatedPhotos)
     localStorage.setItem("wizard_uploaded_photos", JSON.stringify(updatedPhotos))
+    console.log("✅ Photo removed, remaining:", updatedPhotos.length)
   }
 
   const handleNext = () => {
-    if (uploadedPhotos.length < 6) return
-
-    setLoading(true)
-    console.log("✅ Moving to checkout with", uploadedPhotos.length, "photos")
-    router.push("/wizard/checkout")
+    if (uploadedPhotos.length >= 6) {
+      router.push("/wizard/checkout")
+    }
   }
 
   if (status === "loading") {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0077B5]"></div>
       </div>
     )
   }
@@ -138,103 +165,95 @@ export default function UploadPage() {
         <Card>
           <CardHeader className="text-center">
             <CardTitle className="text-2xl">Upload je foto's</CardTitle>
-            <p className="text-gray-600">
-              Upload 6-10 foto's van jezelf. Zorg voor goede belichting en verschillende hoeken.
-            </p>
+            <p className="text-gray-600">Upload minimaal 6 foto's van jezelf. Meer foto's = betere resultaten!</p>
           </CardHeader>
-
           <CardContent className="space-y-6">
             {/* Upload Area */}
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+            <div
+              onDrop={handleDrop}
+              onDragOver={(e) => e.preventDefault()}
+              className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-[#0077B5] transition-colors"
+            >
+              <Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+              <p className="text-lg font-medium text-gray-700 mb-2">Sleep foto's hierheen of klik om te uploaden</p>
+              <p className="text-sm text-gray-500 mb-4">JPG, PNG of WEBP - Max 10MB per foto</p>
               <input
                 type="file"
                 multiple
                 accept="image/*"
-                onChange={(e) => e.target.files && handleFileUpload(e.target.files)}
+                onChange={handleFileInput}
                 className="hidden"
-                id="photo-upload"
-                disabled={uploading || uploadedPhotos.length >= 10}
+                id="file-upload"
               />
-
-              <label
-                htmlFor="photo-upload"
-                className={`cursor-pointer ${uploading || uploadedPhotos.length >= 10 ? "opacity-50 cursor-not-allowed" : ""}`}
+              <Button
+                onClick={() => document.getElementById("file-upload")?.click()}
+                disabled={uploading}
+                className="bg-[#0077B5] hover:bg-[#004182] text-white"
               >
-                <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-lg font-medium text-gray-700 mb-2">
-                  {uploading ? "Uploaden..." : "Klik om foto's te selecteren"}
-                </p>
-                <p className="text-sm text-gray-500">JPG, PNG tot 10MB per foto. {uploadedPhotos.length}/10 foto's</p>
-              </label>
+                {uploading ? "Uploaden..." : "Selecteer foto's"}
+              </Button>
             </div>
 
             {/* Photo Grid */}
             {uploadedPhotos.length > 0 && (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {uploadedPhotos.map((photoUrl, index) => (
-                  <div key={index} className="relative group">
-                    <div className="aspect-square rounded-lg overflow-hidden bg-gray-100">
-                      <Image
-                        src={photoUrl || "/placeholder.svg"}
-                        alt={`Uploaded photo ${index + 1}`}
-                        width={200}
-                        height={200}
-                        className="w-full h-full object-cover"
-                      />
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-medium">Geüploade foto's ({uploadedPhotos.length})</h3>
+                  {uploadedPhotos.length >= 6 && (
+                    <div className="flex items-center text-green-600">
+                      <Check className="h-5 w-5 mr-1" />
+                      <span className="text-sm font-medium">Klaar om door te gaan!</span>
                     </div>
-                    <button
-                      onClick={() => removePhoto(index)}
-                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  </div>
-                ))}
+                  )}
+                </div>
+
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                  {uploadedPhotos.map((photo, index) => (
+                    <div key={index} className="relative group">
+                      <div className="aspect-square rounded-lg overflow-hidden bg-gray-100">
+                        <Image
+                          src={photo || "/placeholder.svg"}
+                          alt={`Upload ${index + 1}`}
+                          width={200}
+                          height={200}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <button
+                        onClick={() => removePhoto(index)}
+                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
 
-            {/* Requirements */}
-            <div className="bg-blue-50 p-4 rounded-lg">
-              <h3 className="font-medium text-blue-900 mb-2">Tips voor de beste resultaten:</h3>
-              <ul className="text-sm text-blue-800 space-y-1">
-                <li className="flex items-center">
-                  <Check className="w-4 h-4 mr-2 text-green-600" />
-                  Goede belichting (natuurlijk licht werkt het best)
-                </li>
-                <li className="flex items-center">
-                  <Check className="w-4 h-4 mr-2 text-green-600" />
-                  Verschillende hoeken en uitdrukkingen
-                </li>
-                <li className="flex items-center">
-                  <Check className="w-4 h-4 mr-2 text-green-600" />
-                  Duidelijk zichtbaar gezicht
-                </li>
-                <li className="flex items-center">
-                  <Check className="w-4 h-4 mr-2 text-green-600" />
-                  Minimaal 6 foto's voor beste resultaat
-                </li>
-              </ul>
-            </div>
+            {/* Progress indicator */}
+            {uploadedPhotos.length > 0 && uploadedPhotos.length < 6 && (
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                <p className="text-yellow-800 text-sm">
+                  Je hebt nog {6 - uploadedPhotos.length} foto's nodig om door te kunnen gaan. Meer foto's geven betere
+                  resultaten!
+                </p>
+              </div>
+            )}
 
             <div className="flex justify-between">
-              <Button variant="ghost" onClick={() => router.push("/wizard/gender")} disabled={loading || uploading}>
+              <Button variant="ghost" onClick={() => router.push("/wizard/gender")} className="text-gray-600">
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Terug
               </Button>
 
               <Button
                 onClick={handleNext}
-                disabled={uploadedPhotos.length < 6 || loading || uploading}
-                className="bg-blue-600 hover:bg-blue-700"
+                disabled={uploadedPhotos.length < 6}
+                className="bg-[#0077B5] hover:bg-[#004182] text-white"
               >
-                {loading ? (
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                ) : (
-                  <>
-                    Naar betaling ({uploadedPhotos.length} foto's)
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </>
-                )}
+                Naar betaling
+                <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </div>
           </CardContent>

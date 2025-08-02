@@ -21,7 +21,7 @@ const plan = {
   ],
 }
 
-export default function PricingSection() {
+export function PricingSection() {
   const { data: session, status } = useSession()
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
@@ -29,8 +29,6 @@ export default function PricingSection() {
   const handlePlanSelect = () => {
     trackViewContent(plan.price, "EUR")
     trackInitiateCheckout(plan.price, "EUR")
-
-    // Go directly to wizard welcome
     router.push("/wizard/welcome")
   }
 
@@ -62,11 +60,15 @@ export default function PricingSection() {
               </ul>
 
               <div className="mb-6">
-                <h4 className="text-lg font-semibold text-gray-900 mb-3">Betaal Veilig & Start Direct</h4>
+                <h4 className="text-lg font-semibold text-gray-900 mb-3">Probeer Eerst, Betaal Later</h4>
                 <div className="space-y-2">
                   <div className="flex items-center">
                     <Check className="h-4 w-4 text-green-500 mr-2 flex-shrink-0" />
-                    <span className="text-sm text-gray-600">Veilige betaling met ideal en credit card</span>
+                    <span className="text-sm text-gray-600">Start gratis - betaal pas na upload</span>
+                  </div>
+                  <div className="flex items-center">
+                    <Check className="h-4 w-4 text-green-500 mr-2 flex-shrink-0" />
+                    <span className="text-sm text-gray-600">Veilige betaling met iDEAL en creditcard</span>
                   </div>
                   <div className="flex items-center">
                     <Check className="h-4 w-4 text-green-500 mr-2 flex-shrink-0" />
@@ -81,7 +83,7 @@ export default function PricingSection() {
                 onClick={handlePlanSelect}
                 disabled={isLoading}
               >
-                {isLoading ? "Bezig..." : "Start Nu"} <ArrowRight className="ml-2 h-5 w-5" />
+                {isLoading ? "Bezig..." : "Start Gratis"} <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </div>
           </div>

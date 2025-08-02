@@ -1,7 +1,4 @@
 "use client"
-
-import type React from "react"
-
 import { useState, useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
@@ -9,28 +6,28 @@ import { Button } from "@/components/ui/button"
 import { ArrowRight, X, ChevronDown, ChevronUp } from "lucide-react"
 import Header from "@/components/header"
 import { Facebook, Instagram, Linkedin } from "lucide-react"
-import AIHeadshotsShowcase from "@/components/ai-headshots-showcase"
+import { AIHeadshotsShowcase } from "@/components/ai-headshots-showcase"
 import HowItWorks from "@/components/how-it-works"
-import PricingSection from "@/components/pricing-section"
+import { PricingSection } from "@/components/pricing-section"
+import { FloatingCTAButton } from "@/components/floating-cta-button"
 
-// Gallery photos: New 16 professional photos in man-woman alternating order
 const galleryPhotos = [
-  "/images/professional-man-1.jpg", // Position 1 - Man
-  "/images/professional-woman-1.jpg", // Position 2 - Woman
-  "/images/professional-man-2.jpg", // Position 3 - Man
-  "/images/professional-woman-2.jpg", // Position 4 - Woman
-  "/images/professional-man-3.jpg", // Position 5 - Man
-  "/images/professional-woman-3.jpg", // Position 6 - Woman
-  "/images/professional-man-4.jpg", // Position 7 - Man
-  "/images/professional-woman-4.jpg", // Position 8 - Woman
-  "/images/professional-man-5.jpg", // Position 9 - Man
-  "/images/professional-woman-5.jpg", // Position 10 - Woman
-  "/images/professional-man-6.jpg", // Position 11 - Man
-  "/images/professional-woman-6.jpg", // Position 12 - Woman
-  "/images/professional-man-7.jpg", // Position 13 - Man
-  "/images/professional-woman-7.jpg", // Position 14 - Woman
-  "/images/professional-man-8.jpg", // Position 15 - Man
-  "/images/professional-woman-8.jpg", // Position 16 - Woman
+  "/images/professional-man-1.jpg",
+  "/images/professional-woman-1.jpg",
+  "/images/professional-man-2.jpg",
+  "/images/professional-woman-2.jpg",
+  "/images/professional-man-3.jpg",
+  "/images/professional-woman-3.jpg",
+  "/images/professional-man-4.jpg",
+  "/images/professional-woman-4.jpg",
+  "/images/professional-man-5.jpg",
+  "/images/professional-woman-5.jpg",
+  "/images/professional-man-6.jpg",
+  "/images/professional-woman-6.jpg",
+  "/images/professional-man-7.jpg",
+  "/images/professional-woman-7.jpg",
+  "/images/professional-man-8.jpg",
+  "/images/professional-woman-8.jpg",
 ]
 
 const faqData = [
@@ -119,7 +116,6 @@ export default function HomePage() {
     }
 
     window.addEventListener("scroll", toggleVisibility)
-
     return () => window.removeEventListener("scroll", toggleVisibility)
   }, [])
 
@@ -135,22 +131,10 @@ export default function HomePage() {
     setOpenFaqIndex(openFaqIndex === index ? null : index)
   }
 
-  const scrollToPricing = (e: React.MouseEvent) => {
-    e.preventDefault()
-    const pricingSection = document.getElementById("prijzen")
-    if (pricingSection) {
-      pricingSection.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      })
-    }
-  }
-
   return (
     <div className="min-h-screen pt-20">
       <Header />
 
-      {/* Hero Section */}
       <section className="container mx-auto px-4 py-6 text-center">
         <h1 className="tracking-tight text-2xl md:text-4xl font-bold mb-6">
           Professionele portretfoto's,
@@ -175,7 +159,6 @@ export default function HomePage() {
         </Button>
       </section>
 
-      {/* Photo Carousel - FIXED: Smooth continuous scrolling */}
       <section className="w-full overflow-hidden mb-16 md:mb-24 bg-gradient-to-r from-blue-50 via-white to-blue-50">
         <div className="relative">
           <div className="carousel-container">
@@ -196,7 +179,6 @@ export default function HomePage() {
                   </div>
                 </div>
               ))}
-              {/* Duplicate items for seamless looping */}
               {galleryPhotos.map((photo, index) => (
                 <div key={`carousel-dup-${index}`} className="carousel-item">
                   <div className="relative">
@@ -217,16 +199,10 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* How It Works - New Component */}
       <HowItWorks />
-
-      {/* AI Headshots Showcase - Replaces Photo Gallery */}
       <AIHeadshotsShowcase />
-
-      {/* Pricing Section */}
       <PricingSection />
 
-      {/* FAQ Section */}
       <section id="faq" className="container mx-auto px-4 py-12 md:py-16 bg-gray-50">
         <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-center mb-4">Veelgestelde Vragen</h2>
         <p className="text-lg text-gray-600 text-center mb-8 md:mb-12 max-w-2xl mx-auto">
@@ -266,7 +242,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* CTA Section */}
       <section className="py-16">
         <div className="max-w-4xl mx-auto text-center px-4">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
@@ -281,7 +256,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Lightbox Modal */}
       {selectedImage && (
         <div
           className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4"
@@ -305,11 +279,9 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* Footer */}
       <footer className="bg-black text-white py-8 px-6">
         <div className="container mx-auto">
           <div className="flex flex-col lg:flex-row lg:justify-between space-y-8 lg:space-y-0">
-            {/* Logo and Company Info */}
             <div className="flex flex-col space-y-4">
               <div className="flex items-center space-x-3">
                 <Image
@@ -326,7 +298,6 @@ export default function HomePage() {
               </p>
             </div>
 
-            {/* Navigation Links */}
             <div className="flex flex-col space-y-4">
               <h4 className="text-white font-semibold text-sm uppercase tracking-wide">Navigatie</h4>
               <div className="flex flex-col space-y-2">
@@ -348,7 +319,6 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Legal Links */}
             <div className="flex flex-col space-y-4">
               <h4 className="text-white font-semibold text-sm uppercase tracking-wide">Juridisch</h4>
               <div className="flex flex-col space-y-2">
@@ -361,7 +331,6 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Social Media */}
             <div className="flex flex-col space-y-4">
               <h4 className="text-white font-semibold text-sm uppercase tracking-wide">Volg Ons</h4>
               <div className="flex space-x-4">
@@ -396,87 +365,71 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* Bottom Border */}
           <div className="border-t border-gray-800 mt-8 pt-6">
             <p className="text-gray-400 text-xs text-center">© 2025 AI Portret Pro. Alle rechten voorbehouden.</p>
           </div>
         </div>
       </footer>
 
-      {/* Floating CTA Button - Mobile Only */}
-      {isVisible && (
-        <div className="fixed bottom-4 left-4 right-4 z-[2147483647] md:hidden">
-          <div className="bg-white rounded-lg shadow-lg p-2">
-            <Button
-              asChild
-              size="lg"
-              className="w-full bg-[#FF8C00] hover:bg-[#FFA500] text-white px-6 py-8 text-base font-semibold"
-            >
-              <Link href="/wizard/welcome" className="flex items-center justify-center">
-                Start jouw fotoshoot nu - €19,99 <ArrowRight className="ml-2 h-6 w-6" />
-              </Link>
-            </Button>
-          </div>
-        </div>
-      )}
+      <FloatingCTAButton />
 
       <style jsx>{`
-    @keyframes scroll {
-      0% {
-        transform: translateX(0);
-      }
-      100% {
-        transform: translateX(-50%);
-      }
-    }
+        @keyframes scroll {
+          0% {
+            transform: translateX(0);
+          }
+          100% {
+            transform: translateX(-50%);
+          }
+        }
 
-    .animate-scroll {
-      animation: scroll 15s linear infinite;
-    }
+        .animate-scroll {
+          animation: scroll 15s linear infinite;
+        }
 
-    .animate-scroll:hover {
-      animation-play-state: paused;
-    }
+        .animate-scroll:hover {
+          animation-play-state: paused;
+        }
 
-    .carousel-container {
-      width: 100%;
-      overflow: hidden;
-      position: relative;
-    }
+        .carousel-container {
+          width: 100%;
+          overflow: hidden;
+          position: relative;
+        }
 
-    .carousel-track {
-      display: flex;
-      width: fit-content;
-      animation: carousel 140s linear infinite;
-    }
+        .carousel-track {
+          display: flex;
+          width: fit-content;
+          animation: carousel 140s linear infinite;
+        }
 
-    .carousel-item {
-      flex-shrink: 0;
-      margin: 0 0.5rem;
-    }
+        .carousel-item {
+          flex-shrink: 0;
+          margin: 0 0.5rem;
+        }
 
-    @keyframes carousel {
-      0% {
-        transform: translateX(calc(-100% / 2));
-      }
-      100% {
-        transform: translateX(0);
-      }
-    }
+        @keyframes carousel {
+          0% {
+            transform: translateX(calc(-100% / 2));
+          }
+          100% {
+            transform: translateX(0);
+          }
+        }
 
-    .carousel-track:hover {
-      animation-play-state: paused;
-    }
+        .carousel-track:hover {
+          animation-play-state: paused;
+        }
 
-    @media (max-width: 768px) {
-      .animate-scroll {
-        animation: scroll 10s linear infinite;
-      }
-      .carousel-track {
-        animation: carousel 140s linear infinite;
-      }
-    }
-  `}</style>
+        @media (max-width: 768px) {
+          .animate-scroll {
+            animation: scroll 10s linear infinite;
+          }
+          .carousel-track {
+            animation: carousel 140s linear infinite;
+          }
+        }
+      `}</style>
     </div>
   )
 }

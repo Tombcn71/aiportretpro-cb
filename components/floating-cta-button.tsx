@@ -5,7 +5,7 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { ArrowRight, Camera } from "lucide-react"
 
-export default function FloatingCTAButton() {
+export function FloatingCTAButton() {
   const [isVisible, setIsVisible] = useState(false)
 
   useEffect(() => {
@@ -18,28 +18,26 @@ export default function FloatingCTAButton() {
     }
 
     window.addEventListener("scroll", toggleVisibility)
-
     return () => window.removeEventListener("scroll", toggleVisibility)
   }, [])
 
-  return (
-<div
-  // Deze div creëert de witte balk onderaan en is ALTIJD zichtbaar.
-  // De animatie (opacity, translate) is HIER WEGGEHAald.
-  className="fixed bottom-0 left-0 right-0 bg-white px-4 py-4 z-[9999] md:hidden"
->
+  if (!isVisible) return null
 
-      <Button
-        asChild
-        size="lg"
-        className="w-full max-w-sm mx-auto bg-[#FFA500] hover:bg-[#FF8C00] text-white py-3 text-base font-semibold shadow-lg"
-      >
-        <Link href="/pricing">
-          <Camera className="mr-2 h-4 w-4" />
-          Start Nu - 29€
-          <ArrowRight className="ml-2 h-4 w-4" />
-        </Link>
-      </Button>
+  return (
+    <div className="fixed bottom-4 left-4 right-4 z-50 md:hidden">
+      <div className="bg-white rounded-lg shadow-lg p-2">
+        <Button
+          asChild
+          size="lg"
+          className="w-full bg-[#FF8C00] hover:bg-[#FFA500] text-white px-6 py-3 text-base font-semibold"
+        >
+          <Link href="/wizard/welcome" className="flex items-center justify-center">
+            <Camera className="mr-2 h-4 w-4" />
+            Start Nu - €19,99
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </Link>
+        </Button>
+      </div>
     </div>
   )
 }
