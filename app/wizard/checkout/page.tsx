@@ -80,7 +80,7 @@ export default function CheckoutPage() {
 
       console.log("✅ Wizard data saved, creating checkout session")
 
-      // Create Stripe checkout session
+      // Create Stripe checkout session WITH EMAIL
       const checkoutResponse = await fetch("/api/stripe/create-checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -88,6 +88,7 @@ export default function CheckoutPage() {
           priceId: "price_1RrFsbDswbEJWagVsEytA8rs",
           successUrl: `${window.location.origin}/generate/processing`,
           cancelUrl: `${window.location.origin}/wizard/checkout`,
+          customerEmail: session.user.email, // EMAIL WORDT HIER DOORGEGEVEN!
           metadata: {
             type: "wizard",
             session_id: sessionId,

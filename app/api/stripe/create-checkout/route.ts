@@ -7,9 +7,9 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 
 export async function POST(req: NextRequest) {
   try {
-    const { priceId, successUrl, cancelUrl, metadata } = await req.json()
+    const { priceId, successUrl, cancelUrl, metadata, customerEmail } = await req.json()
 
-    console.log("🛒 Creating checkout session:", { priceId, metadata })
+    console.log("🛒 Creating checkout session:", { priceId, metadata, customerEmail })
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card", "ideal"],
@@ -22,6 +22,7 @@ export async function POST(req: NextRequest) {
       mode: "payment",
       success_url: successUrl,
       cancel_url: cancelUrl,
+      customer_email: customerEmail, // EMAIL WORDT HIER DOORGEGEVEN!
       allow_promotion_codes: true,
       metadata: metadata || {},
     })
