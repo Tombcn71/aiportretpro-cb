@@ -1,41 +1,68 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { useSession } from "next-auth/react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Check, Star, ArrowLeft } from "lucide-react"
+import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { trackViewContent, trackInitiateCheckout } from "@/lib/facebook-pixel"
-import Image from "next/image"
+import { Card, CardContent } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Loader2 } from "lucide-react"
 
 export default function WizardCheckoutPage() {
-  const { data: session } = useSession()
-  const [loading, setLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const router = useRouter()
 
-  // Track pricing page view
   useEffect(() => {
-    trackViewContent("Wizard Checkout Page", 19.99)
-  }, [])
+    // Check if we have wizard data
+    const projectName = localStorage.getItem("wizard_project_name")
+    const gender = localStorage.getItem("wizard_gender")
+    const uploadedPhotos = localStorage.getItem("wizard_uploaded_photos")
 
-  const handlePlanSelect = () => {
-    // Track checkout initiation
-    trackInitiateCheckout(19.99)
-
-    if (!session) {
-      router.push(`/login?plan=professional`)
-      return
+    if (!projectName || !gender || !uploadedPhotos) {
+      console.error("Missing wizard data, redirecting to start")
+      router.push("/wizard/welcome")
     }
-    handleCheckout()
-  }
+  }, [router])
 
   const handleCheckout = async () => {
-    setLoading(true)
+    setIsLoading(true)
+    setError(null)
 
     try {
-      // EXACT SAME AS PRICING PAGE - NO WIZARD METADATA
-      const response = await fetch("/api/stripe/create-checkout", {
+      // Get wizard data from localStorage
+      const projectName = localStorage.getItem("wizard_project_name")
+      const gender = localStorage.getItem("wizard_gender")
+      const uploadedPhotos = localStorage.getItem("wizard_uploaded_photos")
+
+      if (!projectName || !gender || !uploadedPhotos) {
+        throw new Error("Missing wizard data")
+      }
+
+      const wizardData = {
+        projectName,
+        gender,
+        uploadedPhotos: JSON.parse(uploadedPhotos),
+      }
+
+      console.log("🛒 Starting checkout with wizard data:", wizardData)
+
+      // Save wizard data to database first
+      const saveResponse = await fetch("/api/wizard/save-data", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(wizardData),
+      })
+
+      if (!saveResponse.ok) {
+        throw new Error("Failed to save wizard data")
+      }
+
+      const { sessionId } = await saveResponse.json()
+      console.log("✅ Wizard data saved with session ID:", sessionId)
+
+      // Create checkout session with session ID in metadata
+      const checkoutResponse = await fetch("/api/stripe/create-checkout", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -43,216 +70,67 @@ export default function WizardCheckoutPage() {
         body: JSON.stringify({
           planId: "professional",
           priceId: "price_1RrFTnDswbEJWagVnjXYvNwh",
+          wizardSessionId: sessionId, // Pass session ID instead of full data
         }),
       })
 
-      const data = await response.json()
-
-      if (data.url) {
-        window.location.href = data.url
-      } else {
-        alert("Er is een fout opgetreden. Probeer het opnieuw.")
+      if (!checkoutResponse.ok) {
+        throw new Error("Failed to create checkout session")
       }
+
+      const { url } = await checkoutResponse.json()
+      console.log("✅ Redirecting to checkout:", url)
+
+      // Redirect to Stripe checkout
+      window.location.href = url
     } catch (error) {
-      console.error("Error:", error)
-      alert("Er is een fout opgetreden. Probeer het opnieuw.")
-    } finally {
-      setLoading(false)
+      console.error("❌ Checkout error:", error)
+      setError(error instanceof Error ? error.message : "Something went wrong")
+      setIsLoading(false)
     }
   }
 
-  const features = [
-    "40 professionele portretfoto's",
-    "Verschillende zakelijke outfits",
-    "Verschillende poses en achtergronden",
-    "HD kwaliteit downloads",
-    "Klaar binnen 15 minuten",
-    "Perfect voor LinkedIn, Social Media, CV, Website en Print",
-  ]
-
   return (
-    <div className="min-h-screen bg-white">
-      <div className="container mx-auto px-6 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
-          {/* Left side - Photos grid */}
-          <div className="space-y-8">
-            <div>
-              <Button variant="ghost" onClick={() => router.push("/wizard/upload")} className="mb-6 p-0 h-auto">
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Back
-              </Button>
-              <h1 className="text-5xl font-bold text-gray-900 mb-4 leading-tight">
-                Get your headshots in <span className="text-orange-500">minutes</span>, not days
-              </h1>
-            </div>
-
-            {/* Photos grid - 2x4 layout */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="aspect-square rounded-2xl overflow-hidden">
-                <Image
-                  src="/images/professional-man-1.jpg"
-                  alt="Professional headshot"
-                  width={200}
-                  height={200}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="aspect-square rounded-2xl overflow-hidden">
-                <Image
-                  src="/images/professional-woman-1.jpg"
-                  alt="Professional headshot"
-                  width={200}
-                  height={200}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="aspect-square rounded-2xl overflow-hidden">
-                <Image
-                  src="/images/professional-man-2.jpg"
-                  alt="Professional headshot"
-                  width={200}
-                  height={200}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="aspect-square rounded-2xl overflow-hidden">
-                <Image
-                  src="/images/professional-woman-2.jpg"
-                  alt="Professional headshot"
-                  width={200}
-                  height={200}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="aspect-square rounded-2xl overflow-hidden">
-                <Image
-                  src="/images/professional-man-3.jpg"
-                  alt="Professional headshot"
-                  width={200}
-                  height={200}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="aspect-square rounded-2xl overflow-hidden">
-                <Image
-                  src="/images/professional-woman-3.jpg"
-                  alt="Professional headshot"
-                  width={200}
-                  height={200}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="aspect-square rounded-2xl overflow-hidden">
-                <Image
-                  src="/images/professional-man-4.jpg"
-                  alt="Professional headshot"
-                  width={200}
-                  height={200}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="aspect-square rounded-2xl overflow-hidden">
-                <Image
-                  src="/images/professional-woman-4.jpg"
-                  alt="Professional headshot"
-                  width={200}
-                  height={200}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            </div>
-
-            {/* Trustpilot */}
-            <div className="flex items-center space-x-2">
-              <div className="flex">
-                <Star className="w-4 h-4 text-green-500 fill-current" />
-                <Star className="w-4 h-4 text-green-500 fill-current" />
-                <Star className="w-4 h-4 text-green-500 fill-current" />
-                <Star className="w-4 h-4 text-green-500 fill-current" />
-                <Star className="w-4 h-4 text-green-500 fill-current" />
-              </div>
-              <span className="text-sm font-medium">Trustpilot</span>
-            </div>
-
-            {/* Testimonial */}
-            <div className="bg-gray-50 p-6 rounded-xl">
-              <p className="text-gray-700 italic mb-4">
-                "Some of my family initially worried that I was wasting time and money, but after seeing the results,
-                they were amazed. I had been dreading the task of getting a great photo for my author bio in my upcoming
-                book, and now that worry is gone. Thank you!"
-              </p>
-              <div className="flex items-center">
-                <div className="w-10 h-10 bg-gray-300 rounded-full mr-3"></div>
-                <span className="font-medium">Adam Weygandt</span>
-              </div>
-            </div>
-
-            {/* Company logos */}
-            <div className="space-y-4">
-              <p className="text-center text-gray-600 font-medium">Trusted by teams at</p>
-              <div className="flex items-center justify-center space-x-8 opacity-60 text-xs">
-                <span>Trinity College</span>
-                <span>NEW YORK UNIVERSITY</span>
-                <span>ASU</span>
-                <span>UC Berkeley</span>
-                <span>Microsoft</span>
-                <span>PWC</span>
-              </div>
-            </div>
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+      <Card className="w-full max-w-md">
+        <CardContent className="p-8">
+          <div className="text-center mb-8">
+            <h1 className="text-2xl font-bold mb-2">Complete Your Order</h1>
+            <p className="text-gray-600">Ready to generate your professional AI headshots?</p>
           </div>
 
-          {/* Right side - Pricing */}
-          <div className="flex flex-col justify-center max-w-md mx-auto w-full">
-            <div className="mb-8 text-right">
-              <div className="inline-flex items-center space-x-2">
-                <div className="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-sm">A</span>
-                </div>
-                <span className="font-bold text-lg">Aragon.ai</span>
-              </div>
-            </div>
-
-            <div className="text-center mb-6">
-              <h1 className="text-2xl md:text-4xl font-bold text-gray-900 mb-2">👋 Welkom! Dit is je pakket.</h1>
-              <p className="text-md text-gray-600">Na een snelle en veilige betaling kun je direct aan de slag</p>
-            </div>
-
-            <Card className="relative border-2 border-[#0077B5] shadow-xl">
-              <CardHeader className="text-center pt-8">
-                <CardTitle className="text-2xl font-bold">Professional</CardTitle>
-                <div className="mt-4">
-                  <span className="text-2xl md:text-4xl font-bold text-[#0077B5]">€19,99</span>
-                </div>
-                <p className="text-gray-600 mt-2">40 professionele portretfoto's</p>
-              </CardHeader>
-
-              <CardContent className="space-y-6">
-                <ul className="space-y-4">
-                  {features.map((feature, index) => (
-                    <li key={index} className="flex items-center">
-                      <Check className="h-5 w-5 text-green-500 mr-3 flex-shrink-0" />
-                      <span className="text-gray-700">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-
-                <Button
-                  onClick={handlePlanSelect}
-                  disabled={loading}
-                  className="w-full bg-[#0077B5] hover:bg-[#004182] text-white py-4 text-lg font-semibold"
-                >
-                  {loading ? "Laden..." : "Betaal Veilig & Start Direct"}
-                </Button>
-
-                <div className="text-center text-sm text-gray-500">
-                  <p>✓ Veilige betaling met ideal en credit card</p>
-                  <p>✓ Geld terug garantie</p>
-                </div>
-              </CardContent>
-            </Card>
+          <div className="bg-blue-50 p-4 rounded-lg mb-6">
+            <h3 className="font-semibold mb-2">Professional Package</h3>
+            <p className="text-sm text-gray-600 mb-2">40+ high-quality AI headshots</p>
+            <p className="text-2xl font-bold text-blue-600">€19.99</p>
           </div>
-        </div>
-      </div>
+
+          {error && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+              <p className="text-red-600 text-sm">{error}</p>
+            </div>
+          )}
+
+          <Button
+            onClick={handleCheckout}
+            disabled={isLoading}
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3"
+          >
+            {isLoading ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Processing...
+              </>
+            ) : (
+              "Complete Payment"
+            )}
+          </Button>
+
+          <p className="text-xs text-gray-500 text-center mt-4">
+            Secure payment powered by Stripe. Your data is protected.
+          </p>
+        </CardContent>
+      </Card>
     </div>
   )
 }

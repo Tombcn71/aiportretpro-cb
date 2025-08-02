@@ -16,13 +16,11 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json()
-    const { planId, priceId } = body
+    const { planId, priceId, wizardSessionId } = body
 
-    // Use the correct price ID
     const finalPriceId = priceId || "price_1RrFTnDswbEJWagVnjXYvNwh"
 
-    console.log("🛒 Creating wizard checkout session with price ID:", finalPriceId)
-    console.log("👤 User email:", session.user.email)
+    console.log("🛒 Creating checkout with wizard session ID:", wizardSessionId)
 
     const checkoutSession = await stripe.checkout.sessions.create({
       payment_method_types: ["card", "ideal"],
@@ -38,21 +36,22 @@ export async function POST(req: NextRequest) {
       metadata: {
         flow: "wizard",
         planId: planId || "professional",
+        wizardSessionId: wizardSessionId, // Store session ID in metadata
       },
       allow_promotion_codes: true,
-      billing_address_collection: "required",
+      billing_address_collection: "auto",
       customer_creation: "always",
       customer_email: session.user.email,
     })
 
-    console.log("✅ Wizard checkout session created:", checkoutSession.id)
+    console.log("✅ Checkout session created:", checkoutSession.id)
 
     return NextResponse.json({
       sessionId: checkoutSession.id,
       url: checkoutSession.url,
     })
   } catch (error) {
-    console.error("❌ Error creating wizard checkout session:", error)
+    console.error("❌ Error creating checkout session:", error)
     return NextResponse.json({ error: "Failed to create checkout session" }, { status: 500 })
   }
 }

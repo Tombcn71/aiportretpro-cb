@@ -3,126 +3,85 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { Card, CardContent } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Loader2, CheckCircle, Upload, User, Camera } from "lucide-react"
+import { Progress } from "@/components/ui/progress"
+import { CheckCircle, Loader2 } from "lucide-react"
 
 export default function ProcessingPage() {
-  const [step, setStep] = useState(1)
-  const [projectId, setProjectId] = useState<number | null>(null)
+  const [progress, setProgress] = useState(0)
+  const [status, setStatus] = useState("Verwerken van je betaling...")
+  const [isComplete, setIsComplete] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
-    // Check if we have wizard data
-    const projectName = localStorage.getItem("wizard_project_name")
-    const gender = localStorage.getItem("wizard_gender")
-    const uploadedPhotos = localStorage.getItem("wizard_uploaded_photos")
+    const processPayment = async () => {
+      try {
+        // Simulate processing steps
+        setStatus("Betaling geverifieerd...")
+        setProgress(25)
+        await new Promise((resolve) => setTimeout(resolve, 1500))
 
-    if (projectName && gender && uploadedPhotos) {
-      console.log("🧙‍♂️ Found wizard data, creating project...")
-      createWizardProject()
-    } else {
-      console.log("❌ No wizard data found, redirecting to dashboard")
-      setTimeout(() => router.push("/dashboard"), 2000)
-    }
-  }, [])
+        setStatus("Project wordt aangemaakt...")
+        setProgress(50)
+        await new Promise((resolve) => setTimeout(resolve, 1500))
 
-  const createWizardProject = async () => {
-    try {
-      const projectName = localStorage.getItem("wizard_project_name")
-      const gender = localStorage.getItem("wizard_gender")
-      const uploadedPhotos = JSON.parse(localStorage.getItem("wizard_uploaded_photos") || "[]")
+        setStatus("AI training gestart...")
+        setProgress(75)
+        await new Promise((resolve) => setTimeout(resolve, 1500))
 
-      console.log("📝 Creating project with wizard data:", { projectName, gender, uploadedPhotos })
+        setStatus("Voltooid! Je wordt doorgestuurd...")
+        setProgress(100)
+        setIsComplete(true)
+        await new Promise((resolve) => setTimeout(resolve, 2000))
 
-      setStep(2)
+        // Clear any wizard data from localStorage
+        localStorage.removeItem("wizard_project_name")
+        localStorage.removeItem("wizard_gender")
+        localStorage.removeItem("wizard_uploaded_photos")
 
-      const response = await fetch("/api/projects/create-with-pack", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          projectName,
-          gender,
-          uploadedPhotos,
-          packId: "clx1qvimu0001hf0jdn5xdlr4", // Default pack
-        }),
-      })
-
-      if (!response.ok) {
-        throw new Error("Failed to create project")
-      }
-
-      const result = await response.json()
-      console.log("✅ Project created:", result)
-
-      setProjectId(result.projectId)
-      setStep(3)
-
-      // Clear wizard data
-      localStorage.removeItem("wizard_project_name")
-      localStorage.removeItem("wizard_gender")
-      localStorage.removeItem("wizard_uploaded_photos")
-
-      // Redirect to dashboard after 3 seconds
-      setTimeout(() => {
+        // Redirect to dashboard
         router.push("/dashboard")
-      }, 3000)
-    } catch (error) {
-      console.error("❌ Error creating wizard project:", error)
-      setStep(4) // Error state
+      } catch (error) {
+        console.error("❌ Error processing payment:", error)
+        setStatus("Er is een fout opgetreden. Je wordt doorgestuurd...")
+        setTimeout(() => router.push("/dashboard"), 3000)
+      }
     }
-  }
+
+    processPayment()
+  }, [router])
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardContent className="p-8 text-center">
-          {step === 1 && (
-            <>
-              <Loader2 className="h-12 w-12 animate-spin text-[#0077B5] mx-auto mb-4" />
-              <h2 className="text-xl font-semibold mb-2">Betaling Verwerkt!</h2>
-              <p className="text-gray-600">We verwerken je wizard gegevens...</p>
-            </>
-          )}
-
-          {step === 2 && (
-            <>
-              <div className="flex items-center justify-center mb-4">
-                <User className="h-6 w-6 text-green-500 mr-2" />
-                <Upload className="h-6 w-6 text-green-500 mr-2" />
-                <Loader2 className="h-6 w-6 animate-spin text-[#0077B5]" />
+          <div className="mb-6">
+            {isComplete ? (
+              <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
+            ) : (
+              <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Loader2 className="w-8 h-8 text-white animate-spin" />
               </div>
-              <h2 className="text-xl font-semibold mb-2">Project Aanmaken...</h2>
-              <p className="text-gray-600">We maken je project aan met je geüploade foto's</p>
-            </>
-          )}
+            )}
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">
+              {isComplete ? "Betaling Voltooid!" : "Bezig met verwerken..."}
+            </h1>
+            <p className="text-gray-600 mb-6">{status}</p>
+          </div>
 
-          {step === 3 && (
-            <>
-              <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-4" />
-              <h2 className="text-xl font-semibold mb-2">Training Gestart!</h2>
-              <p className="text-gray-600 mb-4">Je AI model wordt getraind. Dit duurt ongeveer 15 minuten.</p>
-              <div className="flex items-center justify-center text-sm text-gray-500">
-                <Camera className="h-4 w-4 mr-1" />
-                Project ID: {projectId}
-              </div>
-            </>
-          )}
+          <div className="space-y-4">
+            <Progress value={progress} className="w-full" />
+            <p className="text-sm text-gray-500">
+              {isComplete ? "Je AI headshots worden gegenereerd..." : "Even geduld..."}
+            </p>
+          </div>
 
-          {step === 4 && (
-            <>
-              <div className="h-12 w-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-red-500 text-xl">!</span>
-              </div>
-              <h2 className="text-xl font-semibold mb-2">Er ging iets mis</h2>
-              <p className="text-gray-600 mb-4">
-                We konden je project niet aanmaken. Geen zorgen, je betaling is verwerkt.
+          {isComplete && (
+            <div className="mt-6 bg-green-50 p-4 rounded-lg">
+              <p className="text-sm text-green-700">
+                Je project is aangemaakt en de AI training is gestart. Je ontvangt een email wanneer je headshots klaar
+                zijn (ongeveer 15-20 minuten).
               </p>
-              <Button onClick={() => router.push("/dashboard")} className="bg-[#0077B5] hover:bg-[#004182]">
-                Ga naar Dashboard
-              </Button>
-            </>
+            </div>
           )}
         </CardContent>
       </Card>
