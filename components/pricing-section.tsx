@@ -1,8 +1,71 @@
-import Link from "next/link"
+"use client"
+
+import { useState } from "react"
+import { useSession } from "next-auth/react"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { ArrowRight, Check } from "lucide-react"
+import { Check, ArrowRight } from "lucide-react"
+import { trackViewContent, trackInitiateCheckout } from "@/lib/facebook-pixel"
+
+const plan = {
+  id: "professional",
+  name: "Professional",
+  price: 19.99,
+  features: [
+    "40 professionele portretfoto's",
+    "Verschillende zakelijke outfits",
+    "Verschillende poses en achtergronden",
+    "HD kwaliteit downloads",
+    "Klaar binnen 15 minuten",
+    "Perfect voor LinkedIn, Social Media, CV, Website en Print",
+  ],
+}
 
 export default function PricingSection() {
+  const { data: session, status } = useSession()
+  const router = useRouter()
+  const [isLoading, setIsLoading] = useState(false)
+
+  const handleCheckout = async () => {
+    if (!session) {
+      router.push(`/login?plan=${plan.id}`)
+      return
+    }
+
+    setIsLoading(true)
+
+    try {
+      trackInitiateCheckout(plan.price, "EUR")
+
+      const response = await fetch("/api/stripe/create-checkout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          planId: plan.id,
+          planName: plan.name,
+          amount: Math.round(plan.price * 100),
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error("Failed to create checkout session")
+      }
+
+      const { url } = await response.json()
+      window.location.href = url
+    } catch (error) {
+      console.error("Error creating checkout session:", error)
+      setIsLoading(false)
+    }
+  }
+
+  const handlePlanSelect = () => {
+    trackViewContent(plan.price, "EUR")
+    handleCheckout()
+  }
+
   return (
     <section id="prijzen" className="py-16 bg-gradient-to-br from-blue-50 to-white">
       <div className="container mx-auto px-4">
@@ -15,37 +78,19 @@ export default function PricingSection() {
           <div className="bg-white rounded-2xl shadow-xl border-2 border-[#0077B5] relative overflow-hidden">
             <div className="p-8">
               <div className="text-center mb-6">
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">Professional</h3>
+                <h3 className="text-2xl font-bold text-gray-900 mb-2">{plan.name}</h3>
                 <div className="flex items-center justify-center mb-4">
-                  <span className="text-5xl font-bold text-[#0077B5]">€19,99</span>
+                  <span className="text-5xl font-bold text-[#0077B5]">€{plan.price}</span>
                 </div>
               </div>
 
               <ul className="space-y-4 mb-8">
-                <li className="flex items-center">
-                  <Check className="h-5 w-5 text-green-500 mr-3 flex-shrink-0" />
-                  <span className="text-gray-700">40 professionele portretfoto's</span>
-                </li>
-                <li className="flex items-center">
-                  <Check className="h-5 w-5 text-green-500 mr-3 flex-shrink-0" />
-                  <span className="text-gray-700">Verschillende zakelijke outfits</span>
-                </li>
-                <li className="flex items-center">
-                  <Check className="h-5 w-5 text-green-500 mr-3 flex-shrink-0" />
-                  <span className="text-gray-700">Verschillende poses en achtergronden</span>
-                </li>
-                <li className="flex items-center">
-                  <Check className="h-5 w-5 text-green-500 mr-3 flex-shrink-0" />
-                  <span className="text-gray-700">HD kwaliteit downloads</span>
-                </li>
-                <li className="flex items-center">
-                  <Check className="h-5 w-5 text-green-500 mr-3 flex-shrink-0" />
-                  <span className="text-gray-700">Klaar binnen 15 minuten</span>
-                </li>
-                <li className="flex items-center">
-                  <Check className="h-5 w-5 text-green-500 mr-3 flex-shrink-0" />
-                  <span className="text-gray-700">Perfect voor LinkedIn, Social Media, CV, Website en Print</span>
-                </li>
+                {plan.features.map((feature, index) => (
+                  <li key={index} className="flex items-center">
+                    <Check className="h-5 w-5 text-green-500 mr-3 flex-shrink-0" />
+                    <span className="text-gray-700">{feature}</span>
+                  </li>
+                ))}
               </ul>
 
               <div className="mb-6">
@@ -63,13 +108,12 @@ export default function PricingSection() {
               </div>
 
               <Button
-                asChild
                 size="lg"
                 className="w-full bg-[#0077B5] hover:bg-[#005885] text-white py-4 text-lg font-semibold"
+                onClick={handlePlanSelect}
+                disabled={isLoading}
               >
-                <Link href="/login">
-                  Start Nu <ArrowRight className="ml-2 h-5 w-5" />
-                </Link>
+                {isLoading ? "Bezig..." : "Start Nu"} <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </div>
           </div>

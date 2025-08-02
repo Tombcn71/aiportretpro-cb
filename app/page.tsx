@@ -33,17 +33,6 @@ const galleryPhotos = [
   "/images/professional-woman-8.jpg", // Position 16 - Woman
 ]
 
-const companies = [
-  { name: "Microsoft", logo: "/placeholder.svg?height=40&width=120&text=Microsoft" },
-  { name: "Google", logo: "/placeholder.svg?height=40&width=120&text=Google" },
-  { name: "Apple", logo: "/placeholder.svg?height=40&width=120&text=Apple" },
-  { name: "Amazon", logo: "/placeholder.svg?height=40&width=120&text=Amazon" },
-  { name: "Meta", logo: "/placeholder.svg?height=40&width=120&text=Meta" },
-  { name: "Netflix", logo: "/placeholder.svg?height=40&width=120&text=Netflix" },
-  { name: "Tesla", logo: "/placeholder.svg?height=40&width=120&text=Tesla" },
-  { name: "Spotify", logo: "/placeholder.svg?height=40&width=120&text=Spotify" },
-]
-
 const faqData = [
   {
     question: "Hoe werkt deze app precies?",
