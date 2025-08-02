@@ -18,8 +18,14 @@ export default function WizardWelcomePage() {
   useEffect(() => {
     if (status === "loading") return
 
+    // Als success=true, toon training status (na Stripe redirect)
+    if (success === "true") {
+      // Blijf op deze pagina om training status te tonen
+      return
+    }
+
+    // Als ingelogd en geen success, ga naar project-name
     if (session && !success) {
-      // User is logged in and no success param, redirect to project name
       router.push("/wizard/project-name")
     }
   }, [session, status, success, router])
@@ -37,8 +43,8 @@ export default function WizardWelcomePage() {
     }
   }
 
-  // Show success/training status if user just completed payment
-  if (session && success) {
+  // Show success/training status ONLY after Stripe redirect with success=true
+  if (session && success === "true") {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="container mx-auto px-4 max-w-2xl">
@@ -71,8 +77,8 @@ export default function WizardWelcomePage() {
     )
   }
 
-  // Show login screen if not authenticated
-  if (!session) {
+  // Show login screen if not authenticated OR no success parameter
+  if (!session || success !== "true") {
     return (
       <div className="min-h-screen bg-gray-50">
         <div className="container mx-auto px-4 py-8">
