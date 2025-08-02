@@ -16,12 +16,12 @@ export default function WizardCheckoutPage() {
 
   // Track pricing page view
   useEffect(() => {
-    trackViewContent("Wizard Checkout Page", 29)
+    trackViewContent("Wizard Checkout Page", 19.99)
   }, [])
 
   const handlePlanSelect = () => {
     // Track checkout initiation
-    trackInitiateCheckout(29)
+    trackInitiateCheckout(19.99)
 
     if (!session) {
       router.push(`/login?plan=professional`)
@@ -39,7 +39,17 @@ export default function WizardCheckoutPage() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ planId: "professional" }),
+        body: JSON.stringify({
+          planId: "professional",
+          priceId: "price_1RrFTnDswbEJWagVnjXYvNwh",
+          wizardData: {
+            projectName: localStorage.getItem("wizard_project_name") || "My Project",
+            gender: localStorage.getItem("wizard_gender") || "man",
+            uploadedPhotos: JSON.parse(localStorage.getItem("wizard_uploaded_photos") || "[]"),
+          },
+          successUrl: `${window.location.origin}/generate/processing`,
+          cancelUrl: `${window.location.origin}/wizard/checkout`,
+        }),
       })
 
       const data = await response.json()
@@ -58,6 +68,7 @@ export default function WizardCheckoutPage() {
   }
 
   const features = [
+    "40 professionele portretfoto's",
     "Verschillende zakelijke outfits",
     "Verschillende poses en achtergronden",
     "HD kwaliteit downloads",
@@ -196,7 +207,7 @@ export default function WizardCheckoutPage() {
             </div>
           </div>
 
-          {/* Right side - Pricing (copied from pricing page) */}
+          {/* Right side - Pricing */}
           <div className="flex flex-col justify-center max-w-md mx-auto w-full">
             <div className="mb-8 text-right">
               <div className="inline-flex items-center space-x-2">

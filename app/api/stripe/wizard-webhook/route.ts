@@ -86,55 +86,35 @@ export async function POST(req: NextRequest) {
 
       console.log("📁 Project created:", project.id)
 
-      // Start Astria training
+      // Start Astria training immediately
       try {
-        const astriaResponse = await fetch("https://api.astria.ai/tunes", {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${process.env.ASTRIA_API_KEY}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            tune: {
-              title: `${wizardData.projectName} - ${wizardData.gender}`,
-              name: wizardData.gender === "man" ? "man" : "woman",
-              image_urls: wizardData.uploadedPhotos,
-              callback_url: `${process.env.NEXTAUTH_URL}/api/astria/wizard-webhook/${project.id}`,
-            },
-          }),
+        const { createTuneWithPack } = await import("@/lib/astria")
+
+        const astriaResult = await createTuneWithPack("clx1ym7nf0009mi0880wjbxz0", {
+          title: `${wizardData.projectName} - ${wizardData.gender}`,
+          name: `project_${project.id}_${Date.now()}`,
+          imageUrls: wizardData.uploadedPhotos,
+          projectId: project.id,
+          userId: user.id,
         })
 
-        if (!astriaResponse.ok) {
-          const errorText = await astriaResponse.text()
-          console.error("❌ Astria training failed:", errorText)
+        console.log("🚀 Astria training started:", astriaResult.id)
 
-          // Update project status to failed
-          const { updateProjectStatus } = await import("@/lib/db")
-          await updateProjectStatus(project.id, "failed")
-
-          return NextResponse.json({ error: "Training failed" }, { status: 500 })
-        }
-
-        const astriaData = await astriaResponse.json()
-        console.log("🚀 Astria training started:", astriaData.id)
-
-        // Update project with tune_id and status
+        // Update project with tune_id
         const { sql } = await import("@/lib/db")
         await sql`
           UPDATE projects 
-          SET tune_id = ${astriaData.id}, status = 'training', updated_at = CURRENT_TIMESTAMP
+          SET tune_id = ${astriaResult.id}, status = 'training', updated_at = CURRENT_TIMESTAMP
           WHERE id = ${project.id}
         `
 
-        console.log("✅ Project updated with tune_id:", astriaData.id)
+        console.log("✅ Project updated with tune_id:", astriaResult.id)
       } catch (error) {
         console.error("❌ Error starting Astria training:", error)
 
         // Update project status to failed
         const { updateProjectStatus } = await import("@/lib/db")
         await updateProjectStatus(project.id, "failed")
-
-        return NextResponse.json({ error: "Training start failed" }, { status: 500 })
       }
     }
 
