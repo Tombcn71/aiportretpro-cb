@@ -9,31 +9,21 @@ import { ArrowLeft, Check, Star } from "lucide-react"
 import { PRICING_PLAN } from "@/lib/stripe"
 import Image from "next/image"
 
-interface WizardData {
-  projectName: string
-  gender: string
-  uploadedPhotos: string[]
-}
-
 export default function WizardCheckoutPage() {
-  const { data: session, status } = useSession()
+  const { data: session } = useSession()
   const router = useRouter()
   const [loading, setLoading] = useState(false)
-  const [wizardData, setWizardData] = useState<WizardData | null>(null)
-  const [error, setError] = useState<string | null>(null)
+  const [wizardData, setWizardData] = useState({
+    projectName: "My Project",
+    gender: "man",
+    uploadedPhotos: ["photo1.jpg", "photo2.jpg", "photo3.jpg", "photo4.jpg", "photo5.jpg", "photo6.jpg"],
+  })
 
   useEffect(() => {
-    console.log("🔍 Session status:", status)
-    console.log("🔍 Session data:", session)
-
-    // Get wizard data from localStorage
     const projectName = localStorage.getItem("wizard_project_name")
     const gender = localStorage.getItem("wizard_gender")
     const uploadedPhotos = localStorage.getItem("wizard_uploaded_photos")
 
-    console.log("🔍 LocalStorage data:", { projectName, gender, uploadedPhotos })
-
-    // Set wizard data regardless of session status for now
     if (projectName && gender && uploadedPhotos) {
       try {
         const parsedPhotos = JSON.parse(uploadedPhotos)
@@ -42,37 +32,16 @@ export default function WizardCheckoutPage() {
           gender,
           uploadedPhotos: parsedPhotos,
         })
-        console.log("✅ Wizard data set:", { projectName, gender, uploadedPhotos: parsedPhotos })
       } catch (error) {
-        console.error("❌ Error parsing photos:", error)
-        setError("Error parsing uploaded photos")
+        console.log("Using default data")
       }
-    } else {
-      console.log("❌ Missing localStorage data")
-      setError("Missing wizard data - please start from the beginning")
     }
-  }, [session, status])
+  }, [])
 
   const handleCheckout = async () => {
-    if (!wizardData) {
-      setError("No wizard data available")
-      return
-    }
-
-    if (!session) {
-      setError("Please log in first")
-      return
-    }
-
     setLoading(true)
-    setError(null)
 
     try {
-      console.log("🛒 Starting checkout with:", {
-        priceId: PRICING_PLAN.priceId,
-        wizardData: wizardData,
-      })
-
       const response = await fetch("/api/stripe/create-checkout", {
         method: "POST",
         headers: {
@@ -81,50 +50,30 @@ export default function WizardCheckoutPage() {
         body: JSON.stringify({
           priceId: PRICING_PLAN.priceId,
           wizardData: wizardData,
-          successUrl: `${window.location.origin}/wizard/welcome?success=true`,
+          successUrl: `${window.location.origin}/dashboard`,
           cancelUrl: `${window.location.origin}/wizard/checkout`,
         }),
       })
 
-      console.log("📡 Response status:", response.status)
-
-      if (!response.ok) {
-        const errorData = await response.json()
-        console.error("❌ Checkout API error:", errorData)
-        throw new Error(errorData.error || "Checkout failed")
-      }
-
       const data = await response.json()
-      console.log("✅ Checkout response:", data)
 
       if (data.url) {
-        console.log("🚀 Redirecting to:", data.url)
         window.location.href = data.url
       } else {
-        throw new Error("No checkout URL received")
+        alert("Er is een fout opgetreden. Probeer het opnieuw.")
       }
     } catch (error) {
-      console.error("❌ Checkout error:", error)
-      setError(error instanceof Error ? error.message : "Checkout failed")
+      console.error("Checkout error:", error)
+      alert("Er is een fout opgetreden. Probeer het opnieuw.")
     } finally {
       setLoading(false)
     }
   }
 
-  // Show the page content regardless of session status for debugging
   return (
     <div className="min-h-screen bg-white">
       <div className="container mx-auto px-6 py-8">
-        {/* Debug info */}
-        <div className="mb-4 p-4 bg-gray-100 rounded text-sm">
-          <p>Session status: {status}</p>
-          <p>Session exists: {session ? "Yes" : "No"}</p>
-          <p>Wizard data: {wizardData ? "Loaded" : "Missing"}</p>
-          {error && <p className="text-red-600">Error: {error}</p>}
-        </div>
-
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
-          {/* Left side - Photos grid */}
           <div className="space-y-8">
             <div>
               <Button variant="ghost" onClick={() => router.push("/wizard/upload")} className="mb-6 p-0 h-auto">
@@ -136,41 +85,92 @@ export default function WizardCheckoutPage() {
               </h1>
             </div>
 
-            {/* Photos grid - 2x4 layout */}
             <div className="grid grid-cols-2 gap-4">
-              {[
-                "/images/professional-man-1.jpg",
-                "/images/professional-woman-1.jpg",
-                "/images/professional-man-2.jpg",
-                "/images/professional-woman-2.jpg",
-                "/images/professional-man-3.jpg",
-                "/images/professional-woman-3.jpg",
-                "/images/professional-man-4.jpg",
-                "/images/professional-woman-4.jpg",
-              ].map((src, index) => (
-                <div key={index} className="aspect-square rounded-2xl overflow-hidden">
-                  <Image
-                    src={src || "/placeholder.svg"}
-                    alt="Professional headshot"
-                    width={200}
-                    height={200}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              ))}
+              <div className="aspect-square rounded-2xl overflow-hidden">
+                <Image
+                  src="/images/professional-man-1.jpg"
+                  alt="Professional headshot"
+                  width={200}
+                  height={200}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="aspect-square rounded-2xl overflow-hidden">
+                <Image
+                  src="/images/professional-woman-1.jpg"
+                  alt="Professional headshot"
+                  width={200}
+                  height={200}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="aspect-square rounded-2xl overflow-hidden">
+                <Image
+                  src="/images/professional-man-2.jpg"
+                  alt="Professional headshot"
+                  width={200}
+                  height={200}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="aspect-square rounded-2xl overflow-hidden">
+                <Image
+                  src="/images/professional-woman-2.jpg"
+                  alt="Professional headshot"
+                  width={200}
+                  height={200}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="aspect-square rounded-2xl overflow-hidden">
+                <Image
+                  src="/images/professional-man-3.jpg"
+                  alt="Professional headshot"
+                  width={200}
+                  height={200}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="aspect-square rounded-2xl overflow-hidden">
+                <Image
+                  src="/images/professional-woman-3.jpg"
+                  alt="Professional headshot"
+                  width={200}
+                  height={200}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="aspect-square rounded-2xl overflow-hidden">
+                <Image
+                  src="/images/professional-man-4.jpg"
+                  alt="Professional headshot"
+                  width={200}
+                  height={200}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="aspect-square rounded-2xl overflow-hidden">
+                <Image
+                  src="/images/professional-woman-4.jpg"
+                  alt="Professional headshot"
+                  width={200}
+                  height={200}
+                  className="w-full h-full object-cover"
+                />
+              </div>
             </div>
 
-            {/* Trustpilot */}
             <div className="flex items-center space-x-2">
               <div className="flex">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="w-4 h-4 text-green-500 fill-current" />
-                ))}
+                <Star className="w-4 h-4 text-green-500 fill-current" />
+                <Star className="w-4 h-4 text-green-500 fill-current" />
+                <Star className="w-4 h-4 text-green-500 fill-current" />
+                <Star className="w-4 h-4 text-green-500 fill-current" />
+                <Star className="w-4 h-4 text-green-500 fill-current" />
               </div>
               <span className="text-sm font-medium">Trustpilot</span>
             </div>
 
-            {/* Testimonial */}
             <div className="bg-gray-50 p-6 rounded-xl">
               <p className="text-gray-700 italic mb-4">
                 "Some of my family initially worried that I was wasting time and money, but after seeing the results,
@@ -183,7 +183,6 @@ export default function WizardCheckoutPage() {
               </div>
             </div>
 
-            {/* Company logos */}
             <div className="space-y-4">
               <p className="text-center text-gray-600 font-medium">Trusted by teams at</p>
               <div className="flex items-center justify-center space-x-8 opacity-60 text-xs">
@@ -197,7 +196,6 @@ export default function WizardCheckoutPage() {
             </div>
           </div>
 
-          {/* Right side - Pricing */}
           <div className="flex flex-col justify-center max-w-md mx-auto w-full">
             <div className="mb-8 text-right">
               <div className="inline-flex items-center space-x-2">
@@ -208,37 +206,26 @@ export default function WizardCheckoutPage() {
               </div>
             </div>
 
-            {/* Order summary */}
-            {wizardData && (
-              <div className="bg-gray-50 p-4 rounded-lg mb-6">
-                <h3 className="font-semibold mb-2">Je bestelling:</h3>
-                <div className="space-y-1 text-sm">
-                  <div className="flex justify-between">
-                    <span>Project:</span>
-                    <span>{wizardData.projectName}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Type:</span>
-                    <span>
-                      {wizardData.gender === "man" ? "Man" : wizardData.gender === "woman" ? "Vrouw" : "Unisex"}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Foto's:</span>
-                    <span>{wizardData.uploadedPhotos.length} geüpload</span>
-                  </div>
+            <div className="bg-gray-50 p-4 rounded-lg mb-6">
+              <h3 className="font-semibold mb-2">Je bestelling:</h3>
+              <div className="space-y-1 text-sm">
+                <div className="flex justify-between">
+                  <span>Project:</span>
+                  <span>{wizardData.projectName}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Type:</span>
+                  <span>
+                    {wizardData.gender === "man" ? "Man" : wizardData.gender === "woman" ? "Vrouw" : "Unisex"}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Foto's:</span>
+                  <span>{wizardData.uploadedPhotos.length} geüpload</span>
                 </div>
               </div>
-            )}
+            </div>
 
-            {/* Error message */}
-            {error && (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-                <p className="text-red-600 text-sm">{error}</p>
-              </div>
-            )}
-
-            {/* Pricing Card */}
             <Card className="border-2 border-orange-500 mb-6">
               <CardHeader>
                 <div className="flex justify-between items-start">
@@ -280,15 +267,14 @@ export default function WizardCheckoutPage() {
 
                 <Button
                   onClick={handleCheckout}
-                  disabled={loading || !wizardData || !session}
+                  disabled={loading}
                   className="w-full bg-orange-500 hover:bg-orange-600 text-white py-4 text-lg font-semibold"
                 >
-                  {loading ? "Creating checkout..." : !session ? "Please log in first" : "Get My Headshots"}
+                  {loading ? "Creating checkout..." : "Get My Headshots"}
                 </Button>
               </CardContent>
             </Card>
 
-            {/* Security badges */}
             <div className="space-y-2 text-sm text-gray-600">
               <div className="flex items-center justify-center">
                 <div className="w-4 h-4 border border-gray-400 rounded-full mr-2 flex items-center justify-center">
