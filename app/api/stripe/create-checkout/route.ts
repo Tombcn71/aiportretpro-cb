@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
   try {
     const { priceId, successUrl, cancelUrl, customerEmail, metadata } = await req.json()
 
-    console.log("💳 Creating Stripe checkout session:", {
+    console.log("🛒 Creating Stripe checkout session:", {
       priceId,
       customerEmail,
       metadata,

@@ -121,7 +121,7 @@ export async function POST(req: NextRequest) {
             const purchase = purchaseResult[0]
             console.log("💰 Purchase created:", purchase.id)
 
-            // Create project without photos
+            // Create project without photos - use empty PostgreSQL array
             const projectResult = await sql`
               INSERT INTO projects (
                 user_id,
@@ -138,7 +138,7 @@ export async function POST(req: NextRequest) {
                 ${purchase.id},
                 ${fallbackData.projectName},
                 ${fallbackData.gender},
-                '[]',
+                ARRAY[]::text[],
                 'pending_upload',
                 NOW(),
                 NOW()
@@ -191,8 +191,13 @@ export async function POST(req: NextRequest) {
           const purchase = purchaseResult[0]
           console.log("💰 Purchase created:", purchase.id)
 
-          // Create project
+          // Create project - Convert JavaScript array to PostgreSQL array
           console.log("📁 Creating project...")
+          console.log("📸 Photos to save:", wizardData.uploadedPhotos)
+
+          // Convert JavaScript array to PostgreSQL array format
+          const photosArray = wizardData.uploadedPhotos || []
+
           const projectResult = await sql`
             INSERT INTO projects (
               user_id,
@@ -209,7 +214,7 @@ export async function POST(req: NextRequest) {
               ${purchase.id},
               ${wizardData.projectName},
               ${wizardData.gender},
-              ${JSON.stringify(wizardData.uploadedPhotos || [])},
+              ${photosArray},
               'training',
               NOW(),
               NOW()
