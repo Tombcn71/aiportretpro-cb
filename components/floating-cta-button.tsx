@@ -36,7 +36,7 @@ export default function FloatingCTAButton() {
       >
         <Link href="/pricing">
           <Camera className="mr-2 h-4 w-4" />
-          Start Nu - 29€
+          Start Nu - 19,99€
           <ArrowRight className="ml-2 h-4 w-4" />
         </Link>
       </Button>

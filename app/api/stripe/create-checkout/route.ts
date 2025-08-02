@@ -6,7 +6,7 @@ const PRICING_PLAN = {
   name: "Professional",
   price: 19.99,
   photos: 40,
-  priceId: "price_1RrFTnDswbEJWagVnjXYvNwh",
+  priceId: "price_1RrFsbDswbEJWagVsEytA8rs",
 }
 
 export async function POST(request: NextRequest) {
@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
       userId: user.id,
       stripeSessionId: checkoutSession.id,
       planType: "professional",
-      amount: plan.price * 100,
+amount: Math.round(plan.price * 100),
       headshotsIncluded: plan.photos,
     })
 

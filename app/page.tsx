@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { ArrowRight, X, ChevronDown, ChevronUp, Check } from "lucide-react"
+import { ArrowRight, X, ChevronDown, ChevronUp } from "lucide-react"
 import Header from "@/components/header"
 import { Facebook, Instagram, Linkedin } from "lucide-react"
 import AIHeadshotsShowcase from "@/components/ai-headshots-showcase"
@@ -156,9 +156,8 @@ export default function HomePage() {
         </h1>
 
         <p className="text-md md:text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
-          Geen gedoe met studio's, direct 40 AI-portretten in 15 min.{" "}
-          <span className="font-bold"> Tijdelijk voor slechts €19,99</span>. Makkelijk vanaf je telefoon of laptop,
-          bespaar tijd en geld.
+          Geen gedoe met studio's, direct 40 AI-portretten in 15 min.<span className="text-[#0077B5] font-bold"> Tijdelijk voor slechts 19,99€. </span>
+          Makkelijk vanaf je telefoon of laptop, bespaar tijd en geld.
         </p>
 
         <Button
@@ -166,8 +165,8 @@ export default function HomePage() {
           size="lg"
           className=" bg-[#FF8C00] hover:bg-[#FFA500] text-white px-6 md:px-10 py-8 md:py-8 text-base md:text-lg mb-8 md:max-w-sm"
         >
-          <Link href="/login">
-            Start jouw fotoshoot nu - €19,99 <ArrowRight className="ml-2 h-6 md:h-7 w-6 md:w-7" />
+          <Link href="/pricing">
+            Start jouw fotoshoot nu - 19,99€ <ArrowRight className="ml-2 h-6 md:h-7 w-6 md:w-7" />
           </Link>
         </Button>
       </section>
@@ -220,80 +219,6 @@ export default function HomePage() {
       {/* AI Headshots Showcase - Replaces Photo Gallery */}
       <AIHeadshotsShowcase />
 
-      {/* Pricing Section */}
-      <section id="prijzen" className="py-16 bg-gradient-to-br from-blue-50 to-white">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Eenvoudige Prijzen</h2>
-            <p className="text-xl text-gray-600">Alles wat je nodig hebt voor professionele portretfoto's</p>
-          </div>
-
-          <div className="max-w-md mx-auto">
-            <div className="bg-white rounded-2xl shadow-xl border-2 border-[#0077B5] relative overflow-hidden">
-              <div className="p-8">
-                <div className="text-center mb-6">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-2">Professional</h3>
-                  <div className="flex items-center justify-center mb-4">
-                    <span className="text-5xl font-bold text-[#0077B5]">€19,99</span>
-                  </div>
-                </div>
-
-                <ul className="space-y-4 mb-8">
-                  <li className="flex items-center">
-                    <Check className="h-5 w-5 text-green-500 mr-3 flex-shrink-0" />
-                    <span className="text-gray-700">40 professionele portretfoto's</span>
-                  </li>
-                  <li className="flex items-center">
-                    <Check className="h-5 w-5 text-green-500 mr-3 flex-shrink-0" />
-                    <span className="text-gray-700">Verschillende zakelijke outfits</span>
-                  </li>
-                  <li className="flex items-center">
-                    <Check className="h-5 w-5 text-green-500 mr-3 flex-shrink-0" />
-                    <span className="text-gray-700">Verschillende poses en achtergronden</span>
-                  </li>
-                  <li className="flex items-center">
-                    <Check className="h-5 w-5 text-green-500 mr-3 flex-shrink-0" />
-                    <span className="text-gray-700">HD kwaliteit downloads</span>
-                  </li>
-                  <li className="flex items-center">
-                    <Check className="h-5 w-5 text-green-500 mr-3 flex-shrink-0" />
-                    <span className="text-gray-700">Klaar binnen 15 minuten</span>
-                  </li>
-                  <li className="flex items-center">
-                    <Check className="h-5 w-5 text-green-500 mr-3 flex-shrink-0" />
-                    <span className="text-gray-700">Perfect voor LinkedIn, Social Media, CV, Website en Print</span>
-                  </li>
-                </ul>
-
-                <div className="mb-6">
-                  <h4 className="text-lg font-semibold text-gray-900 mb-3">Betaal Veilig & Start Direct</h4>
-                  <div className="space-y-2">
-                    <div className="flex items-center">
-                      <Check className="h-4 w-4 text-green-500 mr-2 flex-shrink-0" />
-                      <span className="text-sm text-gray-600">Veilige betaling met ideal en credit card</span>
-                    </div>
-                    <div className="flex items-center">
-                      <Check className="h-4 w-4 text-green-500 mr-2 flex-shrink-0" />
-                      <span className="text-sm text-gray-600">Geld terug garantie</span>
-                    </div>
-                  </div>
-                </div>
-
-                <Button
-                  asChild
-                  size="lg"
-                  className="w-full bg-[#0077B5] hover:bg-[#005885] text-white py-4 text-lg font-semibold"
-                >
-                  <Link href="/login">
-                    Start Nu <ArrowRight className="ml-2 h-5 w-5" />
-                  </Link>
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* FAQ Section */}
       <section id="faq" className="container mx-auto px-4 py-12 md:py-16 bg-gray-50">
         <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-center mb-4">Veelgestelde Vragen</h2>
@@ -341,9 +266,9 @@ export default function HomePage() {
             Klaar voor je professionele portretfoto's?
           </h2>
           <p className="text-xl text-gray-600 mb-8">Laat zien wie je bent met een krachtige, professionele foto</p>
-          <Link href="/login">
+          <Link href="/pricing">
             <Button size="lg" className="bg-[#FFA500] hover:bg-[#FF8C00] text-white px-8 py-4 text-lg">
-              Start nu voor slechts €19,99 <ArrowRight className="ml-2 h-5 w-5" />
+              Start nu voor slechts €29 <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
           </Link>
         </div>
@@ -404,10 +329,7 @@ export default function HomePage() {
                 >
                   Over Ons
                 </Link>
-                <Link
-                  href="/#prijzen"
-                  className="text-gray-300 hover:text-white transition-colors duration-200 text-sm"
-                >
+                <Link href="/pricing" className="text-gray-300 hover:text-white transition-colors duration-200 text-sm">
                   Prijzen
                 </Link>
                 <Link href="/contact" className="text-gray-300 hover:text-white transition-colors duration-200 text-sm">
@@ -480,8 +402,8 @@ export default function HomePage() {
               size="lg"
               className="w-full bg-[#FF8C00] hover:bg-[#FFA500] text-white px-6 py-8 text-base font-semibold"
             >
-              <Link href="/login" className="flex items-center justify-center">
-                Start jouw fotoshoot nu - €19,99 <ArrowRight className="ml-2 h-6 w-6" />
+              <Link href="/pricing" className="flex items-center justify-center">
+                Start jouw fotoshoot nu - 19,99€ <ArrowRight className="ml-2 h-6 w-6" />
               </Link>
             </Button>
           </div>
