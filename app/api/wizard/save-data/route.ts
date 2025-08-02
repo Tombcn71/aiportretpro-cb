@@ -12,11 +12,11 @@ export async function POST(req: NextRequest) {
       sessionId,
       projectName,
       gender,
-      photoCount: uploadedPhotos.length,
+      photoCount: uploadedPhotos?.length || 0,
       userEmail,
     })
 
-    if (!sessionId || !projectName || !gender || !uploadedPhotos || !userEmail) {
+    if (!sessionId || !projectName || !gender || !userEmail) {
       console.error("❌ Missing required wizard data")
       return NextResponse.json({ error: "Missing required data" }, { status: 400 })
     }
@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
     saveWizardData(sessionId, {
       projectName,
       gender,
-      uploadedPhotos,
+      uploadedPhotos: uploadedPhotos || [],
       userEmail,
       timestamp: Date.now(),
     })

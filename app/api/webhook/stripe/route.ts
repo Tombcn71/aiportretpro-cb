@@ -58,187 +58,289 @@ export async function POST(req: NextRequest) {
 
       // Handle wizard flow
       if (session.metadata?.type === "wizard") {
-        const wizardSessionId = session.metadata.session_id
-        const customerEmail = session.customer_email
-
-        if (!wizardSessionId) {
-          console.error("❌ No wizard session ID in metadata")
-          return NextResponse.json({ error: "No wizard session ID" }, { status: 400 })
-        }
-
-        if (!customerEmail) {
-          console.error("❌ No customer email from Stripe")
-          return NextResponse.json({ error: "No customer email" }, { status: 400 })
-        }
-
-        console.log("🧙‍♂️ Getting wizard data for session:", wizardSessionId)
-
-        // Get wizard data from memory
-        const wizardData = getWizardData(wizardSessionId)
-
-        if (!wizardData) {
-          console.error("❌ Wizard session not found:", wizardSessionId)
-          return NextResponse.json({ error: "Wizard session not found" }, { status: 400 })
-        }
-
-        console.log("✅ Found wizard data:", {
-          projectName: wizardData.projectName,
-          gender: wizardData.gender,
-          photoCount: wizardData.uploadedPhotos.length,
-        })
-
-        // Get or create user
-        const userResult = await sql`
-          SELECT * FROM users WHERE email = ${customerEmail}
-        `
-
-        let user = userResult[0]
-        if (!user) {
-          const createUserResult = await sql`
-            INSERT INTO users (email, name, image, created_at, updated_at)
-            VALUES (${customerEmail}, '', '', NOW(), NOW())
-            RETURNING *
-          `
-          user = createUserResult[0]
-        }
-
-        console.log("👤 User:", user.id, user.email)
-
-        // Create purchase record
-        const purchaseResult = await sql`
-          INSERT INTO purchases (user_id, stripe_session_id, plan_type, amount, headshots_included, status, created_at, updated_at)
-          VALUES (${user.id}, ${session.id}, 'professional', 1999, 40, 'completed', NOW(), NOW())
-          RETURNING *
-        `
-
-        const purchase = purchaseResult[0]
-        console.log("💰 Purchase created:", purchase.id)
-
-        // Create project
-        const projectResult = await sql`
-          INSERT INTO projects (
-            user_id,
-            purchase_id,
-            name,
-            gender,
-            uploaded_photos,
-            status,
-            created_at,
-            updated_at
-          )
-          VALUES (
-            ${user.id},
-            ${purchase.id},
-            ${wizardData.projectName},
-            ${wizardData.gender},
-            ${JSON.stringify(wizardData.uploadedPhotos)},
-            'training',
-            NOW(),
-            NOW()
-          )
-          RETURNING *
-        `
-
-        const project = projectResult[0]
-        console.log("✅ Project created:", project.id)
-
-        // 🚀 START ASTRIA TRAINING!
         try {
-          console.log("🎯 STARTING ASTRIA TRAINING...")
-          console.log("📸 Using photos:", wizardData.uploadedPhotos)
+          const wizardSessionId = session.metadata.session_id
+          const customerEmail = session.customer_email
 
-          const ASTRIA_API_URL = process.env.ASTRIA_API_URL || "https://api.astria.ai"
-          const ASTRIA_API_KEY = process.env.ASTRIA_API_KEY
+          console.log("🧙‍♂️ Processing wizard flow")
+          console.log("Session ID:", wizardSessionId)
+          console.log("Customer email:", customerEmail)
 
-          if (!ASTRIA_API_KEY) {
-            throw new Error("ASTRIA_API_KEY not configured")
+          if (!wizardSessionId) {
+            console.error("❌ No wizard session ID in metadata")
+            return NextResponse.json({ error: "No wizard session ID" }, { status: 400 })
           }
 
-          // DIRECT POST TO ASTRIA
-          const astriaResponse = await fetch(`${ASTRIA_API_URL}/tunes`, {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${ASTRIA_API_KEY}`,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              tune: {
-                title: `${wizardData.projectName} - ${wizardData.gender}`,
-                name: `project_${project.id}_${Date.now()}`,
-                image_urls: wizardData.uploadedPhotos,
-                callback: `${process.env.NEXTAUTH_URL}/api/astria/wizard-webhook/${project.id}?webhookSecret=${process.env.APP_WEBHOOK_SECRET}`,
-              },
-              pack_id: "clx1qvimu0001hf0jdn5xdlr4",
-            }),
+          if (!customerEmail) {
+            console.error("❌ No customer email from Stripe")
+            return NextResponse.json({ error: "No customer email" }, { status: 400 })
+          }
+
+          // Get wizard data from memory
+          const wizardData = getWizardData(wizardSessionId)
+          console.log("📋 Wizard data found:", !!wizardData)
+
+          if (!wizardData) {
+            console.error("❌ Wizard session not found in memory:", wizardSessionId)
+            console.log("Available sessions:", Array.from(wizardSessions.keys()))
+
+            // Try to get data from metadata as fallback
+            const fallbackData = {
+              projectName: session.metadata.project_name || "Untitled Project",
+              gender: session.metadata.gender || "man",
+              uploadedPhotos: [], // Empty array as fallback
+              userEmail: session.metadata.user_email || customerEmail,
+            }
+
+            console.log("🔄 Using fallback data:", fallbackData)
+
+            // Continue with fallback data but skip Astria training
+            const userResult = await sql`
+              SELECT * FROM users WHERE email = ${customerEmail}
+            `
+
+            let user = userResult[0]
+            if (!user) {
+              const createUserResult = await sql`
+                INSERT INTO users (email, name, image, created_at, updated_at)
+                VALUES (${customerEmail}, '', '', NOW(), NOW())
+                RETURNING *
+              `
+              user = createUserResult[0]
+            }
+
+            console.log("👤 User:", user.id, user.email)
+
+            // Create purchase record
+            const purchaseResult = await sql`
+              INSERT INTO purchases (user_id, stripe_session_id, plan_type, amount, headshots_included, status, created_at, updated_at)
+              VALUES (${user.id}, ${session.id}, 'professional', 1999, 40, 'completed', NOW(), NOW())
+              RETURNING *
+            `
+
+            const purchase = purchaseResult[0]
+            console.log("💰 Purchase created:", purchase.id)
+
+            // Create project without photos
+            const projectResult = await sql`
+              INSERT INTO projects (
+                user_id,
+                purchase_id,
+                name,
+                gender,
+                uploaded_photos,
+                status,
+                created_at,
+                updated_at
+              )
+              VALUES (
+                ${user.id},
+                ${purchase.id},
+                ${fallbackData.projectName},
+                ${fallbackData.gender},
+                '[]',
+                'pending_upload',
+                NOW(),
+                NOW()
+              )
+              RETURNING *
+            `
+
+            const project = projectResult[0]
+            console.log("⚠️ Project created without photos:", project.id)
+
+            return NextResponse.json({
+              received: true,
+              message: "Purchase processed but photos missing - user needs to re-upload",
+            })
+          }
+
+          console.log("✅ Found wizard data:", {
+            projectName: wizardData.projectName,
+            gender: wizardData.gender,
+            photoCount: wizardData.uploadedPhotos?.length || 0,
           })
 
-          if (!astriaResponse.ok) {
-            const errorText = await astriaResponse.text()
-            console.error("❌ Astria API error:", errorText)
-            throw new Error(`Astria API error: ${astriaResponse.status}`)
+          // Get or create user
+          console.log("👤 Getting/creating user...")
+          const userResult = await sql`
+            SELECT * FROM users WHERE email = ${customerEmail}
+          `
+
+          let user = userResult[0]
+          if (!user) {
+            console.log("Creating new user...")
+            const createUserResult = await sql`
+              INSERT INTO users (email, name, image, created_at, updated_at)
+              VALUES (${customerEmail}, '', '', NOW(), NOW())
+              RETURNING *
+            `
+            user = createUserResult[0]
           }
 
-          const astriaResult = await astriaResponse.json()
-          console.log("🔥 ASTRIA TRAINING STARTED:", astriaResult.id)
+          console.log("👤 User:", user.id, user.email)
 
-          // Update project with tune_id
-          await sql`
-            UPDATE projects 
-            SET tune_id = ${astriaResult.id}, updated_at = NOW()
-            WHERE id = ${project.id}
+          // Create purchase record
+          console.log("💰 Creating purchase...")
+          const purchaseResult = await sql`
+            INSERT INTO purchases (user_id, stripe_session_id, plan_type, amount, headshots_included, status, created_at, updated_at)
+            VALUES (${user.id}, ${session.id}, 'professional', 1999, 40, 'completed', NOW(), NOW())
+            RETURNING *
           `
+
+          const purchase = purchaseResult[0]
+          console.log("💰 Purchase created:", purchase.id)
+
+          // Create project
+          console.log("📁 Creating project...")
+          const projectResult = await sql`
+            INSERT INTO projects (
+              user_id,
+              purchase_id,
+              name,
+              gender,
+              uploaded_photos,
+              status,
+              created_at,
+              updated_at
+            )
+            VALUES (
+              ${user.id},
+              ${purchase.id},
+              ${wizardData.projectName},
+              ${wizardData.gender},
+              ${JSON.stringify(wizardData.uploadedPhotos || [])},
+              'training',
+              NOW(),
+              NOW()
+            )
+            RETURNING *
+          `
+
+          const project = projectResult[0]
+          console.log("✅ Project created:", project.id)
+
+          // 🚀 START ASTRIA TRAINING!
+          if (wizardData.uploadedPhotos && wizardData.uploadedPhotos.length > 0) {
+            try {
+              console.log("🎯 STARTING ASTRIA TRAINING...")
+              console.log("📸 Using photos:", wizardData.uploadedPhotos)
+
+              const ASTRIA_API_URL = process.env.ASTRIA_API_URL || "https://api.astria.ai"
+              const ASTRIA_API_KEY = process.env.ASTRIA_API_KEY
+
+              if (!ASTRIA_API_KEY) {
+                throw new Error("ASTRIA_API_KEY not configured")
+              }
+
+              // DIRECT POST TO ASTRIA
+              const astriaResponse = await fetch(`${ASTRIA_API_URL}/tunes`, {
+                method: "POST",
+                headers: {
+                  Authorization: `Bearer ${ASTRIA_API_KEY}`,
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  tune: {
+                    title: `${wizardData.projectName} - ${wizardData.gender}`,
+                    name: `project_${project.id}_${Date.now()}`,
+                    image_urls: wizardData.uploadedPhotos,
+                    callback: `${process.env.NEXTAUTH_URL}/api/astria/wizard-webhook/${project.id}?webhookSecret=${process.env.APP_WEBHOOK_SECRET}`,
+                  },
+                  pack_id: "clx1qvimu0001hf0jdn5xdlr4",
+                }),
+              })
+
+              if (!astriaResponse.ok) {
+                const errorText = await astriaResponse.text()
+                console.error("❌ Astria API error:", errorText)
+                throw new Error(`Astria API error: ${astriaResponse.status}`)
+              }
+
+              const astriaResult = await astriaResponse.json()
+              console.log("🔥 ASTRIA TRAINING STARTED:", astriaResult.id)
+
+              // Update project with tune_id
+              await sql`
+                UPDATE projects 
+                SET tune_id = ${astriaResult.id}, updated_at = NOW()
+                WHERE id = ${project.id}
+              `
+
+              console.log("🎉 ASTRIA TRAINING STARTED SUCCESSFULLY!")
+            } catch (astriaError) {
+              console.error("❌ ASTRIA ERROR:", astriaError)
+
+              await sql`
+                UPDATE projects 
+                SET status = 'failed', updated_at = NOW()
+                WHERE id = ${project.id}
+              `
+            }
+          } else {
+            console.log("⚠️ No photos to train with")
+            await sql`
+              UPDATE projects 
+              SET status = 'pending_upload', updated_at = NOW()
+              WHERE id = ${project.id}
+            `
+          }
 
           // Clean up wizard session
           deleteWizardData(wizardSessionId)
 
           console.log("🎉 WIZARD FLOW COMPLETED!")
-        } catch (astriaError) {
-          console.error("❌ ASTRIA ERROR:", astriaError)
-
-          await sql`
-            UPDATE projects 
-            SET status = 'failed', updated_at = NOW()
-            WHERE id = ${project.id}
-          `
+        } catch (wizardError) {
+          console.error("❌ WIZARD FLOW ERROR:", wizardError)
+          return NextResponse.json({ error: "Wizard flow failed" }, { status: 500 })
         }
       }
 
       // Handle regular pricing flow
       else {
-        console.log("💳 Processing regular purchase")
-        const customerEmail = session.customer_email
+        try {
+          console.log("💳 Processing regular purchase")
+          const customerEmail = session.customer_email
 
-        if (!customerEmail) {
-          console.error("❌ No customer email")
-          return NextResponse.json({ error: "No customer email" }, { status: 400 })
-        }
+          if (!customerEmail) {
+            console.error("❌ No customer email")
+            return NextResponse.json({ error: "No customer email" }, { status: 400 })
+          }
 
-        const userResult = await sql`
-          SELECT * FROM users WHERE email = ${customerEmail}
-        `
-
-        let user = userResult[0]
-        if (!user) {
-          const createUserResult = await sql`
-            INSERT INTO users (email, name, image, created_at, updated_at)
-            VALUES (${customerEmail}, '', '', NOW(), NOW())
-            RETURNING *
+          const userResult = await sql`
+            SELECT * FROM users WHERE email = ${customerEmail}
           `
-          user = createUserResult[0]
+
+          let user = userResult[0]
+          if (!user) {
+            const createUserResult = await sql`
+              INSERT INTO users (email, name, image, created_at, updated_at)
+              VALUES (${customerEmail}, '', '', NOW(), NOW())
+              RETURNING *
+            `
+            user = createUserResult[0]
+          }
+
+          await sql`
+            INSERT INTO purchases (user_id, stripe_session_id, plan_type, amount, headshots_included, status, created_at, updated_at)
+            VALUES (${user.id}, ${session.id}, 'professional', 1999, 40, 'completed', NOW(), NOW())
+          `
+
+          console.log("✅ Regular purchase processed")
+        } catch (regularError) {
+          console.error("❌ REGULAR PURCHASE ERROR:", regularError)
+          return NextResponse.json({ error: "Regular purchase failed" }, { status: 500 })
         }
-
-        await sql`
-          INSERT INTO purchases (user_id, stripe_session_id, plan_type, amount, headshots_included, status, created_at, updated_at)
-          VALUES (${user.id}, ${session.id}, 'professional', 1999, 40, 'completed', NOW(), NOW())
-        `
-
-        console.log("✅ Regular purchase processed")
       }
     }
 
     return NextResponse.json({ received: true })
   } catch (error) {
     console.error("❌ WEBHOOK ERROR:", error)
-    return NextResponse.json({ error: "Webhook failed" }, { status: 500 })
+    console.error("Error stack:", error instanceof Error ? error.stack : "No stack trace")
+    return NextResponse.json(
+      { error: "Webhook failed", details: error instanceof Error ? error.message : "Unknown error" },
+      { status: 500 },
+    )
   }
 }
