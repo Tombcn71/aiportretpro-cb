@@ -1,9 +1,8 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
-import { randomUUID } from "crypto"
 
-// Tijdelijke opslag voor wizard data (in memory)
+// In-memory storage for wizard sessions (in production, use Redis or database)
 const wizardSessions = new Map<string, any>()
 
 export async function POST(req: NextRequest) {
@@ -11,42 +10,43 @@ export async function POST(req: NextRequest) {
     const session = await getServerSession(authOptions)
 
     if (!session?.user?.email) {
-      return NextResponse.json({ error: "Not authenticated" }, { status: 401 })
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const wizardData = await req.json()
-    const sessionId = randomUUID()
+    const { projectName, gender, photos } = await req.json()
 
-    // Sla wizard data tijdelijk op met user email
+    // Generate unique session ID
+    const sessionId = `wizard_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+
+    // Store wizard data in memory
     wizardSessions.set(sessionId, {
-      ...wizardData,
       userEmail: session.user.email,
-      createdAt: Date.now(),
+      projectName,
+      gender,
+      uploadedPhotos: photos,
+      createdAt: new Date().toISOString(),
     })
 
-    console.log("💾 Wizard data saved with session ID:", sessionId)
-
-    // Clean up old sessions (older than 1 hour)
-    const oneHourAgo = Date.now() - 60 * 60 * 1000
-    for (const [key, value] of wizardSessions.entries()) {
-      if (value.createdAt < oneHourAgo) {
-        wizardSessions.delete(key)
-      }
-    }
+    console.log("✅ Wizard data saved:", {
+      sessionId,
+      userEmail: session.user.email,
+      projectName,
+      gender,
+      photoCount: photos.length,
+    })
 
     return NextResponse.json({ sessionId })
   } catch (error) {
-    console.error("❌ Error saving wizard data:", error)
+    console.error("Error saving wizard data:", error)
     return NextResponse.json({ error: "Failed to save wizard data" }, { status: 500 })
   }
 }
 
-// Export function to get wizard data
+// Export function to get wizard data (used by webhook)
 export function getWizardData(sessionId: string) {
   return wizardSessions.get(sessionId)
 }
 
-// Export function to delete wizard data
 export function deleteWizardData(sessionId: string) {
   wizardSessions.delete(sessionId)
 }

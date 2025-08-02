@@ -8,16 +8,16 @@ import { Progress } from "@/components/ui/progress"
 import { CheckCircle, Clock, Upload } from "lucide-react"
 
 export default function ProcessingPage() {
-  const { data: session } = useSession()
+  const { data: session, status } = useSession()
   const router = useRouter()
   const [progress, setProgress] = useState(0)
-  const [status, setStatus] = useState("Initializing...")
+  const [statusText, setStatusText] = useState("Initializing...")
 
   useEffect(() => {
-    if (!session?.user?.email) {
-      router.push("/login")
-      return
-    }
+    // Don't redirect if no session - user might be coming from Stripe
+    if (status === "loading") return
+
+    console.log("🔄 Processing page loaded, session:", !!session)
 
     // Clear ALL wizard data since payment is complete
     console.log("🧹 Clearing all wizard data after successful payment")
@@ -39,20 +39,25 @@ export default function ProcessingPage() {
     let currentStep = 0
     const interval = setInterval(() => {
       if (currentStep < steps.length) {
-        setStatus(steps[currentStep].message)
+        setStatusText(steps[currentStep].message)
         setProgress(steps[currentStep].progress)
         currentStep++
       } else {
         clearInterval(interval)
         // Redirect to dashboard after completion
         setTimeout(() => {
-          router.push("/dashboard")
+          if (session) {
+            router.push("/dashboard")
+          } else {
+            // If no session, redirect to login with return URL
+            router.push("/auth/signin?callbackUrl=/dashboard")
+          }
         }, 2000)
       }
     }, 1500)
 
     return () => clearInterval(interval)
-  }, [session, router])
+  }, [session, status, router])
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
@@ -69,7 +74,7 @@ export default function ProcessingPage() {
               )}
             </div>
             <h1 className="text-2xl font-bold mb-2">Processing Your Order</h1>
-            <p className="text-gray-600">{status}</p>
+            <p className="text-gray-600">{statusText}</p>
           </div>
 
           <div className="space-y-4">
