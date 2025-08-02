@@ -38,6 +38,8 @@ export default function WizardCheckoutPage() {
     setLoading(true)
 
     try {
+      console.log("🛒 Starting checkout with PRICING_PLAN.priceId:", PRICING_PLAN.priceId)
+
       // Use existing create-checkout API with wizard metadata
       const response = await fetch("/api/stripe/create-checkout", {
         method: "POST",

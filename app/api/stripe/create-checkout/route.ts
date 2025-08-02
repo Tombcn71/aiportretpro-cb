@@ -12,7 +12,8 @@ export async function POST(req: NextRequest) {
     const body = await req.json()
     const { priceId = PRICING_PLAN.priceId, wizardData, successUrl, cancelUrl } = body
 
-    console.log("🛒 Creating checkout session with wizard data:", wizardData)
+    console.log("🛒 Creating checkout session with price ID:", priceId)
+    console.log("🛒 Wizard data:", wizardData)
 
     // Track Facebook Pixel event
     if (typeof window !== "undefined") {
