@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server"
 import Stripe from "stripe"
 import { trackInitiateCheckout } from "@/lib/facebook-pixel"
+import { PRICING_PLAN } from "@/lib/stripe"
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2024-06-20",
@@ -9,7 +10,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const { priceId = "price_1QSqJhP5vTfZHjfvJhKJQqLs", wizardData, successUrl, cancelUrl } = body
+    const { priceId = PRICING_PLAN.priceId, wizardData, successUrl, cancelUrl } = body
 
     console.log("🛒 Creating checkout session with wizard data:", wizardData)
 
@@ -19,7 +20,7 @@ export async function POST(req: NextRequest) {
         content_ids: [priceId],
         content_type: "product",
         currency: "EUR",
-        value: 29.0,
+        value: PRICING_PLAN.price,
       })
     }
 
@@ -36,6 +37,7 @@ export async function POST(req: NextRequest) {
       cancel_url: cancelUrl || `${process.env.NEXTAUTH_URL}/wizard/checkout?canceled=true`,
       metadata: wizardData
         ? {
+            flow: "wizard",
             wizardData: JSON.stringify(wizardData),
           }
         : {},
