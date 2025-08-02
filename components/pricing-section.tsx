@@ -26,44 +26,12 @@ export default function PricingSection() {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
 
-  const handleCheckout = async () => {
-    if (!session) {
-      router.push(`/login?plan=${plan.id}`)
-      return
-    }
-
-    setIsLoading(true)
-
-    try {
-      trackInitiateCheckout(plan.price, "EUR")
-
-      const response = await fetch("/api/stripe/create-checkout", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          planId: plan.id,
-          planName: plan.name,
-          amount: Math.round(plan.price * 100),
-        }),
-      })
-
-      if (!response.ok) {
-        throw new Error("Failed to create checkout session")
-      }
-
-      const { url } = await response.json()
-      window.location.href = url
-    } catch (error) {
-      console.error("Error creating checkout session:", error)
-      setIsLoading(false)
-    }
-  }
-
   const handlePlanSelect = () => {
     trackViewContent(plan.price, "EUR")
-    handleCheckout()
+    trackInitiateCheckout(plan.price, "EUR")
+
+    // Always go to start page for new flow
+    router.push("/start")
   }
 
   return (

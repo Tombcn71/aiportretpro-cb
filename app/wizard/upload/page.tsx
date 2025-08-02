@@ -1,35 +1,18 @@
 "use client"
 
 import type React from "react"
-import { useState, useCallback, useEffect } from "react"
+
+import { useState, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Upload, X, Camera } from "lucide-react"
-import { Badge } from "@/components/ui/badge"
-import { ProgressBar } from "@/components/ui/progress-bar"
 import Image from "next/image"
-
-interface WizardData {
-  projectName: string
-  gender: string
-}
 
 export default function UploadPage() {
   const [uploadedPhotos, setUploadedPhotos] = useState<File[]>([])
   const [uploading, setUploading] = useState(false)
-  const [wizardData, setWizardData] = useState<WizardData | null>(null)
   const router = useRouter()
-
-  useEffect(() => {
-    // Get wizard data from localStorage
-    const data = JSON.parse(localStorage.getItem("wizardData") || "{}")
-    if (!data.projectName || !data.gender) {
-      router.push("/wizard/project-name")
-      return
-    }
-    setWizardData(data)
-  }, [router])
 
   const handleFileSelect = useCallback((files: FileList | null) => {
     if (!files) return
@@ -56,7 +39,7 @@ export default function UploadPage() {
   }
 
   const handleContinue = async () => {
-    if (uploadedPhotos.length < 4 || !wizardData) return
+    if (uploadedPhotos.length < 4) return
     setUploading(true)
 
     try {
@@ -76,29 +59,18 @@ export default function UploadPage() {
 
       const uploadedUrls = await Promise.all(uploadPromises)
 
-      // Create project with default pack 928 (portetfotos m/v)
-      const response = await fetch("/api/projects/create-with-pack", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          projectName: wizardData.projectName,
-          gender: wizardData.gender,
-          selectedPackId: "928", // Portetfotos m/v pack
-          uploadedPhotos: uploadedUrls,
-        }),
-      })
-
-      const result = await response.json()
-
-      if (result.projectId) {
-        // Clear wizard data
-        localStorage.removeItem("wizardData")
-        router.push(`/generate/${result.projectId}`)
-      } else {
-        throw new Error(result.error || "Failed to create project")
+      // Get wizard data from localStorage and update with photos
+      const wizardData = JSON.parse(localStorage.getItem("wizardData") || "{}")
+      const updatedData = {
+        ...wizardData,
+        uploadedPhotos: uploadedUrls,
+        step: 4,
       }
+
+      localStorage.setItem("wizardData", JSON.stringify(updatedData))
+
+      // Go to checkout instead of creating project immediately
+      router.push("/wizard/checkout")
     } catch (error) {
       console.error("Error:", error)
       alert("Er is een fout opgetreden. Probeer het opnieuw.")
@@ -107,27 +79,30 @@ export default function UploadPage() {
     }
   }
 
-  if (!wizardData) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0077B5]"></div>
-      </div>
-    )
-  }
-
   return (
     <div className="min-h-screen bg-gray-50 p-4">
       <div className="max-w-4xl mx-auto">
-        <div className="mb-8">
-          <ProgressBar currentStep={3} totalSteps={3} />
-        </div>
-
         <Card className="mb-8">
           <CardHeader className="text-center">
-            
-
-            <CardTitle className="text-2xl">Upload je foto's</CardTitle>
-            <p className="text-gray-600">Upload minimaal 6 foto's van hoge kwaliteit voor het beste resultaat</p>
+            <div className="flex items-center justify-center space-x-2 mb-4">
+              <div className="w-8 h-8 bg-green-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                ✓
+              </div>
+              <div className="w-8 h-1 bg-green-500 rounded"></div>
+              <div className="w-8 h-8 bg-green-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                ✓
+              </div>
+              <div className="w-8 h-1 bg-green-500 rounded"></div>
+              <div className="w-8 h-8 bg-[#0077B5] text-white rounded-full flex items-center justify-center text-sm font-bold">
+                3
+              </div>
+              <div className="w-8 h-1 bg-gray-200 rounded"></div>
+              <div className="w-8 h-8 bg-gray-200 text-gray-400 rounded-full flex items-center justify-center text-sm font-bold">
+                4
+              </div>
+            </div>
+            <CardTitle className="text-2xl">Upload Je Foto's</CardTitle>
+            <p className="text-gray-600">Upload minimaal 6 hoge kwaliteit foto's voor het beste resultaat</p>
           </CardHeader>
         </Card>
 
@@ -138,7 +113,8 @@ export default function UploadPage() {
               <div>
                 <h3 className="text-lg font-semibold">Foto Richtlijnen</h3>
                 <p className="text-gray-600 text-sm">
-                 Foto's met verschillende achtergronden met verschillende kleding. Gezicht naar de camera, vanaf je schouders of je middel. geen hoeden of zonnebrillen.
+                  Foto's met verschillende achtergronden met verschillende kleding. Gezicht naar de camera, vanaf je
+                  schouders of je middel. geen hoeden of zonnebrillen.
                 </p>
               </div>
             </div>
@@ -213,7 +189,7 @@ export default function UploadPage() {
                 disabled={uploadedPhotos.length < 4 || uploading}
                 className="w-full bg-[#0077B5] hover:bg-[#004182] text-white"
               >
-                {uploading ? "Portetfotos worden gemaakt..." : "Genereer 40 Professionele Portetfotos"}
+                {uploading ? "Foto's uploaden..." : "Doorgaan naar betaling"}
               </Button>
 
               <Button variant="ghost" onClick={() => router.back()} className="w-full" disabled={uploading}>
