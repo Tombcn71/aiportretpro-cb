@@ -106,7 +106,7 @@ export default function CheckoutPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          priceId: "price_1RrFTnDswbEJWagVnjXYvNwh",
+          priceId: "price_1RrFsbDswbEJWagVsEytA8rs", // FIXED: Updated to correct price ID
           customer_email: session.user.email,
           successUrl: `${window.location.origin}/generate/processing`,
           cancelUrl: `${window.location.origin}/wizard/checkout`,
