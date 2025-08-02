@@ -1,23 +1,17 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { useSession } from "next-auth/react"
-import { Header } from "@/components/header"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Check, Star } from "lucide-react"
+import { Check } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { trackViewContent, trackInitiateCheckout } from "@/lib/facebook-pixel"
+import { trackInitiateCheckout } from "@/lib/facebook-pixel"
 
-export default function PricingPage() {
+export default function PricingSection() {
   const { data: session } = useSession()
   const [loading, setLoading] = useState(false)
   const router = useRouter()
-
-  // Track pricing page view
-  useEffect(() => {
-    trackViewContent("Pricing Page", 29)
-  }, [])
 
   const handlePlanSelect = () => {
     // Track checkout initiation
@@ -58,7 +52,6 @@ export default function PricingPage() {
   }
 
   const features = [
-   
     "Verschillende zakelijke outfits",
     "Verschillende poses en achtergronden",
     "HD kwaliteit downloads",
@@ -67,18 +60,15 @@ export default function PricingPage() {
   ]
 
   return (
-    <div className="min-h-screen ">
-      <Header />
-      <div className="container mx-auto px-4 py-20">
-        <div className="text-center mb-6">
-          <h1 className="text-2xl md:text-4xl font-bold text-gray-900 mb-2">👋 Welkom! Dit is je pakket.</h1>
-          <p className="text-md text-gray-600">Na een snelle en veilige betaling kun je direct aan de slag</p>
+    <section id="prijzen" className="py-16 bg-gradient-to-br from-blue-50 to-white">
+      <div className="container mx-auto px-4">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Eenvoudige Prijzen</h2>
+          <p className="text-xl text-gray-600">Alles wat je nodig hebt voor professionele portretfoto's</p>
         </div>
 
         <div className="max-w-md mx-auto">
           <Card className="relative border-2 border-[#0077B5] shadow-xl">
-            
-
             <CardHeader className="text-center pt-8">
               <CardTitle className="text-2xl font-bold">Professional</CardTitle>
               <div className="mt-4">
@@ -112,9 +102,7 @@ export default function PricingPage() {
             </CardContent>
           </Card>
         </div>
-
-        
       </div>
-    </div>
+    </section>
   )
 }

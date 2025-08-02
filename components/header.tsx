@@ -31,7 +31,7 @@ export function Header() {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
-            <Link href="/pricing" className="text-gray-600 hover:text-gray-900">
+            <Link href="/#prijzen" className="text-gray-600 hover:text-gray-900">
               Prijzen
             </Link>
             <Link href="/#faq" className="text-gray-600 hover:text-gray-900">
@@ -139,7 +139,7 @@ export function Header() {
         <div className="md:hidden absolute top-16 left-0 right-0 bg-white border-b shadow-lg z-50">
           <nav className="px-4 py-4 space-y-4">
             <Link
-              href="/pricing"
+              href="/#prijzen"
               className="block text-gray-600 hover:text-gray-900 py-2 text-lg"
               onClick={closeMobileMenu}
             >
