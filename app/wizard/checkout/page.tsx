@@ -58,7 +58,6 @@ export default function CheckoutPage() {
     try {
       // Generate unique session ID
       const sessionId = `wizard_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-
       console.log("💾 Saving wizard data with session ID:", sessionId)
 
       // Save wizard data to server
@@ -80,7 +79,7 @@ export default function CheckoutPage() {
 
       console.log("✅ Wizard data saved, creating checkout session")
 
-      // Create Stripe checkout session WITH EMAIL
+      // Create Stripe checkout session
       const checkoutResponse = await fetch("/api/stripe/create-checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -88,7 +87,7 @@ export default function CheckoutPage() {
           priceId: "price_1RrFsbDswbEJWagVsEytA8rs",
           successUrl: `${window.location.origin}/generate/processing`,
           cancelUrl: `${window.location.origin}/wizard/checkout`,
-          customerEmail: session.user.email, // EMAIL WORDT HIER DOORGEGEVEN!
+          customerEmail: session.user.email, // EMAIL WORDT DOORGEGEVEN!
           metadata: {
             type: "wizard",
             session_id: sessionId,
@@ -104,7 +103,6 @@ export default function CheckoutPage() {
       }
 
       const { url } = await checkoutResponse.json()
-
       if (url) {
         console.log("🚀 Redirecting to Stripe checkout")
         window.location.href = url
