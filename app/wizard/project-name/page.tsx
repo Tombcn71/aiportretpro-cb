@@ -18,15 +18,16 @@ export default function ProjectNamePage() {
 
   useEffect(() => {
     if (status === "loading") return
+
     if (!session) {
       router.push("/wizard/welcome")
       return
     }
 
-    // Load existing project name if available
-    const savedName = localStorage.getItem("wizard_project_name")
-    if (savedName) {
-      setProjectName(savedName)
+    // Load saved name
+    const saved = localStorage.getItem("wizard_project_name")
+    if (saved) {
+      setProjectName(saved)
     }
   }, [session, status, router])
 
@@ -34,11 +35,7 @@ export default function ProjectNamePage() {
     if (!projectName.trim()) return
 
     setLoading(true)
-
-    // Save to localStorage
     localStorage.setItem("wizard_project_name", projectName.trim())
-
-    // Navigate to gender selection
     router.push("/wizard/gender")
   }
 
@@ -57,7 +54,6 @@ export default function ProjectNamePage() {
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="container mx-auto px-4 max-w-2xl">
-        {/* Progress Bar */}
         <div className="mb-8">
           <ProgressBar currentStep={1} totalSteps={4} />
         </div>

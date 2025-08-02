@@ -10,28 +10,29 @@ import { ProgressBar } from "@/components/ui/progress-bar"
 
 export default function GenderPage() {
   const { data: session, status } = useSession()
+  const router = useRouter()
   const [selectedGender, setSelectedGender] = useState("")
   const [loading, setLoading] = useState(false)
-  const router = useRouter()
 
   useEffect(() => {
     if (status === "loading") return
+
     if (!session) {
       router.push("/wizard/welcome")
       return
     }
 
-    // Check if previous step is completed
+    // Check previous step
     const projectName = localStorage.getItem("wizard_project_name")
     if (!projectName) {
       router.push("/wizard/project-name")
       return
     }
 
-    // Load existing gender if available
-    const savedGender = localStorage.getItem("wizard_gender")
-    if (savedGender) {
-      setSelectedGender(savedGender)
+    // Load saved gender
+    const saved = localStorage.getItem("wizard_gender")
+    if (saved) {
+      setSelectedGender(saved)
     }
   }, [session, status, router])
 
@@ -39,19 +40,9 @@ export default function GenderPage() {
     if (!selectedGender) return
 
     setLoading(true)
-
-    // Save gender with consistent key
     localStorage.setItem("wizard_gender", selectedGender)
-
-    // Navigate to upload
     router.push("/wizard/upload")
   }
-
-  const genderOptions = [
-    { id: "man", label: "Man", icon: User },
-    { id: "woman", label: "Vrouw", icon: User },
-    { id: "non-binary", label: "Unisex", icon: Users },
-  ]
 
   if (status === "loading") {
     return (
@@ -65,6 +56,12 @@ export default function GenderPage() {
     return null
   }
 
+  const genderOptions = [
+    { id: "man", label: "Man", icon: User },
+    { id: "woman", label: "Vrouw", icon: User },
+    { id: "non-binary", label: "Unisex", icon: Users },
+  ]
+
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="container mx-auto px-4 max-w-2xl">
@@ -72,12 +69,10 @@ export default function GenderPage() {
           <ProgressBar currentStep={2} totalSteps={4} />
         </div>
 
-        <Card className="w-full">
+        <Card>
           <CardHeader className="text-center">
             <CardTitle className="text-2xl">Type fotoshoot?</CardTitle>
-            <p className="text-gray-600">
-              Dit helpt ons de perfecte professionele portetfotos te genereren met de juiste portretfotos
-            </p>
+            <p className="text-gray-600">Dit helpt ons de perfecte professionele portetfotos te genereren</p>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

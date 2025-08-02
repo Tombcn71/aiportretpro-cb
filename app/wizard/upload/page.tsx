@@ -14,19 +14,19 @@ import Image from "next/image"
 export default function UploadPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
-  const [uploadedFiles, setUploadedFiles] = useState<File[]>([])
   const [uploadedUrls, setUploadedUrls] = useState<string[]>([])
   const [uploading, setUploading] = useState(false)
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
     if (status === "loading") return
+
     if (!session) {
       router.push("/wizard/welcome")
       return
     }
 
-    // Check if previous steps are completed
+    // Check previous steps
     const projectName = localStorage.getItem("wizard_project_name")
     const gender = localStorage.getItem("wizard_gender")
 
@@ -40,11 +40,14 @@ export default function UploadPage() {
       return
     }
 
-    // Load existing uploads if available
-    const savedUrls = localStorage.getItem("wizard_uploaded_photos")
-    if (savedUrls) {
+    // Load saved uploads
+    const saved = localStorage.getItem("wizard_uploaded_photos")
+    if (saved) {
       try {
-        setUploadedUrls(JSON.parse(savedUrls))
+        const parsed = JSON.parse(saved)
+        if (Array.isArray(parsed)) {
+          setUploadedUrls(parsed)
+        }
       } catch (error) {
         console.error("Error parsing saved URLs:", error)
       }
@@ -61,7 +64,7 @@ export default function UploadPage() {
         return
       }
 
-      if (uploadedFiles.length + imageFiles.length > 10) {
+      if (uploadedUrls.length + imageFiles.length > 10) {
         alert("Je kunt maximaal 10 foto's uploaden")
         return
       }
@@ -88,13 +91,8 @@ export default function UploadPage() {
           }
         }
 
-        const updatedFiles = [...uploadedFiles, ...imageFiles]
         const updatedUrls = [...uploadedUrls, ...newUrls]
-
-        setUploadedFiles(updatedFiles)
         setUploadedUrls(updatedUrls)
-
-        // Save to localStorage
         localStorage.setItem("wizard_uploaded_photos", JSON.stringify(updatedUrls))
       } catch (error) {
         console.error("Upload error:", error)
@@ -103,7 +101,7 @@ export default function UploadPage() {
         setUploading(false)
       }
     },
-    [uploadedFiles, uploadedUrls],
+    [uploadedUrls],
   )
 
   const handleDrop = useCallback(
@@ -122,13 +120,8 @@ export default function UploadPage() {
   }, [])
 
   const removeFile = (index: number) => {
-    const newFiles = uploadedFiles.filter((_, i) => i !== index)
     const newUrls = uploadedUrls.filter((_, i) => i !== index)
-
-    setUploadedFiles(newFiles)
     setUploadedUrls(newUrls)
-
-    // Update localStorage
     localStorage.setItem("wizard_uploaded_photos", JSON.stringify(newUrls))
   }
 
@@ -157,7 +150,6 @@ export default function UploadPage() {
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="container mx-auto px-4 max-w-4xl">
-        {/* Progress Bar */}
         <div className="mb-8">
           <ProgressBar currentStep={3} totalSteps={4} />
         </div>
