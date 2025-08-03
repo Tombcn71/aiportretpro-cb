@@ -5,12 +5,24 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2024-06-20",
 })
 
-// Import the save function from wizard webhook
-import { saveWizardData } from "../wizard-webhook/route"
+// In-memory storage for wizard data (in production, use Redis or database)
+const wizardDataStore = new Map()
+
+export function saveWizardData(sessionId: string, data: any) {
+  wizardDataStore.set(sessionId, data)
+}
+
+export function getWizardData(sessionId: string) {
+  return wizardDataStore.get(sessionId)
+}
+
+export function deleteWizardData(sessionId: string) {
+  wizardDataStore.delete(sessionId)
+}
 
 export async function POST(req: NextRequest) {
   try {
-    const { wizardSessionId, projectName, gender, uploadedPhotos, userEmail, couponCode, price } = await req.json()
+    const { wizardSessionId, projectName, gender, uploadedPhotos, userEmail } = await req.json()
 
     console.log("🛒 Creating Stripe checkout:", {
       wizardSessionId,
@@ -18,8 +30,6 @@ export async function POST(req: NextRequest) {
       gender,
       photoCount: uploadedPhotos?.length,
       userEmail,
-      couponCode,
-      price,
     })
 
     // Save wizard data
@@ -30,19 +40,12 @@ export async function POST(req: NextRequest) {
       userEmail,
     })
 
-    // Create Stripe checkout session
+    // Create Stripe checkout session using the specific price ID
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card", "ideal"],
       line_items: [
         {
-          price_data: {
-            currency: "eur",
-            product_data: {
-              name: "AI Headshots - 40 Professional Photos",
-              description: `Project: ${projectName} | Gender: ${gender} | Photos: ${uploadedPhotos?.length || 0}`,
-            },
-            unit_amount: price * 100, // Convert to cents
-          },
+          price: "price_1RrFsbDswbEJWagVsEytA8rs", // Use the specific price ID
           quantity: 1,
         },
       ],
@@ -55,7 +58,6 @@ export async function POST(req: NextRequest) {
         projectName,
         gender,
         userEmail,
-        couponCode: couponCode || "",
         photoCount: uploadedPhotos?.length?.toString() || "0",
       },
     })

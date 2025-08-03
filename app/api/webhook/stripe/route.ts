@@ -1,7 +1,8 @@
 import { type NextRequest, NextResponse } from "next/server"
 import Stripe from "stripe"
 import { neon } from "@neondatabase/serverless"
-import { getWizardData, deleteWizardData } from "../../wizard/save-data/route"
+import { getWizardData, deleteWizardData } from "../../stripe/create-checkout/route"
+import { trainWithPack } from "@/lib/astria-packs"
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2024-06-20",
@@ -83,36 +84,21 @@ export async function POST(req: NextRequest) {
         const projectId = projectResult[0].id
         console.log("✅ Project created with ID:", projectId)
 
-        // Start Astria training
-        const astriaResponse = await fetch("https://api.astria.ai/tunes", {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${process.env.ASTRIA_API_KEY}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            tune: {
-              title: `${wizardData.projectName} - ${userEmail}`,
-              name: wizardData.gender === "woman" ? "woman" : "man",
-              image_urls: wizardData.uploadedPhotos,
-              callback: `${process.env.NEXTAUTH_URL}/api/astria/wizard-webhook/${projectId}`,
-            },
-          }),
+        // Start Astria training using pack 928
+        const astriaResult = await trainWithPack({
+          packId: "928",
+          images: wizardData.uploadedPhotos,
+          projectName: wizardData.projectName,
+          gender: wizardData.gender,
+          projectId: projectId,
         })
 
-        if (!astriaResponse.ok) {
-          const errorText = await astriaResponse.text()
-          console.error("❌ Astria API error:", astriaResponse.status, errorText)
-          throw new Error(`Astria API error: ${astriaResponse.status}`)
-        }
-
-        const astriaData = await astriaResponse.json()
-        console.log("✅ Astria training started:", astriaData.id)
+        console.log("✅ Astria training started:", astriaResult.id)
 
         // Update project with Astria tune ID
         await sql`
           UPDATE projects 
-          SET astria_tune_id = ${astriaData.id}
+          SET astria_tune_id = ${astriaResult.id}
           WHERE id = ${projectId}
         `
 
