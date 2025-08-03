@@ -5,8 +5,8 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2024-06-20",
 })
 
-// In-memory storage for wizard data (in production, use Redis or database)
-const wizardDataStore = new Map()
+// In-memory storage for wizard data (temporary)
+const wizardDataStore = new Map<string, any>()
 
 export function saveWizardData(sessionId: string, data: any) {
   wizardDataStore.set(sessionId, data)
@@ -22,25 +22,15 @@ export function deleteWizardData(sessionId: string) {
 
 export async function POST(req: NextRequest) {
   try {
-    const { wizardSessionId, projectName, gender, uploadedPhotos, userEmail } = await req.json()
+    const { wizardSessionId } = await req.json()
 
-    console.log("🛒 Creating Stripe checkout:", {
-      wizardSessionId,
-      projectName,
-      gender,
-      photoCount: uploadedPhotos?.length,
-      userEmail,
-    })
+    if (!wizardSessionId) {
+      return NextResponse.json({ error: "Missing wizard session ID" }, { status: 400 })
+    }
 
-    // Save wizard data
-    saveWizardData(wizardSessionId, {
-      projectName,
-      gender,
-      uploadedPhotos,
-      userEmail,
-    })
+    console.log("🛒 Creating Stripe checkout for wizard session:", wizardSessionId)
 
-    // Create Stripe checkout session with promotion codes enabled
+    // Create Stripe checkout session
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card", "ideal"],
       line_items: [
@@ -50,23 +40,22 @@ export async function POST(req: NextRequest) {
         },
       ],
       mode: "payment",
-      customer_email: userEmail,
-      success_url: `${process.env.NEXTAUTH_URL}/generate/processing?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXTAUTH_URL}/wizard/review`,
-      allow_promotion_codes: true, // This enables coupon code field on Stripe checkout
+      success_url: `${process.env.NEXTAUTH_URL}/wizard-training/${wizardSessionId}?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.NEXTAUTH_URL}/wizard/review?session=${wizardSessionId}`,
+      allow_promotion_codes: true,
       metadata: {
-        wizardSessionId,
-        projectName,
-        gender,
-        userEmail,
-        photoCount: uploadedPhotos?.length?.toString() || "0",
-        packId: "928", // Astria pack ID
+        wizardSessionId: wizardSessionId,
+        packId: "928",
+        source: "wizard_flow",
       },
     })
 
-    console.log("✅ Stripe checkout session created:", session.id)
+    console.log("✅ Stripe session created:", session.id)
 
-    return NextResponse.json({ url: session.url })
+    return NextResponse.json({
+      sessionId: session.id,
+      url: session.url,
+    })
   } catch (error) {
     console.error("❌ Stripe checkout error:", error)
     return NextResponse.json({ error: "Failed to create checkout session" }, { status: 500 })

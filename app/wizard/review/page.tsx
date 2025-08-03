@@ -1,243 +1,247 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import { useSession } from "next-auth/react"
-import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { ArrowLeft, ArrowRight, User, Camera, FileText, Check } from "lucide-react"
+import { CheckCircle, Star, Shield, Clock, ArrowRight } from "lucide-react"
+import Image from "next/image"
+
+interface WizardData {
+  projectName: string
+  gender: string
+  uploadedPhotos: string[]
+  userEmail?: string
+}
 
 export default function ReviewPage() {
-  const { data: session, status } = useSession()
   const router = useRouter()
-  const [wizardData, setWizardData] = useState<{
-    projectName: string
-    gender: string
-    uploadedPhotos: string[]
-  } | null>(null)
-  const [isProcessing, setIsProcessing] = useState(false)
+  const searchParams = useSearchParams()
+  const { data: session, status } = useSession()
+  const [wizardData, setWizardData] = useState<WizardData | null>(null)
+  const [loading, setLoading] = useState(false)
+  const sessionId = searchParams.get("session")
 
   useEffect(() => {
     if (status === "loading") return
 
     if (!session) {
-      console.log("❌ No session, redirecting to welcome")
-      router.push("/wizard/welcome")
+      router.push("/login?flow=wizard")
       return
     }
 
-    // Load wizard data from sessionStorage
-    const projectName = sessionStorage.getItem("projectName")
-    const gender = sessionStorage.getItem("gender")
-    const uploadedPhotos = JSON.parse(sessionStorage.getItem("uploadedPhotos") || "[]")
-    const wizardSessionId = sessionStorage.getItem("wizardSessionId")
-
-    if (!projectName || !gender || uploadedPhotos.length === 0 || !wizardSessionId) {
-      console.log("❌ Missing wizard data, redirecting to welcome")
-      router.push("/wizard/welcome")
+    if (!sessionId) {
+      router.push("/wizard/project-name")
       return
     }
 
-    setWizardData({
-      projectName,
-      gender,
-      uploadedPhotos,
-    })
-  }, [session, status, router])
+    // Load wizard data
+    const loadData = async () => {
+      try {
+        const response = await fetch(`/api/wizard/save-data?sessionId=${sessionId}`)
+        if (response.ok) {
+          const data = await response.json()
+          setWizardData(data)
+        } else {
+          router.push("/wizard/project-name")
+        }
+      } catch (error) {
+        console.error("Failed to load wizard data:", error)
+        router.push("/wizard/project-name")
+      }
+    }
+
+    loadData()
+  }, [session, status, router, sessionId])
 
   const handleConfirmAndPay = async () => {
-    if (!wizardData || !session?.user?.email) return
+    if (!sessionId || !wizardData) return
 
-    setIsProcessing(true)
-
+    setLoading(true)
     try {
-      const wizardSessionId = sessionStorage.getItem("wizardSessionId")
-
-      // Create Stripe checkout session
-      const response = await fetch("/api/stripe/create-checkout", {
+      // Save final wizard data
+      await fetch("/api/wizard/save-data", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          wizardSessionId,
-          projectName: wizardData.projectName,
-          gender: wizardData.gender,
-          uploadedPhotos: wizardData.uploadedPhotos,
-          userEmail: session.user.email,
+          sessionId,
+          ...wizardData,
+          userEmail: session?.user?.email,
         }),
       })
 
-      const { url } = await response.json()
+      // Create Stripe checkout
+      const response = await fetch("/api/stripe/create-checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ wizardSessionId: sessionId }),
+      })
 
-      if (url) {
+      if (response.ok) {
+        const { url } = await response.json()
         window.location.href = url
       } else {
-        throw new Error("No checkout URL received")
+        throw new Error("Failed to create checkout session")
       }
     } catch (error) {
-      console.error("❌ Failed to create checkout:", error)
-      setIsProcessing(false)
+      console.error("Checkout error:", error)
+      alert("Er is een fout opgetreden. Probeer het opnieuw.")
+    } finally {
+      setLoading(false)
     }
   }
 
   if (status === "loading" || !wizardData) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0077B5]"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
       </div>
     )
   }
 
-  if (!session) {
-    return null
-  }
-
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="container mx-auto px-4 max-w-6xl">
+    <div className="min-h-screen bg-gray-50 py-12 px-4">
+      <div className="max-w-4xl mx-auto">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">Bevestig je bestelling</h1>
-          <p className="text-lg text-gray-600">Controleer je gegevens en ga door naar betaling</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Overzicht & Bevestiging</h1>
+          <p className="text-gray-600">Controleer je gegevens en start de AI training</p>
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-8">
-          {/* Order Summary */}
-          <div className="lg:col-span-2 space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <FileText className="w-5 h-5" />
-                  Project Details
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <label className="text-sm font-medium text-gray-500">Project Naam</label>
-                  <p className="text-lg font-semibold">{wizardData.projectName}</p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-gray-500">Geslacht</label>
-                  <div className="flex items-center gap-2 mt-1">
-                    <User className="w-4 h-4" />
-                    <Badge variant="secondary" className="capitalize">
-                      {wizardData.gender}
-                    </Badge>
-                  </div>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-gray-500">Geüploade Foto's</label>
-                  <div className="flex items-center gap-2 mt-1">
-                    <Camera className="w-4 h-4" />
-                    <span className="font-semibold">{wizardData.uploadedPhotos.length} foto's</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+        <div className="grid lg:grid-cols-2 gap-8">
+          {/* Project Details */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <CheckCircle className="h-5 w-5 text-green-600" />
+                Project Details
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <label className="text-sm font-medium text-gray-700">Project Naam</label>
+                <p className="text-lg font-semibold">{wizardData.projectName}</p>
+              </div>
 
-            {/* Photo Preview */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Je Foto's</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-3 gap-4 max-h-96 overflow-y-auto">
-                  {wizardData.uploadedPhotos.map((photo, index) => (
-                    <div key={index} className="aspect-square rounded-lg overflow-hidden bg-gray-100">
-                      <img
+              <div>
+                <label className="text-sm font-medium text-gray-700">Geslacht</label>
+                <p className="text-lg font-semibold capitalize">{wizardData.gender}</p>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium text-gray-700">Geüploade Foto's</label>
+                <p className="text-lg font-semibold">{wizardData.uploadedPhotos.length} foto's</p>
+                <div className="grid grid-cols-4 gap-2 mt-2">
+                  {wizardData.uploadedPhotos.slice(0, 8).map((photo, index) => (
+                    <div key={index} className="aspect-square relative rounded-lg overflow-hidden">
+                      <Image
                         src={photo || "/placeholder.svg"}
                         alt={`Upload ${index + 1}`}
-                        className="w-full h-full object-cover"
+                        fill
+                        className="object-cover"
                       />
                     </div>
                   ))}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Pricing Card */}
-          <div className="space-y-6">
-            <Card className="border-2 border-[#0077B5]">
-              <CardHeader className="bg-[#0077B5] text-white">
-                <CardTitle className="text-center">Professional</CardTitle>
-                <div className="text-center">
-                  <div className="text-4xl font-bold">€19,99</div>
-                </div>
-              </CardHeader>
-              <CardContent className="pt-6">
-                <div className="space-y-3 mb-6">
-                  <div className="flex items-center gap-3">
-                    <Check className="w-5 h-5 text-green-500" />
-                    <span>40 professionele portretfoto's</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Check className="w-5 h-5 text-green-500" />
-                    <span>Verschillende zakelijke outfits</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Check className="w-5 h-5 text-green-500" />
-                    <span>Verschillende poses en achtergronden</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Check className="w-5 h-5 text-green-500" />
-                    <span>HD kwaliteit downloads</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Check className="w-5 h-5 text-green-500" />
-                    <span>Klaar binnen 15 minuten</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Check className="w-5 h-5 text-green-500" />
-                    <span>Perfect voor LinkedIn, Social Media, CV, Website en Print</span>
-                  </div>
-                </div>
-
-                <div className="space-y-3 text-sm text-gray-600 mb-6">
-                  <div className="flex items-center gap-2">
-                    <Check className="w-4 h-4 text-green-500" />
-                    <span>Veilige betaling met iDEAL en creditcard</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Check className="w-4 h-4 text-green-500" />
-                    <span>Geld terug garantie</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Check className="w-4 h-4 text-green-500" />
-                    <span>Coupon codes beschikbaar op betaalpagina</span>
-                  </div>
-                </div>
-
-                <Button
-                  onClick={handleConfirmAndPay}
-                  disabled={isProcessing}
-                  className="w-full bg-[#0077B5] hover:bg-[#004182] text-white py-3 text-lg font-semibold"
-                >
-                  {isProcessing ? (
-                    <div className="flex items-center gap-2">
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                      Bezig...
+                  {wizardData.uploadedPhotos.length > 8 && (
+                    <div className="aspect-square bg-gray-100 rounded-lg flex items-center justify-center">
+                      <span className="text-sm text-gray-600">+{wizardData.uploadedPhotos.length - 8}</span>
                     </div>
-                  ) : (
-                    <>
-                      Bevestigen & Betalen
-                      <ArrowRight className="ml-2 h-4 w-4" />
-                    </>
                   )}
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Plan Details */}
+          <Card className="border-2 border-blue-200 bg-blue-50">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Star className="h-5 w-5 text-yellow-500" />
+                Professional Plan
+                <Badge variant="secondary" className="ml-auto">
+                  Populair
+                </Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="text-center">
+                <div className="text-3xl font-bold text-blue-600">€19,99</div>
+                <p className="text-gray-600">Eenmalige betaling</p>
+              </div>
+
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4 text-green-600" />
+                  <span className="text-sm">40 professionele portretfoto's</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4 text-green-600" />
+                  <span className="text-sm">Verschillende zakelijke outfits</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4 text-green-600" />
+                  <span className="text-sm">Verschillende poses en achtergronden</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4 text-green-600" />
+                  <span className="text-sm">HD kwaliteit downloads</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Clock className="h-4 w-4 text-blue-600" />
+                  <span className="text-sm">Klaar binnen 15 minuten</span>
+                </div>
+              </div>
+
+              <div className="pt-4 border-t border-blue-200">
+                <p className="text-sm text-gray-700 mb-2">Perfect voor:</p>
+                <p className="text-xs text-gray-600">LinkedIn, Social Media, CV, Website en Print</p>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
-        {/* Navigation Buttons */}
-        <div className="flex justify-between mt-8">
-          <Button variant="ghost" onClick={() => router.push("/wizard/upload")} className="text-gray-600">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Terug naar Upload
-          </Button>
-        </div>
+        {/* Payment Section */}
+        <Card className="mt-8">
+          <CardContent className="pt-6">
+            <div className="text-center space-y-4">
+              <h3 className="text-xl font-semibold">Bevestigen & Betalen</h3>
+              <p className="text-gray-600">
+                Je wordt doorgestuurd naar een veilige betaalpagina waar je ook coupon codes kunt invoeren
+              </p>
+
+              <Button
+                onClick={handleConfirmAndPay}
+                disabled={loading}
+                size="lg"
+                className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3"
+              >
+                {loading ? (
+                  <div className="flex items-center gap-2">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    Bezig...
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    Bevestigen & Betalen €19,99
+                    <ArrowRight className="h-4 w-4" />
+                  </div>
+                )}
+              </Button>
+
+              <div className="flex items-center justify-center gap-4 text-sm text-gray-600">
+                <div className="flex items-center gap-1">
+                  <Shield className="h-4 w-4" />
+                  <span>Veilige betaling met iDEAL en creditcard</span>
+                </div>
+              </div>
+
+              <p className="text-xs text-gray-500">
+                ✓ Geld terug garantie • ✓ Coupon codes beschikbaar op betaalpagina
+              </p>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   )

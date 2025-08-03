@@ -3,26 +3,34 @@ import { neon } from "@neondatabase/serverless"
 
 const sql = neon(process.env.DATABASE_URL!)
 
-// In-memory storage as fallback
-const wizardSessions = new Map<string, any>()
+// In-memory fallback storage
+const wizardDataStore = new Map<string, any>()
 
-interface WizardData {
-  projectName: string
-  gender: string
-  uploadedPhotos: string[]
-  userEmail?: string
+export function saveWizardData(sessionId: string, data: any) {
+  wizardDataStore.set(sessionId, data)
 }
 
-export async function POST(request: NextRequest) {
+export function getWizardData(sessionId: string) {
+  return wizardDataStore.get(sessionId)
+}
+
+export function deleteWizardData(sessionId: string) {
+  wizardDataStore.delete(sessionId)
+}
+
+export async function POST(req: NextRequest) {
   try {
-    const { sessionId, projectName, gender, uploadedPhotos, userEmail } = await request.json()
+    const { sessionId, projectName, gender, uploadedPhotos, userEmail } = await req.json()
+
+    if (!sessionId || !projectName || !gender || !uploadedPhotos) {
+      return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
+    }
 
     console.log("💾 Saving wizard data:", {
       sessionId,
       projectName,
       gender,
-      photoCount: uploadedPhotos?.length,
-      userEmail,
+      photoCount: uploadedPhotos.length,
     })
 
     const wizardData = {
@@ -30,45 +38,43 @@ export async function POST(request: NextRequest) {
       gender,
       uploadedPhotos,
       userEmail,
-      createdAt: new Date().toISOString(),
     }
 
-    // Try database first
+    // Save to memory first
+    saveWizardData(sessionId, wizardData)
+
+    // Try to save to database
     try {
       await sql`
-        INSERT INTO wizard_sessions (session_id, project_name, gender, uploaded_photos, user_email, created_at, updated_at)
-        VALUES (${sessionId}, ${projectName}, ${gender}, ${sql.array(uploadedPhotos, "text")}, ${userEmail}, NOW(), NOW())
+        INSERT INTO wizard_sessions (session_id, project_name, gender, uploaded_photos, user_email, created_at)
+        VALUES (${sessionId}, ${projectName}, ${gender}, ${uploadedPhotos}, ${userEmail || ""}, NOW())
         ON CONFLICT (session_id) 
         DO UPDATE SET 
           project_name = ${projectName},
           gender = ${gender},
-          uploaded_photos = ${sql.array(uploadedPhotos, "text")},
-          user_email = ${userEmail},
+          uploaded_photos = ${uploadedPhotos},
+          user_email = ${userEmail || ""},
           updated_at = NOW()
       `
       console.log("✅ Wizard data saved to database")
     } catch (dbError) {
-      console.log("⚠️ Database save failed, using memory storage:", dbError)
+      console.log("⚠️ Database save failed, using memory fallback:", dbError)
     }
-
-    // Always save to memory as backup
-    wizardSessions.set(sessionId, wizardData)
-    console.log("✅ Wizard data saved to memory")
 
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error("❌ Save wizard data error:", error)
-    return NextResponse.json({ error: "Failed to save wizard data" }, { status: 500 })
+    return NextResponse.json({ error: "Failed to save data" }, { status: 500 })
   }
 }
 
-export async function GET(request: NextRequest) {
+export async function GET(req: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url)
+    const { searchParams } = new URL(req.url)
     const sessionId = searchParams.get("sessionId")
 
     if (!sessionId) {
-      return NextResponse.json({ error: "Session ID required" }, { status: 400 })
+      return NextResponse.json({ error: "Missing session ID" }, { status: 400 })
     }
 
     // Try database first
@@ -90,35 +96,14 @@ export async function GET(request: NextRequest) {
     }
 
     // Fallback to memory
-    const wizardData = wizardSessions.get(sessionId)
-    if (wizardData) {
-      return NextResponse.json(wizardData)
+    const data = getWizardData(sessionId)
+    if (data) {
+      return NextResponse.json(data)
     }
 
     return NextResponse.json({ error: "Session not found" }, { status: 404 })
   } catch (error) {
     console.error("❌ Get wizard data error:", error)
-    return NextResponse.json({ error: "Failed to get wizard data" }, { status: 500 })
+    return NextResponse.json({ error: "Failed to get data" }, { status: 500 })
   }
-}
-
-// Export functions for use in other files
-export function saveWizardData(sessionId: string, data: WizardData) {
-  wizardSessions.set(sessionId, {
-    ...data,
-    createdAt: new Date().toISOString(),
-  })
-  console.log("✅ Wizard data saved to memory:", sessionId)
-}
-
-export function getWizardData(sessionId: string) {
-  const data = wizardSessions.get(sessionId)
-  console.log("📖 Getting wizard data for:", sessionId, data ? "found" : "not found")
-  return data
-}
-
-export function deleteWizardData(sessionId: string) {
-  const deleted = wizardSessions.delete(sessionId)
-  console.log("🗑️ Deleted wizard data:", sessionId, deleted ? "success" : "not found")
-  return deleted
 }
