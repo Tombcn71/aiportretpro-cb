@@ -1,28 +1,34 @@
 "use client"
 
+import type React from "react"
+
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { useSession } from "next-auth/react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Progress } from "@/components/ui/progress"
 
 export default function ProjectNamePage() {
-  const router = useRouter()
-  const { data: session } = useSession()
   const [projectName, setProjectName] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
+  const router = useRouter()
 
-  if (!session) {
-    router.push("/login?flow=wizard")
-    return null
-  }
-
-  const handleNext = () => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
     if (!projectName.trim()) return
 
+    setIsLoading(true)
+
     // Save to sessionStorage
-    const wizardData = { projectName: projectName.trim() }
-    sessionStorage.setItem("wizardData", JSON.stringify(wizardData))
+    sessionStorage.setItem(
+      "wizardData",
+      JSON.stringify({
+        projectName: projectName.trim(),
+        step: 1,
+      }),
+    )
 
     router.push("/wizard/gender")
   }
@@ -30,19 +36,47 @@ export default function ProjectNamePage() {
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle>Stap 1: Project Naam</CardTitle>
+        <CardHeader className="text-center">
+          <div className="mb-4">
+            <Progress value={25} className="w-full h-2" style={{ backgroundColor: "#e5e7eb" }}>
+              <div
+                className="h-full transition-all duration-300 ease-in-out rounded-full"
+                style={{
+                  width: "25%",
+                  backgroundColor: "#0077B5",
+                }}
+              />
+            </Progress>
+          </div>
+          <CardTitle className="text-2xl font-bold text-gray-900">Geef je project een naam</CardTitle>
+          <p className="text-gray-600 mt-2">Stap 1 van 4: Kies een naam voor je AI headshot project</p>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <Input
-            placeholder="Bijv. Mijn LinkedIn Foto's"
-            value={projectName}
-            onChange={(e) => setProjectName(e.target.value)}
-            onKeyPress={(e) => e.key === "Enter" && handleNext()}
-          />
-          <Button onClick={handleNext} disabled={!projectName.trim()} className="w-full">
-            Volgende
-          </Button>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-2">
+              <Label htmlFor="projectName" className="text-sm font-medium text-gray-700">
+                Project naam
+              </Label>
+              <Input
+                id="projectName"
+                type="text"
+                value={projectName}
+                onChange={(e) => setProjectName(e.target.value)}
+                placeholder="Bijv. Mijn professionele headshots"
+                className="w-full"
+                required
+              />
+            </div>
+
+            <Button
+              type="submit"
+              disabled={!projectName.trim() || isLoading}
+              className="w-full"
+              style={{ backgroundColor: "#0077B5" }}
+            >
+              {isLoading ? "Bezig..." : "Volgende stap"}
+            </Button>
+          </form>
         </CardContent>
       </Card>
     </div>

@@ -1,22 +1,14 @@
--- Create purchases table if it doesn't exist
 CREATE TABLE IF NOT EXISTS purchases (
   id SERIAL PRIMARY KEY,
-  user_id INTEGER REFERENCES users(id),
-  stripe_session_id VARCHAR(255) UNIQUE,
-  plan_type VARCHAR(50),
-  amount INTEGER,
-  headshots_included INTEGER,
+  user_email VARCHAR(255) NOT NULL,
+  stripe_session_id VARCHAR(255) UNIQUE NOT NULL,
+  amount INTEGER NOT NULL,
   status VARCHAR(50) DEFAULT 'pending',
+  wizard_session_id INTEGER,
   created_at TIMESTAMP DEFAULT NOW(),
-  updated_at TIMESTAMP DEFAULT NOW()
+  updated_at TIMESTAMP DEFAULT NOW(),
+  FOREIGN KEY (user_email) REFERENCES users(email)
 );
 
--- Create indexes for faster lookups
-CREATE INDEX IF NOT EXISTS idx_purchases_user_id ON purchases(user_id);
+CREATE INDEX IF NOT EXISTS idx_purchases_user_email ON purchases(user_email);
 CREATE INDEX IF NOT EXISTS idx_purchases_stripe_session ON purchases(stripe_session_id);
-
--- Log the creation
-DO $$
-BEGIN
-  RAISE NOTICE 'Purchases table created or already exists';
-END $$;

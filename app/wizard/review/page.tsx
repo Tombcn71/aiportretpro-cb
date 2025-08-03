@@ -2,98 +2,146 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { useSession } from "next-auth/react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { v4 as uuidv4 } from "uuid"
+import { Progress } from "@/components/ui/progress"
+
+interface WizardData {
+  projectName: string
+  gender: string
+  images: string[]
+  step: number
+}
 
 export default function ReviewPage() {
+  const [wizardData, setWizardData] = useState<WizardData | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
-  const { data: session } = useSession()
-  const [wizardData, setWizardData] = useState<any>(null)
-  const [processing, setProcessing] = useState(false)
 
   useEffect(() => {
-    const stored = sessionStorage.getItem("wizardData")
-    if (stored) {
-      setWizardData(JSON.parse(stored))
-    } else {
+    // Check if we have wizard data
+    const data = sessionStorage.getItem("wizardData")
+    if (!data) {
       router.push("/wizard/project-name")
+      return
     }
+
+    const parsedData = JSON.parse(data)
+    if (!parsedData.projectName || !parsedData.gender || !parsedData.images || parsedData.images.length < 4) {
+      router.push("/wizard/upload")
+      return
+    }
+
+    setWizardData(parsedData)
   }, [router])
 
-  const handleConfirmAndPay = async () => {
-    if (!wizardData || !session?.user?.email) return
+  const handleSubmit = async () => {
+    if (!wizardData) return
 
-    setProcessing(true)
+    setIsLoading(true)
+
     try {
-      const sessionId = uuidv4()
-
-      // Save wizard data
-      await fetch("/api/wizard/save-data", {
+      // Save wizard data to database
+      const response = await fetch("/api/wizard/save-data", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(wizardData),
+      })
+
+      if (!response.ok) throw new Error("Failed to save data")
+
+      const result = await response.json()
+
+      // Create Stripe checkout session
+      const checkoutResponse = await fetch("/api/stripe/create-checkout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({
-          sessionId,
+          sessionId: result.sessionId,
           projectName: wizardData.projectName,
-          gender: wizardData.gender,
-          uploadedPhotos: wizardData.uploadedPhotos,
-          userEmail: session.user.email,
         }),
       })
 
-      // Create checkout
-      const response = await fetch("/api/stripe/create-checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ wizardSessionId: sessionId }),
-      })
+      if (!checkoutResponse.ok) throw new Error("Failed to create checkout")
 
-      const { url } = await response.json()
-      window.location.href = url
+      const checkoutData = await checkoutResponse.json()
+
+      // Redirect to Stripe
+      window.location.href = checkoutData.url
     } catch (error) {
       console.error("Error:", error)
-      alert("Er is een fout opgetreden")
-      setProcessing(false)
+      alert("Er ging iets mis. Probeer opnieuw.")
+      setIsLoading(false)
     }
   }
 
-  if (!wizardData) return null
+  if (!wizardData) {
+    return <div>Loading...</div>
+  }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4">
-      <div className="max-w-2xl mx-auto">
-        <Card>
-          <CardHeader>
-            <CardTitle>Review & Betaling</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <h3 className="font-semibold">Project: {wizardData.projectName}</h3>
-              <p>Geslacht: {wizardData.gender}</p>
-              <p>Foto's: {wizardData.uploadedPhotos?.length}</p>
-            </div>
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+      <Card className="w-full max-w-2xl">
+        <CardHeader className="text-center">
+          <div className="mb-4">
+            <Progress value={100} className="w-full h-2" style={{ backgroundColor: "#e5e7eb" }}>
+              <div
+                className="h-full transition-all duration-300 ease-in-out rounded-full"
+                style={{
+                  width: "100%",
+                  backgroundColor: "#0077B5",
+                }}
+              />
+            </Progress>
+          </div>
+          <CardTitle className="text-2xl font-bold text-gray-900">Controleer je gegevens</CardTitle>
+          <p className="text-gray-600 mt-2">Stap 4 van 4: Controleer alles voordat je doorgaat naar betaling</p>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="bg-white p-4 rounded-lg border">
+            <h3 className="font-semibold text-gray-900 mb-2">Project naam</h3>
+            <p className="text-gray-600">{wizardData.projectName}</p>
+          </div>
 
-            <div className="border-t pt-4">
-              <h3 className="font-semibold mb-2">Professional Plan - €19,99</h3>
-              <ul className="text-sm space-y-1">
-                <li>✓ 40 professionele portretfoto's</li>
-                <li>✓ Verschillende zakelijke outfits</li>
-                <li>✓ HD kwaliteit downloads</li>
-                <li>✓ Klaar binnen 15 minuten</li>
-              </ul>
-            </div>
+          <div className="bg-white p-4 rounded-lg border">
+            <h3 className="font-semibold text-gray-900 mb-2">Geslacht</h3>
+            <p className="text-gray-600 capitalize">{wizardData.gender}</p>
+          </div>
 
-            <Button
-              onClick={handleConfirmAndPay}
-              disabled={processing}
-              className="w-full bg-blue-600 hover:bg-blue-700"
-            >
-              {processing ? "Bezig..." : "Bevestigen & Betalen €19,99"}
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
+          <div className="bg-white p-4 rounded-lg border">
+            <h3 className="font-semibold text-gray-900 mb-2">Geüploade foto's ({wizardData.images.length})</h3>
+            <div className="grid grid-cols-4 gap-2">
+              {wizardData.images.map((url, index) => (
+                <img
+                  key={index}
+                  src={url || "/placeholder.svg"}
+                  alt={`Upload ${index + 1}`}
+                  className="w-full h-20 object-cover rounded"
+                />
+              ))}
+            </div>
+          </div>
+
+          <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+            <h3 className="font-semibold text-blue-900 mb-2">Prijs</h3>
+            <p className="text-2xl font-bold text-blue-900">€29,99</p>
+            <p className="text-sm text-blue-700">Eenmalige betaling voor 40+ professionele headshots</p>
+          </div>
+
+          <Button
+            onClick={handleSubmit}
+            disabled={isLoading}
+            className="w-full text-lg py-3"
+            style={{ backgroundColor: "#0077B5" }}
+          >
+            {isLoading ? "Bezig met opslaan..." : "Doorgaan naar betaling"}
+          </Button>
+        </CardContent>
+      </Card>
     </div>
   )
 }
