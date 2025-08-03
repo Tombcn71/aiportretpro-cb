@@ -21,31 +21,28 @@ export async function POST(request: NextRequest) {
       sessionId,
       projectName,
       gender,
-      photoCount: uploadedPhotos?.length || 0,
+      photoCount: uploadedPhotos?.length,
       userEmail,
     })
 
     const wizardData = {
-      projectName: projectName || "",
-      gender: gender || "",
-      uploadedPhotos: uploadedPhotos || [],
-      userEmail: userEmail || "",
+      projectName,
+      gender,
+      uploadedPhotos,
+      userEmail,
       createdAt: new Date().toISOString(),
     }
 
     // Try database first
     try {
-      // Convert array to PostgreSQL array format
-      const photosArray = Array.isArray(uploadedPhotos) ? uploadedPhotos : []
-
       await sql`
         INSERT INTO wizard_sessions (session_id, project_name, gender, uploaded_photos, user_email, created_at, updated_at)
-        VALUES (${sessionId}, ${projectName}, ${gender}, ${photosArray}, ${userEmail}, NOW(), NOW())
+        VALUES (${sessionId}, ${projectName}, ${gender}, ${sql.array(uploadedPhotos, "text")}, ${userEmail}, NOW(), NOW())
         ON CONFLICT (session_id) 
         DO UPDATE SET 
           project_name = ${projectName},
           gender = ${gender},
-          uploaded_photos = ${photosArray},
+          uploaded_photos = ${sql.array(uploadedPhotos, "text")},
           user_email = ${userEmail},
           updated_at = NOW()
       `
@@ -84,9 +81,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({
           projectName: row.project_name,
           gender: row.gender,
-          uploadedPhotos: Array.isArray(row.uploaded_photos)
-            ? row.uploaded_photos
-            : JSON.parse(row.uploaded_photos || "[]"),
+          uploadedPhotos: row.uploaded_photos,
           userEmail: row.user_email,
         })
       }
