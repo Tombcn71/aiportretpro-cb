@@ -1,84 +1,139 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Progress } from "@/components/ui/progress"
-import { CheckCircle, Upload, User, CreditCard, Sparkles } from "lucide-react"
+import { CheckCircle, Upload, User, CreditCard, Sparkles, ArrowLeft } from "lucide-react"
+import Link from "next/link"
 
 export default function CheckoutPage() {
   const router = useRouter()
-  const searchParams = useSearchParams()
   const { data: session } = useSession()
   const [loading, setLoading] = useState(false)
   const [couponCode, setCouponCode] = useState("")
   const [wizardData, setWizardData] = useState<any>(null)
 
-  const sessionId = searchParams.get("sessionId")
-
   useEffect(() => {
     if (!session) {
-      router.push("/auth/signin")
-      return
-    }
-
-    if (!sessionId) {
       router.push("/wizard/welcome")
       return
     }
 
-    // Load wizard data
-    const loadWizardData = async () => {
-      try {
-        const response = await fetch(`/api/wizard/save-data?sessionId=${sessionId}`)
-        if (response.ok) {
-          const result = await response.json()
-          setWizardData(result.data)
-        }
-      } catch (error) {
-        console.error("Failed to load wizard data:", error)
-      }
+    // Get wizard data from sessionStorage
+    const sessionId = sessionStorage.getItem("wizardSessionId")
+    const projectName = sessionStorage.getItem("projectName")
+    const gender = sessionStorage.getItem("gender")
+    const uploadedPhotos = sessionStorage.getItem("uploadedPhotos")
+
+    console.log("📋 Loading checkout data:", {
+      sessionId,
+      projectName,
+      gender,
+      photosCount: uploadedPhotos ? JSON.parse(uploadedPhotos).length : 0,
+    })
+
+    if (!sessionId || !projectName || !gender || !uploadedPhotos) {
+      console.error("❌ Missing wizard data, redirecting to start")
+      router.push("/wizard/welcome")
+      return
     }
 
-    loadWizardData()
-  }, [session, sessionId, router])
+    const photos = JSON.parse(uploadedPhotos)
+    if (photos.length < 6) {
+      console.error("❌ Not enough photos, redirecting to upload")
+      router.push("/wizard/upload")
+      return
+    }
+
+    setWizardData({
+      sessionId,
+      projectName,
+      gender,
+      uploadedPhotos: photos,
+    })
+  }, [session, router])
 
   const handleCheckout = async () => {
-    if (!sessionId || !wizardData) return
+    if (!wizardData || !session?.user?.email) {
+      console.error("❌ Missing wizard data or session")
+      return
+    }
 
     setLoading(true)
+    console.log("🚀 Starting checkout process...")
+
     try {
-      const response = await fetch("/api/stripe/create-checkout", {
+      // First save the wizard data
+      const saveResponse = await fetch("/api/wizard/save-data", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          sessionId,
-          couponCode: couponCode.trim() || undefined,
-          projectName: wizardData.project_name || wizardData.projectName,
+          sessionId: wizardData.sessionId,
+          projectName: wizardData.projectName,
           gender: wizardData.gender,
-          uploadedPhotos: wizardData.uploaded_photos || wizardData.uploadedPhotos,
+          uploadedPhotos: wizardData.uploadedPhotos,
+          userEmail: session.user.email,
         }),
       })
 
-      if (response.ok) {
-        const { url } = await response.json()
+      if (!saveResponse.ok) {
+        throw new Error("Failed to save wizard data")
+      }
+
+      console.log("✅ Wizard data saved, creating Stripe checkout...")
+
+      // Create Stripe checkout session
+      const checkoutResponse = await fetch("/api/stripe/create-checkout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          sessionId: wizardData.sessionId,
+          couponCode: couponCode.trim() || undefined,
+          projectName: wizardData.projectName,
+          gender: wizardData.gender,
+          uploadedPhotos: wizardData.uploadedPhotos,
+        }),
+      })
+
+      if (!checkoutResponse.ok) {
+        const errorData = await checkoutResponse.json()
+        throw new Error(errorData.error || "Failed to create checkout session")
+      }
+
+      const { url } = await checkoutResponse.json()
+
+      if (url) {
+        console.log("✅ Redirecting to Stripe checkout:", url)
         window.location.href = url
       } else {
-        const error = await response.json()
-        alert(`Checkout failed: ${error.error}`)
+        throw new Error("No checkout URL received")
       }
     } catch (error) {
-      console.error("Checkout error:", error)
-      alert("Er is een fout opgetreden bij het starten van de betaling.")
+      console.error("❌ Checkout error:", error)
+      alert(`Er is een fout opgetreden: ${error instanceof Error ? error.message : "Onbekende fout"}`)
     } finally {
       setLoading(false)
     }
+  }
+
+  if (!session) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Laden...</p>
+        </div>
+      </div>
+    )
   }
 
   if (!wizardData) {
@@ -92,13 +147,15 @@ export default function CheckoutPage() {
     )
   }
 
-  const projectName = wizardData.project_name || wizardData.projectName
-  const gender = wizardData.gender
-  const photoCount = wizardData.uploaded_photos?.length || wizardData.uploadedPhotos?.length || 0
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 py-8">
       <div className="container mx-auto px-4 max-w-4xl">
+        {/* Back Button */}
+        <Link href="/wizard/upload" className="inline-flex items-center text-gray-600 hover:text-gray-900 mb-6">
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Terug naar foto upload
+        </Link>
+
         {/* Progress Bar */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
@@ -136,7 +193,7 @@ export default function CheckoutPage() {
                 <div className="flex items-center space-x-3">
                   <User className="w-5 h-5 text-gray-600" />
                   <div>
-                    <p className="font-medium">{projectName}</p>
+                    <p className="font-medium">{wizardData.projectName}</p>
                     <p className="text-sm text-gray-600">Project naam</p>
                   </div>
                 </div>
@@ -145,10 +202,10 @@ export default function CheckoutPage() {
               <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                 <div className="flex items-center space-x-3">
                   <div className="w-5 h-5 rounded-full bg-purple-600 flex items-center justify-center">
-                    <span className="text-xs text-white font-bold">{gender === "man" ? "M" : "V"}</span>
+                    <span className="text-xs text-white font-bold">{wizardData.gender === "man" ? "M" : "V"}</span>
                   </div>
                   <div>
-                    <p className="font-medium">{gender === "man" ? "Man" : "Vrouw"}</p>
+                    <p className="font-medium">{wizardData.gender === "man" ? "Man" : "Vrouw"}</p>
                     <p className="text-sm text-gray-600">Geslacht</p>
                   </div>
                 </div>
@@ -158,7 +215,7 @@ export default function CheckoutPage() {
                 <div className="flex items-center space-x-3">
                   <Upload className="w-5 h-5 text-gray-600" />
                   <div>
-                    <p className="font-medium">{photoCount} foto's</p>
+                    <p className="font-medium">{wizardData.uploadedPhotos.length} foto's</p>
                     <p className="text-sm text-gray-600">Geüpload</p>
                   </div>
                 </div>
@@ -187,7 +244,7 @@ export default function CheckoutPage() {
                   type="text"
                   placeholder="Voer je kortingscode in"
                   value={couponCode}
-                  onChange={(e) => setCouponCode(e.target.value)}
+                  onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
                   className="w-full"
                 />
                 <p className="text-sm text-gray-600">Heb je een kortingscode? Voer deze hier in.</p>
