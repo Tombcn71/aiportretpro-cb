@@ -1,6 +1,8 @@
 import { type NextRequest, NextResponse } from "next/server"
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/lib/auth"
 
-// Simple in-memory storage for wizard data (temporary until checkout)
+// Simple in-memory storage for wizard data (fallback)
 const wizardDataStore = new Map<string, any>()
 
 export function saveWizardData(sessionId: string, data: any) {
@@ -20,27 +22,35 @@ export function deleteWizardData(sessionId: string) {
   return deleted
 }
 
-export async function POST(req: NextRequest) {
+export async function POST(request: NextRequest) {
   try {
-    const { sessionId, projectName, gender, uploadedPhotos, userEmail } = await req.json()
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
 
-    if (!sessionId || !projectName || !gender || !uploadedPhotos || !userEmail) {
+    const data = await request.json()
+    const { sessionId, projectName, gender, uploadedPhotos } = data
+
+    if (!sessionId || !projectName || !gender || !uploadedPhotos) {
       return NextResponse.json({ error: "Missing required data" }, { status: 400 })
     }
 
-    // Save to memory temporarily
+    // Save to memory as fallback
     saveWizardData(sessionId, {
       projectName,
       gender,
       uploadedPhotos,
-      userEmail,
+      userEmail: session.user.email,
     })
 
-    console.log("✅ Wizard data saved for session:", sessionId)
-
-    return NextResponse.json({ success: true, sessionId })
+    return NextResponse.json({
+      success: true,
+      sessionId,
+      message: "Wizard data saved successfully",
+    })
   } catch (error) {
-    console.error("❌ Error saving wizard data:", error)
+    console.error("Error saving wizard data:", error)
     return NextResponse.json({ error: "Failed to save data" }, { status: 500 })
   }
 }

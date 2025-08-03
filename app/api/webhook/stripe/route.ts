@@ -48,30 +48,34 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: "No customer email" }, { status: 400 })
       }
 
-      if (!metadata?.wizardSessionId) {
-        console.error("❌ No wizard session ID in metadata")
-        return NextResponse.json({ error: "Missing wizard session ID" }, { status: 400 })
+      if (!metadata?.projectId) {
+        console.error("❌ No project ID in metadata")
+        return NextResponse.json({ error: "Missing project ID" }, { status: 400 })
       }
 
       try {
-        // Get or create user using existing pattern
-        const userResult = await sql`
-          SELECT * FROM users WHERE email = ${customerEmail}
+        const projectId = Number.parseInt(metadata.projectId)
+
+        // Get the project that was created during checkout
+        const projectResult = await sql`
+          SELECT * FROM projects WHERE id = ${projectId} AND status = 'pending_payment'
         `
 
-        let user = userResult[0]
-        if (!user) {
-          const createUserResult = await sql`
-            INSERT INTO users (email, name, image, created_at, updated_at)
-            VALUES (${customerEmail}, '', '', NOW(), NOW())
-            RETURNING *
-          `
-          user = createUserResult[0]
+        if (projectResult.length === 0) {
+          console.error("❌ Project not found or already processed")
+          return NextResponse.json({ error: "Project not found" }, { status: 400 })
         }
 
-        console.log("👤 User:", user.id, user.email)
+        const project = projectResult[0]
+        console.log("📦 Found project:", project.id, project.name)
 
-        // Create purchase record using existing pattern
+        // Get user
+        const userResult = await sql`
+          SELECT * FROM users WHERE id = ${project.user_id}
+        `
+        const user = userResult[0]
+
+        // Create purchase record
         const purchaseResult = await sql`
           INSERT INTO purchases (user_id, stripe_session_id, plan_type, amount, headshots_included, status, created_at, updated_at)
           VALUES (${user.id}, ${session.id}, 'professional', 1999, 40, 'completed', NOW(), NOW())
@@ -81,40 +85,17 @@ export async function POST(req: NextRequest) {
         const purchase = purchaseResult[0]
         console.log("💰 Purchase created:", purchase.id)
 
-        // Create project using existing pattern - get data from metadata
-        const uploadedPhotos = JSON.parse(metadata.uploadedPhotos || "[]")
-
-        const projectResult = await sql`
-          INSERT INTO projects (
-            user_id,
-            purchase_id,
-            name,
-            gender,
-            uploaded_photos,
-            status,
-            created_at,
-            updated_at
-          )
-          VALUES (
-            ${user.id},
-            ${purchase.id},
-            ${metadata.projectName || "Wizard Project"},
-            ${metadata.gender || "man"},
-            ${uploadedPhotos},
-            'training',
-            NOW(),
-            NOW()
-          )
-          RETURNING *
+        // Update project with purchase and set to training
+        await sql`
+          UPDATE projects 
+          SET purchase_id = ${purchase.id}, status = 'training', updated_at = NOW()
+          WHERE id = ${project.id}
         `
-
-        const project = projectResult[0]
-        console.log("✅ Project created:", project.id)
 
         // Start Astria training using existing pattern
         try {
           console.log("🎯 STARTING ASTRIA TRAINING WITH PACK ID 928...")
-          console.log("📸 Using photos:", uploadedPhotos)
+          console.log("📸 Using photos:", project.uploaded_photos)
 
           const ASTRIA_API_URL = process.env.ASTRIA_API_URL || "https://api.astria.ai"
           const ASTRIA_API_KEY = process.env.ASTRIA_API_KEY
@@ -132,9 +113,9 @@ export async function POST(req: NextRequest) {
             },
             body: JSON.stringify({
               tune: {
-                title: `${metadata.projectName} - ${metadata.gender}`,
+                title: `${project.name} - ${project.gender}`,
                 name: `project_${project.id}_${Date.now()}`,
-                image_urls: uploadedPhotos,
+                image_urls: project.uploaded_photos,
                 callback: `${process.env.NEXTAUTH_URL}/api/astria/wizard-webhook/${project.id}?webhookSecret=${process.env.APP_WEBHOOK_SECRET}`,
               },
             }),
