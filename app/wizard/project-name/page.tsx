@@ -2,62 +2,69 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { ProgressBar } from "@/components/ui/progress-bar"
 
 export default function ProjectNamePage() {
   const [projectName, setProjectName] = useState("")
   const router = useRouter()
 
-  const handleNext = () => {
+  const handleContinue = () => {
     if (projectName.trim()) {
-      localStorage.setItem("wizardData", JSON.stringify({ projectName }))
+      localStorage.setItem(
+        "wizardData",
+        JSON.stringify({
+          projectName: projectName.trim(),
+          selectedPackId: "928", // Portetfotos m/v pack
+          step: 1,
+        }),
+      )
       router.push("/wizard/gender")
     }
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Progress Bar */}
-      <div className="w-full bg-gray-200 h-2">
-        <div className="bg-blue-600 h-2 w-1/4"></div>
-      </div>
+    <div className="min-h-screen bg-gray-50 p-4">
+      <div className="max-w-md mx-auto">
+        <div className="mb-8">
+          <ProgressBar currentStep={1} totalSteps={3} />
+        </div>
 
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-md mx-auto bg-white rounded-lg shadow-sm p-8">
-          <div className="text-center mb-8">
-            <div className="w-8 h-8 bg-orange-500 text-white rounded-full flex items-center justify-center mx-auto mb-4">
-              1
-            </div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">Wat is de naam van je project?</h1>
-            <p className="text-gray-600">Geef je fotoshoot een naam zodat je deze later makkelijk kunt terugvinden.</p>
-          </div>
-
-          <div className="space-y-6">
-            <div>
-              <Label htmlFor="projectName" className="text-sm font-medium text-gray-700">
-                Project naam
-              </Label>
+        <Card className="w-full">
+          <CardHeader className="text-center">
+            <CardTitle className="text-2xl">Geef je project een naam</CardTitle>
+            <p className="text-gray-600">Kies een naam zodat je je portetfotos later makkelijk kunt terugvinden</p>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="space-y-2">
+              <Label htmlFor="projectName">Project Naam</Label>
               <Input
                 id="projectName"
-                type="text"
                 value={projectName}
                 onChange={(e) => setProjectName(e.target.value)}
-                placeholder="Bijv. LinkedIn profielfoto's"
-                className="mt-1 w-full"
+                placeholder="bijv. Mijn LinkedIn Foto's"
+                className="text-lg"
               />
             </div>
 
-            <Button
-              onClick={handleNext}
-              disabled={!projectName.trim()}
-              className="w-full bg-orange-500 hover:bg-orange-600 text-white py-3 px-6 rounded-lg font-medium text-lg"
-            >
-              Volgende →
-            </Button>
-          </div>
-        </div>
+            <div className="space-y-4">
+              <Button
+                onClick={handleContinue}
+                disabled={!projectName.trim()}
+                className="w-full bg-[#0077B5] hover:bg-[#004182] text-white"
+              >
+                Doorgaan
+              </Button>
+
+              <Button variant="ghost" onClick={() => router.back()} className="w-full">
+                ← Terug
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   )

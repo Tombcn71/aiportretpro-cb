@@ -1,19 +1,5 @@
 import axios from "axios"
 
-export const ASTRIA_PACKS = {
-  men: "928",
-  women: "928",
-  default: "928",
-}
-
-export function getPackId(gender?: string): string {
-  return "928" // Always use pack 928
-}
-
-export function getPackName(gender: string): string {
-  return gender === "man" ? "928 man" : "928 woman"
-}
-
 if (!process.env.ASTRIA_API_KEY) {
   throw new Error("ASTRIA_API_KEY is not set")
 }
@@ -57,14 +43,14 @@ export async function trainWithPack(data: PackTrainRequest) {
         ? deploymentUrl
         : `https://${deploymentUrl}`
 
-    const trainWebhook = `${baseUrl}/api/astria/wizard-webhook/${data.projectId}`
-    const promptWebhook = `${baseUrl}/api/astria/wizard-prompt-webhook/${data.projectId}`
+    const trainWebhook = `${baseUrl}/api/astria/train-webhook`
+    const trainWebhookWithParams = `${trainWebhook}?user_id=1&model_id=${data.projectId}&webhook_secret=${process.env.APP_WEBHOOK_SECRET}`
+
+    const promptWebhook = `${baseUrl}/api/astria/prompt-webhook`
+    const promptWebhookWithParams = `${promptWebhook}?user_id=1&model_id=${data.projectId}&webhook_secret=${process.env.APP_WEBHOOK_SECRET}`
 
     // Map gender to class name
     const className = data.gender === "man" ? "man" : data.gender === "woman" ? "woman" : "person"
-
-    // Use pack ID from ASTRIA_PACKS based on gender
-    const packId = getPackId(data.gender)
 
     // Use the new pack-based API endpoint
     const tuneBody = {
@@ -73,26 +59,26 @@ export async function trainWithPack(data: PackTrainRequest) {
         images: data.images,
         class_name: className,
         characteristics: data.characteristics || `professional ${className}`,
-        callback: trainWebhook,
+        callback: trainWebhookWithParams,
         prompts_attributes: [
           {
             text: `professional headshot of ohwx ${className}, business suit, clean white background, corporate photography, high quality, detailed, professional lighting, 8k resolution`,
-            callback: promptWebhook,
+            callback: promptWebhookWithParams,
             num_images: 10,
           },
           {
             text: `linkedin profile picture of ohwx ${className}, professional attire, office background, business casual, corporate headshot, professional photography, high resolution`,
-            callback: promptWebhook,
+            callback: promptWebhookWithParams,
             num_images: 10,
           },
           {
             text: `portrait of ohwx ${className} in business casual attire, professional headshot, neutral background, corporate style, high quality photography, detailed`,
-            callback: promptWebhook,
+            callback: promptWebhookWithParams,
             num_images: 10,
           },
           {
             text: `corporate headshot of ohwx ${className}, professional blazer, studio lighting, clean background, business portrait, high resolution, detailed`,
-            callback: promptWebhook,
+            callback: promptWebhookWithParams,
             num_images: 10,
           },
         ],
@@ -100,10 +86,10 @@ export async function trainWithPack(data: PackTrainRequest) {
     }
 
     console.log("Sending pack-based request to Astria API...")
-    console.log("Using pack ID:", packId)
+    console.log("Using pack ID:", data.packId)
 
     // Use the new pack endpoint: POST /p/:id/tunes
-    const response = await axios.post(`${ASTRIA_DOMAIN}/p/${packId}/tunes`, tuneBody, {
+    const response = await axios.post(`${ASTRIA_DOMAIN}/p/${data.packId}/tunes`, tuneBody, {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${ASTRIA_API_KEY}`,
@@ -114,7 +100,7 @@ export async function trainWithPack(data: PackTrainRequest) {
     console.log("Pack-based training response:", {
       status: response.status,
       tuneId: response.data?.id,
-      packId: packId,
+      packId: data.packId,
     })
 
     return response.data
