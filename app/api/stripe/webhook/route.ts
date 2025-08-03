@@ -61,7 +61,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: "Missing wizard metadata" }, { status: 400 })
       }
 
-      // Get uploaded photos from sessionStorage backup or API
+      // Get uploaded photos from wizard session
       let uploadedPhotos: string[] = []
       try {
         const photosResponse = await fetch(`${process.env.NEXTAUTH_URL}/api/wizard/get-data`, {
@@ -76,6 +76,8 @@ export async function POST(req: NextRequest) {
       } catch (error) {
         console.error("❌ Could not get wizard data:", error)
       }
+
+      console.log("📸 Photos to use:", uploadedPhotos)
 
       // Get or create user
       const userResult = await sql`
@@ -104,7 +106,7 @@ export async function POST(req: NextRequest) {
       const purchase = purchaseResult[0]
       console.log("💰 Purchase created:", purchase.id)
 
-      // Create project
+      // Create project - FIX: Don't JSON.stringify the photos array
       const projectResult = await sql`
         INSERT INTO projects (
           user_id,
@@ -121,7 +123,7 @@ export async function POST(req: NextRequest) {
           ${purchase.id},
           ${metadata.projectName},
           ${metadata.gender},
-          ${JSON.stringify(uploadedPhotos)},
+          ${uploadedPhotos},
           'training',
           NOW(),
           NOW()
