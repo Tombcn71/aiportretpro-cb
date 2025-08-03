@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
-import { getUserByEmail, sql } from "@/lib/db"
 import Stripe from "stripe"
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
@@ -10,70 +9,45 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 
 export async function POST(request: Request) {
   try {
-    const { priceId, successUrl, cancelUrl, customerEmail, metadata, couponCode } = await request.json()
-
     const session = await getServerSession(authOptions)
     if (!session?.user?.email) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const user = await getUserByEmail(session.user.email)
-    if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 })
+    const { sessionId, couponCode } = await request.json()
+
+    if (!sessionId) {
+      return NextResponse.json({ error: "Session ID required" }, { status: 400 })
     }
 
-    // Create purchase record
-    const purchaseResult = await sql`
-      INSERT INTO purchases (user_id, plan_type, amount, headshots_included, status, created_at, updated_at)
-      VALUES (${user.id}, 'professional', 1999, 40, 'pending', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-      RETURNING id
-    `
-
-    const purchaseId = purchaseResult[0].id
-
-    // Create Stripe checkout session
     const checkoutSessionData: any = {
       payment_method_types: ["card", "ideal"],
       line_items: [
         {
-          price: priceId,
+          price: "price_1RrFsbDswbEJWagVsEytA8rs", // €19.99 price ID
           quantity: 1,
         },
       ],
       mode: "payment",
-      success_url: successUrl,
-      cancel_url: cancelUrl,
-      customer_email: customerEmail,
+      success_url: `${process.env.NEXTAUTH_URL}/generate/processing?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.NEXTAUTH_URL}/wizard/checkout`,
+      customer_email: session.user.email,
       metadata: {
-        ...metadata,
-        purchase_id: purchaseId.toString(),
-        user_id: user.id.toString(),
+        wizardSessionId: sessionId,
+        userEmail: session.user.email,
       },
     }
 
     // Add coupon if provided
     if (couponCode) {
-      checkoutSessionData.discounts = [
-        {
-          coupon: couponCode,
-        },
-      ]
+      checkoutSessionData.discounts = [{ coupon: couponCode }]
     }
 
     const checkoutSession = await stripe.checkout.sessions.create(checkoutSessionData)
 
-    // Update purchase with Stripe session ID
-    await sql`
-      UPDATE purchases 
-      SET stripe_session_id = ${checkoutSession.id}
-      WHERE id = ${purchaseId}
-    `
-
-    console.log("✅ Stripe checkout created:", checkoutSession.id)
-
-    return NextResponse.json({ url: checkoutSession.url })
-  } catch (error) {
+    return NextResponse.json({ sessionId: checkoutSession.id })
+  } catch (error: any) {
     console.error("❌ Stripe checkout error:", error)
-    return NextResponse.json({ error: "Failed to create checkout session" }, { status: 500 })
+    return NextResponse.json({ error: error.message || "Failed to create checkout session" }, { status: 500 })
   }
 }

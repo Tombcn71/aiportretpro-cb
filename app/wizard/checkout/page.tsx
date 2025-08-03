@@ -9,6 +9,7 @@ import { ArrowLeft, Check, Loader2, Tag } from "lucide-react"
 import Link from "next/link"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { loadStripe } from "@stripe/stripe-js"
 
 interface WizardData {
   projectName: string
@@ -79,22 +80,8 @@ export default function CheckoutPage() {
 
       // Create Stripe checkout session
       const checkoutData: any = {
-        priceId: "price_1RrFsbDswbEJWagVsEytA8rs",
-        successUrl: `${window.location.origin}/generate/processing`,
-        cancelUrl: `${window.location.origin}/wizard/checkout`,
-        customerEmail: session.user.email,
-        metadata: {
-          type: "wizard",
-          session_id: sessionId,
-          user_email: session.user.email,
-          project_name: wizardData.projectName,
-          gender: wizardData.gender,
-        },
-      }
-
-      // Add coupon if provided
-      if (couponCode.trim()) {
-        checkoutData.couponCode = couponCode.trim()
+        sessionId,
+        couponCode: couponCode.trim() || undefined,
       }
 
       const checkoutResponse = await fetch("/api/stripe/create-checkout", {
@@ -107,12 +94,12 @@ export default function CheckoutPage() {
         throw new Error("Failed to create checkout session")
       }
 
-      const { url } = await checkoutResponse.json()
-      if (url) {
-        console.log("🚀 Redirecting to Stripe checkout")
-        window.location.href = url
-      } else {
-        throw new Error("No checkout URL received")
+      const { sessionId: stripeSessionId } = await checkoutResponse.json()
+
+      const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!)
+      const stripe = await stripePromise
+      if (stripe) {
+        await stripe.redirectToCheckout({ sessionId: stripeSessionId })
       }
     } catch (error) {
       console.error("❌ Checkout error:", error)
