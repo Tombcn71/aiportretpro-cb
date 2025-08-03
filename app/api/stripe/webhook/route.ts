@@ -41,15 +41,10 @@ export async function POST(req: NextRequest) {
       console.log("📧 Customer email from Stripe:", session.customer_email)
       console.log("📋 Metadata:", session.metadata)
 
-      // Handle wizard flow
-      if (session.metadata?.type === "wizard") {
-        const wizardSessionId = session.metadata.session_id
+      // Handle wizard flow - check for wizardSessionId in metadata
+      if (session.metadata?.wizardSessionId) {
+        const wizardSessionId = session.metadata.wizardSessionId
         const customerEmail = session.customer_email
-
-        if (!wizardSessionId) {
-          console.error("❌ No wizard session ID in metadata")
-          return NextResponse.json({ error: "No wizard session ID" }, { status: 400 })
-        }
 
         if (!customerEmail) {
           console.error("❌ No customer email from Stripe")
@@ -127,9 +122,9 @@ export async function POST(req: NextRequest) {
         const project = projectResult[0]
         console.log("✅ Project created:", project.id)
 
-        // 🚀 START ASTRIA TRAINING!
+        // 🚀 START ASTRIA TRAINING WITH PACK ID 928!
         try {
-          console.log("🎯 STARTING ASTRIA TRAINING...")
+          console.log("🎯 STARTING ASTRIA TRAINING WITH PACK ID 928...")
           console.log("📸 Using photos:", wizardData.uploadedPhotos)
 
           const ASTRIA_API_URL = process.env.ASTRIA_API_URL || "https://api.astria.ai"
@@ -139,8 +134,8 @@ export async function POST(req: NextRequest) {
             throw new Error("ASTRIA_API_KEY not configured")
           }
 
-          // DIRECT POST TO ASTRIA
-          const astriaResponse = await fetch(`${ASTRIA_API_URL}/tunes`, {
+          // Use pack endpoint with pack ID 928
+          const astriaResponse = await fetch(`${ASTRIA_API_URL}/p/928/tunes`, {
             method: "POST",
             headers: {
               Authorization: `Bearer ${ASTRIA_API_KEY}`,
@@ -153,7 +148,6 @@ export async function POST(req: NextRequest) {
                 image_urls: wizardData.uploadedPhotos,
                 callback: `${process.env.NEXTAUTH_URL}/api/astria/wizard-webhook/${project.id}?webhookSecret=${process.env.APP_WEBHOOK_SECRET}`,
               },
-              pack_id: "clx1qvimu0001hf0jdn5xdlr4",
             }),
           })
 
@@ -164,7 +158,7 @@ export async function POST(req: NextRequest) {
           }
 
           const astriaResult = await astriaResponse.json()
-          console.log("🔥 ASTRIA TRAINING STARTED:", astriaResult.id)
+          console.log("🔥 ASTRIA TRAINING STARTED WITH PACK 928:", astriaResult.id)
 
           // Update project with tune_id
           await sql`
@@ -176,7 +170,7 @@ export async function POST(req: NextRequest) {
           // Clean up wizard session
           deleteWizardData(wizardSessionId)
 
-          console.log("🎉 WIZARD FLOW COMPLETED!")
+          console.log("🎉 WIZARD FLOW COMPLETED WITH PACK 928!")
         } catch (astriaError) {
           console.error("❌ ASTRIA ERROR:", astriaError)
 
