@@ -3,7 +3,6 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { sql } from "@/lib/db"
 
-// In-memory storage for wizard sessions (fallback)
 const wizardSessions = new Map<string, any>()
 
 export function saveWizardData(sessionId: string, data: any) {
@@ -37,7 +36,6 @@ export async function POST(request: Request) {
       userEmail,
     })
 
-    // Save to memory (fallback)
     saveWizardData(sessionId, {
       sessionId,
       projectName,
@@ -47,7 +45,6 @@ export async function POST(request: Request) {
     })
 
     try {
-      // Try to save to database
       await sql`
         INSERT INTO wizard_sessions (
           session_id, 

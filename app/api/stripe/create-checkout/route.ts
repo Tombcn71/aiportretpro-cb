@@ -20,11 +20,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Session ID required" }, { status: 400 })
     }
 
-    const checkoutSessionData: any = {
-      payment_method_types: ["card", "ideal"],
+    const checkoutSession = await stripe.checkout.sessions.create({
+      payment_method_types: ["card"],
       line_items: [
         {
-          price: "price_1RrFsbDswbEJWagVsEytA8rs", // €19.99 price ID
+          price: "price_1QSqJhP5wjEFaQw8tOHWJhzF",
           quantity: 1,
         },
       ],
@@ -36,14 +36,8 @@ export async function POST(request: Request) {
         wizardSessionId: sessionId,
         userEmail: session.user.email,
       },
-    }
-
-    // Add coupon if provided
-    if (couponCode) {
-      checkoutSessionData.discounts = [{ coupon: couponCode }]
-    }
-
-    const checkoutSession = await stripe.checkout.sessions.create(checkoutSessionData)
+      ...(couponCode && { discounts: [{ coupon: couponCode }] }),
+    })
 
     return NextResponse.json({ sessionId: checkoutSession.id })
   } catch (error: any) {
