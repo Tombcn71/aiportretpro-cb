@@ -1,7 +1,4 @@
 import { NextResponse } from "next/server"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
-import { getUserByEmail, sql } from "@/lib/db"
 import Stripe from "stripe"
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
@@ -10,64 +7,41 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 
 export async function POST(request: Request) {
   try {
-    const { priceId, successUrl, cancelUrl, customerEmail, metadata } = await request.json()
+    const { sessionId, userEmail, couponCode } = await request.json()
 
-    const session = await getServerSession(authOptions)
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    if (!sessionId || !userEmail) {
+      return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
     }
 
-    const user = await getUserByEmail(session.user.email)
-    if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 })
-    }
-
-    // Create purchase record with discounted price
-    const purchaseResult = await sql`
-      INSERT INTO purchases (user_id, plan_type, amount, headshots_included, status, created_at, updated_at)
-      VALUES (${user.id}, 'professional', 1599, 40, 'pending', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-      RETURNING id
-    `
-
-    const purchaseId = purchaseResult[0].id
-
-    // Create Stripe checkout with discount coupon
-    const checkoutSession = await stripe.checkout.sessions.create({
-      payment_method_types: ["card", "ideal"],
+    const sessionData: Stripe.Checkout.SessionCreateParams = {
+      payment_method_types: ["card"],
       line_items: [
         {
-          price: priceId,
+          price: "price_1QSjJhP5wjjQQQQQQQQQQQQQ", // Your actual price ID
           quantity: 1,
         },
       ],
       mode: "payment",
-      success_url: successUrl,
-      cancel_url: cancelUrl,
-      customer_email: customerEmail,
-      discounts: [
-        {
-          coupon: "LAUNCH20", // 20% discount coupon ID in Stripe
-        },
-      ],
+      success_url: `${process.env.NEXTAUTH_URL}/generate/processing?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.NEXTAUTH_URL}/wizard/checkout`,
+      customer_email: userEmail,
       metadata: {
-        ...metadata,
-        purchase_id: purchaseId.toString(),
-        user_id: user.id.toString(),
+        wizard_session_id: sessionId,
+        user_email: userEmail,
       },
-    })
+    }
 
-    // Update purchase with Stripe session ID
-    await sql`
-      UPDATE purchases 
-      SET stripe_session_id = ${checkoutSession.id}
-      WHERE id = ${purchaseId}
-    `
+    // Add coupon if provided
+    if (couponCode) {
+      sessionData.discounts = [{ coupon: couponCode }]
+      sessionData.metadata!.discount_code = couponCode
+    }
 
-    console.log("✅ Stripe checkout created with LAUNCH20 discount:", checkoutSession.id)
+    const session = await stripe.checkout.sessions.create(sessionData)
 
-    return NextResponse.json({ url: checkoutSession.url })
-  } catch (error) {
+    return NextResponse.json({ url: session.url })
+  } catch (error: any) {
     console.error("❌ Stripe checkout error:", error)
-    return NextResponse.json({ error: "Failed to create checkout session" }, { status: 500 })
+    return NextResponse.json({ error: error.message }, { status: 500 })
   }
 }

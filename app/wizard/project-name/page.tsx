@@ -1,97 +1,62 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { useSession } from "next-auth/react"
+import type React from "react"
+
+import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { ArrowRight } from "lucide-react"
-import { ProgressBar } from "@/components/ui/progress-bar"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Progress } from "@/components/ui/progress"
 
 export default function ProjectNamePage() {
-  const { data: session, status } = useSession()
-  const router = useRouter()
   const [projectName, setProjectName] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
+  const router = useRouter()
 
-  useEffect(() => {
-    if (status === "loading") return
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!projectName.trim()) return
 
-    if (!session) {
-      console.log("❌ No session, redirecting to welcome")
-      router.push("/wizard/welcome")
-      return
-    }
+    setIsLoading(true)
 
-    // Load existing project name if available
-    const savedName = localStorage.getItem("wizard_project_name")
-    if (savedName) {
-      setProjectName(savedName)
-    }
-  }, [session, status, router])
+    // Store project name in sessionStorage
+    sessionStorage.setItem("wizardProjectName", projectName)
 
-  const handleNext = () => {
-    if (projectName.trim()) {
-      localStorage.setItem("wizard_project_name", projectName.trim())
-      console.log("✅ Project name saved:", projectName.trim())
-      router.push("/wizard/gender")
-    }
-  }
-
-  if (status === "loading") {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0077B5]"></div>
-      </div>
-    )
-  }
-
-  if (!session) {
-    return null
+    // Navigate to gender selection
+    router.push("/wizard/gender")
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="container mx-auto px-4 max-w-2xl">
-        {/* Progress Bar */}
-        <div className="mb-8">
-          <ProgressBar currentStep={2} totalSteps={5} />
-        </div>
-
-        <Card>
-          <CardHeader className="text-center">
-            <CardTitle className="text-2xl">Geef je project een naam</CardTitle>
-            <p className="text-gray-600">
-              Kies een naam voor je headshot project. Dit helpt je later om je foto's terug te vinden.
-            </p>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="projectName">Project naam</Label>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+      <Card className="w-full max-w-md">
+        <CardHeader className="text-center">
+          <CardTitle className="text-2xl font-bold">Project Name</CardTitle>
+          <p className="text-gray-600">Give your headshot project a name</p>
+          <Progress value={33} className="mt-4" />
+          <p className="text-sm text-gray-500 mt-2">Step 1 of 3</p>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <Label htmlFor="projectName">Project Name</Label>
               <Input
                 id="projectName"
                 type="text"
-                placeholder="Bijv. LinkedIn Headshots, Zakelijke Foto's, ..."
                 value={projectName}
                 onChange={(e) => setProjectName(e.target.value)}
-                className="text-lg py-3"
-                maxLength={50}
+                placeholder="e.g., Professional Headshots"
+                required
+                className="mt-1"
               />
-              <p className="text-sm text-gray-500">{projectName.length}/50 karakters</p>
             </div>
-
-            <Button
-              onClick={handleNext}
-              disabled={!projectName.trim()}
-              className="w-full bg-[#0077B5] hover:bg-[#004182] text-white py-3 text-lg"
-            >
-              Volgende stap
-              <ArrowRight className="ml-2 h-5 w-5" />
+            <Button type="submit" className="w-full" disabled={!projectName.trim() || isLoading}>
+              {isLoading ? "Next..." : "Continue"}
             </Button>
-          </CardContent>
-        </Card>
-      </div>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   )
 }

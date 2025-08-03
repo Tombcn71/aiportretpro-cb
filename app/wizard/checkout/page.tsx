@@ -1,261 +1,114 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { useSession } from "next-auth/react"
-import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { ArrowLeft, Check, Loader2, Sparkles } from "lucide-react"
-import { ProgressBar } from "@/components/ui/progress-bar"
-import Link from "next/link"
-
-interface WizardData {
-  projectName: string
-  gender: string
-  uploadedPhotos: string[]
-}
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Check } from "lucide-react"
 
 export default function CheckoutPage() {
-  const { data: session, status } = useSession()
-  const router = useRouter()
-  const [wizardData, setWizardData] = useState<WizardData | null>(null)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState("")
-
-  useEffect(() => {
-    // Load wizard data from localStorage
-    const projectName = localStorage.getItem("wizard_project_name")
-    const gender = localStorage.getItem("wizard_gender")
-    const uploadedPhotos = localStorage.getItem("wizard_uploaded_photos")
-
-    console.log("📋 Loading wizard data:", {
-      projectName,
-      gender,
-      photosCount: uploadedPhotos ? JSON.parse(uploadedPhotos).length : 0,
-    })
-
-    if (!projectName || !gender || !uploadedPhotos) {
-      console.error("❌ Missing wizard data, redirecting to start")
-      router.push("/wizard/welcome")
-      return
-    }
-
-    const photos = JSON.parse(uploadedPhotos)
-    if (photos.length < 6) {
-      console.error("❌ Not enough photos, redirecting to upload")
-      router.push("/wizard/upload")
-      return
-    }
-
-    setWizardData({
-      projectName,
-      gender,
-      uploadedPhotos: photos,
-    })
-  }, [router])
+  const [isLoading, setIsLoading] = useState(false)
+  const [couponCode, setCouponCode] = useState("")
+  const { data: session } = useSession()
 
   const handleCheckout = async () => {
-    if (!session?.user?.email || !wizardData) {
-      setError("Missing session or wizard data")
-      return
-    }
-
-    setLoading(true)
-    setError("")
+    setIsLoading(true)
 
     try {
-      // Generate unique session ID
-      const sessionId = `wizard_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-      console.log("💾 Saving wizard data with session ID:", sessionId)
+      const sessionId = sessionStorage.getItem("wizardSessionId")
+      if (!sessionId) {
+        alert("Session expired. Please start over.")
+        return
+      }
 
-      // Save wizard data to server
-      const saveResponse = await fetch("/api/wizard/save-data", {
+      const response = await fetch("/api/stripe/create-checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           sessionId,
-          projectName: wizardData.projectName,
-          gender: wizardData.gender,
-          uploadedPhotos: wizardData.uploadedPhotos,
-          userEmail: session.user.email,
+          userEmail: session?.user?.email,
+          couponCode: couponCode || undefined,
         }),
       })
 
-      if (!saveResponse.ok) {
-        throw new Error("Failed to save wizard data")
-      }
+      const data = await response.json()
 
-      console.log("✅ Wizard data saved, creating checkout session")
-
-      // Create Stripe checkout session with discount
-      const checkoutResponse = await fetch("/api/stripe/create-checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          priceId: "price_1RrFsbDswbEJWagVsEytA8rs",
-          successUrl: `${window.location.origin}/generate/processing`,
-          cancelUrl: `${window.location.origin}/wizard/checkout`,
-          customerEmail: session.user.email,
-          metadata: {
-            type: "wizard",
-            session_id: sessionId,
-            user_email: session.user.email,
-            project_name: wizardData.projectName,
-            gender: wizardData.gender,
-            discount_code: "LAUNCH20",
-          },
-        }),
-      })
-
-      if (!checkoutResponse.ok) {
-        throw new Error("Failed to create checkout session")
-      }
-
-      const { url } = await checkoutResponse.json()
-      if (url) {
-        console.log("🚀 Redirecting to Stripe checkout")
-        window.location.href = url
+      if (data.url) {
+        window.location.href = data.url
       } else {
-        throw new Error("No checkout URL received")
+        alert("Failed to create checkout session")
       }
     } catch (error) {
-      console.error("❌ Checkout error:", error)
-      setError(error instanceof Error ? error.message : "Er is een fout opgetreden")
+      console.error("Checkout error:", error)
+      alert("Failed to create checkout session")
     } finally {
-      setLoading(false)
+      setIsLoading(false)
     }
   }
 
-  if (status === "loading") {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin" />
-      </div>
-    )
-  }
-
-  if (!session) {
-    router.push("/auth/signin?callbackUrl=/wizard/checkout")
-    return null
-  }
-
-  if (!wizardData) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin" />
-      </div>
-    )
-  }
-
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="container mx-auto px-4 max-w-2xl">
-        {/* Progress Bar */}
-        <div className="mb-8">
-          <ProgressBar currentStep={5} totalSteps={5} />
-        </div>
-
-        <Link href="/wizard/upload" className="inline-flex items-center text-gray-600 hover:text-gray-900 mb-8">
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Terug naar upload
-        </Link>
-
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold mb-4">Bijna klaar! 🎉</h1>
-          <p className="text-lg text-gray-600">
-            Je foto's zijn geüpload. Nu alleen nog betalen en we starten direct met het maken van je professionele
-            portretfoto's.
-          </p>
-        </div>
-
-        <Card className="border-2 border-green-200">
-          <CardHeader className="text-center">
-            <div className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold mb-2 inline-block">
-              <Sparkles className="inline h-4 w-4 mr-1" />
-              20% LAUNCH KORTING
-            </div>
-            <CardTitle className="text-2xl">Professional</CardTitle>
-            <div className="space-y-2">
-              <div className="flex items-center justify-center space-x-2">
-                <span className="text-lg text-gray-500 line-through">€19,99</span>
-                <span className="text-4xl font-bold text-green-600">€15,99</span>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+      <Card className="w-full max-w-md">
+        <CardHeader className="text-center">
+          <CardTitle className="text-2xl font-bold">Complete Your Order</CardTitle>
+          <p className="text-gray-600">Get 40 professional AI headshots</p>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* Package Details */}
+          <div className="bg-white rounded-lg p-4 border">
+            <h3 className="font-semibold text-lg mb-3">AI Headshot Package</h3>
+            <div className="space-y-2 text-sm">
+              <div className="flex items-center gap-2">
+                <Check className="h-4 w-4 text-green-500" />
+                <span>40 professional headshots</span>
               </div>
-              <p className="text-gray-600">40 professionele portretfoto's</p>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-3">
-              <div className="flex items-center">
-                <Check className="h-5 w-5 text-green-500 mr-3" />
-                <span>40 professionele AI portretfoto's</span>
+              <div className="flex items-center gap-2">
+                <Check className="h-4 w-4 text-green-500" />
+                <span>Multiple styles & backgrounds</span>
               </div>
-              <div className="flex items-center">
-                <Check className="h-5 w-5 text-green-500 mr-3" />
-                <span>Verschillende zakelijke outfits</span>
+              <div className="flex items-center gap-2">
+                <Check className="h-4 w-4 text-green-500" />
+                <span>High-resolution downloads</span>
               </div>
-              <div className="flex items-center">
-                <Check className="h-5 w-5 text-green-500 mr-3" />
-                <span>Verschillende poses en achtergronden</span>
-              </div>
-              <div className="flex items-center">
-                <Check className="h-5 w-5 text-green-500 mr-3" />
-                <span>HD kwaliteit downloads</span>
-              </div>
-              <div className="flex items-center">
-                <Check className="h-5 w-5 text-green-500 mr-3" />
-                <span>Klaar binnen 15 minuten</span>
-              </div>
-              <div className="flex items-center">
-                <Check className="h-5 w-5 text-green-500 mr-3" />
-                <span>Perfect voor LinkedIn, Social Media, CV, Website en Print</span>
+              <div className="flex items-center gap-2">
+                <Check className="h-4 w-4 text-green-500" />
+                <span>Ready in 15 minutes</span>
               </div>
             </div>
+          </div>
 
-            <div className="bg-blue-50 rounded-lg p-4">
-              <h4 className="font-medium text-blue-900 mb-2">📋 Je project samenvatting:</h4>
-              <div className="text-sm text-blue-800 space-y-1">
-                <p>
-                  <strong>Project:</strong> {wizardData.projectName}
-                </p>
-                <p>
-                  <strong>Stijl:</strong>{" "}
-                  {wizardData.gender === "man" ? "Mannelijk" : wizardData.gender === "woman" ? "Vrouwelijk" : "Unisex"}
-                </p>
-                <p>
-                  <strong>Foto's:</strong> {wizardData.uploadedPhotos.length} geüpload
-                </p>
-              </div>
+          {/* Coupon Code */}
+          <div>
+            <Label htmlFor="coupon">Discount Code (Optional)</Label>
+            <Input
+              id="coupon"
+              type="text"
+              value={couponCode}
+              onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+              placeholder="Enter coupon code"
+              className="mt-1"
+            />
+          </div>
+
+          {/* Price */}
+          <div className="bg-gray-50 rounded-lg p-4">
+            <div className="flex justify-between items-center">
+              <span className="text-lg font-semibold">Total:</span>
+              <span className="text-2xl font-bold">€19.99</span>
             </div>
+            {couponCode && <p className="text-sm text-green-600 mt-1">Discount code will be applied at checkout</p>}
+          </div>
 
-            {error && (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                <p className="text-red-600 text-sm">{error}</p>
-              </div>
-            )}
+          {/* Checkout Button */}
+          <Button onClick={handleCheckout} className="w-full" disabled={isLoading}>
+            {isLoading ? "Processing..." : "Complete Purchase"}
+          </Button>
 
-            <Button
-              onClick={handleCheckout}
-              disabled={loading}
-              className="w-full bg-green-600 hover:bg-green-700 text-white py-6 text-lg font-semibold"
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="h-5 w-5 animate-spin mr-2" />
-                  Bezig met laden...
-                </>
-              ) : (
-                "Betaal €15,99 & Start Training"
-              )}
-            </Button>
-
-            <div className="text-center text-sm text-gray-500 space-y-1">
-              <p>✓ Veilige betaling met iDEAL en creditcard</p>
-              <p>✓ Geld terug garantie</p>
-              <p>✓ 20% korting automatisch toegepast</p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+          <p className="text-xs text-gray-500 text-center">Secure payment powered by Stripe</p>
+        </CardContent>
+      </Card>
     </div>
   )
 }
