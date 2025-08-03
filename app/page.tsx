@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { ArrowRight, X, ChevronDown, ChevronUp } from "lucide-react"
 import Header from "@/components/header"
 import { Facebook, Instagram, Linkedin } from "lucide-react"
-import { AIHeadshotsShowcase } from "@/components/ai-headshots-showcase"
+import AIHeadshotsShowcase from "@/components/ai-headshots-showcase"
 import HowItWorks from "@/components/how-it-works"
 
 // Gallery photos: New 16 professional photos in man-woman alternating order
@@ -127,6 +127,7 @@ export default function HomePage() {
     }
 
     window.addEventListener("scroll", toggleVisibility)
+
     return () => window.removeEventListener("scroll", toggleVisibility)
   }, [])
 
@@ -153,17 +154,18 @@ export default function HomePage() {
           <br />
           <span className="text-[#0077B5]"> slim en simpel </span>geregeld
         </h1>
+
         <p className="text-md md:text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
-          Geen gedoe met studio's, direct 40 AI-portretten in 15 min.
-          <span className="text-[#0077B5] font-bold"> Tijdelijk voor slechts 19,99€. </span>
+          Geen gedoe met studio's, direct 40 AI-portretten in 15 min.<span className="text-[#0077B5] font-bold"> Tijdelijk voor slechts 19,99€. </span>
           Makkelijk vanaf je telefoon of laptop, bespaar tijd en geld.
         </p>
+
         <Button
           asChild
           size="lg"
           className=" bg-[#FF8C00] hover:bg-[#FFA500] text-white px-6 md:px-10 py-8 md:py-8 text-base md:text-lg mb-8 md:max-w-sm"
         >
-          <Link href="/wizard/welcome">
+          <Link href="/pricing">
             Start jouw fotoshoot nu - 19,99€ <ArrowRight className="ml-2 h-6 md:h-7 w-6 md:w-7" />
           </Link>
         </Button>
@@ -264,7 +266,7 @@ export default function HomePage() {
             Klaar voor je professionele portretfoto's?
           </h2>
           <p className="text-xl text-gray-600 mb-8">Laat zien wie je bent met een krachtige, professionele foto</p>
-          <Link href="/wizard/welcome">
+          <Link href="/pricing">
             <Button size="lg" className="bg-[#FFA500] hover:bg-[#FF8C00] text-white px-8 py-4 text-lg">
               Start nu voor slechts €29 <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
@@ -400,7 +402,7 @@ export default function HomePage() {
               size="lg"
               className="w-full bg-[#FF8C00] hover:bg-[#FFA500] text-white px-6 py-8 text-base font-semibold"
             >
-              <Link href="/wizard/welcome" className="flex items-center justify-center">
+              <Link href="/pricing" className="flex items-center justify-center">
                 Start jouw fotoshoot nu - 19,99€ <ArrowRight className="ml-2 h-6 w-6" />
               </Link>
             </Button>
@@ -409,63 +411,62 @@ export default function HomePage() {
       )}
 
       <style jsx>{`
-        @keyframes scroll {
-          0% {
-            transform: translateX(0);
-          }
-          100% {
-            transform: translateX(-50%);
-          }
-        }
+    @keyframes scroll {
+      0% {
+        transform: translateX(0);
+      }
+      100% {
+        transform: translateX(-50%);
+      }
+    }
 
-        .animate-scroll {
-          animation: scroll 15s linear infinite;
-        }
+    .animate-scroll {
+      animation: scroll 15s linear infinite;
+    }
 
-        .animate-scroll:hover {
-          animation-play-state: paused;
-        }
+    .animate-scroll:hover {
+      animation-play-state: paused;
+    }
 
-        .carousel-container {
-          width: 100%;
-          overflow: hidden;
-          position: relative;
-        }
+    .carousel-container {
+      width: 100%;
+      overflow: hidden;
+      position: relative;
+    }
 
-        .carousel-track {
-          display: flex;
-          width: fit-content;
-          animation: carousel 140s linear infinite;
-        }
+    .carousel-track {
+      display: flex;
+      width: fit-content;
+      animation: carousel 140s linear infinite;
+    }
 
-        .carousel-item {
-          flex-shrink: 0;
-          margin: 0 0.5rem;
-        }
+    .carousel-item {
+      flex-shrink: 0;
+      margin: 0 0.5rem;
+    }
 
-        @keyframes carousel {
-          0% {
-            transform: translateX(calc(-100% / 2));
-          }
-          100% {
-            transform: translateX(0);
-          }
-        }
+    @keyframes carousel {
+      0% {
+        transform: translateX(calc(-100% / 2));
+      }
+      100% {
+        transform: translateX(0);
+      }
+    }
 
-        .carousel-track:hover {
-          animation-play-state: paused;
-        }
+    .carousel-track:hover {
+      animation-play-state: paused;
+    }
 
-        @media (max-width: 768px) {
-          .animate-scroll {
-            animation: scroll 10s linear infinite;
-          }
-
-          .carousel-track {
-            animation: carousel 140s linear infinite;
-          }
-        }
-      `}</style>
+    @media (max-width: 768px) {
+      .animate-scroll {
+        animation: scroll 10s linear infinite;
+      }
+      .carousel-track {
+        animation: carousel 140s linear infinite;
+      }
+    }
+  `}</style>
     </div>
   )
 }

@@ -64,7 +64,9 @@ export async function POST(request: NextRequest) {
 
     if (imageUrls.length > 0) {
       // Get current photos from database
-      const projectResult = await sql`SELECT generated_photos FROM projects WHERE id = ${modelId}`
+      const projectResult = await sql`
+        SELECT generated_photos FROM projects WHERE id = ${modelId}
+      `
 
       let currentPhotos: string[] = []
       if (projectResult.length > 0 && projectResult[0].generated_photos) {
