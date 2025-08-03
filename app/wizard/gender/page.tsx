@@ -1,26 +1,38 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
+import { useSession } from "next-auth/react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 
 export default function GenderPage() {
-  const [selectedGender, setSelectedGender] = useState<string>("")
+  const [gender, setGender] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
+  const { data: session } = useSession()
 
-  const handleSubmit = async () => {
-    if (!selectedGender) return
+  useEffect(() => {
+    const projectName = sessionStorage.getItem("projectName")
+    if (!projectName) {
+      router.push("/wizard/project-name")
+    }
+  }, [router])
 
+  const handleSubmit = async (selectedGender: string) => {
     setIsLoading(true)
+    setGender(selectedGender)
 
     // Store gender in sessionStorage
-    sessionStorage.setItem("wizardGender", selectedGender)
+    sessionStorage.setItem("gender", selectedGender)
 
-    // Navigate to upload
     router.push("/wizard/upload")
+  }
+
+  if (!session) {
+    router.push("/auth/signin")
+    return null
   }
 
   return (
@@ -28,30 +40,29 @@ export default function GenderPage() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold">Select Gender</CardTitle>
-          <p className="text-gray-600">Choose your gender for better AI results</p>
-          <Progress value={67} className="mt-4" />
-          <p className="text-sm text-gray-500 mt-2">Step 2 of 3</p>
+          <p className="text-gray-600">Step 2 of 3</p>
+          <Progress value={67} className="mt-2" />
         </CardHeader>
         <CardContent className="space-y-4">
+          <p className="text-center text-gray-600">This helps us generate better headshots for you</p>
           <div className="grid grid-cols-2 gap-4">
             <Button
-              variant={selectedGender === "male" ? "default" : "outline"}
-              onClick={() => setSelectedGender("male")}
-              className="h-20 text-lg"
+              variant="outline"
+              className="h-20 text-lg bg-transparent"
+              onClick={() => handleSubmit("male")}
+              disabled={isLoading}
             >
-              Male
+              👨 Male
             </Button>
             <Button
-              variant={selectedGender === "female" ? "default" : "outline"}
-              onClick={() => setSelectedGender("female")}
-              className="h-20 text-lg"
+              variant="outline"
+              className="h-20 text-lg bg-transparent"
+              onClick={() => handleSubmit("female")}
+              disabled={isLoading}
             >
-              Female
+              👩 Female
             </Button>
           </div>
-          <Button onClick={handleSubmit} className="w-full" disabled={!selectedGender || isLoading}>
-            {isLoading ? "Next..." : "Continue"}
-          </Button>
         </CardContent>
       </Card>
     </div>

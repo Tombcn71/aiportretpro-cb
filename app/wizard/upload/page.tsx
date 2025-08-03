@@ -1,37 +1,46 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
-import { Upload, X, Check } from "lucide-react"
-import Image from "next/image"
+import { Upload, X } from "lucide-react"
 
 export default function UploadPage() {
-  const [uploadedFiles, setUploadedFiles] = useState<File[]>([])
-  const [isUploading, setIsUploading] = useState(false)
   const [uploadedPhotos, setUploadedPhotos] = useState<string[]>([])
+  const [isUploading, setIsUploading] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
   const { data: session } = useSession()
 
+  useEffect(() => {
+    const projectName = sessionStorage.getItem("projectName")
+    const gender = sessionStorage.getItem("gender")
+    if (!projectName || !gender) {
+      router.push("/wizard/project-name")
+    }
+  }, [router])
+
   const handleFileUpload = useCallback(
     async (files: FileList) => {
-      if (uploadedFiles.length + files.length > 10) {
+      if (uploadedPhotos.length + files.length > 10) {
         alert("Maximum 10 photos allowed")
         return
       }
 
       setIsUploading(true)
-      const newFiles = Array.from(files)
-      const newUploadedPhotos: string[] = []
+      const newPhotos: string[] = []
 
-      for (const file of newFiles) {
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i]
+        if (!file.type.startsWith("image/")) continue
+
+        const formData = new FormData()
+        formData.append("file", file)
+
         try {
-          const formData = new FormData()
-          formData.append("file", file)
-
           const response = await fetch("/api/upload", {
             method: "POST",
             body: formData,
@@ -39,46 +48,38 @@ export default function UploadPage() {
 
           if (response.ok) {
             const data = await response.json()
-            newUploadedPhotos.push(data.url)
+            newPhotos.push(data.url)
           }
         } catch (error) {
-          console.error("Upload error:", error)
+          console.error("Upload failed:", error)
         }
       }
 
-      setUploadedFiles((prev) => [...prev, ...newFiles])
-      setUploadedPhotos((prev) => [...prev, ...newUploadedPhotos])
+      setUploadedPhotos((prev) => [...prev, ...newPhotos])
       setIsUploading(false)
     },
-    [uploadedFiles.length],
+    [uploadedPhotos.length],
   )
 
-  const removeFile = (index: number) => {
-    setUploadedFiles((prev) => prev.filter((_, i) => i !== index))
+  const removePhoto = (index: number) => {
     setUploadedPhotos((prev) => prev.filter((_, i) => i !== index))
   }
 
-  const handleContinue = async () => {
+  const handleSubmit = async () => {
     if (uploadedPhotos.length < 6) {
       alert("Please upload at least 6 photos")
       return
     }
 
-    // Get data from sessionStorage
-    const projectName = sessionStorage.getItem("wizardProjectName")
-    const gender = sessionStorage.getItem("wizardGender")
+    setIsLoading(true)
 
-    if (!projectName || !gender) {
-      alert("Missing project data. Please start over.")
-      router.push("/wizard/project-name")
-      return
-    }
+    const sessionId = sessionStorage.getItem("wizardSessionId")
+    const projectName = sessionStorage.getItem("projectName")
+    const gender = sessionStorage.getItem("gender")
 
     // Save wizard data
-    const sessionId = `wizard_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-
     try {
-      const response = await fetch("/api/wizard/save-data", {
+      await fetch("/api/wizard/save-data", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -89,17 +90,16 @@ export default function UploadPage() {
           userEmail: session?.user?.email,
         }),
       })
-
-      if (response.ok) {
-        sessionStorage.setItem("wizardSessionId", sessionId)
-        router.push("/wizard/checkout")
-      } else {
-        alert("Failed to save data. Please try again.")
-      }
     } catch (error) {
-      console.error("Save error:", error)
-      alert("Failed to save data. Please try again.")
+      console.error("Failed to save wizard data:", error)
     }
+
+    router.push("/wizard/checkout")
+  }
+
+  if (!session) {
+    router.push("/auth/signin")
+    return null
   }
 
   return (
@@ -107,71 +107,59 @@ export default function UploadPage() {
       <Card className="w-full max-w-2xl">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold">Upload Photos</CardTitle>
-          <p className="text-gray-600">Upload 6-10 high-quality photos of yourself</p>
-          <Progress value={100} className="mt-4" />
-          <p className="text-sm text-gray-500 mt-2">Step 3 of 3</p>
+          <p className="text-gray-600">Step 3 of 3</p>
+          <Progress value={100} className="mt-2" />
         </CardHeader>
-        <CardContent>
-          <div className="space-y-6">
-            {/* Upload Area */}
-            <div
-              className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-gray-400 transition-colors cursor-pointer"
-              onClick={() => document.getElementById("file-input")?.click()}
-            >
-              <Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-              <p className="text-lg font-medium text-gray-900 mb-2">Click to upload photos</p>
-              <p className="text-sm text-gray-500">
-                PNG, JPG up to 10MB each. {uploadedFiles.length}/10 photos uploaded.
-              </p>
+        <CardContent className="space-y-6">
+          <div className="text-center">
+            <p className="text-gray-600 mb-4">Upload 6-10 high-quality photos of yourself</p>
+            <div className="border-2 border-dashed border-gray-300 rounded-lg p-8">
               <input
-                id="file-input"
                 type="file"
                 multiple
                 accept="image/*"
-                className="hidden"
                 onChange={(e) => e.target.files && handleFileUpload(e.target.files)}
+                className="hidden"
+                id="photo-upload"
               />
+              <label htmlFor="photo-upload" className="cursor-pointer">
+                <Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                <p className="text-lg font-medium">Click to upload photos</p>
+                <p className="text-sm text-gray-500">PNG, JPG up to 10MB each</p>
+              </label>
             </div>
+          </div>
 
-            {/* Uploaded Files Grid */}
-            {uploadedFiles.length > 0 && (
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                {uploadedFiles.map((file, index) => (
-                  <div key={index} className="relative group">
-                    <div className="aspect-square rounded-lg overflow-hidden bg-gray-100">
-                      <Image
-                        src={URL.createObjectURL(file) || "/placeholder.svg"}
-                        alt={`Upload ${index + 1}`}
-                        width={200}
-                        height={200}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
+          {uploadedPhotos.length > 0 && (
+            <div>
+              <h3 className="font-medium mb-3">Uploaded Photos ({uploadedPhotos.length}/10)</h3>
+              <div className="grid grid-cols-3 gap-4">
+                {uploadedPhotos.map((photo, index) => (
+                  <div key={index} className="relative">
+                    <img
+                      src={photo || "/placeholder.svg"}
+                      alt={`Upload ${index + 1}`}
+                      className="w-full h-24 object-cover rounded-lg"
+                    />
                     <button
-                      onClick={() => removeFile(index)}
-                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                      onClick={() => removePhoto(index)}
+                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1"
                     >
                       <X className="h-4 w-4" />
                     </button>
-                    {uploadedPhotos[index] && (
-                      <div className="absolute bottom-2 right-2 bg-green-500 text-white rounded-full p-1">
-                        <Check className="h-4 w-4" />
-                      </div>
-                    )}
                   </div>
                 ))}
               </div>
-            )}
+            </div>
+          )}
 
-            {/* Continue Button */}
-            <Button onClick={handleContinue} className="w-full" disabled={uploadedPhotos.length < 6 || isUploading}>
-              {isUploading ? "Uploading..." : `Continue to Checkout (${uploadedPhotos.length}/10 photos)`}
-            </Button>
-
-            {uploadedPhotos.length < 6 && (
-              <p className="text-sm text-red-500 text-center">Please upload at least 6 photos to continue</p>
-            )}
-          </div>
+          <Button
+            onClick={handleSubmit}
+            className="w-full"
+            disabled={uploadedPhotos.length < 6 || isLoading || isUploading}
+          >
+            {isLoading ? "Processing..." : `Continue with ${uploadedPhotos.length} photos`}
+          </Button>
         </CardContent>
       </Card>
     </div>

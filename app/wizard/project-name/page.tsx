@@ -4,6 +4,7 @@ import type React from "react"
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import { useSession } from "next-auth/react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -14,6 +15,7 @@ export default function ProjectNamePage() {
   const [projectName, setProjectName] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
+  const { data: session } = useSession()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -22,10 +24,16 @@ export default function ProjectNamePage() {
     setIsLoading(true)
 
     // Store project name in sessionStorage
-    sessionStorage.setItem("wizardProjectName", projectName)
+    const sessionId = crypto.randomUUID()
+    sessionStorage.setItem("wizardSessionId", sessionId)
+    sessionStorage.setItem("projectName", projectName.trim())
 
-    // Navigate to gender selection
     router.push("/wizard/gender")
+  }
+
+  if (!session) {
+    router.push("/auth/signin")
+    return null
   }
 
   return (
@@ -33,20 +41,19 @@ export default function ProjectNamePage() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold">Project Name</CardTitle>
-          <p className="text-gray-600">Give your headshot project a name</p>
-          <Progress value={33} className="mt-4" />
-          <p className="text-sm text-gray-500 mt-2">Step 1 of 3</p>
+          <p className="text-gray-600">Step 1 of 3</p>
+          <Progress value={33} className="mt-2" />
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <Label htmlFor="projectName">Project Name</Label>
+              <Label htmlFor="projectName">What should we call your project?</Label>
               <Input
                 id="projectName"
                 type="text"
                 value={projectName}
                 onChange={(e) => setProjectName(e.target.value)}
-                placeholder="e.g., Professional Headshots"
+                placeholder="e.g. Professional Headshots"
                 required
                 className="mt-1"
               />
