@@ -27,27 +27,43 @@ export async function POST(request: NextRequest) {
       userEmail: session.user.email,
     })
 
-    // First create project in database to get project ID
+    // Get or create user first
+    const userResult = await sql`
+      SELECT * FROM users WHERE email = ${session.user.email}
+    `
+
+    let user = userResult[0]
+    if (!user) {
+      console.log("👤 Creating new user:", session.user.email)
+      const createUserResult = await sql`
+        INSERT INTO users (email, name, image, created_at, updated_at)
+        VALUES (${session.user.email}, ${session.user.email.split("@")[0]}, '', NOW(), NOW())
+        RETURNING *
+      `
+      user = createUserResult[0]
+    }
+
+    // Create project in database to get project ID
     const projectResult = await sql`
       INSERT INTO projects (
-        user_email,
-        guest_email,
+        user_id,
         name,
         gender,
         uploaded_photos,
         status,
         user_session_id,
+        guest_email,
         photo_count,
         created_at,
         updated_at
       ) VALUES (
-        ${session.user.email},
-        ${session.user.email},
+        ${user.id},
         ${projectName},
         ${gender},
         ${JSON.stringify(uploadedPhotos)},
         'photos_uploaded',
         ${wizardSessionId},
+        ${session.user.email},
         ${uploadedPhotos?.length || 0},
         NOW(),
         NOW()
@@ -63,14 +79,7 @@ export async function POST(request: NextRequest) {
       payment_method_types: ["card", "ideal"],
       line_items: [
         {
-          price_data: {
-            currency: "eur",
-            product_data: {
-              name: "AI Professional Headshots",
-              description: "40 high-quality AI-generated professional headshots",
-            },
-            unit_amount: 1999, // €19.99
-          },
+          price: "price_1RrFsbDswbEJWagVsEytA8rs",
           quantity: 1,
         },
       ],

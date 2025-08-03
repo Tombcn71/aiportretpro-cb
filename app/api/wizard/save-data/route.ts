@@ -1,6 +1,9 @@
 import { type NextRequest, NextResponse } from "next/server"
+import { neon } from "@neondatabase/serverless"
 
-// In-memory storage for wizard data (temporary solution)
+const sql = neon(process.env.DATABASE_URL!)
+
+// In-memory storage for wizard data
 const wizardDataStore = new Map<string, any>()
 
 export function saveWizardData(sessionId: string, data: any) {
@@ -20,28 +23,44 @@ export function deleteWizardData(sessionId: string) {
   return deleted
 }
 
-export async function POST(request: NextRequest) {
+export async function POST(req: NextRequest) {
   try {
-    const { sessionId, projectName, gender, uploadedPhotos, userEmail } = await request.json()
+    const { sessionId, data } = await req.json()
 
-    if (!sessionId || !projectName || !gender || !uploadedPhotos || !userEmail) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
+    if (!sessionId || !data) {
+      return NextResponse.json({ error: "Missing sessionId or data" }, { status: 400 })
     }
 
-    const wizardData = {
-      sessionId,
-      projectName,
-      gender,
-      uploadedPhotos,
-      userEmail,
-      timestamp: new Date().toISOString(),
-    }
+    console.log("💾 Saving wizard data for session:", sessionId)
 
-    saveWizardData(sessionId, wizardData)
+    // Save to memory
+    saveWizardData(sessionId, data)
 
-    return NextResponse.json({ success: true, message: "Wizard data saved" })
+    return NextResponse.json({ success: true })
   } catch (error) {
-    console.error("❌ Error saving wizard data:", error)
+    console.error("Error saving wizard data:", error)
     return NextResponse.json({ error: "Failed to save wizard data" }, { status: 500 })
+  }
+}
+
+export async function GET(req: NextRequest) {
+  try {
+    const { searchParams } = new URL(req.url)
+    const sessionId = searchParams.get("sessionId")
+
+    if (!sessionId) {
+      return NextResponse.json({ error: "Missing sessionId" }, { status: 400 })
+    }
+
+    const data = getWizardData(sessionId)
+
+    if (!data) {
+      return NextResponse.json({ error: "Session not found" }, { status: 404 })
+    }
+
+    return NextResponse.json({ data })
+  } catch (error) {
+    console.error("Error getting wizard data:", error)
+    return NextResponse.json({ error: "Failed to get wizard data" }, { status: 500 })
   }
 }

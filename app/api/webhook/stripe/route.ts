@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
 
         const unpaidProjectResult = await sql`
           SELECT * FROM projects 
-          WHERE (user_email = ${userEmail} OR guest_email = ${userEmail})
+          WHERE guest_email = ${userEmail}
           AND status = 'photos_uploaded'
           ORDER BY created_at DESC
           LIMIT 1

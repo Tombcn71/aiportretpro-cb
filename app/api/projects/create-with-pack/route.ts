@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server"
 import axios from "axios"
-import { sql } from "@/lib/db"
+import { neon } from "@neondatabase/serverless"
+
+const sql = neon(process.env.DATABASE_URL!)
 
 export const dynamic = "force-dynamic"
 
@@ -140,7 +142,6 @@ export async function POST(request: Request) {
     }
 
     console.log(`Creating tune with pack ${packId}`)
-
     const response = await axios.post(`${DOMAIN}/p/${packId}/tunes`, tuneBody, {
       headers: {
         "Content-Type": "application/json",
@@ -171,7 +172,7 @@ export async function POST(request: Request) {
     await sql`
       UPDATE projects 
       SET 
-        tune_id = ${response.data.id.toString()}, 
+        tune_id = ${response.data.id.toString()},
         status = 'training',
         user_id = ${userId},
         updated_at = NOW()
@@ -188,7 +189,6 @@ export async function POST(request: Request) {
     })
   } catch (error) {
     console.error("Tune creation error:", error)
-
     // Update project status to error
     try {
       await sql`
