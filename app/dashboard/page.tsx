@@ -8,56 +8,50 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Trash2, Download, User, LogOut, CreditCard } from "lucide-react"
+import { Download, MoreVertical, Trash2, User, CreditCard, LogOut } from "lucide-react"
 import { signOut } from "next-auth/react"
 import Image from "next/image"
 
 interface Project {
-  id: string
+  id: number
   name: string
   status: string
   created_at: string
-  photos?: string[]
-  tune_id?: string
+  generated_photos: string[]
+  photo_count: number
 }
 
-interface Credit {
-  id: string
-  amount: number
-  created_at: string
-  description: string
+interface Credits {
+  balance: number
+  total_purchased: number
+  total_used: number
 }
 
-export default function Dashboard() {
+export default function DashboardPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
   const [projects, setProjects] = useState<Project[]>([])
-  const [credits, setCredits] = useState<Credit[]>([])
-  const [totalCredits, setTotalCredits] = useState(0)
+  const [credits, setCredits] = useState<Credits | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    if (status === "loading") return
-
-    if (!session) {
+    if (status === "unauthenticated") {
       router.push("/auth/signin")
       return
     }
 
-    fetchProjects()
-    fetchCredits()
-  }, [session, status, router])
+    if (status === "authenticated") {
+      fetchProjects()
+      fetchCredits()
+    }
+  }, [status, router])
 
   const fetchProjects = async () => {
     try {
       const response = await fetch("/api/projects")
       if (response.ok) {
         const data = await response.json()
-        // Only show completed projects
-        const completedProjects = data.filter(
-          (project: Project) => project.status === "completed" && project.photos && project.photos.length > 0,
-        )
-        setProjects(completedProjects)
+        setProjects(data.projects || [])
       }
     } catch (error) {
       console.error("Error fetching projects:", error)
@@ -71,51 +65,71 @@ export default function Dashboard() {
       const response = await fetch("/api/credits/balance")
       if (response.ok) {
         const data = await response.json()
-        setCredits(data.credits || [])
-        setTotalCredits(data.balance || 0)
+        setCredits(data)
       }
     } catch (error) {
       console.error("Error fetching credits:", error)
     }
   }
 
-  const deletePhoto = async (projectId: string, photoUrl: string) => {
+  const deleteProject = async (projectId: number) => {
     try {
-      const response = await fetch("/api/photos/delete", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ projectId, photoUrl }),
+      const response = await fetch(`/api/projects/${projectId}`, {
+        method: "DELETE",
       })
 
       if (response.ok) {
-        fetchProjects() // Refresh projects
+        setProjects(projects.filter((p) => p.id !== projectId))
       }
     } catch (error) {
-      console.error("Error deleting photo:", error)
+      console.error("Error deleting project:", error)
     }
   }
 
-  const downloadPhoto = (photoUrl: string, projectName: string, index: number) => {
-    const link = document.createElement("a")
-    link.href = photoUrl
-    link.download = `${projectName}_photo_${index + 1}.jpg`
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
+  const downloadPhoto = async (photoUrl: string, filename: string) => {
+    try {
+      const response = await fetch(photoUrl)
+      const blob = await response.blob()
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement("a")
+      a.href = url
+      a.download = filename
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+    } catch (error) {
+      console.error("Error downloading photo:", error)
+    }
+  }
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case "completed":
+        return <Badge className="bg-green-100 text-green-800">Voltooid</Badge>
+      case "training":
+        return <Badge className="bg-blue-100 text-blue-800">Training</Badge>
+      case "generating":
+        return <Badge className="bg-yellow-100 text-yellow-800">Genereren</Badge>
+      case "error":
+        return <Badge className="bg-red-100 text-red-800">Fout</Badge>
+      default:
+        return <Badge className="bg-gray-100 text-gray-800">{status}</Badge>
+    }
   }
 
   if (status === "loading" || isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading dashboard...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Dashboard laden...</p>
         </div>
       </div>
     )
   }
+
+  const completedProjects = projects.filter((p) => p.status === "completed")
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -124,15 +138,16 @@ export default function Dashboard() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-4">
-              <Image src="/images/logo.png" alt="Logo" width={40} height={40} className="rounded-lg" />
+              <Image src="/images/logo-icon.png" alt="Logo" width={32} height={32} />
               <h1 className="text-xl font-semibold text-gray-900">Dashboard</h1>
             </div>
 
             <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2 bg-blue-50 px-3 py-1 rounded-full">
-                <CreditCard className="h-4 w-4 text-blue-600" />
-                <span className="text-sm font-medium text-blue-600">{totalCredits} credits</span>
-              </div>
+              {credits && (
+                <div className="text-sm text-gray-600">
+                  <span className="font-medium">{credits.balance}</span> credits
+                </div>
+              )}
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -146,9 +161,13 @@ export default function Dashboard() {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-56" align="end" forceMount>
+                  <DropdownMenuItem onClick={() => router.push("/pricing")}>
+                    <CreditCard className="mr-2 h-4 w-4" />
+                    <span>Credits kopen</span>
+                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => signOut()}>
                     <LogOut className="mr-2 h-4 w-4" />
-                    <span>Log out</span>
+                    <span>Uitloggen</span>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -159,117 +178,108 @@ export default function Dashboard() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Credits Overview */}
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <CreditCard className="h-5 w-5" />
-              <span>Credits Overview</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="text-center p-4 bg-blue-50 rounded-lg">
-                <div className="text-2xl font-bold text-blue-600">{totalCredits}</div>
-                <div className="text-sm text-gray-600">Available Credits</div>
-              </div>
-              <div className="text-center p-4 bg-green-50 rounded-lg">
-                <div className="text-2xl font-bold text-green-600">{projects.length}</div>
-                <div className="text-sm text-gray-600">Completed Projects</div>
-              </div>
-              <div className="text-center p-4 bg-purple-50 rounded-lg">
-                <div className="text-2xl font-bold text-purple-600">
-                  {projects.reduce((total, project) => total + (project.photos?.length || 0), 0)}
+        {credits && (
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <CreditCard className="h-5 w-5" />
+                <span>Credits Overzicht</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-blue-600">{credits.balance}</div>
+                  <div className="text-sm text-gray-600">Beschikbaar</div>
                 </div>
-                <div className="text-sm text-gray-600">Total Photos</div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-green-600">{credits.total_purchased}</div>
+                  <div className="text-sm text-gray-600">Gekocht</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-orange-600">{credits.total_used}</div>
+                  <div className="text-sm text-gray-600">Gebruikt</div>
+                </div>
               </div>
-            </div>
-
-            {totalCredits === 0 && (
-              <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                <p className="text-yellow-800 text-sm">
-                  You have no credits remaining. Purchase more credits to create new projects.
-                </p>
-                <Button
-                  onClick={() => router.push("/pricing")}
-                  className="mt-2 bg-blue-600 hover:bg-blue-700 text-white"
-                >
-                  Buy Credits
-                </Button>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+              {credits.balance === 0 && (
+                <div className="mt-4 text-center">
+                  <Button onClick={() => router.push("/pricing")} className="bg-blue-600 hover:bg-blue-700">
+                    Credits kopen
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
 
         {/* Photo Gallery */}
         <Card>
           <CardHeader>
-            <CardTitle>Your AI Headshots</CardTitle>
+            <CardTitle>Jouw AI Headshots</CardTitle>
           </CardHeader>
           <CardContent>
-            {projects.length === 0 ? (
+            {completedProjects.length === 0 ? (
               <div className="text-center py-12">
                 <div className="text-gray-400 mb-4">
-                  <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                    />
-                  </svg>
+                  <User className="h-16 w-16 mx-auto" />
                 </div>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No photos yet</h3>
-                <p className="text-gray-500 mb-4">Create your first AI headshot project to see your photos here.</p>
-                <Button
-                  onClick={() => router.push("/wizard/welcome")}
-                  className="bg-blue-600 hover:bg-blue-700 text-white"
-                >
-                  Create First Project
+                <h3 className="text-lg font-medium text-gray-900 mb-2">Nog geen headshots</h3>
+                <p className="text-gray-600 mb-6">
+                  Start je eerste fotoshoot om professionele AI headshots te krijgen.
+                </p>
+                <Button onClick={() => router.push("/wizard/welcome")} className="bg-blue-600 hover:bg-blue-700">
+                  Start fotoshoot
                 </Button>
               </div>
             ) : (
               <div className="space-y-8">
-                {projects.map((project) => (
+                {completedProjects.map((project) => (
                   <div key={project.id} className="border rounded-lg p-6">
                     <div className="flex justify-between items-center mb-4">
                       <div>
                         <h3 className="text-lg font-semibold text-gray-900">{project.name}</h3>
-                        <div className="flex items-center space-x-2 mt-1">
-                          <Badge variant="secondary" className="bg-green-100 text-green-800">
-                            {project.status}
-                          </Badge>
+                        <div className="flex items-center space-x-4 mt-1">
+                          {getStatusBadge(project.status)}
                           <span className="text-sm text-gray-500">
-                            Created {new Date(project.created_at).toLocaleDateString()}
+                            {new Date(project.created_at).toLocaleDateString("nl-NL")}
                           </span>
                         </div>
                       </div>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" className="h-8 w-8 p-0">
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => deleteProject(project.id)} className="text-red-600">
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Verwijderen
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
 
-                    {project.photos && project.photos.length > 0 && (
+                    {project.generated_photos && project.generated_photos.length > 0 && (
                       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                        {project.photos.map((photo, index) => (
+                        {project.generated_photos.map((photo, index) => (
                           <div key={index} className="relative group">
                             <Image
                               src={photo || "/placeholder.svg"}
-                              alt={`${project.name} photo ${index + 1}`}
+                              alt={`Generated photo ${index + 1}`}
                               width={200}
                               height={200}
                               className="w-full h-32 object-cover rounded-lg"
                             />
                             <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all duration-200 rounded-lg flex items-center justify-center">
-                              <div className="opacity-0 group-hover:opacity-100 flex space-x-2">
-                                <Button
-                                  size="sm"
-                                  variant="secondary"
-                                  onClick={() => downloadPhoto(photo, project.name, index)}
-                                  className="bg-white text-gray-900 hover:bg-gray-100"
-                                >
-                                  <Download className="h-4 w-4" />
-                                </Button>
-                                <Button size="sm" variant="destructive" onClick={() => deletePhoto(project.id, photo)}>
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </div>
+                              <Button
+                                size="sm"
+                                variant="secondary"
+                                className="opacity-0 group-hover:opacity-100 transition-opacity"
+                                onClick={() => downloadPhoto(photo, `${project.name}-${index + 1}.jpg`)}
+                              >
+                                <Download className="h-4 w-4" />
+                              </Button>
                             </div>
                           </div>
                         ))}

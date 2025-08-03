@@ -1,16 +1,17 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import type React from "react"
+
+import { useState, useEffect, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import { Button } from "@/components/ui/button"
-import { Upload, Trash2 } from "lucide-react"
+import { Upload, X } from "lucide-react"
 import Image from "next/image"
 
 export default function UploadPage() {
   const [uploadedPhotos, setUploadedPhotos] = useState<string[]>([])
   const [isUploading, setIsUploading] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
   const { data: session } = useSession()
 
@@ -34,60 +35,72 @@ export default function UploadPage() {
       return
     }
 
-    // Load existing photos from sessionStorage
+    // Load saved photos
     const savedPhotos = sessionStorage.getItem("wizard_uploadedPhotos")
     if (savedPhotos) {
       try {
-        setUploadedPhotos(JSON.parse(savedPhotos))
+        const photos = JSON.parse(savedPhotos)
+        setUploadedPhotos(photos)
       } catch (error) {
         console.error("Error parsing saved photos:", error)
       }
     }
   }, [session, router])
 
-  const handleFileUpload = async (files: FileList) => {
-    if (!files || files.length === 0) return
+  const handleFileUpload = useCallback(
+    async (files: FileList) => {
+      if (!files.length) return
 
-    setIsUploading(true)
-    const newPhotos: string[] = []
+      setIsUploading(true)
 
-    try {
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i]
+      try {
+        const uploadPromises = Array.from(files).map(async (file) => {
+          const formData = new FormData()
+          formData.append("file", file)
 
-        // Check file type
-        if (!file.type.startsWith("image/")) {
-          continue
-        }
+          const response = await fetch("/api/upload", {
+            method: "POST",
+            body: formData,
+          })
 
-        // Check file size (max 10MB)
-        if (file.size > 10 * 1024 * 1024) {
-          continue
-        }
+          if (!response.ok) {
+            throw new Error("Upload failed")
+          }
 
-        const formData = new FormData()
-        formData.append("file", file)
-
-        const response = await fetch("/api/upload", {
-          method: "POST",
-          body: formData,
+          const data = await response.json()
+          return data.url
         })
 
-        if (response.ok) {
-          const data = await response.json()
-          newPhotos.push(data.url)
-        }
+        const newUrls = await Promise.all(uploadPromises)
+        const updatedPhotos = [...uploadedPhotos, ...newUrls]
+        setUploadedPhotos(updatedPhotos)
+        sessionStorage.setItem("wizard_uploadedPhotos", JSON.stringify(updatedPhotos))
+      } catch (error) {
+        console.error("Upload error:", error)
+      } finally {
+        setIsUploading(false)
       }
+    },
+    [uploadedPhotos],
+  )
 
-      const updatedPhotos = [...uploadedPhotos, ...newPhotos]
-      setUploadedPhotos(updatedPhotos)
-      sessionStorage.setItem("wizard_uploadedPhotos", JSON.stringify(updatedPhotos))
-    } catch (error) {
-      console.error("Upload error:", error)
-    } finally {
-      setIsUploading(false)
-    }
-  }
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault()
+      const files = e.dataTransfer.files
+      handleFileUpload(files)
+    },
+    [handleFileUpload],
+  )
+
+  const handleFileInput = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (e.target.files) {
+        handleFileUpload(e.target.files)
+      }
+    },
+    [handleFileUpload],
+  )
 
   const removePhoto = (index: number) => {
     const updatedPhotos = uploadedPhotos.filter((_, i) => i !== index)
@@ -95,18 +108,9 @@ export default function UploadPage() {
     sessionStorage.setItem("wizard_uploadedPhotos", JSON.stringify(updatedPhotos))
   }
 
-  const handleNext = async () => {
-    if (uploadedPhotos.length < 4) return
-
-    setIsLoading(true)
-
-    try {
-      // Navigate to review
+  const handleNext = () => {
+    if (uploadedPhotos.length >= 4) {
       router.push("/wizard/review")
-    } catch (error) {
-      console.error("Error proceeding to review:", error)
-    } finally {
-      setIsLoading(false)
     }
   }
 
@@ -122,94 +126,100 @@ export default function UploadPage() {
       </div>
 
       {/* Main content */}
-      <div className="flex-1 flex">
-        {/* Left sidebar with instructions */}
-        <div className="w-1/3 p-6 bg-gray-50">
-          <div className="space-y-6">
-            <div>
-              <p className="text-gray-600 mb-4">
-                of close-ups, selfies and mid-range shots can help the AI better capture your face and body type.
-              </p>
-            </div>
-
-            <div className="space-y-4">
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-                <div className="mb-4">
-                  <div className="w-8 h-8 bg-gray-800 rounded mx-auto mb-2 flex items-center justify-center">
-                    <Upload className="h-4 w-4 text-white" />
-                  </div>
-                  <h3 className="font-semibold text-gray-900">Upload from your computer</h3>
-                </div>
-
-                <Button
-                  onClick={() => document.getElementById("file-input")?.click()}
-                  disabled={isUploading}
-                  className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-lg mb-4"
-                >
-                  <Upload className="h-4 w-4 mr-2" />
-                  Upload files
-                </Button>
-
-                <p className="text-sm text-gray-600">
-                  or <span className="text-orange-500 font-medium">drag and drop</span> your photos
+      <div className="flex-1 p-8">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Left side - Instructions */}
+            <div className="space-y-6">
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900 mb-4">Upload je foto's</h1>
+                <p className="text-gray-600 mb-6">
+                  Upload minimaal 4 foto's van jezelf. Een mix van close-ups, selfies en mid-range shots kan de AI
+                  helpen je gezicht en lichaamsbouw beter vast te leggen.
                 </p>
-                <p className="text-xs text-gray-500 mt-1">PNG, JPG, HEIC, WEBP up to 120MB</p>
-
-                <input
-                  id="file-input"
-                  type="file"
-                  multiple
-                  accept="image/*"
-                  className="hidden"
-                  onChange={(e) => e.target.files && handleFileUpload(e.target.files)}
-                  disabled={isUploading}
-                />
               </div>
-            </div>
-          </div>
-        </div>
 
-        {/* Right side with uploaded images */}
-        <div className="flex-1 p-6">
-          <div className="mb-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold">Uploaded Images</h2>
-              <div className="flex items-center space-x-4">
-                <span className="text-2xl font-bold">{uploadedPhotos.length}</span>
-                <span className="text-gray-500">{uploadedPhotos.length} of 10</span>
-              </div>
-            </div>
-
-            <div className="w-full bg-gray-200 rounded-full h-2">
-              <div
-                className="bg-green-500 h-2 rounded-full transition-all duration-300"
-                style={{ width: `${Math.min((uploadedPhotos.length / 10) * 100, 100)}%` }}
-              ></div>
-            </div>
-          </div>
-
-          {/* Photo Grid */}
-          {uploadedPhotos.length > 0 && (
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
-              {uploadedPhotos.map((photo, index) => (
-                <div key={index} className="relative group">
-                  <Image
-                    src={photo || "/placeholder.svg"}
-                    alt={`Upload ${index + 1}`}
-                    width={200}
-                    height={200}
-                    className="w-full h-32 object-cover rounded-lg"
+              {/* Upload from computer */}
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">📱 Upload vanaf je computer</h3>
+                <div
+                  className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-gray-400 transition-colors"
+                  onDrop={handleDrop}
+                  onDragOver={(e) => e.preventDefault()}
+                >
+                  <input
+                    type="file"
+                    multiple
+                    accept="image/*"
+                    onChange={handleFileInput}
+                    className="hidden"
+                    id="file-upload"
                   />
-                  <button
-                    onClick={() => removePhoto(index)}
-                    className="absolute top-2 right-2 bg-white text-gray-600 rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity shadow-lg hover:bg-gray-100"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
+                  <label htmlFor="file-upload" className="cursor-pointer">
+                    <Button
+                      type="button"
+                      className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-lg font-medium"
+                      disabled={isUploading}
+                    >
+                      <Upload className="w-4 h-4 mr-2" />
+                      {isUploading ? "Uploading..." : "Upload files"}
+                    </Button>
+                    <p className="text-sm text-gray-500 mt-4">
+                      of drag and drop je foto's
+                      <br />
+                      PNG, JPG, HEIC, WEBP tot 120MB
+                    </p>
+                  </label>
                 </div>
-              ))}
+              </div>
             </div>
-          )}
+
+            {/* Right side - Uploaded photos */}
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-900">Geüploade foto's</h3>
+                <div className="text-sm text-gray-500">{uploadedPhotos.length} van minimaal 4</div>
+              </div>
+
+              {uploadedPhotos.length > 0 && (
+                <div className="mb-4">
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div
+                      className="bg-green-500 h-2 rounded-full transition-all duration-300"
+                      style={{ width: `${Math.min((uploadedPhotos.length / 4) * 100, 100)}%` }}
+                    ></div>
+                  </div>
+                </div>
+              )}
+
+              <div className="grid grid-cols-2 gap-4">
+                {uploadedPhotos.map((photo, index) => (
+                  <div key={index} className="relative group">
+                    <Image
+                      src={photo || "/placeholder.svg"}
+                      alt={`Uploaded photo ${index + 1}`}
+                      width={200}
+                      height={200}
+                      className="w-full h-32 object-cover rounded-lg"
+                    />
+                    <button
+                      onClick={() => removePhoto(index)}
+                      className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+
+              {uploadedPhotos.length === 0 && (
+                <div className="text-center py-12 text-gray-500">
+                  <Upload className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                  <p>Nog geen foto's geüpload</p>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </div>
 
@@ -217,10 +227,10 @@ export default function UploadPage() {
       <div className="p-6 border-t bg-white">
         <Button
           onClick={handleNext}
-          disabled={uploadedPhotos.length < 4 || isLoading}
+          disabled={uploadedPhotos.length < 4}
           className="w-full py-4 text-lg font-semibold bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {isLoading ? "Bezig..." : "Volgende"}
+          Volgende →
         </Button>
       </div>
     </div>
