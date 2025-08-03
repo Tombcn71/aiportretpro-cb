@@ -1,202 +1,98 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useRouter } from "next/navigation"
+import { useSession } from "next-auth/react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { CheckCircle, Clock, CreditCard, Shield, Zap } from "lucide-react"
+import { v4 as uuidv4 } from "uuid"
 
 export default function ReviewPage() {
   const router = useRouter()
-  const searchParams = useSearchParams()
+  const { data: session } = useSession()
   const [wizardData, setWizardData] = useState<any>(null)
-  const [isLoading, setIsLoading] = useState(false)
-  const sessionId = searchParams.get("session") || "default"
+  const [processing, setProcessing] = useState(false)
 
   useEffect(() => {
-    // Get wizard data from sessionStorage
-    const storedData = sessionStorage.getItem("wizardData")
-    if (storedData) {
-      setWizardData(JSON.parse(storedData))
+    const stored = sessionStorage.getItem("wizardData")
+    if (stored) {
+      setWizardData(JSON.parse(stored))
     } else {
-      // Redirect back to start if no data
       router.push("/wizard/project-name")
     }
   }, [router])
 
   const handleConfirmAndPay = async () => {
-    if (!wizardData) return
+    if (!wizardData || !session?.user?.email) return
 
-    setIsLoading(true)
+    setProcessing(true)
     try {
-      // Save wizard data to server
-      const saveResponse = await fetch("/api/wizard/save-data", {
+      const sessionId = uuidv4()
+
+      // Save wizard data
+      await fetch("/api/wizard/save-data", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           sessionId,
-          ...wizardData,
+          projectName: wizardData.projectName,
+          gender: wizardData.gender,
+          uploadedPhotos: wizardData.uploadedPhotos,
+          userEmail: session.user.email,
         }),
       })
 
-      if (!saveResponse.ok) {
-        throw new Error("Failed to save wizard data")
-      }
-
-      // Create Stripe checkout session
-      const checkoutResponse = await fetch("/api/stripe/create-checkout", {
+      // Create checkout
+      const response = await fetch("/api/stripe/create-checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          wizardSessionId: sessionId,
-        }),
+        body: JSON.stringify({ wizardSessionId: sessionId }),
       })
 
-      if (!checkoutResponse.ok) {
-        throw new Error("Failed to create checkout session")
-      }
-
-      const { url } = await checkoutResponse.json()
-
-      // Redirect to Stripe checkout
+      const { url } = await response.json()
       window.location.href = url
     } catch (error) {
-      console.error("❌ Checkout error:", error)
-      alert("Er is een fout opgetreden. Probeer het opnieuw.")
-    } finally {
-      setIsLoading(false)
+      console.error("Error:", error)
+      alert("Er is een fout opgetreden")
+      setProcessing(false)
     }
   }
 
-  if (!wizardData) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p>Gegevens laden...</p>
-        </div>
-      </div>
-    )
-  }
+  if (!wizardData) return null
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4">
-      <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Controleer je bestelling</h1>
-          <p className="text-gray-600">Bekijk je project details en ga door naar betaling</p>
-        </div>
+    <div className="min-h-screen bg-gray-50 p-4">
+      <div className="max-w-2xl mx-auto">
+        <Card>
+          <CardHeader>
+            <CardTitle>Review & Betaling</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <h3 className="font-semibold">Project: {wizardData.projectName}</h3>
+              <p>Geslacht: {wizardData.gender}</p>
+              <p>Foto's: {wizardData.uploadedPhotos?.length}</p>
+            </div>
 
-        <div className="grid md:grid-cols-2 gap-8">
-          {/* Project Details */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <CheckCircle className="h-5 w-5 text-green-600" />
-                Project Details
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <label className="text-sm font-medium text-gray-600">Project Naam</label>
-                <p className="text-lg font-semibold">{wizardData.projectName}</p>
-              </div>
+            <div className="border-t pt-4">
+              <h3 className="font-semibold mb-2">Professional Plan - €19,99</h3>
+              <ul className="text-sm space-y-1">
+                <li>✓ 40 professionele portretfoto's</li>
+                <li>✓ Verschillende zakelijke outfits</li>
+                <li>✓ HD kwaliteit downloads</li>
+                <li>✓ Klaar binnen 15 minuten</li>
+              </ul>
+            </div>
 
-              <div>
-                <label className="text-sm font-medium text-gray-600">Geslacht</label>
-                <p className="text-lg font-semibold capitalize">{wizardData.gender}</p>
-              </div>
-
-              <div>
-                <label className="text-sm font-medium text-gray-600">Geüploade Foto's</label>
-                <p className="text-lg font-semibold">{wizardData.uploadedPhotos?.length || 0} foto's</p>
-              </div>
-
-              <div>
-                <label className="text-sm font-medium text-gray-600">Email</label>
-                <p className="text-lg font-semibold">{wizardData.userEmail}</p>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Plan Details */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <CreditCard className="h-5 w-5 text-blue-600" />
-                Professional Plan
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center mb-6">
-                <div className="text-4xl font-bold text-blue-600 mb-2">€19,99</div>
-                <Badge variant="secondary" className="mb-4">
-                  Eenmalige betaling
-                </Badge>
-              </div>
-
-              <div className="space-y-3 mb-6">
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4 text-green-600" />
-                  <span className="text-sm">40 professionele portretfoto's</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4 text-green-600" />
-                  <span className="text-sm">Verschillende zakelijke outfits</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4 text-green-600" />
-                  <span className="text-sm">Verschillende poses en achtergronden</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4 text-green-600" />
-                  <span className="text-sm">HD kwaliteit downloads</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Clock className="h-4 w-4 text-blue-600" />
-                  <span className="text-sm">Klaar binnen 15 minuten</span>
-                </div>
-              </div>
-
-              <div className="text-xs text-gray-600 mb-6">
-                Perfect voor LinkedIn, Social Media, CV, Website en Print
-              </div>
-
-              <Button
-                onClick={handleConfirmAndPay}
-                disabled={isLoading}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 text-lg font-semibold"
-              >
-                {isLoading ? (
-                  <div className="flex items-center gap-2">
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                    Bezig...
-                  </div>
-                ) : (
-                  <>
-                    <Zap className="h-5 w-5 mr-2" />
-                    Bevestigen & Betalen
-                  </>
-                )}
-              </Button>
-
-              <div className="mt-4 space-y-2 text-xs text-gray-600">
-                <div className="flex items-center gap-2">
-                  <Shield className="h-3 w-3" />
-                  <span>Veilige betaling met iDEAL en creditcard</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Shield className="h-3 w-3" />
-                  <span>Geld terug garantie</span>
-                </div>
-                <div className="text-center mt-2">
-                  <span>💡 Coupon codes kunnen toegepast worden op de betaalpagina</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+            <Button
+              onClick={handleConfirmAndPay}
+              disabled={processing}
+              className="w-full bg-blue-600 hover:bg-blue-700"
+            >
+              {processing ? "Bezig..." : "Bevestigen & Betalen €19,99"}
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     </div>
   )

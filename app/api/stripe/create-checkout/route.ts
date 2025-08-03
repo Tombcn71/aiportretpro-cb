@@ -5,24 +5,20 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2024-06-20",
 })
 
-// In-memory storage for wizard data (temporary)
-const wizardDataStore = new Map<string, any>()
+// Simple in-memory storage
+const wizardSessions = new Map<string, any>()
 
 export function saveWizardData(sessionId: string, data: any) {
-  wizardDataStore.set(sessionId, data)
-  console.log("💾 Saved wizard data for session:", sessionId)
+  wizardSessions.set(sessionId, data)
+  console.log("💾 Saved wizard data:", sessionId)
 }
 
 export function getWizardData(sessionId: string) {
-  const data = wizardDataStore.get(sessionId)
-  console.log("📖 Getting wizard data for:", sessionId, data ? "found" : "not found")
-  return data
+  return wizardSessions.get(sessionId)
 }
 
 export function deleteWizardData(sessionId: string) {
-  const deleted = wizardDataStore.delete(sessionId)
-  console.log("🗑️ Deleted wizard data:", sessionId, deleted ? "success" : "not found")
-  return deleted
+  wizardSessions.delete(sessionId)
 }
 
 export async function POST(req: NextRequest) {
@@ -33,14 +29,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Missing wizard session ID" }, { status: 400 })
     }
 
-    console.log("🛒 Creating Stripe checkout for wizard session:", wizardSessionId)
-
-    // Create Stripe checkout session
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card", "ideal"],
       line_items: [
         {
-          price: "price_1RrFsbDswbEJWagVsEytA8rs", // Professional plan price ID
+          price: "price_1RrFsbDswbEJWagVsEytA8rs",
           quantity: 1,
         },
       ],
@@ -49,18 +42,13 @@ export async function POST(req: NextRequest) {
       cancel_url: `${process.env.NEXTAUTH_URL}/wizard/review?session=${wizardSessionId}`,
       allow_promotion_codes: true,
       metadata: {
-        wizardSessionId: wizardSessionId,
+        wizardSessionId,
         packId: "928",
         source: "wizard_flow",
       },
     })
 
-    console.log("✅ Stripe session created:", session.id)
-
-    return NextResponse.json({
-      sessionId: session.id,
-      url: session.url,
-    })
+    return NextResponse.json({ url: session.url })
   } catch (error) {
     console.error("❌ Stripe checkout error:", error)
     return NextResponse.json({ error: "Failed to create checkout session" }, { status: 500 })
