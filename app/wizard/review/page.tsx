@@ -2,36 +2,30 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { Card, CardContent } from "@/components/ui/card"
+import { useSession } from "next-auth/react"
+import { Button } from "@/components/ui/button"
 import { Check } from "lucide-react"
-import Image from "next/image"
 
 export default function ReviewPage() {
-  const [projectName, setProjectName] = useState("")
-  const [gender, setGender] = useState("")
-  const [uploadedPhotos, setUploadedPhotos] = useState<any[]>([])
-  const [isLoading, setIsLoading] = useState(false)
+  const [wizardData, setWizardData] = useState<any>({})
+  const [loading, setLoading] = useState(false)
+  const { data: session } = useSession()
   const router = useRouter()
 
   useEffect(() => {
-    // Load data from sessionStorage
-    const name = sessionStorage.getItem("projectName") || ""
-    const genderValue = sessionStorage.getItem("gender") || ""
-    const photos = JSON.parse(sessionStorage.getItem("uploadedPhotos") || "[]")
-
-    setProjectName(name)
-    setGender(genderValue)
-    setUploadedPhotos(photos)
-
-    // Redirect if missing data
-    if (!name || !genderValue || photos.length === 0) {
-      router.push("/wizard/project-name")
+    const data = localStorage.getItem("wizardData")
+    if (data) {
+      setWizardData(JSON.parse(data))
     }
-  }, [router])
+  }, [])
 
   const handleCheckout = async () => {
-    setIsLoading(true)
+    if (!session) {
+      router.push("/auth/signin")
+      return
+    }
 
+    setLoading(true)
     try {
       const response = await fetch("/api/stripe/create-checkout", {
         method: "POST",
@@ -39,134 +33,126 @@ export default function ReviewPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          projectName,
-          gender,
-          uploadedPhotos,
-          priceId: "price_1QQvJhP5wjEQJQJQvQvQvQvQ", // Replace with actual price ID
+          projectName: wizardData.projectName,
+          gender: wizardData.gender,
+          uploadedPhotos: wizardData.uploadedPhotos,
+          wizardSessionId: Date.now().toString(),
+          packId: "928",
         }),
       })
 
       if (response.ok) {
-        const { url } = await response.json()
-        window.location.href = url
+        const data = await response.json()
+        window.location.href = data.url
       } else {
-        const error = await response.json()
-        console.error("Checkout error:", error)
-        alert("Er is een fout opgetreden bij het starten van de betaling")
+        console.error("Checkout failed")
       }
     } catch (error) {
-      console.error("Checkout error:", error)
-      alert("Er is een fout opgetreden bij het starten van de betaling")
+      console.error("Error:", error)
     } finally {
-      setIsLoading(false)
+      setLoading(false)
     }
   }
 
+  const handleBack = () => {
+    router.push("/wizard/upload")
+  }
+
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gray-50">
       {/* Progress Bar */}
       <div className="w-full bg-gray-200 h-2">
-        <div className="bg-blue-500 h-2 transition-all duration-300" style={{ width: "100%" }}></div>
+        <div className="bg-blue-600 h-2 w-full"></div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Left side - Plan Details */}
-          <div>
-            <Card className="border-2 border-blue-500">
-              <CardContent className="p-8">
-                <div className="text-center mb-6">
-                  <h2 className="text-3xl font-bold text-gray-900 mb-2">Professional</h2>
-                  <div className="text-5xl font-bold text-blue-600 mb-2">€19,99</div>
-                  <p className="text-gray-600 text-lg">40 professionele portretfoto's</p>
-                </div>
+      <div className="container mx-auto px-4 py-8">
+        <div className="max-w-4xl mx-auto">
+          <button onClick={handleBack} className="flex items-center text-gray-600 hover:text-gray-800 mb-8">
+            ← Terug
+          </button>
 
-                <div className="space-y-4">
-                  <div className="flex items-center space-x-3">
-                    <Check className="w-5 h-5 text-green-500" />
-                    <span className="text-gray-700">Verschillende zakelijke outfits</span>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <Check className="w-5 h-5 text-green-500" />
-                    <span className="text-gray-700">Verschillende poses en achtergronden</span>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <Check className="w-5 h-5 text-green-500" />
-                    <span className="text-gray-700">HD kwaliteit downloads</span>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <Check className="w-5 h-5 text-green-500" />
-                    <span className="text-gray-700">Klaar binnen 15 minuten</span>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <Check className="w-5 h-5 text-green-500" />
-                    <span className="text-gray-700">Perfect voor LinkedIn, Social Media, CV, Website en Print</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Left side - Plan details */}
+            <div className="bg-white rounded-lg border-2 border-blue-500 p-6">
+              <div className="text-center mb-6">
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">Professional</h2>
+                <div className="text-4xl font-bold text-blue-600 mb-2">€19,99</div>
+                <p className="text-gray-600">40 professionele portretfoto's</p>
+              </div>
 
-          {/* Right side - Review */}
-          <div className="space-y-6">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-4">Controleer je bestelling</h1>
-              <p className="text-gray-600 text-lg">
-                Controleer of alle gegevens correct zijn voordat je doorgaat naar de betaling.
-              </p>
+              <div className="space-y-4">
+                <div className="flex items-center">
+                  <Check className="h-5 w-5 text-green-500 mr-3" />
+                  <span>Verschillende zakelijke outfits</span>
+                </div>
+                <div className="flex items-center">
+                  <Check className="h-5 w-5 text-green-500 mr-3" />
+                  <span>Verschillende poses en achtergronden</span>
+                </div>
+                <div className="flex items-center">
+                  <Check className="h-5 w-5 text-green-500 mr-3" />
+                  <span>HD kwaliteit downloads</span>
+                </div>
+                <div className="flex items-center">
+                  <Check className="h-5 w-5 text-green-500 mr-3" />
+                  <span>Klaar binnen 15 minuten</span>
+                </div>
+                <div className="flex items-center">
+                  <Check className="h-5 w-5 text-green-500 mr-3" />
+                  <span>Perfect voor LinkedIn, Social Media, CV, Website en Print</span>
+                </div>
+              </div>
             </div>
 
-            <Card>
-              <CardContent className="p-6">
-                <h3 className="font-semibold text-lg mb-4">Project Details</h3>
-                <div className="space-y-3">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Project naam:</span>
-                    <span className="font-medium">{projectName}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Geslacht:</span>
-                    <span className="font-medium capitalize">{gender}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Aantal foto's:</span>
-                    <span className="font-medium">{uploadedPhotos.length} foto's</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            {/* Right side - Summary */}
+            <div className="space-y-6">
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900 mb-4">Overzicht van je bestelling</h1>
+                <p className="text-gray-600">Controleer je gegevens voordat je doorgaat naar de betaling.</p>
+              </div>
 
-            <Card>
-              <CardContent className="p-6">
-                <h3 className="font-semibold text-lg mb-4">Je foto's</h3>
-                <div className="grid grid-cols-3 gap-2">
-                  {uploadedPhotos.slice(0, 6).map((photo, index) => (
-                    <div key={index} className="aspect-square rounded-lg overflow-hidden bg-gray-100">
-                      <Image
-                        src={photo.url || "/placeholder.svg"}
+              <div className="bg-white rounded-lg p-6 space-y-4">
+                <div>
+                  <h3 className="font-medium text-gray-900">Project naam</h3>
+                  <p className="text-gray-600">{wizardData.projectName}</p>
+                </div>
+                <div>
+                  <h3 className="font-medium text-gray-900">Geslacht</h3>
+                  <p className="text-gray-600 capitalize">{wizardData.gender}</p>
+                </div>
+                <div>
+                  <h3 className="font-medium text-gray-900">Geüploade foto's</h3>
+                  <p className="text-gray-600">{wizardData.uploadedPhotos?.length || 0} foto's</p>
+                </div>
+              </div>
+
+              {wizardData.uploadedPhotos && (
+                <div className="bg-white rounded-lg p-6">
+                  <h3 className="font-medium text-gray-900 mb-4">Je foto's</h3>
+                  <div className="grid grid-cols-4 gap-2">
+                    {wizardData.uploadedPhotos.slice(0, 8).map((photo: string, index: number) => (
+                      <img
+                        key={index}
+                        src={photo || "/placeholder.svg"}
                         alt={`Photo ${index + 1}`}
-                        width={100}
-                        height={100}
-                        className="w-full h-full object-cover"
+                        className="w-full h-16 object-cover rounded"
                       />
-                    </div>
-                  ))}
-                  {uploadedPhotos.length > 6 && (
-                    <div className="aspect-square rounded-lg bg-gray-100 flex items-center justify-center">
-                      <span className="text-gray-500 text-sm">+{uploadedPhotos.length - 6}</span>
-                    </div>
+                    ))}
+                  </div>
+                  {wizardData.uploadedPhotos.length > 8 && (
+                    <p className="text-sm text-gray-500 mt-2">+{wizardData.uploadedPhotos.length - 8} meer foto's</p>
                   )}
                 </div>
-              </CardContent>
-            </Card>
+              )}
 
-            <button
-              onClick={handleCheckout}
-              disabled={isLoading}
-              className="w-full bg-orange-500 hover:bg-orange-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold py-4 px-6 rounded-lg transition-colors duration-200 text-lg"
-            >
-              {isLoading ? "Bezig..." : "Start jouw fotoshoot nu - 19,99€ →"}
-            </button>
+              <Button
+                onClick={handleCheckout}
+                disabled={loading}
+                className="w-full bg-orange-500 hover:bg-orange-600 text-white py-4 px-6 rounded-lg font-medium text-lg"
+              >
+                {loading ? "Bezig..." : "Start jouw fotoshoot nu - 19,99€ →"}
+              </Button>
+            </div>
           </div>
         </div>
       </div>
