@@ -4,8 +4,7 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Progress } from "@/components/ui/progress"
+import { ArrowLeft } from "lucide-react"
 
 export default function GenderPage() {
   const [selectedGender, setSelectedGender] = useState("")
@@ -52,9 +51,9 @@ export default function GenderPage() {
   }
 
   const genderOptions = [
-    { value: "man", label: "Man", icon: "👨" },
-    { value: "vrouw", label: "Vrouw", icon: "👩" },
-    { value: "unisex", label: "Unisex", icon: "👤" },
+    { value: "man", label: "Man", icon: "♂" },
+    { value: "vrouw", label: "Vrouw", icon: "♀" },
+    { value: "anders", label: "Anders", icon: "⚬" },
   ]
 
   if (!session) {
@@ -62,49 +61,83 @@ export default function GenderPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold text-gray-900">Selecteer je geslacht</CardTitle>
-          <Progress value={50} className="w-full mt-4" style={{ backgroundColor: "#e5e7eb" }}>
-            <div
-              className="h-full transition-all duration-300 ease-in-out rounded-full"
-              style={{
-                width: "50%",
-                backgroundColor: "#0077B5",
-              }}
-            />
-          </Progress>
-          <p className="text-sm text-gray-600 mt-2">Stap 2 van 4</p>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="grid gap-3">
+    <div className="min-h-screen bg-gray-50 flex flex-col">
+      {/* Header with progress */}
+      <div className="bg-white">
+        <div className="w-full bg-gray-200 h-2">
+          <div className="bg-orange-500 h-2 transition-all duration-300" style={{ width: "50%" }}></div>
+        </div>
+
+        <div className="p-4 flex items-center">
+          <Button
+            variant="ghost"
+            onClick={() => router.back()}
+            className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back
+          </Button>
+
+          <div className="ml-auto">
+            <div className="w-8 h-8 bg-orange-500 text-white rounded-full flex items-center justify-center text-sm font-semibold">
+              1
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main content */}
+      <div className="flex-1 flex items-center justify-center p-6">
+        <div className="w-full max-w-2xl text-center space-y-8">
+          <div>
+            <h1 className="text-4xl font-bold text-gray-900 mb-4">What's your gender?</h1>
+            <p className="text-lg text-gray-600">
+              We'd love to learn more about you! Help us generate perfect photos that reflect who you are.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-4xl mx-auto">
             {genderOptions.map((option) => (
               <button
                 key={option.value}
                 onClick={() => setSelectedGender(option.value)}
-                className={`p-4 rounded-lg border-2 transition-all duration-200 flex items-center space-x-3 ${
+                className={`p-6 rounded-xl border-2 transition-all duration-200 flex items-center justify-between ${
                   selectedGender === option.value
-                    ? "border-blue-500 bg-blue-50"
-                    : "border-gray-200 hover:border-gray-300"
+                    ? "border-orange-500 bg-orange-50"
+                    : "border-gray-200 hover:border-gray-300 bg-white"
                 }`}
               >
-                <span className="text-2xl">{option.icon}</span>
-                <span className="font-medium text-gray-900">{option.label}</span>
+                <div className="flex items-center space-x-3">
+                  <span className="text-2xl">{option.icon}</span>
+                  <span className="text-lg font-medium text-gray-900">{option.label}</span>
+                </div>
+                <div
+                  className={`w-6 h-6 rounded-full border-2 ${
+                    selectedGender === option.value ? "border-orange-500 bg-orange-500" : "border-gray-300"
+                  }`}
+                >
+                  {selectedGender === option.value && (
+                    <div className="w-full h-full rounded-full bg-orange-500 flex items-center justify-center">
+                      <div className="w-2 h-2 bg-white rounded-full"></div>
+                    </div>
+                  )}
+                </div>
               </button>
             ))}
           </div>
+        </div>
+      </div>
 
-          <Button
-            onClick={handleNext}
-            disabled={!selectedGender || isLoading}
-            className="w-full"
-            style={{ backgroundColor: "#0077B5" }}
-          >
-            {isLoading ? "Bezig..." : "Volgende"}
-          </Button>
-        </CardContent>
-      </Card>
+      {/* Bottom CTA */}
+      <div className="p-6">
+        <Button
+          onClick={handleNext}
+          disabled={!selectedGender || isLoading}
+          className="w-full py-4 text-lg font-semibold bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-colors"
+        >
+          {isLoading ? "Bezig..." : "Continue"}
+        </Button>
+      </div>
     </div>
   )
 }

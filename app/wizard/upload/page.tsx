@@ -4,9 +4,7 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Progress } from "@/components/ui/progress"
-import { Upload, X, Check } from "lucide-react"
+import { Upload, X, Trash2 } from "lucide-react"
 import Image from "next/image"
 
 export default function UploadPage() {
@@ -117,53 +115,115 @@ export default function UploadPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-2xl">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold text-gray-900">Upload je foto's</CardTitle>
-          <Progress value={75} className="w-full mt-4" style={{ backgroundColor: "#e5e7eb" }}>
-            <div
-              className="h-full transition-all duration-300 ease-in-out rounded-full"
-              style={{
-                width: "75%",
-                backgroundColor: "#0077B5",
-              }}
-            />
-          </Progress>
-          <p className="text-sm text-gray-600 mt-2">Stap 3 van 4</p>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="text-center">
-            <p className="text-sm text-gray-600 mb-4">
-              Upload minimaal 4 foto's voor de beste resultaten. Maximaal 10MB per foto.
-            </p>
-            <p className="text-xs text-gray-500 mb-6">{uploadedPhotos.length}/10 foto's geüpload</p>
+    <div className="min-h-screen bg-white flex flex-col">
+      {/* Header with Aragon.ai logo and progress */}
+      <div className="bg-white border-b">
+        <div className="flex items-center justify-between p-4">
+          <div className="flex items-center space-x-2">
+            <div className="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center">
+              <span className="text-white font-bold text-sm">A</span>
+            </div>
+            <span className="font-semibold text-lg">Aragon.ai</span>
           </div>
+          <button className="p-2 hover:bg-gray-100 rounded-lg">
+            <X className="h-5 w-5" />
+          </button>
+        </div>
 
-          {/* Upload Area */}
-          <div
-            className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-gray-400 transition-colors cursor-pointer"
-            onClick={() => document.getElementById("file-input")?.click()}
-          >
-            <Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-            <p className="text-lg font-medium text-gray-900 mb-2">
-              {isUploading ? "Uploaden..." : "Klik om foto's te selecteren"}
-            </p>
-            <p className="text-sm text-gray-500">Of sleep foto's hierheen</p>
-            <input
-              id="file-input"
-              type="file"
-              multiple
-              accept="image/*"
-              className="hidden"
-              onChange={(e) => e.target.files && handleFileUpload(e.target.files)}
-              disabled={isUploading}
-            />
+        <div className="w-full bg-gray-200 h-2">
+          <div className="bg-orange-500 h-2 transition-all duration-300" style={{ width: "75%" }}></div>
+        </div>
+      </div>
+
+      {/* Main content */}
+      <div className="flex-1 flex">
+        {/* Left sidebar with instructions */}
+        <div className="w-1/3 p-6 bg-gray-50">
+          <div className="space-y-6">
+            <div>
+              <p className="text-gray-600 mb-4">
+                of close-ups, selfies and mid-range shots can help the AI better capture your face and body type.
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                <div className="mb-4">
+                  <div className="w-8 h-8 bg-gray-800 rounded mx-auto mb-2 flex items-center justify-center">
+                    <Upload className="h-4 w-4 text-white" />
+                  </div>
+                  <h3 className="font-semibold text-gray-900">Upload from your computer</h3>
+                </div>
+
+                <Button
+                  onClick={() => document.getElementById("file-input")?.click()}
+                  disabled={isUploading}
+                  className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-lg mb-4"
+                >
+                  <Upload className="h-4 w-4 mr-2" />
+                  Upload files
+                </Button>
+
+                <p className="text-sm text-gray-600">
+                  or <span className="text-orange-500 font-medium">drag and drop</span> your photos
+                </p>
+                <p className="text-xs text-gray-500 mt-1">PNG, JPG, HEIC, WEBP up to 120MB</p>
+
+                <input
+                  id="file-input"
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => e.target.files && handleFileUpload(e.target.files)}
+                  disabled={isUploading}
+                />
+              </div>
+
+              <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                <div className="mb-4">
+                  <div className="w-8 h-8 bg-gray-800 rounded mx-auto mb-2 flex items-center justify-center">
+                    <span className="text-white text-xs">📱</span>
+                  </div>
+                  <h3 className="font-semibold text-gray-900">Or upload from your mobile</h3>
+                </div>
+
+                <div className="bg-white p-4 rounded-lg border">
+                  <p className="font-medium mb-2">Scan the QR code</p>
+                  <div className="w-16 h-16 bg-black mx-auto rounded">
+                    {/* QR code placeholder */}
+                    <div className="w-full h-full bg-black rounded flex items-center justify-center">
+                      <div className="w-12 h-12 bg-white rounded-sm"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Right side with uploaded images */}
+        <div className="flex-1 p-6">
+          <div className="mb-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-semibold">Uploaded Images</h2>
+              <div className="flex items-center space-x-4">
+                <span className="text-2xl font-bold">{uploadedPhotos.length}</span>
+                <span className="text-gray-500">{uploadedPhotos.length} of 10</span>
+              </div>
+            </div>
+
+            <div className="w-full bg-gray-200 rounded-full h-2">
+              <div
+                className="bg-green-500 h-2 rounded-full transition-all duration-300"
+                style={{ width: `${Math.min((uploadedPhotos.length / 10) * 100, 100)}%` }}
+              ></div>
+            </div>
           </div>
 
           {/* Photo Grid */}
           {uploadedPhotos.length > 0 && (
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
               {uploadedPhotos.map((photo, index) => (
                 <div key={index} className="relative group">
                   <Image
@@ -175,28 +235,27 @@ export default function UploadPage() {
                   />
                   <button
                     onClick={() => removePhoto(index)}
-                    className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="absolute top-2 right-2 bg-white text-gray-600 rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity shadow-lg hover:bg-gray-100"
                   >
-                    <X className="h-4 w-4" />
+                    <Trash2 className="h-4 w-4" />
                   </button>
-                  <div className="absolute bottom-2 right-2 bg-green-500 text-white rounded-full p-1">
-                    <Check className="h-4 w-4" />
-                  </div>
                 </div>
               ))}
             </div>
           )}
+        </div>
+      </div>
 
-          <Button
-            onClick={handleNext}
-            disabled={uploadedPhotos.length < 4 || isLoading}
-            className="w-full"
-            style={{ backgroundColor: "#0077B5" }}
-          >
-            {isLoading ? "Bezig..." : `Volgende (${uploadedPhotos.length}/4 minimum)`}
-          </Button>
-        </CardContent>
-      </Card>
+      {/* Bottom CTA */}
+      <div className="p-6 border-t bg-white">
+        <Button
+          onClick={handleNext}
+          disabled={uploadedPhotos.length < 4 || isLoading}
+          className="w-full py-4 text-lg font-semibold bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-colors"
+        >
+          {isLoading ? "Bezig..." : "Continue"}
+        </Button>
+      </div>
     </div>
   )
 }

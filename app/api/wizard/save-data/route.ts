@@ -1,53 +1,41 @@
-import { type NextRequest, NextResponse } from "next/server"
+import { NextResponse } from "next/server"
 
-// In-memory storage for wizard data
-const wizardDataStore = new Map<string, any>()
+// In-memory storage for wizard data (temporary solution)
+const wizardSessions = new Map<string, any>()
 
-export function saveWizardData(sessionId: string, data: any) {
-  wizardDataStore.set(sessionId, data)
-  console.log("💾 Saved wizard data to memory:", sessionId)
-}
-
-export function getWizardData(sessionId: string) {
-  const data = wizardDataStore.get(sessionId)
-  console.log("📖 Getting wizard data:", sessionId, data ? "found" : "not found")
-  return data
-}
-
-export function deleteWizardData(sessionId: string) {
-  const deleted = wizardDataStore.delete(sessionId)
-  console.log("🗑️ Deleted wizard data:", sessionId, deleted ? "success" : "not found")
-  return deleted
-}
-
-export async function POST(req: NextRequest) {
+export async function POST(request: Request) {
   try {
-    const { sessionId, data } = await req.json()
+    const { sessionId, data } = await request.json()
 
-    if (!sessionId || !data) {
-      return NextResponse.json({ error: "Missing sessionId or data" }, { status: 400 })
+    if (!sessionId) {
+      return NextResponse.json({ error: "Session ID required" }, { status: 400 })
     }
 
-    console.log("💾 Saving wizard data for session:", sessionId)
-    saveWizardData(sessionId, data)
+    // Store wizard data
+    wizardSessions.set(sessionId, {
+      ...data,
+      updatedAt: new Date().toISOString(),
+    })
+
+    console.log("Wizard data saved for session:", sessionId)
 
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error("Error saving wizard data:", error)
-    return NextResponse.json({ error: "Failed to save wizard data" }, { status: 500 })
+    return NextResponse.json({ error: "Failed to save data" }, { status: 500 })
   }
 }
 
-export async function GET(req: NextRequest) {
+export async function GET(request: Request) {
   try {
-    const { searchParams } = new URL(req.url)
+    const { searchParams } = new URL(request.url)
     const sessionId = searchParams.get("sessionId")
 
     if (!sessionId) {
-      return NextResponse.json({ error: "Missing sessionId" }, { status: 400 })
+      return NextResponse.json({ error: "Session ID required" }, { status: 400 })
     }
 
-    const data = getWizardData(sessionId)
+    const data = wizardSessions.get(sessionId)
 
     if (!data) {
       return NextResponse.json({ error: "Session not found" }, { status: 404 })
@@ -55,7 +43,16 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ data })
   } catch (error) {
-    console.error("Error getting wizard data:", error)
-    return NextResponse.json({ error: "Failed to get wizard data" }, { status: 500 })
+    console.error("Error retrieving wizard data:", error)
+    return NextResponse.json({ error: "Failed to retrieve data" }, { status: 500 })
   }
+}
+
+// Export functions for use in other parts of the app
+export function getWizardData(sessionId: string) {
+  return wizardSessions.get(sessionId)
+}
+
+export function deleteWizardData(sessionId: string) {
+  return wizardSessions.delete(sessionId)
 }
