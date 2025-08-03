@@ -1,11 +1,11 @@
 import { type NextRequest, NextResponse } from "next/server"
 
-// In-memory storage for wizard sessions
+// In-memory storage for wizard sessions (fallback)
 const wizardSessions = new Map<string, any>()
 
 export function saveWizardData(sessionId: string, data: any) {
   wizardSessions.set(sessionId, data)
-  console.log("💾 Wizard data saved:", sessionId)
+  console.log("💾 Wizard data saved to memory:", sessionId)
 }
 
 export function getWizardData(sessionId: string) {
@@ -14,11 +14,13 @@ export function getWizardData(sessionId: string) {
 
 export function deleteWizardData(sessionId: string) {
   wizardSessions.delete(sessionId)
+  console.log("🗑️ Wizard data deleted from memory:", sessionId)
 }
 
 export async function POST(req: NextRequest) {
   try {
-    const { sessionId, projectName, gender, uploadedPhotos, userEmail } = await req.json()
+    const body = await req.json()
+    const { sessionId, projectName, gender, uploadedPhotos, userEmail } = body
 
     console.log("💾 Saving wizard data:", {
       sessionId,
@@ -28,20 +30,23 @@ export async function POST(req: NextRequest) {
       userEmail,
     })
 
-    const wizardData = {
-      sessionId,
+    if (!sessionId || !projectName || !gender || !uploadedPhotos || !userEmail) {
+      return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
+    }
+
+    // Save to memory
+    saveWizardData(sessionId, {
       projectName,
       gender,
       uploadedPhotos,
       userEmail,
-      createdAt: new Date().toISOString(),
-    }
+    })
 
-    saveWizardData(sessionId, wizardData)
+    console.log("✅ Wizard data saved to memory")
 
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error("❌ Error saving wizard data:", error)
-    return NextResponse.json({ error: "Failed to save wizard data" }, { status: 500 })
+    return NextResponse.json({ error: "Failed to save data" }, { status: 500 })
   }
 }

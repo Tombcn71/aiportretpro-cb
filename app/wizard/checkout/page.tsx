@@ -56,34 +56,59 @@ export default function CheckoutPage() {
     setError("")
 
     try {
-      console.log("🚀 Starting project creation with pack 928...")
+      // Generate unique session ID
+      const sessionId = `wizard_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+      console.log("💾 Saving wizard data with session ID:", sessionId)
 
-      // Create project directly with pack 928
-      const createResponse = await fetch("/api/projects/create-with-pack", {
+      // Save wizard data to server
+      const saveResponse = await fetch("/api/wizard/save-data", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          sessionId,
           projectName: wizardData.projectName,
           gender: wizardData.gender,
           uploadedPhotos: wizardData.uploadedPhotos,
+          userEmail: session.user.email,
         }),
       })
 
-      if (!createResponse.ok) {
-        const errorData = await createResponse.json()
-        throw new Error(errorData.message || "Failed to create project")
+      if (!saveResponse.ok) {
+        throw new Error("Failed to save wizard data")
       }
 
-      const result = await createResponse.json()
-      console.log("✅ Project created successfully:", result)
+      console.log("✅ Wizard data saved, creating checkout session")
 
-      // Clear wizard data
-      localStorage.removeItem("wizard_project_name")
-      localStorage.removeItem("wizard_gender")
-      localStorage.removeItem("wizard_uploaded_photos")
+      // Create Stripe checkout session
+      const checkoutResponse = await fetch("/api/stripe/create-checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          priceId: "price_1RrFsbDswbEJWagVsEytA8rs",
+          successUrl: `${window.location.origin}/generate/processing`,
+          cancelUrl: `${window.location.origin}/wizard/checkout`,
+          customerEmail: session.user.email,
+          metadata: {
+            type: "wizard",
+            session_id: sessionId,
+            user_email: session.user.email,
+            project_name: wizardData.projectName,
+            gender: wizardData.gender,
+          },
+        }),
+      })
 
-      // Redirect to processing page
-      router.push(`/generate/${result.projectId}`)
+      if (!checkoutResponse.ok) {
+        throw new Error("Failed to create checkout session")
+      }
+
+      const { url } = await checkoutResponse.json()
+      if (url) {
+        console.log("🚀 Redirecting to Stripe checkout")
+        window.location.href = url
+      } else {
+        throw new Error("No checkout URL received")
+      }
     } catch (error) {
       console.error("❌ Checkout error:", error)
       setError(error instanceof Error ? error.message : "Er is een fout opgetreden")
@@ -124,14 +149,15 @@ export default function CheckoutPage() {
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold mb-4">Bijna klaar! 🎉</h1>
           <p className="text-lg text-gray-600">
-            Je foto's zijn geüpload. Klik op "Start Training" om je professionele portretfoto's te maken.
+            Je foto's zijn geüpload. Nu alleen nog betalen en we starten direct met het maken van je professionele
+            portretfoto's.
           </p>
         </div>
 
         <Card className="border-2 border-blue-200">
           <CardHeader className="text-center">
             <CardTitle className="text-2xl">Professional</CardTitle>
-            <div className="text-4xl font-bold text-blue-600 mt-2">1 Credit</div>
+            <div className="text-4xl font-bold text-blue-600 mt-2">€19,99</div>
             <p className="text-gray-600">40 professionele portretfoto's</p>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -176,16 +202,16 @@ export default function CheckoutPage() {
               {loading ? (
                 <>
                   <Loader2 className="h-5 w-5 animate-spin mr-2" />
-                  Training starten...
+                  Bezig met laden...
                 </>
               ) : (
-                "Start Training"
+                "Betaal Veilig & Start Training"
               )}
             </Button>
 
             <div className="text-center text-sm text-gray-500 space-y-1">
-              <p>✓ Gebruikt 1 credit uit je account</p>
-              <p>✓ Training start direct na bevestiging</p>
+              <p>✓ Veilige betaling met iDEAL en creditcard</p>
+              <p>✓ Geld terug garantie</p>
             </div>
           </CardContent>
         </Card>

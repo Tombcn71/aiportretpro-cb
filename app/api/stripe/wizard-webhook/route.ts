@@ -126,13 +126,13 @@ export async function POST(req: NextRequest) {
         const project = projectResult[0]
         console.log("✅ Project created:", project.id)
 
-        // Start Astria training
+        // Start Astria training with pack ID 928
         try {
           const { createTuneWithPack } = await import("@/lib/astria")
 
-          console.log("🚀 Starting Astria training...")
+          console.log("🚀 Starting Astria training with pack 928...")
 
-          const astriaResult = await createTuneWithPack("clx1qvimu0001hf0jdn5xdlr4", {
+          const astriaResult = await createTuneWithPack("928", {
             title: `${wizardData.projectName} - ${wizardData.gender}`,
             name: `project_${project.id}_${Date.now()}`,
             imageUrls: wizardData.uploadedPhotos,
