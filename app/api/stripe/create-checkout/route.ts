@@ -1,100 +1,107 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
+import Stripe from "stripe"
+import { neon } from "@neondatabase/serverless"
 
-const PRICING_PLAN = {
-  name: "Professional",
-  price: 19.99,
-  photos: 40,
-  priceId: "price_1RrFsbDswbEJWagVsEytA8rs",
-}
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+  apiVersion: "2024-06-20",
+})
+
+const sql = neon(process.env.DATABASE_URL!)
 
 export async function POST(request: NextRequest) {
   try {
-    console.log("Starting checkout session creation...")
-
     const session = await getServerSession(authOptions)
-    console.log("Session:", session)
-
     if (!session?.user?.email) {
-      console.log("No session or email found")
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const { planId } = await request.json()
-    console.log("Plan ID:", planId)
+    const { projectName, gender, uploadedPhotos, wizardSessionId, packId = "928" } = await request.json()
 
-    // Use single plan
-    const plan = PRICING_PLAN
-    console.log("Using plan:", plan)
+    console.log("🛒 Creating Stripe checkout with data:", {
+      projectName,
+      gender,
+      photoCount: uploadedPhotos?.length,
+      wizardSessionId,
+      userEmail: session.user.email,
+    })
 
-    // Import database functions
-    const { getUserByEmail, createUser, createPurchase } = await import("@/lib/db")
+    // First create project in database to get project ID
+    const projectResult = await sql`
+      INSERT INTO projects (
+        user_email,
+        guest_email,
+        name,
+        gender,
+        uploaded_photos,
+        status,
+        user_session_id,
+        photo_count,
+        created_at,
+        updated_at
+      ) VALUES (
+        ${session.user.email},
+        ${session.user.email},
+        ${projectName},
+        ${gender},
+        ${JSON.stringify(uploadedPhotos)},
+        'photos_uploaded',
+        ${wizardSessionId},
+        ${uploadedPhotos?.length || 0},
+        NOW(),
+        NOW()
+      )
+      RETURNING id
+    `
 
-    // Get or create user in database
-    let user = await getUserByEmail(session.user.email)
-    console.log("Existing user:", user)
+    const projectId = projectResult[0].id
+    console.log("📦 Created project with ID:", projectId)
 
-    if (!user) {
-      console.log("Creating new user...")
-      user = await createUser({
-        email: session.user.email,
-        name: session.user.name || "",
-        image: session.user.image || "",
-      })
-      console.log("Created user:", user)
-    }
-
-    if (!user || !user.id) {
-      console.log("Failed to get or create user")
-      return NextResponse.json({ error: "Failed to create user" }, { status: 500 })
-    }
-
-    // Initialize Stripe
-    const { stripe } = await import("@/lib/stripe")
-    console.log("Creating Stripe checkout session...")
-
+    // Create Stripe checkout session with project ID in metadata
     const checkoutSession = await stripe.checkout.sessions.create({
       payment_method_types: ["card", "ideal"],
       line_items: [
         {
-          price: plan.priceId,
+          price_data: {
+            currency: "eur",
+            product_data: {
+              name: "AI Professional Headshots",
+              description: "40 high-quality AI-generated professional headshots",
+            },
+            unit_amount: 1999, // €19.99
+          },
           quantity: 1,
         },
       ],
       mode: "payment",
-      success_url: `${process.env.NEXTAUTH_URL}/wizard/welcome?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXTAUTH_URL}/pricing`,
-      metadata: {
-        userId: user.id.toString(),
-        planId: "professional",
-      },
       customer_email: session.user.email,
+      client_reference_id: projectId.toString(), // BELANGRIJK: Project ID hier
+      metadata: {
+        projectId: projectId.toString(), // EN hier
+        projectName: projectName,
+        gender: gender,
+        userEmail: session.user.email,
+        wizardSessionId: wizardSessionId,
+        packId: packId,
+        photoCount: uploadedPhotos?.length?.toString() || "0",
+        source: "wizard",
+      },
+      success_url: `${process.env.NEXTAUTH_URL}/generate/processing?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.NEXTAUTH_URL}/wizard/review`,
       allow_promotion_codes: true,
     })
 
-    console.log("Stripe session created:", checkoutSession.id)
+    console.log("✅ Stripe checkout created:", checkoutSession.id)
+    console.log("🏷️ Metadata sent to Stripe:", checkoutSession.metadata)
 
-    // Create purchase record
-    const purchase = await createPurchase({
-      userId: user.id,
-      stripeSessionId: checkoutSession.id,
-      planType: "professional",
-amount: Math.round(plan.price * 100),
-      headshotsIncluded: plan.photos,
+    return NextResponse.json({
+      url: checkoutSession.url,
+      sessionId: checkoutSession.id,
+      projectId: projectId,
     })
-
-    console.log("Purchase created:", purchase)
-
-    return NextResponse.json({ url: checkoutSession.url })
   } catch (error) {
-    console.error("Detailed error creating checkout session:", error)
-    return NextResponse.json(
-      {
-        error: "Internal server error",
-        details: error instanceof Error ? error.message : "Unknown error",
-      },
-      { status: 500 },
-    )
+    console.error("❌ Stripe checkout error:", error)
+    return NextResponse.json({ error: "Failed to create checkout session" }, { status: 500 })
   }
 }

@@ -5,7 +5,7 @@ import { useSession } from "next-auth/react"
 import { Header } from "@/components/header"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Check, Star } from "lucide-react"
+import { Check } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { trackViewContent, trackInitiateCheckout } from "@/lib/facebook-pixel"
 
@@ -16,12 +16,12 @@ export default function PricingPage() {
 
   // Track pricing page view
   useEffect(() => {
-    trackViewContent("Pricing Page", 19,99)
+    trackViewContent("Pricing Page", 29)
   }, [])
 
   const handlePlanSelect = () => {
     // Track checkout initiation
-    trackInitiateCheckout(19,99)
+    trackInitiateCheckout(29)
 
     if (!session) {
       router.push(`/login?plan=professional`)
@@ -58,7 +58,6 @@ export default function PricingPage() {
   }
 
   const features = [
-   
     "Verschillende zakelijke outfits",
     "Verschillende poses en achtergronden",
     "HD kwaliteit downloads",
@@ -77,8 +76,6 @@ export default function PricingPage() {
 
         <div className="max-w-md mx-auto">
           <Card className="relative border-2 border-[#0077B5] shadow-xl">
-            
-
             <CardHeader className="text-center pt-8">
               <CardTitle className="text-2xl font-bold">Professional</CardTitle>
               <div className="mt-4">
@@ -112,8 +109,6 @@ export default function PricingPage() {
             </CardContent>
           </Card>
         </div>
-
-        
       </div>
     </div>
   )

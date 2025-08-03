@@ -1,45 +1,63 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { ArrowRight, Camera } from "lucide-react"
+import Link from "next/link"
+import { ArrowRight, X } from "lucide-react"
 
-export default function FloatingCTAButton() {
+export function FloatingCTAButton() {
   const [isVisible, setIsVisible] = useState(false)
+  const [isDismissed, setIsDismissed] = useState(false)
 
   useEffect(() => {
-    const toggleVisibility = () => {
-      if (window.pageYOffset > 300) {
+    const handleScroll = () => {
+      const scrollY = window.scrollY
+      const windowHeight = window.innerHeight
+
+      // Show after scrolling 50% of viewport height
+      if (scrollY > windowHeight * 0.5 && !isDismissed) {
         setIsVisible(true)
       } else {
         setIsVisible(false)
       }
     }
 
-    window.addEventListener("scroll", toggleVisibility)
+    window.addEventListener("scroll", handleScroll)
+    return () => window.removeEventListener("scroll", handleScroll)
+  }, [isDismissed])
 
-    return () => window.removeEventListener("scroll", toggleVisibility)
-  }, [])
+  if (isDismissed) return null
 
   return (
-<div
-  // Deze div creëert de witte balk onderaan en is ALTIJD zichtbaar.
-  // De animatie (opacity, translate) is HIER WEGGEHAald.
-  className="fixed bottom-0 left-0 right-0 bg-white px-4 py-4 z-[9999] md:hidden"
->
+    <div
+      className={`fixed bottom-6 right-6 z-50 transition-all duration-300 transform ${
+        isVisible ? "translate-y-0 opacity-100" : "translate-y-16 opacity-0"
+      }`}
+    >
+      <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 p-4 max-w-sm">
+        <button
+          onClick={() => setIsDismissed(true)}
+          className="absolute -top-2 -right-2 bg-gray-100 hover:bg-gray-200 rounded-full p-1 transition-colors"
+        >
+          <X className="h-4 w-4 text-gray-600" />
+        </button>
 
-      <Button
-        asChild
-        size="lg"
-        className="w-full max-w-sm mx-auto bg-[#FFA500] hover:bg-[#FF8C00] text-white py-3 text-base font-semibold shadow-lg"
-      >
-        <Link href="/pricing">
-          <Camera className="mr-2 h-4 w-4" />
-          Start Nu - 19,99€
-          <ArrowRight className="ml-2 h-4 w-4" />
-        </Link>
-      </Button>
+        <div className="text-center space-y-3">
+          <div className="text-sm font-semibold text-gray-900">🎯 Klaar om te beginnen?</div>
+          <div className="text-xs text-gray-600">Start nu gratis - betaal pas na upload</div>
+
+          <Button
+            asChild
+            size="sm"
+            className="w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-semibold shadow-lg"
+          >
+            <Link href="/wizard/welcome">
+              Start Nu - €29
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Link>
+          </Button>
+        </div>
+      </div>
     </div>
   )
 }

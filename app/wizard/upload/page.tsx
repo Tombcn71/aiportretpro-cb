@@ -1,113 +1,120 @@
 "use client"
 
 import type React from "react"
-import { useState, useCallback, useEffect } from "react"
+
+import { useState, useEffect, useCallback } from "react"
 import { useRouter } from "next/navigation"
+import { useSession } from "next-auth/react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Upload, X, Camera } from "lucide-react"
-import { Badge } from "@/components/ui/badge"
-import { ProgressBar } from "@/components/ui/progress-bar"
-import Image from "next/image"
-
-interface WizardData {
-  projectName: string
-  gender: string
-}
+import { Progress } from "@/components/ui/progress"
+import { Upload, X, CheckCircle } from "lucide-react"
 
 export default function UploadPage() {
-  const [uploadedPhotos, setUploadedPhotos] = useState<File[]>([])
-  const [uploading, setUploading] = useState(false)
-  const [wizardData, setWizardData] = useState<WizardData | null>(null)
+  const [uploadedPhotos, setUploadedPhotos] = useState<string[]>([])
+  const [isUploading, setIsUploading] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
+  const { data: session, status } = useSession()
 
   useEffect(() => {
-    // Get wizard data from localStorage
-    const data = JSON.parse(localStorage.getItem("wizardData") || "{}")
-    if (!data.projectName || !data.gender) {
+    if (status === "loading") return
+
+    if (!session) {
+      router.push("/login?flow=wizard")
+      return
+    }
+
+    // Check if previous steps are completed
+    const projectName = sessionStorage.getItem("projectName")
+    const gender = sessionStorage.getItem("gender")
+
+    if (!projectName || !gender) {
       router.push("/wizard/project-name")
       return
     }
-    setWizardData(data)
-  }, [router])
 
-  const handleFileSelect = useCallback((files: FileList | null) => {
-    if (!files) return
-    const newFiles = Array.from(files).filter(
-      (file) => file.type.startsWith("image/") && file.size <= 120 * 1024 * 1024,
-    )
-    setUploadedPhotos((prev) => [...prev, ...newFiles].slice(0, 10))
-  }, [])
+    // Load existing photos if available
+    const savedPhotos = JSON.parse(sessionStorage.getItem("uploadedPhotos") || "[]")
+    if (savedPhotos.length > 0) {
+      setUploadedPhotos(savedPhotos)
+    }
+  }, [session, status, router])
+
+  const handleFileUpload = useCallback(
+    async (files: FileList) => {
+      if (uploadedPhotos.length + files.length > 10) {
+        alert("Je kunt maximaal 10 foto's uploaden")
+        return
+      }
+
+      setIsUploading(true)
+
+      try {
+        const uploadPromises = Array.from(files).map(async (file) => {
+          const formData = new FormData()
+          formData.append("file", file)
+
+          const response = await fetch("/api/upload", {
+            method: "POST",
+            body: formData,
+          })
+
+          if (!response.ok) {
+            throw new Error("Upload failed")
+          }
+
+          const data = await response.json()
+          return data.url
+        })
+
+        const newUrls = await Promise.all(uploadPromises)
+        const updatedPhotos = [...uploadedPhotos, ...newUrls]
+
+        setUploadedPhotos(updatedPhotos)
+        sessionStorage.setItem("uploadedPhotos", JSON.stringify(updatedPhotos))
+      } catch (error) {
+        console.error("Upload error:", error)
+        alert("Er is een fout opgetreden bij het uploaden. Probeer het opnieuw.")
+      } finally {
+        setIsUploading(false)
+      }
+    },
+    [uploadedPhotos],
+  )
 
   const handleDrop = useCallback(
     (e: React.DragEvent) => {
       e.preventDefault()
-      handleFileSelect(e.dataTransfer.files)
+      const files = e.dataTransfer.files
+      if (files.length > 0) {
+        handleFileUpload(files)
+      }
     },
-    [handleFileSelect],
+    [handleFileUpload],
   )
 
-  const handleDragOver = useCallback((e: React.DragEvent) => {
-    e.preventDefault()
-  }, [])
-
-  const removePhoto = (index: number) => {
-    setUploadedPhotos((prev) => prev.filter((_, i) => i !== index))
-  }
-
-  const handleContinue = async () => {
-    if (uploadedPhotos.length < 4 || !wizardData) return
-    setUploading(true)
-
-    try {
-      // Upload photos to Vercel Blob
-      const uploadPromises = uploadedPhotos.map(async (photo) => {
-        const formData = new FormData()
-        formData.append("file", photo)
-
-        const response = await fetch("/api/upload", {
-          method: "POST",
-          body: formData,
-        })
-
-        const result = await response.json()
-        return result.url
-      })
-
-      const uploadedUrls = await Promise.all(uploadPromises)
-
-      // Create project with default pack 928 (portetfotos m/v)
-      const response = await fetch("/api/projects/create-with-pack", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          projectName: wizardData.projectName,
-          gender: wizardData.gender,
-          selectedPackId: "928", // Portetfotos m/v pack
-          uploadedPhotos: uploadedUrls,
-        }),
-      })
-
-      const result = await response.json()
-
-      if (result.projectId) {
-        // Clear wizard data
-        localStorage.removeItem("wizardData")
-        router.push(`/generate/${result.projectId}`)
-      } else {
-        throw new Error(result.error || "Failed to create project")
-      }
-    } catch (error) {
-      console.error("Error:", error)
-      alert("Er is een fout opgetreden. Probeer het opnieuw.")
-    } finally {
-      setUploading(false)
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files
+    if (files && files.length > 0) {
+      handleFileUpload(files)
     }
   }
 
-  if (!wizardData) {
+  const removePhoto = (index: number) => {
+    const updatedPhotos = uploadedPhotos.filter((_, i) => i !== index)
+    setUploadedPhotos(updatedPhotos)
+    sessionStorage.setItem("uploadedPhotos", JSON.stringify(updatedPhotos))
+  }
+
+  const handleNext = () => {
+    if (uploadedPhotos.length < 6) return
+
+    setIsLoading(true)
+    router.push("/wizard/review")
+  }
+
+  if (status === "loading") {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0077B5]"></div>
@@ -115,114 +122,108 @@ export default function UploadPage() {
     )
   }
 
+  if (!session) {
+    return null
+  }
+
   return (
-    <div className="min-h-screen bg-gray-50 p-4">
-      <div className="max-w-4xl mx-auto">
-        <div className="mb-8">
-          <ProgressBar currentStep={3} totalSteps={3} />
-        </div>
-
-        <Card className="mb-8">
-          <CardHeader className="text-center">
-            
-
-            <CardTitle className="text-2xl">Upload je foto's</CardTitle>
-            <p className="text-gray-600">Upload minimaal 6 foto's van hoge kwaliteit voor het beste resultaat</p>
-          </CardHeader>
-        </Card>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div className="space-y-6">
-            <div className="flex items-center space-x-4">
-              <Camera className="h-8 w-8 text-[#0077B5]" />
-              <div>
-                <h3 className="text-lg font-semibold">Foto Richtlijnen</h3>
-                <p className="text-gray-600 text-sm">
-                 Foto's met verschillende achtergronden met verschillende kleding. Gezicht naar de camera, vanaf je schouders of je middel. geen hoeden of zonnebrillen.
-                </p>
-              </div>
-            </div>
-
-            <div
-              onDrop={handleDrop}
-              onDragOver={handleDragOver}
-              className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-gray-400 transition-colors relative"
-            >
-              <Upload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <Button className="bg-[#0077B5] hover:bg-[#004182] text-white mb-4">
-                <Upload className="h-4 w-4 mr-2" />
-                Selecteer Foto's
-              </Button>
-              <p className="text-gray-600">
-                of <span className="text-[#0077B5] font-medium">sleep en zet neer</span> je foto's hier
-              </p>
-              <p className="text-sm text-gray-500 mt-2">PNG, JPG, HEIC, WEBP tot 120MB</p>
-              <input
-                type="file"
-                multiple
-                accept="image/*"
-                onChange={(e) => handleFileSelect(e.target.files)}
-                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+      <Card className="w-full max-w-4xl">
+        <CardHeader className="text-center">
+          <div className="mb-4">
+            <Progress value={75} className="w-full h-2" style={{ backgroundColor: "#e5e7eb" }}>
+              <div
+                className="h-full transition-all duration-300 ease-in-out rounded-full"
+                style={{
+                  width: "75%",
+                  backgroundColor: "#0077B5",
+                }}
               />
-            </div>
+            </Progress>
+          </div>
+          <CardTitle className="text-2xl font-bold text-gray-900">Upload je foto's</CardTitle>
+          <p className="text-gray-600 mt-2">
+            Stap 3 van 4: Upload minimaal 6 foto's voor de beste resultaten ({uploadedPhotos.length}/10)
+          </p>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* Upload Area */}
+          <div
+            onDrop={handleDrop}
+            onDragOver={(e) => e.preventDefault()}
+            className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-[#0077B5] transition-colors"
+          >
+            <Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+            <p className="text-lg font-medium text-gray-900 mb-2">Sleep foto's hierheen of klik om te selecteren</p>
+            <p className="text-sm text-gray-500 mb-4">JPG, PNG of JPEG bestanden tot 10MB per foto</p>
+            <input
+              type="file"
+              multiple
+              accept="image/*"
+              onChange={handleFileSelect}
+              className="hidden"
+              id="file-upload"
+            />
+            <Button
+              onClick={() => document.getElementById("file-upload")?.click()}
+              disabled={isUploading || uploadedPhotos.length >= 10}
+              variant="outline"
+            >
+              {isUploading ? "Uploaden..." : "Selecteer foto's"}
+            </Button>
           </div>
 
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold">Geüploade Foto's</h3>
-              <div className="flex items-center space-x-2">
-                <div
-                  className={`w-3 h-3 rounded-full ${uploadedPhotos.length >= 4 ? "bg-green-500" : "bg-gray-300"}`}
-                ></div>
-                <span className="text-sm font-medium">{uploadedPhotos.length} van 10</span>
-              </div>
-            </div>
-
-            <Card>
-              <CardContent className="p-4">
-                {uploadedPhotos.length === 0 ? (
-                  <div className="text-center py-8 text-gray-500">Nog geen foto's geüpload</div>
-                ) : (
-                  <div className="grid grid-cols-2 gap-4">
-                    {uploadedPhotos.map((photo, index) => (
-                      <div key={index} className="relative group">
-                        <div className="aspect-square rounded-lg overflow-hidden bg-gray-100">
-                          <Image
-                            src={URL.createObjectURL(photo) || "/placeholder.svg"}
-                            alt={`Upload ${index + 1}`}
-                            fill
-                            className="object-cover"
-                          />
-                        </div>
-                        <button
-                          onClick={() => removePhoto(index)}
-                          className="absolute top-2 right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                        >
-                          <X className="h-4 w-4" />
-                        </button>
-                      </div>
-                    ))}
+          {/* Photo Grid */}
+          {uploadedPhotos.length > 0 && (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {uploadedPhotos.map((url, index) => (
+                <div key={index} className="relative group">
+                  <img
+                    src={url || "/placeholder.svg"}
+                    alt={`Upload ${index + 1}`}
+                    className="w-full h-32 object-cover rounded-lg"
+                  />
+                  <button
+                    onClick={() => removePhoto(index)}
+                    className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                  <div className="absolute bottom-2 left-2">
+                    <CheckCircle className="h-5 w-5 text-green-500" />
                   </div>
-                )}
-              </CardContent>
-            </Card>
-
-            <div className="space-y-4">
-              <Button
-                onClick={handleContinue}
-                disabled={uploadedPhotos.length < 4 || uploading}
-                className="w-full bg-[#0077B5] hover:bg-[#004182] text-white"
-              >
-                {uploading ? "Portetfotos worden gemaakt..." : "Genereer 40 Professionele Portetfotos"}
-              </Button>
-
-              <Button variant="ghost" onClick={() => router.back()} className="w-full" disabled={uploading}>
-                ← Terug
-              </Button>
+                </div>
+              ))}
             </div>
+          )}
+
+          {/* Tips */}
+          <div className="bg-blue-50 p-4 rounded-lg">
+            <h3 className="font-semibold text-blue-900 mb-2">Tips voor de beste resultaten:</h3>
+            <ul className="text-sm text-blue-800 space-y-1">
+              <li>• Upload foto's met verschillende gezichtshoeken</li>
+              <li>• Zorg voor goede belichting</li>
+              <li>• Vermijd zonnebrillen of petten</li>
+              <li>• Upload minimaal 6 foto's voor optimale resultaten</li>
+            </ul>
           </div>
-        </div>
-      </div>
+
+          {/* Navigation */}
+          <div className="flex space-x-4">
+            <Button variant="outline" onClick={() => router.back()} className="flex-1">
+              Vorige stap
+            </Button>
+            <Button
+              onClick={handleNext}
+              disabled={uploadedPhotos.length < 6 || isLoading}
+              className="flex-1 text-lg py-3"
+              style={{ backgroundColor: "#0077B5" }}
+            >
+              {isLoading ? "Bezig..." : `Doorgaan (${uploadedPhotos.length}/6)`}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   )
 }

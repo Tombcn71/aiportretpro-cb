@@ -1,124 +1,208 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { sql } from "@/lib/db"
+import Stripe from "stripe"
+import { neon } from "@neondatabase/serverless"
 
-async function getStripe() {
-  const { stripe } = await import("@/lib/stripe")
-  return stripe
-}
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+  apiVersion: "2024-06-20",
+})
+
+const sql = neon(process.env.DATABASE_URL!)
 
 export async function POST(request: NextRequest) {
-  console.log("🔔 WEBHOOK RECEIVED at", new Date().toISOString())
-
   const body = await request.text()
-  const signature = request.headers.get("stripe-signature")
+  const signature = request.headers.get("stripe-signature")!
 
-  if (!signature) {
-    console.log("❌ No signature")
-    return NextResponse.json({ error: "No signature" }, { status: 400 })
-  }
-
-  if (!process.env.STRIPE_WEBHOOK_SECRET) {
-    console.log("❌ No webhook secret")
-    return NextResponse.json({ error: "Webhook secret not configured" }, { status: 500 })
-  }
+  let event: Stripe.Event
 
   try {
-    const stripe = await getStripe()
-    const event = stripe.webhooks.constructEvent(body, signature, process.env.STRIPE_WEBHOOK_SECRET!)
+    event = stripe.webhooks.constructEvent(body, signature, process.env.STRIPE_WEBHOOK_SECRET!)
+  } catch (err) {
+    console.error("❌ Webhook signature verification failed:", err)
+    return NextResponse.json({ error: "Invalid signature" }, { status: 400 })
+  }
 
-    console.log("✅ Event type:", event.type)
+  console.log("🎯 Webhook event:", event.type)
 
-    if (event.type === "checkout.session.completed") {
-      const session = event.data.object
-      console.log("💳 Processing checkout session:", session.id)
+  if (event.type === "checkout.session.completed") {
+    const session = event.data.object as Stripe.Checkout.Session
+    console.log("💳 Checkout completed:", session.id)
+    console.log("🏷️ Metadata:", session.metadata)
 
-      // Find and update the purchase
-      const purchaseResult = await sql`
-        UPDATE purchases 
-        SET status = 'completed', updated_at = CURRENT_TIMESTAMP
-        WHERE stripe_session_id = ${session.id}
-        RETURNING user_id, id
+    try {
+      let projectId: string | undefined
+
+      // Optie 1: Probeer projectId uit metadata te halen
+      if (session.metadata?.projectId) {
+        projectId = session.metadata.projectId
+      }
+
+      // Optie 2: Haal projectId uit client_reference_id
+      else if (session.client_reference_id) {
+        projectId = session.client_reference_id
+        console.log("📋 Using client_reference_id as projectId:", projectId)
+      }
+
+      // Optie 3: Zoek project op basis van userEmail en status 'photos_uploaded'
+      else if (session.metadata?.userEmail || session.customer_details?.email) {
+        const userEmail = session.metadata?.userEmail || session.customer_details?.email
+        console.log("🔍 Searching for photos_uploaded project for user:", userEmail)
+
+        const unpaidProjectResult = await sql`
+          SELECT * FROM projects 
+          WHERE (user_email = ${userEmail} OR guest_email = ${userEmail})
+          AND status = 'photos_uploaded'
+          ORDER BY created_at DESC
+          LIMIT 1
+        `
+
+        if (unpaidProjectResult[0]) {
+          projectId = unpaidProjectResult[0].id.toString()
+          console.log("🎯 Found photos_uploaded project:", projectId)
+        }
+      }
+
+      const { projectName, gender, userEmail, packId, source, photoCount, wizardSessionId } = session.metadata || {}
+
+      if (!projectId || !userEmail) {
+        console.error("❌ Missing required data:", {
+          projectId,
+          userEmail,
+          hasMetadata: !!session.metadata,
+          clientReferenceId: session.client_reference_id,
+        })
+
+        // Log alle beschikbare data voor debugging
+        console.log("🔍 Available session data:", {
+          id: session.id,
+          metadata: session.metadata,
+          client_reference_id: session.client_reference_id,
+          customer_email: session.customer_details?.email,
+          amount_total: session.amount_total,
+        })
+
+        return NextResponse.json({ error: "Missing project ID or user email" }, { status: 400 })
+      }
+
+      console.log("📦 Processing project ID:", projectId)
+      console.log("📧 User email:", userEmail)
+
+      // Get user
+      const userResult = await sql`
+        SELECT * FROM users WHERE email = ${userEmail}
+      `
+      const user = userResult[0]
+
+      if (!user) {
+        console.error("❌ User not found:", userEmail)
+        return NextResponse.json({ error: "User not found" }, { status: 404 })
+      }
+
+      // Record the purchase
+      await sql`
+        INSERT INTO purchases (
+          user_id,
+          stripe_session_id,
+          amount,
+          currency,
+          status,
+          metadata,
+          created_at,
+          updated_at
+        )
+        VALUES (
+          ${user.id},
+          ${session.id},
+          ${session.amount_total || 0},
+          ${session.currency || "eur"},
+          'completed',
+          ${JSON.stringify({
+            ...session.metadata,
+            projectId: projectId, // Zorg dat projectId wordt opgeslagen
+          })},
+          NOW(),
+          NOW()
+        )
       `
 
-      if (purchaseResult[0]) {
-        const userId = purchaseResult[0].user_id
-        console.log(`👤 Adding credit for user ${userId}`)
+      // Update project status to paid
+      await sql`
+        UPDATE projects 
+        SET 
+          status = 'paid',
+          stripe_session_id = ${session.id},
+          updated_at = NOW()
+        WHERE id = ${Number.parseInt(projectId)}
+      `
 
-        // Add 1 credit - using INSERT with proper conflict handling
-        try {
-          const creditResult = await sql`
-            INSERT INTO credits (user_id, credits, created_at, updated_at)
-            VALUES (${userId}, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-            ON CONFLICT (user_id) 
-            DO UPDATE SET 
-              credits = credits.credits + 1,
-              updated_at = CURRENT_TIMESTAMP
-            RETURNING credits
-          `
+      console.log("✅ Project updated to paid status")
 
-          console.log(`✅ User ${userId} now has ${creditResult[0]?.credits} credits`)
+      // Get project details for Astria training
+      const projectResult = await sql`
+        SELECT * FROM projects WHERE id = ${Number.parseInt(projectId)}
+      `
+      const project = projectResult[0]
 
-          return NextResponse.json({
-            received: true,
-            userId,
-            creditsAdded: 1,
-            totalCredits: creditResult[0]?.credits,
-          })
-        } catch (creditError) {
-          console.error("❌ Credit error:", creditError)
-
-          // Fallback: try to update existing or create new
-          const existingCredit = await sql`
-            SELECT credits FROM credits WHERE user_id = ${userId}
-          `
-
-          if (existingCredit[0]) {
-            // Update existing
-            const updateResult = await sql`
-              UPDATE credits 
-              SET credits = credits + 1, updated_at = CURRENT_TIMESTAMP
-              WHERE user_id = ${userId}
-              RETURNING credits
-            `
-            console.log(`✅ Updated credits for user ${userId}: ${updateResult[0]?.credits}`)
-
-            return NextResponse.json({
-              received: true,
-              userId,
-              creditsAdded: 1,
-              totalCredits: updateResult[0]?.credits,
-            })
-          } else {
-            // Create new
-            const newCredit = await sql`
-              INSERT INTO credits (user_id, credits, created_at, updated_at)
-              VALUES (${userId}, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-              RETURNING credits
-            `
-            console.log(`✅ Created new credits for user ${userId}: ${newCredit[0]?.credits}`)
-
-            return NextResponse.json({
-              received: true,
-              userId,
-              creditsAdded: 1,
-              totalCredits: newCredit[0]?.credits,
-            })
-          }
-        }
-      } else {
-        console.log("❌ No purchase found for session:", session.id)
+      if (!project) {
+        console.error("❌ Project not found:", projectId)
+        return NextResponse.json({ error: "Project not found" }, { status: 404 })
       }
-    }
 
-    return NextResponse.json({ received: true })
-  } catch (error) {
-    console.error("❌ Webhook error:", error)
-    return NextResponse.json(
-      {
-        error: "Webhook error",
-        details: error instanceof Error ? error.message : "Unknown error",
-      },
-      { status: 400 },
-    )
+      // Start Astria training
+      console.log("🚀 Starting Astria training for project:", projectId)
+
+      const uploadedPhotos =
+        typeof project.uploaded_photos === "string" ? JSON.parse(project.uploaded_photos) : project.uploaded_photos
+
+      // Call existing Astria training API
+      const astriaResponse = await fetch(`${process.env.NEXTAUTH_URL}/api/projects/create-with-pack`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          projectName: project.name,
+          gender: project.gender,
+          uploadedPhotos: uploadedPhotos,
+          userEmail: userEmail,
+          packId: packId || "928",
+          existingProjectId: Number.parseInt(projectId),
+        }),
+      })
+
+      if (!astriaResponse.ok) {
+        const errorText = await astriaResponse.text()
+        console.error("❌ Failed to start Astria training:", errorText)
+
+        // Update project status to error
+        await sql`
+          UPDATE projects 
+          SET status = 'error', updated_at = NOW()
+          WHERE id = ${Number.parseInt(projectId)}
+        `
+
+        return NextResponse.json(
+          {
+            error: "Failed to start training",
+            details: errorText,
+          },
+          { status: 500 },
+        )
+      } else {
+        console.log("✅ Astria training started successfully")
+        // Update project status to training
+        await sql`
+          UPDATE projects 
+          SET status = 'training', updated_at = NOW()
+          WHERE id = ${Number.parseInt(projectId)}
+        `
+      }
+
+      return NextResponse.json({ received: true })
+    } catch (error) {
+      console.error("❌ Error processing webhook:", error)
+      return NextResponse.json({ error: "Processing failed" }, { status: 500 })
+    }
   }
+
+  return NextResponse.json({ received: true })
 }

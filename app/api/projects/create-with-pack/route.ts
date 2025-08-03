@@ -1,9 +1,6 @@
 import { NextResponse } from "next/server"
 import axios from "axios"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
-import { getUserByEmail, sql } from "@/lib/db"
-import { CreditManager } from "@/lib/credits"
+import { sql } from "@/lib/db"
 
 export const dynamic = "force-dynamic"
 
@@ -16,19 +13,16 @@ if (!appWebhookSecret) {
 
 export async function POST(request: Request) {
   const payload = await request.json()
-  const { projectName, gender, selectedPackId, uploadedPhotos } = payload
+  const { projectName, gender, uploadedPhotos, userEmail, packId = "928", existingProjectId } = payload
 
-  console.log("Creating project with pack:", {
+  console.log("Creating Astria training for project:", {
+    existingProjectId,
     projectName,
     gender,
-    selectedPackId,
+    packId,
     photoCount: uploadedPhotos?.length,
+    userEmail,
   })
-
-  const session = await getServerSession(authOptions)
-  if (!session?.user?.email) {
-    return NextResponse.json({ message: "Unauthorized" }, { status: 401 })
-  }
 
   if (!astriaApiKey) {
     return NextResponse.json(
@@ -37,63 +31,117 @@ export async function POST(request: Request) {
     )
   }
 
-  if (!uploadedPhotos || uploadedPhotos.length < 4) {
-    return NextResponse.json({ message: "Upload at least 4 sample images" }, { status: 500 })
-  }
-
-  if (!selectedPackId) {
-    return NextResponse.json({ message: "Pack ID is required" }, { status: 400 })
-  }
-
-  // Get user from Neon database
-  const user = await getUserByEmail(session.user.email)
-  if (!user) {
-    return NextResponse.json({ error: "User not found" }, { status: 404 })
-  }
-
-  // Check credits using CreditManager - SAME AS USE-CREDITS
-  const currentCredits = await CreditManager.getUserCredits(user.id)
-  if (currentCredits < 1) {
+  if (!uploadedPhotos || uploadedPhotos.length < 3) {
     return NextResponse.json(
-      { message: "Not enough credits, please purchase some credits and try again." },
+      {
+        message: "Need at least 3 photos for training",
+      },
+      { status: 400 },
+    )
+  }
+
+  if (!existingProjectId) {
+    return NextResponse.json(
+      {
+        message: "Missing project ID",
+      },
+      { status: 400 },
+    )
+  }
+
+  // Get the project from database
+  let project
+  try {
+    const projectResult = await sql`
+      SELECT * FROM projects WHERE id = ${existingProjectId}
+    `
+
+    if (projectResult.length === 0) {
+      return NextResponse.json(
+        {
+          message: "Project not found",
+        },
+        { status: 404 },
+      )
+    }
+
+    project = projectResult[0]
+
+    // Verify project status
+    if (project.status !== "paid") {
+      return NextResponse.json(
+        {
+          message: "Project is not in paid status",
+        },
+        { status: 400 },
+      )
+    }
+  } catch (error) {
+    console.error("Project lookup error:", error)
+    return NextResponse.json(
+      {
+        message: "Database error",
+      },
       { status: 500 },
     )
   }
 
-  // Create a project in database
-  let projectId
-  try {
-    const result = await sql`
-      INSERT INTO projects (user_id, name, gender, outfits, backgrounds, uploaded_photos, status, credits_used)
-      VALUES (${user.id}, ${projectName}, ${gender}, ${[]}, ${[]}, ${uploadedPhotos}, 'training', 0)
-      RETURNING id
-    `
-    projectId = result[0].id
-    console.log(`✅ Project created with ID ${projectId}`)
-  } catch (error) {
-    console.error("Project creation error:", error)
-    return NextResponse.json({ message: "Something went wrong!" }, { status: 500 })
+  // Get user ID from project or find by email
+  let userId = project.user_id
+
+  if (!userId && userEmail) {
+    try {
+      const userResult = await sql`
+        SELECT id FROM users WHERE email = ${userEmail}
+      `
+      if (userResult.length > 0) {
+        userId = userResult[0].id
+
+        // Update project with user ID
+        await sql`
+          UPDATE projects 
+          SET user_id = ${userId}, updated_at = NOW()
+          WHERE id = ${existingProjectId}
+        `
+      }
+    } catch (error) {
+      console.error("User lookup error:", error)
+    }
   }
 
   try {
     const baseUrl = process.env.NEXTAUTH_URL || `https://${process.env.VERCEL_URL}`
     const DOMAIN = "https://api.astria.ai"
 
+    // Parse uploaded photos if they're stored as JSON with metadata
+    let photoUrls = uploadedPhotos
+    if (typeof uploadedPhotos === "string") {
+      photoUrls = JSON.parse(uploadedPhotos)
+    }
+
+    // Extract just the URLs if photos are stored with metadata
+    if (Array.isArray(photoUrls) && photoUrls[0] && typeof photoUrls[0] === "object") {
+      photoUrls = photoUrls.map((photo) => photo.url || photo)
+    }
+
+    console.log("Photo URLs for training:", photoUrls)
+
+    // Create Astria tune
     const tuneBody = {
       tune: {
-        title: `${projectName}_${projectId}`,
+        title: `${projectName}_${existingProjectId}`,
         name: gender,
-        image_urls: uploadedPhotos,
-        callback: `${baseUrl}/api/astria/train-webhook?user_id=${user.id}&model_id=${projectId}&webhook_secret=${appWebhookSecret}`,
+        image_urls: photoUrls,
+        callback: `${baseUrl}/api/astria/train-webhook?user_id=${userId || "guest"}&model_id=${existingProjectId}&webhook_secret=${appWebhookSecret}`,
         prompt_attributes: {
-          callback: `${baseUrl}/api/astria/prompt-webhook?user_id=${user.id}&model_id=${projectId}&webhook_secret=${appWebhookSecret}`,
+          callback: `${baseUrl}/api/astria/prompt-webhook?user_id=${userId || "guest"}&model_id=${existingProjectId}&webhook_secret=${appWebhookSecret}`,
         },
       },
     }
 
-    console.log(`Creating tune with pack ${selectedPackId}`)
+    console.log(`Creating tune with pack ${packId}`)
 
-    const response = await axios.post(`${DOMAIN}/p/${selectedPackId}/tunes`, tuneBody, {
+    const response = await axios.post(`${DOMAIN}/p/${packId}/tunes`, tuneBody, {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${astriaApiKey}`,
@@ -102,32 +150,54 @@ export async function POST(request: Request) {
 
     if (response.status !== 201) {
       console.error("Astria error:", response.status, response.data)
-      await sql`DELETE FROM projects WHERE id = ${projectId}`
-      return NextResponse.json({ message: "Astria API error" }, { status: response.status })
+
+      // Update project status to error
+      await sql`
+        UPDATE projects 
+        SET status = 'error', updated_at = NOW()
+        WHERE id = ${existingProjectId}
+      `
+
+      return NextResponse.json(
+        {
+          message: "Astria API error",
+          details: response.data,
+        },
+        { status: response.status },
+      )
     }
 
-    // Update project with tune ID
+    // Update project with tune ID and status
     await sql`
       UPDATE projects 
-      SET tune_id = ${response.data.id.toString()}, status = 'training'
-      WHERE id = ${projectId}
+      SET 
+        tune_id = ${response.data.id.toString()}, 
+        status = 'training',
+        user_id = ${userId},
+        updated_at = NOW()
+      WHERE id = ${existingProjectId}
     `
 
-    // Use credit - EXACT SAME AS USE-CREDITS ROUTE
-    await CreditManager.useCredit(user.id, projectId)
-    console.log(`✅ Credit used successfully for project ${projectId}`)
+    console.log(`✅ Training started for project ${existingProjectId}, tune ID: ${response.data.id}`)
 
     return NextResponse.json({
-      message: "success",
-      projectId: projectId,
+      message: "Training started successfully",
+      projectId: existingProjectId,
       tuneId: response.data.id,
+      status: "training",
     })
   } catch (error) {
     console.error("Tune creation error:", error)
 
-    // Rollback project
-    if (projectId) {
-      await sql`DELETE FROM projects WHERE id = ${projectId}`
+    // Update project status to error
+    try {
+      await sql`
+        UPDATE projects 
+        SET status = 'error', updated_at = NOW()
+        WHERE id = ${existingProjectId}
+      `
+    } catch (dbError) {
+      console.error("Failed to update project status:", dbError)
     }
 
     if (axios.isAxiosError(error)) {
@@ -137,6 +207,12 @@ export async function POST(request: Request) {
       })
     }
 
-    return NextResponse.json({ message: "Something went wrong!" }, { status: 500 })
+    return NextResponse.json(
+      {
+        message: "Failed to start training",
+        error: error.message,
+      },
+      { status: 500 },
+    )
   }
 }
