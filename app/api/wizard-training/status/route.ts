@@ -19,10 +19,12 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Session ID required" }, { status: 400 })
     }
 
-    // Get wizard session status
+    // Get wizard session and project status
     const result = await sql`
-      SELECT status, created_at, updated_at FROM wizard_sessions 
-      WHERE id = ${sessionId} AND user_email = ${session.user.email}
+      SELECT ws.*, p.status as project_status, p.id as project_id
+      FROM wizard_sessions ws
+      LEFT JOIN projects p ON ws.project_id = p.id
+      WHERE ws.id = ${sessionId} AND ws.user_email = ${session.user.email}
     `
 
     if (result.length === 0) {
@@ -30,38 +32,45 @@ export async function GET(request: NextRequest) {
     }
 
     const wizardSession = result[0]
-
-    // Calculate progress based on time elapsed and status
-    let progress = 0
     let status = "processing"
+    let progress = 0
+    let message = "Je betaling wordt verwerkt..."
 
-    if (wizardSession.status === "paid") {
-      const now = new Date()
-      const startTime = new Date(wizardSession.updated_at)
-      const elapsedMinutes = (now.getTime() - startTime.getTime()) / (1000 * 60)
+    if (wizardSession.status === "paid" && wizardSession.project_id) {
+      const projectStatus = wizardSession.project_status
 
-      if (elapsedMinutes < 1) {
-        status = "processing"
-        progress = 10
-      } else if (elapsedMinutes < 15) {
-        status = "training"
-        progress = Math.min(90, 10 + (elapsedMinutes / 15) * 80)
-      } else {
-        status = "completed"
-        progress = 100
-
-        // Update status in database
-        await sql`
-          UPDATE wizard_sessions 
-          SET status = 'completed' 
-          WHERE id = ${sessionId}
-        `
+      switch (projectStatus) {
+        case "paid":
+          status = "starting"
+          progress = 10
+          message = "Training wordt gestart..."
+          break
+        case "training":
+          status = "training"
+          progress = 50
+          message = "Je AI model wordt getraind..."
+          break
+        case "generating":
+          status = "generating"
+          progress = 80
+          message = "Headshots worden gegenereerd..."
+          break
+        case "completed":
+          status = "completed"
+          progress = 100
+          message = "Je headshots zijn klaar!"
+          break
+        default:
+          status = "processing"
+          progress = 25
+          message = "Bezig met verwerken..."
       }
     }
 
     return NextResponse.json({
       status,
-      progress: Math.round(progress),
+      progress,
+      message,
     })
   } catch (error) {
     console.error("Error getting training status:", error)

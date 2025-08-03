@@ -2,61 +2,32 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { useSession } from "next-auth/react"
-import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Check } from "lucide-react"
 import Image from "next/image"
 
 export default function ReviewPage() {
-  const [uploadedPhotos, setUploadedPhotos] = useState<string[]>([])
   const [projectName, setProjectName] = useState("")
   const [gender, setGender] = useState("")
+  const [uploadedPhotos, setUploadedPhotos] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
-  const { data: session } = useSession()
 
   useEffect(() => {
-    if (!session) {
-      router.push("/auth/signin")
-      return
-    }
+    // Load data from sessionStorage
+    const name = sessionStorage.getItem("projectName") || ""
+    const genderValue = sessionStorage.getItem("gender") || ""
+    const photos = JSON.parse(sessionStorage.getItem("uploadedPhotos") || "[]")
 
-    // Load all wizard data
-    const savedProjectName = sessionStorage.getItem("wizard_projectName")
-    const savedGender = sessionStorage.getItem("wizard_gender")
-    const savedPhotos = sessionStorage.getItem("wizard_uploadedPhotos")
+    setProjectName(name)
+    setGender(genderValue)
+    setUploadedPhotos(photos)
 
-    if (!savedProjectName) {
+    // Redirect if missing data
+    if (!name || !genderValue || photos.length === 0) {
       router.push("/wizard/project-name")
-      return
     }
-
-    if (!savedGender) {
-      router.push("/wizard/gender")
-      return
-    }
-
-    if (!savedPhotos) {
-      router.push("/wizard/upload")
-      return
-    }
-
-    setProjectName(savedProjectName)
-    setGender(savedGender)
-
-    try {
-      const photos = JSON.parse(savedPhotos)
-      if (photos.length < 4) {
-        router.push("/wizard/upload")
-        return
-      }
-      setUploadedPhotos(photos)
-    } catch (error) {
-      console.error("Error parsing photos:", error)
-      router.push("/wizard/upload")
-    }
-  }, [session, router])
+  }, [router])
 
   const handleCheckout = async () => {
     setIsLoading(true)
@@ -71,48 +42,46 @@ export default function ReviewPage() {
           projectName,
           gender,
           uploadedPhotos,
-          packId: "professional", // Default pack
+          priceId: "price_1QQvJhP5wjEQJQJQvQvQvQvQ", // Replace with actual price ID
         }),
       })
 
-      if (!response.ok) {
-        throw new Error("Failed to create checkout session")
+      if (response.ok) {
+        const { url } = await response.json()
+        window.location.href = url
+      } else {
+        const error = await response.json()
+        console.error("Checkout error:", error)
+        alert("Er is een fout opgetreden bij het starten van de betaling")
       }
-
-      const { url } = await response.json()
-      window.location.href = url
     } catch (error) {
       console.error("Checkout error:", error)
-      alert("Er is een fout opgetreden. Probeer het opnieuw.")
+      alert("Er is een fout opgetreden bij het starten van de betaling")
     } finally {
       setIsLoading(false)
     }
   }
 
-  if (!session) {
-    return <div>Loading...</div>
-  }
-
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-6xl">
-        {/* Progress bar */}
-        <div className="w-full bg-gray-200 h-2 rounded-full mb-8">
-          <div className="bg-blue-500 h-2 transition-all duration-300 rounded-full" style={{ width: "100%" }}></div>
-        </div>
+    <div className="min-h-screen bg-white">
+      {/* Progress Bar */}
+      <div className="w-full bg-gray-200 h-2">
+        <div className="bg-blue-500 h-2 transition-all duration-300" style={{ width: "100%" }}></div>
+      </div>
 
+      <div className="max-w-6xl mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Left side - Plan details */}
+          {/* Left side - Plan Details */}
           <div>
             <Card className="border-2 border-blue-500">
-              <CardContent className="p-6">
+              <CardContent className="p-8">
                 <div className="text-center mb-6">
-                  <h2 className="text-2xl font-bold text-gray-900 mb-2">Professional</h2>
-                  <div className="text-4xl font-bold text-blue-600 mb-4">€19,99</div>
-                  <p className="text-gray-600">40 professionele portretfoto's</p>
+                  <h2 className="text-3xl font-bold text-gray-900 mb-2">Professional</h2>
+                  <div className="text-5xl font-bold text-blue-600 mb-2">€19,99</div>
+                  <p className="text-gray-600 text-lg">40 professionele portretfoto's</p>
                 </div>
 
-                <div className="space-y-3">
+                <div className="space-y-4">
                   <div className="flex items-center space-x-3">
                     <Check className="w-5 h-5 text-green-500" />
                     <span className="text-gray-700">Verschillende zakelijke outfits</span>
@@ -141,55 +110,63 @@ export default function ReviewPage() {
           {/* Right side - Review */}
           <div className="space-y-6">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900 mb-4">Controleer je gegevens</h1>
-
-              <div className="bg-white rounded-lg p-6 space-y-4">
-                <div>
-                  <h3 className="font-semibold text-gray-900">Project naam:</h3>
-                  <p className="text-gray-600">{projectName}</p>
-                </div>
-
-                <div>
-                  <h3 className="font-semibold text-gray-900">Geslacht:</h3>
-                  <p className="text-gray-600 capitalize">{gender}</p>
-                </div>
-
-                <div>
-                  <h3 className="font-semibold text-gray-900">Geüploade foto's:</h3>
-                  <p className="text-gray-600">{uploadedPhotos.length} foto's</p>
-                </div>
-              </div>
+              <h1 className="text-3xl font-bold text-gray-900 mb-4">Controleer je bestelling</h1>
+              <p className="text-gray-600 text-lg">
+                Controleer of alle gegevens correct zijn voordat je doorgaat naar de betaling.
+              </p>
             </div>
 
-            {/* Photo preview */}
-            <div className="bg-white rounded-lg p-6">
-              <h3 className="font-semibold text-gray-900 mb-4">Je foto's:</h3>
-              <div className="grid grid-cols-3 gap-2">
-                {uploadedPhotos.slice(0, 6).map((photo, index) => (
-                  <Image
-                    key={index}
-                    src={photo || "/placeholder.svg"}
-                    alt={`Photo ${index + 1}`}
-                    width={100}
-                    height={100}
-                    className="w-full h-20 object-cover rounded-lg"
-                  />
-                ))}
-                {uploadedPhotos.length > 6 && (
-                  <div className="w-full h-20 bg-gray-100 rounded-lg flex items-center justify-center text-gray-500 text-sm">
-                    +{uploadedPhotos.length - 6} meer
+            <Card>
+              <CardContent className="p-6">
+                <h3 className="font-semibold text-lg mb-4">Project Details</h3>
+                <div className="space-y-3">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Project naam:</span>
+                    <span className="font-medium">{projectName}</span>
                   </div>
-                )}
-              </div>
-            </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Geslacht:</span>
+                    <span className="font-medium capitalize">{gender}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Aantal foto's:</span>
+                    <span className="font-medium">{uploadedPhotos.length} foto's</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
-            <Button
+            <Card>
+              <CardContent className="p-6">
+                <h3 className="font-semibold text-lg mb-4">Je foto's</h3>
+                <div className="grid grid-cols-3 gap-2">
+                  {uploadedPhotos.slice(0, 6).map((photo, index) => (
+                    <div key={index} className="aspect-square rounded-lg overflow-hidden bg-gray-100">
+                      <Image
+                        src={photo.url || "/placeholder.svg"}
+                        alt={`Photo ${index + 1}`}
+                        width={100}
+                        height={100}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  ))}
+                  {uploadedPhotos.length > 6 && (
+                    <div className="aspect-square rounded-lg bg-gray-100 flex items-center justify-center">
+                      <span className="text-gray-500 text-sm">+{uploadedPhotos.length - 6}</span>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            <button
               onClick={handleCheckout}
               disabled={isLoading}
-              className="w-full py-4 text-lg font-semibold bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-colors disabled:opacity-50"
+              className="w-full bg-orange-500 hover:bg-orange-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold py-4 px-6 rounded-lg transition-colors duration-200 text-lg"
             >
               {isLoading ? "Bezig..." : "Start jouw fotoshoot nu - 19,99€ →"}
-            </Button>
+            </button>
           </div>
         </div>
       </div>
