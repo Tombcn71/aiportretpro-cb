@@ -1,5 +1,4 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { headers } from "next/headers"
 import Stripe from "stripe"
 import { neon } from "@neondatabase/serverless"
 
@@ -9,34 +8,25 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 
 const sql = neon(process.env.DATABASE_URL!)
 
-const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET!
-
-export async function POST(req: NextRequest) {
-  const body = await req.text()
-  const headersList = headers()
-  const sig = headersList.get("stripe-signature")!
-
-  let event: Stripe.Event
-
+export async function POST(request: NextRequest) {
   try {
-    event = stripe.webhooks.constructEvent(body, sig, endpointSecret)
-  } catch (err: any) {
-    console.error("❌ WEBHOOK SIGNATURE ERROR:", err.message)
-    return NextResponse.json({ error: "Webhook signature verification failed" }, { status: 400 })
-  }
+    const body = await request.text()
+    const signature = request.headers.get("stripe-signature")!
 
-  console.log("✅ WEBHOOK EVENT:", event.type, event.id)
-
-  if (event.type === "checkout.session.completed") {
-    const session = event.data.object as Stripe.Checkout.Session
-
-    console.log("💳 CHECKOUT COMPLETED:", {
-      sessionId: session.id,
-      customerEmail: session.customer_details?.email,
-      metadata: session.metadata,
-    })
+    let event: Stripe.Event
 
     try {
+      event = stripe.webhooks.constructEvent(body, signature, process.env.STRIPE_WEBHOOK_SECRET!)
+    } catch (err) {
+      console.error("❌ Webhook signature verification failed:", err)
+      return NextResponse.json({ error: "Webhook signature verification failed" }, { status: 400 })
+    }
+
+    if (event.type === "checkout.session.completed") {
+      const session = event.data.object as Stripe.Checkout.Session
+
+      console.log("🎉 Payment completed:", session.id)
+
       // Check if this session was already processed
       const existingPurchase = await sql`
         SELECT id FROM purchases WHERE stripe_session_id = ${session.id}
@@ -47,163 +37,160 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ received: true })
       }
 
-      // Get wizard data
       const wizardSessionId = session.metadata?.wizardSessionId
-      if (!wizardSessionId) {
-        throw new Error("No wizard session ID in metadata")
-      }
+      const projectName = session.metadata?.projectName || ""
+      const gender = session.metadata?.gender || ""
+      const userEmail = session.metadata?.userEmail || session.customer_details?.email || ""
+      const photoCount = Number.parseInt(session.metadata?.photoCount || "0")
 
-      // Get wizard data from database
-      let wizardData
+      console.log("📋 Processing payment:", {
+        wizardSessionId,
+        projectName,
+        gender,
+        userEmail,
+        photoCount,
+      })
+
+      // Get wizard data
+      let wizardData = null
       try {
         const wizardResult = await sql`
           SELECT * FROM wizard_sessions WHERE session_id = ${wizardSessionId}
         `
         if (wizardResult.length > 0) {
-          const row = wizardResult[0]
-          wizardData = {
-            projectName: row.project_name,
-            gender: row.gender,
-            uploadedPhotos: Array.isArray(row.uploaded_photos)
-              ? row.uploaded_photos
-              : JSON.parse(row.uploaded_photos || "[]"),
-            userEmail: row.user_email,
-          }
+          wizardData = wizardResult[0]
         }
-      } catch (dbError) {
-        console.log("⚠️ Database read failed, using metadata")
+      } catch (error) {
+        console.log("⚠️ Could not fetch wizard data:", error)
       }
 
-      if (!wizardData) {
-        // Fallback to metadata
-        wizardData = {
-          projectName: session.metadata?.projectName || "Untitled",
-          gender: session.metadata?.gender || "man",
-          uploadedPhotos: [],
-          userEmail: session.customer_details?.email || session.metadata?.userEmail,
-        }
-      }
-
-      console.log("📸 Photos to use:", wizardData.uploadedPhotos)
-
-      // Get or create user
-      const userResult = await sql`
-        SELECT * FROM users WHERE email = ${wizardData.userEmail}
-      `
-
-      let user = userResult[0]
-      if (!user) {
-        const createUserResult = await sql`
-          INSERT INTO users (email, name, image, created_at, updated_at)
-          VALUES (${wizardData.userEmail}, '', '', NOW(), NOW())
-          RETURNING *
-        `
-        user = createUserResult[0]
-      }
-
-      console.log("👤 User:", user.id, user.email)
+      const uploadedPhotos = wizardData?.uploaded_photos || []
 
       // Create purchase record
       const purchaseResult = await sql`
-        INSERT INTO purchases (user_id, stripe_session_id, plan_type, amount, headshots_included, status, created_at, updated_at)
-        VALUES (${user.id}, ${session.id}, 'professional', 1999, 40, 'completed', NOW(), NOW())
-        RETURNING *
+        INSERT INTO purchases (
+          stripe_session_id,
+          user_email,
+          amount,
+          currency,
+          status,
+          created_at
+        ) VALUES (
+          ${session.id},
+          ${userEmail},
+          ${session.amount_total || 0},
+          ${session.currency || "eur"},
+          'completed',
+          NOW()
+        )
+        RETURNING id
       `
 
-      const purchase = purchaseResult[0]
-      console.log("💰 Purchase created:", purchase.id)
+      const purchaseId = purchaseResult[0].id
 
-      // Create project - FIXED: Use proper array format for PostgreSQL
+      // Create project
       const projectResult = await sql`
         INSERT INTO projects (
-          user_id,
-          purchase_id,
+          user_email,
           name,
           gender,
           uploaded_photos,
           status,
+          purchase_id,
           created_at,
           updated_at
-        )
-        VALUES (
-          ${user.id},
-          ${purchase.id},
-          ${wizardData.projectName},
-          ${wizardData.gender},
-          ${wizardData.uploadedPhotos}::text[],
-          'training',
+        ) VALUES (
+          ${userEmail},
+          ${projectName},
+          ${gender},
+          ${Array.isArray(uploadedPhotos) ? uploadedPhotos : []},
+          'processing',
+          ${purchaseId},
           NOW(),
           NOW()
         )
-        RETURNING *
+        RETURNING id
       `
 
-      const project = projectResult[0]
-      console.log("✅ Project created:", project.id)
+      const projectId = projectResult[0].id
 
-      // 🚀 START ASTRIA TRAINING WITH PACK ID 928!
+      console.log("✅ Project created:", projectId)
+
+      // Start Astria training with pack 928
       try {
-        console.log("🎯 STARTING ASTRIA TRAINING WITH PACK ID 928...")
-        console.log("📸 Using photos:", wizardData.uploadedPhotos)
-
-        const ASTRIA_API_URL = process.env.ASTRIA_API_URL || "https://api.astria.ai"
-        const ASTRIA_API_KEY = process.env.ASTRIA_API_KEY
-
-        if (!ASTRIA_API_KEY) {
-          throw new Error("ASTRIA_API_KEY not configured")
-        }
-
-        // Use pack endpoint with pack ID 928
-        const astriaResponse = await fetch(`${ASTRIA_API_URL}/p/928/tunes`, {
+        const astriaResponse = await fetch("https://api.astria.ai/tunes", {
           method: "POST",
           headers: {
-            Authorization: `Bearer ${ASTRIA_API_KEY}`,
+            Authorization: `Bearer ${process.env.ASTRIA_API_KEY}`,
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
             tune: {
-              title: `${wizardData.projectName} - ${wizardData.gender}`,
-              name: `project_${project.id}_${Date.now()}`,
-              image_urls: wizardData.uploadedPhotos,
-              callback: `${process.env.NEXTAUTH_URL}/api/astria/wizard-webhook/${project.id}?webhookSecret=${process.env.APP_WEBHOOK_SECRET}`,
+              title: `${projectName} - ${gender}`,
+              name: projectName.toLowerCase().replace(/[^a-z0-9]/g, ""),
+              callback: `${process.env.NEXTAUTH_URL}/api/astria/wizard-webhook/${projectId}`,
             },
+            pack_id: 928,
           }),
         })
 
         if (!astriaResponse.ok) {
-          const errorText = await astriaResponse.text()
-          console.error("❌ Astria API error:", errorText)
           throw new Error(`Astria API error: ${astriaResponse.status}`)
         }
 
-        const astriaResult = await astriaResponse.json()
-        console.log("🔥 ASTRIA TRAINING STARTED WITH PACK 928:", astriaResult.id)
+        const astriaData = await astriaResponse.json()
+        console.log("🚀 Astria training started:", astriaData.id)
 
         // Update project with tune_id
         await sql`
           UPDATE projects 
-          SET tune_id = ${astriaResult.id}, updated_at = NOW()
-          WHERE id = ${project.id}
+          SET tune_id = ${astriaData.id}, updated_at = NOW()
+          WHERE id = ${projectId}
         `
 
-        console.log("🎉 WIZARD FLOW COMPLETED WITH PACK 928!")
-      } catch (astriaError) {
-        console.error("❌ ASTRIA ERROR:", astriaError)
+        // Upload photos to Astria
+        if (Array.isArray(uploadedPhotos) && uploadedPhotos.length > 0) {
+          for (const photoUrl of uploadedPhotos) {
+            try {
+              await fetch(`https://api.astria.ai/tunes/${astriaData.id}/images`, {
+                method: "POST",
+                headers: {
+                  Authorization: `Bearer ${process.env.ASTRIA_API_KEY}`,
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  image: { url: photoUrl },
+                }),
+              })
+            } catch (photoError) {
+              console.error("❌ Failed to upload photo:", photoError)
+            }
+          }
+        }
 
+        console.log("✅ All photos uploaded to Astria")
+      } catch (astriaError) {
+        console.error("❌ Astria training failed:", astriaError)
+
+        // Update project status to failed
         await sql`
           UPDATE projects 
           SET status = 'failed', updated_at = NOW()
-          WHERE id = ${project.id}
+          WHERE id = ${projectId}
         `
       }
 
-      console.log("✅ WEBHOOK COMPLETED SUCCESSFULLY")
-      return NextResponse.json({ received: true })
-    } catch (error) {
-      console.error("❌ WEBHOOK ERROR:", error)
-      return NextResponse.json({ error: "Webhook failed" }, { status: 500 })
+      // Clean up wizard session
+      try {
+        await sql`DELETE FROM wizard_sessions WHERE session_id = ${wizardSessionId}`
+      } catch (cleanupError) {
+        console.log("⚠️ Wizard session cleanup failed:", cleanupError)
+      }
     }
-  }
 
-  return NextResponse.json({ received: true })
+    return NextResponse.json({ received: true })
+  } catch (error) {
+    console.error("❌ WEBHOOK ERROR:", error)
+    return NextResponse.json({ error: "Webhook failed" }, { status: 500 })
+  }
 }

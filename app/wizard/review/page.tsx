@@ -65,16 +65,11 @@ export default function ReviewPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          priceId: "price_1RgTKtDswbEJWagVIUeDtNUS",
-          successUrl: `${window.location.origin}/generate/processing?session_id={CHECKOUT_SESSION_ID}&wizard_session=${wizardSessionId}`,
-          cancelUrl: `${window.location.origin}/wizard/review`,
-          metadata: {
-            projectName,
-            gender,
-            wizardSessionId,
-            userEmail: session?.user?.email,
-            photoCount: uploadedPhotos.length.toString(),
-          },
+          sessionId: wizardSessionId,
+          projectName,
+          gender,
+          photoCount: uploadedPhotos.length,
+          userEmail: session?.user?.email,
         }),
       })
 

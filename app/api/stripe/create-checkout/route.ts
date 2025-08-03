@@ -17,6 +17,10 @@ export async function POST(request: NextRequest) {
       userEmail,
     })
 
+    // Ensure photoCount is a number and convert to string safely
+    const safePhotoCount = photoCount || 0
+    const photoCountString = safePhotoCount.toString()
+
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card", "ideal"],
       line_items: [
@@ -27,15 +31,15 @@ export async function POST(request: NextRequest) {
       ],
       mode: "payment",
       success_url: `${process.env.NEXTAUTH_URL}/generate/processing?session_id={CHECKOUT_SESSION_ID}&wizard_session=${sessionId}`,
-      cancel_url: `${process.env.NEXTAUTH_URL}/wizard/upload`,
+      cancel_url: `${process.env.NEXTAUTH_URL}/wizard/review`,
       customer_email: userEmail,
       allow_promotion_codes: true,
       metadata: {
-        wizardSessionId: sessionId,
-        projectName,
-        gender,
-        photoCount: photoCount.toString(),
-        userEmail,
+        wizardSessionId: sessionId || "",
+        projectName: projectName || "",
+        gender: gender || "",
+        photoCount: photoCountString,
+        userEmail: userEmail || "",
       },
     })
 
