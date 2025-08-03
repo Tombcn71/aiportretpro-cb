@@ -1,183 +1,222 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { useRouter, useParams } from "next/navigation"
-import { Card, CardContent } from "@/components/ui/card"
-import { CheckCircle, Clock, Zap, Camera } from "lucide-react"
+import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
+import { useSession } from "next-auth/react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { CheckCircle, Clock, Zap } from "lucide-react"
 
-export default function WizardTrainingPage() {
+interface TrainingStatus {
+  status: string
+  progress: number
+  message: string
+  estimated_time?: number
+}
+
+export default function WizardTrainingPage({ params }: { params: { sessionId: string } }) {
+  const [trainingStatus, setTrainingStatus] = useState<TrainingStatus>({
+    status: "starting",
+    progress: 0,
+    message: "Je AI model wordt voorbereid...",
+  })
+  const [isComplete, setIsComplete] = useState(false)
   const router = useRouter()
-  const params = useParams()
-  const sessionId = params.sessionId as string
-
-  const [progress, setProgress] = useState(0)
-  const [status, setStatus] = useState("starting")
-  const [statusText, setStatusText] = useState("Training wordt gestart...")
-  const [timeRemaining, setTimeRemaining] = useState("15 minuten")
+  const { data: session } = useSession()
 
   useEffect(() => {
-    if (!sessionId) {
-      router.push("/dashboard")
+    if (!session) {
+      router.push("/auth/signin")
       return
     }
 
-    // Simulate training progress
-    const steps = [
-      { status: "starting", text: "Training wordt gestart...", progress: 5, time: "15 minuten" },
-      { status: "uploading", text: "Foto's worden geanalyseerd...", progress: 15, time: "12 minuten" },
-      { status: "training", text: "AI model wordt getraind...", progress: 30, time: "10 minuten" },
-      { status: "training", text: "Gezichtskenmerken worden geleerd...", progress: 50, time: "8 minuten" },
-      { status: "training", text: "Stijlen worden toegepast...", progress: 70, time: "5 minuten" },
-      { status: "generating", text: "Headshots worden gegenereerd...", progress: 85, time: "3 minuten" },
-      { status: "finalizing", text: "Laatste details worden toegevoegd...", progress: 95, time: "1 minuut" },
-      { status: "complete", text: "Klaar! Je headshots zijn beschikbaar.", progress: 100, time: "Nu beschikbaar" },
-    ]
+    const checkStatus = async () => {
+      try {
+        const response = await fetch(`/api/wizard-training/status?sessionId=${params.sessionId}`)
+        if (response.ok) {
+          const data = await response.json()
+          setTrainingStatus(data)
 
-    let currentStep = 0
-    const interval = setInterval(() => {
-      if (currentStep < steps.length) {
-        const step = steps[currentStep]
-        setStatus(step.status)
-        setStatusText(step.text)
-        setProgress(step.progress)
-        setTimeRemaining(step.time)
-        currentStep++
-      } else {
-        clearInterval(interval)
-        // Redirect to dashboard after completion
-        setTimeout(() => {
-          router.push("/dashboard")
-        }, 3000)
+          if (data.status === "completed") {
+            setIsComplete(true)
+            // Redirect to dashboard after 3 seconds
+            setTimeout(() => {
+              router.push("/dashboard")
+            }, 3000)
+          }
+        }
+      } catch (error) {
+        console.error("Error checking training status:", error)
       }
-    }, 2000) // Update every 2 seconds
+    }
+
+    // Check status immediately
+    checkStatus()
+
+    // Set up polling every 10 seconds
+    const interval = setInterval(checkStatus, 10000)
 
     return () => clearInterval(interval)
-  }, [sessionId, router])
+  }, [params.sessionId, session, router])
 
   const getStatusIcon = () => {
-    switch (status) {
-      case "starting":
-      case "uploading":
-        return <Clock className="w-8 h-8 text-blue-600" />
+    switch (trainingStatus.status) {
+      case "completed":
+        return <CheckCircle className="h-8 w-8 text-green-500" />
       case "training":
-        return <Zap className="w-8 h-8 text-orange-600 animate-pulse" />
-      case "generating":
-        return <Camera className="w-8 h-8 text-purple-600" />
-      case "complete":
-        return <CheckCircle className="w-8 h-8 text-green-600" />
+        return <Zap className="h-8 w-8 text-blue-500 animate-pulse" />
       default:
-        return <Clock className="w-8 h-8 text-blue-600" />
+        return <Clock className="h-8 w-8 text-orange-500" />
     }
   }
 
   const getStatusColor = () => {
-    switch (status) {
-      case "starting":
-      case "uploading":
-        return "bg-blue-500"
-      case "training":
-        return "bg-orange-500"
-      case "generating":
-        return "bg-purple-500"
-      case "complete":
+    switch (trainingStatus.status) {
+      case "completed":
         return "bg-green-500"
-      default:
+      case "training":
         return "bg-blue-500"
+      default:
+        return "bg-orange-500"
     }
+  }
+
+  if (!session) {
+    return <div>Loading...</div>
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
       <Card className="w-full max-w-2xl">
-        <CardContent className="p-8">
-          <div className="text-center mb-8">
-            <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
-              {getStatusIcon()}
+        <CardHeader className="text-center">
+          <div className="flex justify-center mb-4">{getStatusIcon()}</div>
+          <CardTitle className="text-3xl font-bold text-gray-900">
+            {isComplete ? "Je AI headshots zijn klaar!" : "Je AI model wordt getraind"}
+          </CardTitle>
+          <p className="text-gray-600 mt-2">
+            {isComplete
+              ? "Je wordt automatisch doorgestuurd naar je dashboard..."
+              : "Dit duurt ongeveer 10-15 minuten. Je hoeft niet te wachten - we sturen je een email wanneer het klaar is."}
+          </p>
+        </CardHeader>
+
+        <CardContent className="space-y-6">
+          {/* Progress Bar */}
+          <div className="space-y-2">
+            <div className="flex justify-between text-sm text-gray-600">
+              <span>Voortgang</span>
+              <span>{Math.round(trainingStatus.progress)}%</span>
             </div>
-            <h1 className="text-3xl font-bold mb-4">Je AI Headshots worden gemaakt</h1>
-            <p className="text-xl text-gray-600 mb-2">{statusText}</p>
-            <p className="text-lg text-gray-500">Geschatte tijd: {timeRemaining}</p>
+            <div className="w-full bg-gray-200 rounded-full h-3">
+              <div
+                className={`h-3 rounded-full transition-all duration-500 ${getStatusColor()}`}
+                style={{ width: `${trainingStatus.progress}%` }}
+              ></div>
+            </div>
           </div>
 
-          <div className="space-y-6">
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm text-gray-600">
-                <span>Voortgang</span>
-                <span>{progress}%</span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-3">
-                <div
-                  className={`h-3 rounded-full transition-all duration-500 ${getStatusColor()}`}
-                  style={{ width: `${progress}%` }}
-                ></div>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
-              <div className="bg-white p-4 rounded-lg shadow-sm">
-                <div className="flex items-center mb-2">
-                  <CheckCircle className="w-5 h-5 text-green-500 mr-2" />
-                  <span className="font-medium">Foto's geüpload</span>
-                </div>
-                <p className="text-sm text-gray-600">Je foto's zijn succesvol verwerkt</p>
-              </div>
-
-              <div className="bg-white p-4 rounded-lg shadow-sm">
-                <div className="flex items-center mb-2">
-                  {progress >= 30 ? (
-                    <CheckCircle className="w-5 h-5 text-green-500 mr-2" />
-                  ) : (
-                    <Clock className="w-5 h-5 text-gray-400 mr-2" />
-                  )}
-                  <span className="font-medium">AI Training</span>
-                </div>
-                <p className="text-sm text-gray-600">
-                  {progress >= 30 ? "Model is getraind" : "Model wordt getraind..."}
-                </p>
-              </div>
-
-              <div className="bg-white p-4 rounded-lg shadow-sm">
-                <div className="flex items-center mb-2">
-                  {progress >= 85 ? (
-                    <CheckCircle className="w-5 h-5 text-green-500 mr-2" />
-                  ) : (
-                    <Clock className="w-5 h-5 text-gray-400 mr-2" />
-                  )}
-                  <span className="font-medium">Headshots genereren</span>
-                </div>
-                <p className="text-sm text-gray-600">
-                  {progress >= 85 ? "40 headshots gegenereerd" : "Headshots worden gemaakt..."}
-                </p>
-              </div>
-
-              <div className="bg-white p-4 rounded-lg shadow-sm">
-                <div className="flex items-center mb-2">
-                  {progress >= 100 ? (
-                    <CheckCircle className="w-5 h-5 text-green-500 mr-2" />
-                  ) : (
-                    <Clock className="w-5 h-5 text-gray-400 mr-2" />
-                  )}
-                  <span className="font-medium">Klaar voor download</span>
-                </div>
-                <p className="text-sm text-gray-600">
-                  {progress >= 100 ? "Beschikbaar in je dashboard" : "Bijna klaar..."}
-                </p>
-              </div>
-            </div>
-
-            {progress >= 100 && (
-              <div className="text-center mt-8">
-                <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
-                  <p className="text-green-800 font-medium">🎉 Gefeliciteerd! Je professionele headshots zijn klaar.</p>
-                  <p className="text-green-700 text-sm mt-1">Je wordt automatisch doorgestuurd naar je dashboard...</p>
-                </div>
-              </div>
+          {/* Status Message */}
+          <div className="text-center p-4 bg-gray-50 rounded-lg">
+            <p className="text-lg font-medium text-gray-900">{trainingStatus.message}</p>
+            {trainingStatus.estimated_time && (
+              <p className="text-sm text-gray-600 mt-2">
+                Geschatte tijd: {Math.round(trainingStatus.estimated_time / 60)} minuten
+              </p>
             )}
           </div>
 
-          <div className="mt-8 text-center text-sm text-gray-500">
-            <p>💡 Tip: Je kunt dit venster sluiten. We sturen je een email wanneer je headshots klaar zijn.</p>
+          {/* Training Steps */}
+          <div className="space-y-3">
+            <div
+              className={`flex items-center space-x-3 p-3 rounded-lg ${
+                trainingStatus.progress >= 25 ? "bg-green-50" : "bg-gray-50"
+              }`}
+            >
+              <div
+                className={`w-6 h-6 rounded-full flex items-center justify-center ${
+                  trainingStatus.progress >= 25 ? "bg-green-500" : "bg-gray-300"
+                }`}
+              >
+                {trainingStatus.progress >= 25 ? (
+                  <CheckCircle className="h-4 w-4 text-white" />
+                ) : (
+                  <span className="text-xs text-white font-bold">1</span>
+                )}
+              </div>
+              <span className={`${trainingStatus.progress >= 25 ? "text-green-700" : "text-gray-600"}`}>
+                Foto's analyseren
+              </span>
+            </div>
+
+            <div
+              className={`flex items-center space-x-3 p-3 rounded-lg ${
+                trainingStatus.progress >= 50 ? "bg-green-50" : "bg-gray-50"
+              }`}
+            >
+              <div
+                className={`w-6 h-6 rounded-full flex items-center justify-center ${
+                  trainingStatus.progress >= 50 ? "bg-green-500" : "bg-gray-300"
+                }`}
+              >
+                {trainingStatus.progress >= 50 ? (
+                  <CheckCircle className="h-4 w-4 text-white" />
+                ) : (
+                  <span className="text-xs text-white font-bold">2</span>
+                )}
+              </div>
+              <span className={`${trainingStatus.progress >= 50 ? "text-green-700" : "text-gray-600"}`}>
+                AI model trainen
+              </span>
+            </div>
+
+            <div
+              className={`flex items-center space-x-3 p-3 rounded-lg ${
+                trainingStatus.progress >= 75 ? "bg-green-50" : "bg-gray-50"
+              }`}
+            >
+              <div
+                className={`w-6 h-6 rounded-full flex items-center justify-center ${
+                  trainingStatus.progress >= 75 ? "bg-green-500" : "bg-gray-300"
+                }`}
+              >
+                {trainingStatus.progress >= 75 ? (
+                  <CheckCircle className="h-4 w-4 text-white" />
+                ) : (
+                  <span className="text-xs text-white font-bold">3</span>
+                )}
+              </div>
+              <span className={`${trainingStatus.progress >= 75 ? "text-green-700" : "text-gray-600"}`}>
+                Headshots genereren
+              </span>
+            </div>
+
+            <div
+              className={`flex items-center space-x-3 p-3 rounded-lg ${
+                trainingStatus.progress >= 100 ? "bg-green-50" : "bg-gray-50"
+              }`}
+            >
+              <div
+                className={`w-6 h-6 rounded-full flex items-center justify-center ${
+                  trainingStatus.progress >= 100 ? "bg-green-500" : "bg-gray-300"
+                }`}
+              >
+                {trainingStatus.progress >= 100 ? (
+                  <CheckCircle className="h-4 w-4 text-white" />
+                ) : (
+                  <span className="text-xs text-white font-bold">4</span>
+                )}
+              </div>
+              <span className={`${trainingStatus.progress >= 100 ? "text-green-700" : "text-gray-600"}`}>
+                Klaar voor download
+              </span>
+            </div>
           </div>
+
+          {isComplete && (
+            <div className="text-center p-4 bg-green-50 border border-green-200 rounded-lg">
+              <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-2" />
+              <p className="text-green-800 font-medium">Success! Je wordt doorgestuurd naar je dashboard...</p>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

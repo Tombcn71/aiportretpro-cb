@@ -106,129 +106,114 @@ export default function ReviewPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
-      {/* Left side - Plan details */}
-      <div className="w-1/2 bg-white p-8 flex flex-col justify-center">
-        <div className="max-w-md">
-          <div className="mb-8">
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">Amazing headshots are waiting for you!</h1>
-            <p className="text-gray-600">
-              We offer a package for every budget. Pay once, no subscriptions or hidden fees.
-            </p>
-          </div>
+    <div className="min-h-screen bg-white flex flex-col">
+      {/* Progress bar */}
+      <div className="w-full bg-gray-200 h-2">
+        <div className="bg-blue-500 h-2 transition-all duration-300" style={{ width: "100%" }}></div>
+      </div>
 
-          <div className="space-y-6">
-            <div className="flex items-center space-x-2">
-              <CheckCircle className="h-5 w-5 text-green-500" />
-              <span className="text-gray-700">100% Money Back Guarantee</span>
-            </div>
+      {/* Main content */}
+      <div className="flex-1 flex">
+        {/* Left side - Plan details */}
+        <div className="w-1/2 p-8 flex flex-col justify-center">
+          <div className="max-w-md">
+            {/* Professional Plan Card */}
+            <div className="p-6 border-2 border-blue-500 rounded-lg bg-blue-50 mb-8">
+              <div className="text-center mb-6">
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">Professional</h2>
+                <div className="text-4xl font-bold text-blue-600">€19,99</div>
+                <div className="text-lg text-gray-600 mt-2">40 professionele portretfoto's</div>
+              </div>
 
-            <div className="flex items-center space-x-4">
-              <span className="text-gray-700">Google Reviews</span>
-              <div className="flex items-center space-x-1">
-                <span className="font-bold">4.8</span>
-                <div className="flex text-yellow-400">
-                  {"★★★★★".split("").map((star, i) => (
-                    <span key={i}>{star}</span>
-                  ))}
+              <div className="space-y-3">
+                <div className="flex items-center space-x-3">
+                  <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0" />
+                  <span className="text-gray-700">Verschillende zakelijke outfits</span>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0" />
+                  <span className="text-gray-700">Verschillende poses en achtergronden</span>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0" />
+                  <span className="text-gray-700">HD kwaliteit downloads</span>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <Clock className="h-5 w-5 text-blue-500 flex-shrink-0" />
+                  <span className="text-gray-700">Klaar binnen 15 minuten</span>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0" />
+                  <span className="text-gray-700">Perfect voor LinkedIn, Social Media, CV, Website en Print</span>
                 </div>
               </div>
             </div>
 
-            <div className="flex items-center space-x-4">
-              <span className="text-gray-700">TrustPilot</span>
-              <div className="flex items-center space-x-1">
-                <span className="font-bold">4.8</span>
-                <div className="flex text-green-500">
-                  {"★★★★★".split("").map((star, i) => (
-                    <span key={i}>{star}</span>
-                  ))}
+            {/* Project Summary */}
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <h3 className="font-semibold text-gray-900 mb-3">Project Samenvatting</h3>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Project naam:</span>
+                  <span className="font-medium">{projectName}</span>
                 </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Plan details */}
-          <div className="mt-8 p-6 border-2 border-orange-500 rounded-lg bg-orange-50">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-bold">Professional</h3>
-              <div className="text-right">
-                <div className="text-3xl font-bold">€19</div>
-                <div className="text-sm text-gray-500 line-through">€39</div>
-              </div>
-            </div>
-
-            <div className="space-y-3">
-              <div className="flex items-center space-x-2">
-                <CheckCircle className="h-4 w-4 text-green-500" />
-                <span className="text-sm">40 headshots</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Clock className="h-4 w-4 text-blue-500" />
-                <span className="text-sm">15 mins eta</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <CheckCircle className="h-4 w-4 text-green-500" />
-                <span className="text-sm">Choice of 2 attires</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <CheckCircle className="h-4 w-4 text-green-500" />
-                <span className="text-sm">2 backgrounds</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <CheckCircle className="h-4 w-4 text-green-500" />
-                <span className="text-sm">Standard resolution</span>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Geslacht:</span>
+                  <span className="font-medium">{gender}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Aantal foto's:</span>
+                  <span className="font-medium">{uploadedPhotos.length}</span>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Right side - Generated examples */}
-      <div className="w-1/2 p-8 flex items-center justify-center">
-        <div className="grid grid-cols-2 gap-4 max-w-md">
-          <Image
-            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Screenshot%202025-08-03%20at%2015.20.35-rw0hazL0ylykSkY2JFeWOyLAmFww8x.png"
-            alt="Professional headshot example 1"
-            width={200}
-            height={250}
-            className="rounded-lg shadow-lg"
-          />
-          <Image
-            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Screenshot%202025-08-03%20at%2015.20.35-rw0hazL0ylykSkY2JFeWOyLAmFww8x.png"
-            alt="Professional headshot example 2"
-            width={200}
-            height={250}
-            className="rounded-lg shadow-lg"
-          />
-          <Image
-            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Screenshot%202025-08-03%20at%2015.20.35-rw0hazL0ylykSkY2JFeWOyLAmFww8x.png"
-            alt="Professional headshot example 3"
-            width={200}
-            height={250}
-            className="rounded-lg shadow-lg"
-          />
-          <Image
-            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Screenshot%202025-08-03%20at%2015.20.35-rw0hazL0ylykSkY2JFeWOyLAmFww8x.png"
-            alt="Professional headshot example 4"
-            width={200}
-            height={250}
-            className="rounded-lg shadow-lg"
-          />
+        {/* Right side - Generated examples */}
+        <div className="w-1/2 p-8 flex items-center justify-center bg-gray-50">
+          <div className="grid grid-cols-2 gap-4 max-w-md">
+            <Image
+              src="/images/professional-man-1.jpg"
+              alt="Professional headshot example 1"
+              width={200}
+              height={250}
+              className="rounded-lg shadow-lg"
+            />
+            <Image
+              src="/images/professional-woman-1.jpg"
+              alt="Professional headshot example 2"
+              width={200}
+              height={250}
+              className="rounded-lg shadow-lg"
+            />
+            <Image
+              src="/images/professional-man-2.jpg"
+              alt="Professional headshot example 3"
+              width={200}
+              height={250}
+              className="rounded-lg shadow-lg"
+            />
+            <Image
+              src="/images/professional-woman-2.jpg"
+              alt="Professional headshot example 4"
+              width={200}
+              height={250}
+              className="rounded-lg shadow-lg"
+            />
+          </div>
         </div>
       </div>
 
       {/* Bottom CTA */}
-      <div className="fixed bottom-0 left-0 right-0 p-6 bg-white border-t">
-        <div className="max-w-4xl mx-auto">
-          <Button
-            onClick={handleCheckout}
-            disabled={isLoading}
-            className="w-full py-4 text-lg font-semibold bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-colors"
-          >
-            {isLoading ? "Bezig..." : "Verder met Pro"}
-          </Button>
-        </div>
+      <div className="p-6 border-t bg-white">
+        <Button
+          onClick={handleCheckout}
+          disabled={isLoading}
+          className="w-full py-4 text-lg font-semibold bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {isLoading ? "Bezig..." : "Start jouw fotoshoot nu - 19,99€ →"}
+        </Button>
       </div>
     </div>
   )

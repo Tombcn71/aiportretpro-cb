@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import { Button } from "@/components/ui/button"
-import { Upload, X, Trash2 } from "lucide-react"
+import { Upload, Trash2 } from "lucide-react"
 import Image from "next/image"
 
 export default function UploadPage() {
@@ -116,23 +116,9 @@ export default function UploadPage() {
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
-      {/* Header with Aragon.ai logo and progress */}
-      <div className="bg-white border-b">
-        <div className="flex items-center justify-between p-4">
-          <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">A</span>
-            </div>
-            <span className="font-semibold text-lg">Aragon.ai</span>
-          </div>
-          <button className="p-2 hover:bg-gray-100 rounded-lg">
-            <X className="h-5 w-5" />
-          </button>
-        </div>
-
-        <div className="w-full bg-gray-200 h-2">
-          <div className="bg-orange-500 h-2 transition-all duration-300" style={{ width: "75%" }}></div>
-        </div>
+      {/* Progress bar */}
+      <div className="w-full bg-gray-200 h-2">
+        <div className="bg-blue-500 h-2 transition-all duration-300" style={{ width: "75%" }}></div>
       </div>
 
       {/* Main content */}
@@ -178,25 +164,6 @@ export default function UploadPage() {
                   onChange={(e) => e.target.files && handleFileUpload(e.target.files)}
                   disabled={isUploading}
                 />
-              </div>
-
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-                <div className="mb-4">
-                  <div className="w-8 h-8 bg-gray-800 rounded mx-auto mb-2 flex items-center justify-center">
-                    <span className="text-white text-xs">📱</span>
-                  </div>
-                  <h3 className="font-semibold text-gray-900">Or upload from your mobile</h3>
-                </div>
-
-                <div className="bg-white p-4 rounded-lg border">
-                  <p className="font-medium mb-2">Scan the QR code</p>
-                  <div className="w-16 h-16 bg-black mx-auto rounded">
-                    {/* QR code placeholder */}
-                    <div className="w-full h-full bg-black rounded flex items-center justify-center">
-                      <div className="w-12 h-12 bg-white rounded-sm"></div>
-                    </div>
-                  </div>
-                </div>
               </div>
             </div>
           </div>
@@ -251,9 +218,9 @@ export default function UploadPage() {
         <Button
           onClick={handleNext}
           disabled={uploadedPhotos.length < 4 || isLoading}
-          className="w-full py-4 text-lg font-semibold bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-colors"
+          className="w-full py-4 text-lg font-semibold bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {isLoading ? "Bezig..." : "Continue"}
+          {isLoading ? "Bezig..." : "Volgende"}
         </Button>
       </div>
     </div>

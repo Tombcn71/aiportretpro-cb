@@ -1,484 +1,286 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { Header } from "@/components/header"
+import { useState, useEffect } from "react"
+import { useSession } from "next-auth/react"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Download, Camera, Trash2, X, CheckCircle, DownloadIcon } from "lucide-react"
-import Link from "next/link"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Trash2, Download, User, LogOut, CreditCard } from "lucide-react"
+import { signOut } from "next-auth/react"
 import Image from "next/image"
-import JSZip from "jszip"
 
 interface Project {
-  id: number
+  id: string
   name: string
   status: string
   created_at: string
-  generated_photos: string | string[] | null
+  photos?: string[]
+  tune_id?: string
 }
 
-interface UserCredits {
-  credits: number
+interface Credit {
+  id: string
+  amount: number
+  created_at: string
+  description: string
 }
 
-interface PhotoItem {
-  url: string
-  projectName: string
-  projectId: number
-  index: number
-  key: string
-}
-
-export default function DashboardPage() {
+export default function Dashboard() {
+  const { data: session, status } = useSession()
+  const router = useRouter()
   const [projects, setProjects] = useState<Project[]>([])
-  const [credits, setCredits] = useState<UserCredits>({ credits: 0 })
-  const [loading, setLoading] = useState(true)
-  const [imageErrors, setImageErrors] = useState<Set<string>>(new Set())
-  const [deletingPhotos, setDeletingPhotos] = useState<Set<string>>(new Set())
-  const [showDeleteMode, setShowDeleteMode] = useState(false)
-  const [selectedPhotos, setSelectedPhotos] = useState<Set<string>>(new Set())
-  const [bulkDownloading, setBulkDownloading] = useState(false)
+  const [credits, setCredits] = useState<Credit[]>([])
+  const [totalCredits, setTotalCredits] = useState(0)
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [projectsResponse, creditsResponse] = await Promise.all([
-          fetch("/api/projects"),
-          fetch("/api/credits/balance"),
-        ])
+    if (status === "loading") return
 
-        if (!projectsResponse.ok || !creditsResponse.ok) {
-          throw new Error("Failed to fetch data")
-        }
-
-        const projectsData = await projectsResponse.json()
-        const creditsData = await creditsResponse.json()
-
-        console.log("Dashboard data:", { projectsData, creditsData })
-
-        setProjects(projectsData)
-        setCredits(creditsData)
-      } catch (error) {
-        console.error("Error fetching data:", error)
-        setCredits({ credits: 0 })
-      } finally {
-        setLoading(false)
-      }
+    if (!session) {
+      router.push("/auth/signin")
+      return
     }
 
-    fetchData()
-  }, [])
+    fetchProjects()
+    fetchCredits()
+  }, [session, status, router])
 
-  // Parse generated photos and filter out invalid ones - ONLY COUNT UNIQUE PHOTOS
-  const allPhotos = projects.flatMap((project) => {
-    let photos: string[] = []
-
-    if (project.generated_photos) {
-      try {
-        if (typeof project.generated_photos === "string") {
-          if (project.generated_photos.startsWith("[") && project.generated_photos.endsWith("]")) {
-            photos = JSON.parse(project.generated_photos)
-          } else if (project.generated_photos.includes("astria.ai")) {
-            photos = [project.generated_photos]
-          }
-        } else if (Array.isArray(project.generated_photos)) {
-          photos = project.generated_photos
-        }
-      } catch (e) {
-        console.warn("Could not parse photos for project", project.id, e)
-        photos = []
+  const fetchProjects = async () => {
+    try {
+      const response = await fetch("/api/projects")
+      if (response.ok) {
+        const data = await response.json()
+        // Only show completed projects
+        const completedProjects = data.filter(
+          (project: Project) => project.status === "completed" && project.photos && project.photos.length > 0,
+        )
+        setProjects(completedProjects)
       }
+    } catch (error) {
+      console.error("Error fetching projects:", error)
+    } finally {
+      setIsLoading(false)
     }
+  }
 
-    // Filter for valid Astria photos only
-    const validPhotos = photos.filter(
-      (photo) =>
-        photo &&
-        typeof photo === "string" &&
-        photo.length > 20 &&
-        (photo.includes("astria.ai") || photo.includes("mp.astria.ai")) &&
-        !photo.includes("example.com") &&
-        !photo.includes("placeholder") &&
-        !photo.includes("/placeholder.svg") &&
-        !photo.includes("null") &&
-        photo.startsWith("http"),
-    )
+  const fetchCredits = async () => {
+    try {
+      const response = await fetch("/api/credits/balance")
+      if (response.ok) {
+        const data = await response.json()
+        setCredits(data.credits || [])
+        setTotalCredits(data.balance || 0)
+      }
+    } catch (error) {
+      console.error("Error fetching credits:", error)
+    }
+  }
 
-    return validPhotos.map((photo: string, index: number) => ({
-      url: photo,
-      projectName: project.name,
-      projectId: project.id,
-      index: index,
-      key: `${project.id}-${photo.substring(photo.lastIndexOf("/") + 1)}`,
-    }))
-  })
+  const deletePhoto = async (projectId: string, photoUrl: string) => {
+    try {
+      const response = await fetch("/api/photos/delete", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ projectId, photoUrl }),
+      })
 
-  // Remove duplicates based on URL - THIS IS THE KEY FIX
-  const uniquePhotos = allPhotos.filter((photo, index, self) => index === self.findIndex((p) => p.url === photo.url))
-
-  console.log("Total photos found:", allPhotos.length, "Unique photos:", uniquePhotos.length)
-
-  const handleImageError = (photoKey: string) => {
-    console.log("Image error for:", photoKey)
-    setImageErrors((prev) => new Set([...prev, photoKey]))
+      if (response.ok) {
+        fetchProjects() // Refresh projects
+      }
+    } catch (error) {
+      console.error("Error deleting photo:", error)
+    }
   }
 
   const downloadPhoto = (photoUrl: string, projectName: string, index: number) => {
     const link = document.createElement("a")
     link.href = photoUrl
-    link.download = `${projectName}_portretfoto_${index + 1}.jpg`
-    link.target = "_blank"
+    link.download = `${projectName}_photo_${index + 1}.jpg`
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
   }
 
-  const deletePhoto = async (photo: PhotoItem) => {
-    if (!confirm(`Weet je zeker dat je deze foto wilt verwijderen? Dit kan niet ongedaan worden gemaakt.`)) {
-      return
-    }
-
-    setDeletingPhotos((prev) => new Set([...prev, photo.key]))
-
-    try {
-      const response = await fetch("/api/photos/delete", {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          photoUrl: photo.url,
-          projectId: photo.projectId,
-        }),
-      })
-
-      if (!response.ok) {
-        throw new Error("Failed to delete photo")
-      }
-
-      const result = await response.json()
-
-      // Update the projects state to reflect the deletion
-      setProjects((prevProjects) =>
-        prevProjects.map((project) => {
-          if (project.id === photo.projectId) {
-            let currentPhotos: string[] = []
-
-            if (project.generated_photos) {
-              try {
-                if (typeof project.generated_photos === "string") {
-                  if (project.generated_photos.startsWith("[")) {
-                    currentPhotos = JSON.parse(project.generated_photos)
-                  } else {
-                    currentPhotos = [project.generated_photos]
-                  }
-                } else if (Array.isArray(project.generated_photos)) {
-                  currentPhotos = project.generated_photos
-                }
-              } catch (e) {
-                currentPhotos = []
-              }
-            }
-
-            const updatedPhotos = currentPhotos.filter((p) => p !== photo.url)
-
-            return {
-              ...project,
-              generated_photos: updatedPhotos,
-            }
-          }
-          return project
-        }),
-      )
-
-      // Remove from selected photos if it was selected
-      setSelectedPhotos((prev) => {
-        const newSet = new Set(prev)
-        newSet.delete(photo.key)
-        return newSet
-      })
-
-      console.log("Photo deleted successfully")
-    } catch (error) {
-      console.error("Error deleting photo:", error)
-      alert("Er ging iets mis bij het verwijderen van de foto. Probeer het opnieuw.")
-    } finally {
-      setDeletingPhotos((prev) => {
-        const newSet = new Set(prev)
-        newSet.delete(photo.key)
-        return newSet
-      })
-    }
-  }
-
-  const togglePhotoSelection = (photoKey: string) => {
-    setSelectedPhotos((prev) => {
-      const newSet = new Set(prev)
-      if (newSet.has(photoKey)) {
-        newSet.delete(photoKey)
-      } else {
-        newSet.add(photoKey)
-      }
-      return newSet
-    })
-  }
-
-  const selectAllPhotos = () => {
-    const validPhotoKeys = uniquePhotos.filter((photo) => !imageErrors.has(photo.key)).map((photo) => photo.key)
-    setSelectedPhotos(new Set(validPhotoKeys))
-  }
-
-  const deselectAllPhotos = () => {
-    setSelectedPhotos(new Set())
-  }
-
-  const bulkDownloadPhotos = async () => {
-    if (selectedPhotos.size === 0) return
-
-    setBulkDownloading(true)
-    const zip = new JSZip()
-
-    try {
-      const selectedPhotoItems = uniquePhotos.filter((photo) => selectedPhotos.has(photo.key))
-
-      for (const photo of selectedPhotoItems) {
-        try {
-          const response = await fetch(photo.url)
-          const blob = await response.blob()
-          const filename = `${photo.projectName}_portretfoto_${photo.index + 1}.jpg`
-          zip.file(filename, blob)
-        } catch (error) {
-          console.error(`Failed to download ${photo.url}:`, error)
-        }
-      }
-
-      const zipBlob = await zip.generateAsync({ type: "blob" })
-      const link = document.createElement("a")
-      link.href = URL.createObjectURL(zipBlob)
-      link.download = `portretfotos_${new Date().toISOString().split("T")[0]}.zip`
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-      URL.revokeObjectURL(link.href)
-
-      // Clear selection after download
-      setSelectedPhotos(new Set())
-    } catch (error) {
-      console.error("Error creating zip file:", error)
-      alert("Er ging iets mis bij het maken van het zip bestand.")
-    } finally {
-      setBulkDownloading(false)
-    }
-  }
-
-  if (loading) {
+  if (status === "loading" || isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <Header />
-        <div className="flex items-center justify-center min-h-[60vh]">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0077B5]"></div>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading dashboard...</p>
         </div>
       </div>
     )
   }
 
-  const validPhotos = uniquePhotos.filter((photo) => !imageErrors.has(photo.key))
-
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header />
+      {/* Header */}
+      <header className="bg-white shadow-sm border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center space-x-4">
+              <Image src="/images/logo.png" alt="Logo" width={40} height={40} className="rounded-lg" />
+              <h1 className="text-xl font-semibold text-gray-900">Dashboard</h1>
+            </div>
 
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold text-center mb-8">Dashboard</h1>
-
-        {/* Credits Overview */}
-        <div className="mb-8">
-          <Card className="bg-gradient-to-r from-[#0077B5] to-[#004182] text-white">
-            <CardContent className="p-6">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <div>
-                  <p className="text-3xl font-bold">{credits.credits}</p>
-                  <p className="text-blue-100">Credits</p>
-                </div>
-                <div className="w-full sm:w-auto">
-                  {credits.credits > 0 ? (
-                    <Link href="/login?flow=wizard" className="block">
-                      <Button className="bg-white text-[#0077B5] hover:bg-gray-100 font-semibold w-full sm:w-auto">
-                        Start Nieuw Project
-                      </Button>
-                    </Link>
-                  ) : (
-                    <Link href="/pricing" className="block">
-                      <Button className="bg-white text-[#0077B5] hover:bg-gray-100 font-semibold w-full sm:w-auto">
-                        Koop Tegoed
-                      </Button>
-                    </Link>
-                  )}
-                </div>
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2 bg-blue-50 px-3 py-1 rounded-full">
+                <CreditCard className="h-4 w-4 text-blue-600" />
+                <span className="text-sm font-medium text-blue-600">{totalCredits} credits</span>
               </div>
-            </CardContent>
-          </Card>
+
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={session?.user?.image || ""} alt={session?.user?.name || ""} />
+                      <AvatarFallback>
+                        <User className="h-4 w-4" />
+                      </AvatarFallback>
+                    </Avatar>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56" align="end" forceMount>
+                  <DropdownMenuItem onClick={() => signOut()}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Log out</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </div>
         </div>
+      </header>
 
-        {/* Photos Gallery */}
-        <div>
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
-            <h2 className="text-2xl font-semibold">Jouw Portetfotos</h2>
-            {validPhotos.length > 0 && (
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-4 w-full sm:w-auto">
-                {/* Bulk Download Controls */}
-                {!showDeleteMode && (
-                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-                    <Button
-                      onClick={selectedPhotos.size === validPhotos.length ? deselectAllPhotos : selectAllPhotos}
-                      variant="outline"
-                      size="sm"
-                      className="w-full sm:w-auto bg-transparent"
-                    >
-                      {selectedPhotos.size === validPhotos.length ? "Deselecteer Alles" : "Selecteer Alles"}
-                    </Button>
-                    {selectedPhotos.size > 0 && (
-                      <Button
-                        onClick={bulkDownloadPhotos}
-                        disabled={bulkDownloading}
-                        className="bg-[#0077B5] hover:bg-[#004182] text-white w-full sm:w-auto"
-                        size="sm"
-                      >
-                        <DownloadIcon className="h-4 w-4 mr-2" />
-                        {bulkDownloading ? "Downloaden..." : `Download ${selectedPhotos.size} foto's`}
-                      </Button>
-                    )}
-                  </div>
-                )}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Credits Overview */}
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <CreditCard className="h-5 w-5" />
+              <span>Credits Overview</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="text-center p-4 bg-blue-50 rounded-lg">
+                <div className="text-2xl font-bold text-blue-600">{totalCredits}</div>
+                <div className="text-sm text-gray-600">Available Credits</div>
+              </div>
+              <div className="text-center p-4 bg-green-50 rounded-lg">
+                <div className="text-2xl font-bold text-green-600">{projects.length}</div>
+                <div className="text-sm text-gray-600">Completed Projects</div>
+              </div>
+              <div className="text-center p-4 bg-purple-50 rounded-lg">
+                <div className="text-2xl font-bold text-purple-600">
+                  {projects.reduce((total, project) => total + (project.photos?.length || 0), 0)}
+                </div>
+                <div className="text-sm text-gray-600">Total Photos</div>
+              </div>
+            </div>
 
+            {totalCredits === 0 && (
+              <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <p className="text-yellow-800 text-sm">
+                  You have no credits remaining. Purchase more credits to create new projects.
+                </p>
                 <Button
-                  onClick={() => {
-                    setShowDeleteMode(!showDeleteMode)
-                    setSelectedPhotos(new Set()) // Clear selection when toggling modes
-                  }}
-                  variant={showDeleteMode ? "destructive" : "outline"}
-                  className="flex items-center gap-2 w-full sm:w-auto"
+                  onClick={() => router.push("/pricing")}
+                  className="mt-2 bg-blue-600 hover:bg-blue-700 text-white"
                 >
-                  {showDeleteMode ? (
-                    <>
-                      <X className="h-4 w-4" />
-                      Annuleren
-                    </>
-                  ) : (
-                    <>
-                      <Trash2 className="h-4 w-4" />
-                      Foto's Verwijderen
-                    </>
-                  )}
+                  Buy Credits
                 </Button>
               </div>
             )}
-          </div>
+          </CardContent>
+        </Card>
 
-          {showDeleteMode && (
-            <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-              <p className="text-red-800 font-medium">
-                ⚠️ Verwijder modus actief - Klik op een foto om deze permanent te verwijderen
-              </p>
-            </div>
-          )}
-
-          {validPhotos.length === 0 ? (
-            <div className="text-center py-20">
-              <Camera className="h-16 w-16 text-gray-400 mx-auto mb-6" />
-              <h3 className="text-xl font-semibold mb-4">Nog geen portetfotos</h3>
-              <p className="text-gray-600 mb-8">
-                {credits.credits > 0
-                  ? "Je hebt tegoed! Start je eerste project."
-                  : "Koop tegoed om je eerste professionele portetfotos te maken."}
-              </p>
-              {credits.credits > 0 ? (
-                <Link href="/login?flow=wizard">
-                  <Button className="bg-[#0077B5] hover:bg-[#004182] text-white px-8 py-3">Start Nieuw Project</Button>
-                </Link>
-              ) : (
-                <Link href="/pricing">
-                  <Button className="bg-[#0077B5] hover:bg-[#004182] text-white px-8 py-3">Portetfotos maken</Button>
-                </Link>
-              )}
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-              {validPhotos.map((photo) => (
-                <div key={photo.key} className="group relative">
-                  <div
-                    className={`aspect-[3/4] rounded-lg overflow-hidden bg-gray-100 shadow-md hover:shadow-lg transition-all ${
-                      showDeleteMode ? "cursor-pointer hover:ring-2 hover:ring-red-500" : ""
-                    } ${deletingPhotos.has(photo.key) ? "opacity-50" : ""} ${
-                      !showDeleteMode && selectedPhotos.has(photo.key) ? "ring-2 ring-[#0077B5]" : ""
-                    }`}
-                    onClick={showDeleteMode ? () => deletePhoto(photo) : () => togglePhotoSelection(photo.key)}
-                  >
-                    <Image
-                      src={photo.url || "/placeholder.svg"}
-                      alt={`Portretfoto ${photo.index + 1} van ${photo.projectName}`}
-                      width={300}
-                      height={400}
-                      className="w-full h-full object-cover"
-                      onError={() => handleImageError(photo.key)}
-                      unoptimized
-                      crossOrigin="anonymous"
+        {/* Photo Gallery */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Your AI Headshots</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {projects.length === 0 ? (
+              <div className="text-center py-12">
+                <div className="text-gray-400 mb-4">
+                  <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
                     />
-
-                    {/* Selection indicator */}
-                    {!showDeleteMode && selectedPhotos.has(photo.key) && (
-                      <div className="absolute top-2 right-2 bg-[#0077B5] text-white rounded-full p-1">
-                        <CheckCircle className="h-4 w-4" />
+                  </svg>
+                </div>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">No photos yet</h3>
+                <p className="text-gray-500 mb-4">Create your first AI headshot project to see your photos here.</p>
+                <Button
+                  onClick={() => router.push("/wizard/welcome")}
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                  Create First Project
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-8">
+                {projects.map((project) => (
+                  <div key={project.id} className="border rounded-lg p-6">
+                    <div className="flex justify-between items-center mb-4">
+                      <div>
+                        <h3 className="text-lg font-semibold text-gray-900">{project.name}</h3>
+                        <div className="flex items-center space-x-2 mt-1">
+                          <Badge variant="secondary" className="bg-green-100 text-green-800">
+                            {project.status}
+                          </Badge>
+                          <span className="text-sm text-gray-500">
+                            Created {new Date(project.created_at).toLocaleDateString()}
+                          </span>
+                        </div>
                       </div>
-                    )}
+                    </div>
 
-                    {/* Delete overlay */}
-                    {showDeleteMode && (
-                      <div className="absolute inset-0 bg-red-500 bg-opacity-0 hover:bg-opacity-20 transition-all flex items-center justify-center">
-                        <Trash2 className="h-8 w-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
-                      </div>
-                    )}
-
-                    {/* Loading overlay */}
-                    {deletingPhotos.has(photo.key) && (
-                      <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+                    {project.photos && project.photos.length > 0 && (
+                      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                        {project.photos.map((photo, index) => (
+                          <div key={index} className="relative group">
+                            <Image
+                              src={photo || "/placeholder.svg"}
+                              alt={`${project.name} photo ${index + 1}`}
+                              width={200}
+                              height={200}
+                              className="w-full h-32 object-cover rounded-lg"
+                            />
+                            <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all duration-200 rounded-lg flex items-center justify-center">
+                              <div className="opacity-0 group-hover:opacity-100 flex space-x-2">
+                                <Button
+                                  size="sm"
+                                  variant="secondary"
+                                  onClick={() => downloadPhoto(photo, project.name, index)}
+                                  className="bg-white text-gray-900 hover:bg-gray-100"
+                                >
+                                  <Download className="h-4 w-4" />
+                                </Button>
+                                <Button size="sm" variant="destructive" onClick={() => deletePhoto(project.id, photo)}>
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     )}
                   </div>
-
-                  {!showDeleteMode && (
-                    <Button
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        downloadPhoto(photo.url, photo.projectName, photo.index)
-                      }}
-                      size="sm"
-                      variant="outline"
-                      className="w-full mt-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                      disabled={deletingPhotos.has(photo.key)}
-                    >
-                      <Download className="h-4 w-4 mr-2" />
-                      Download
-                    </Button>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Success message */}
-        {validPhotos.length > 0 && !showDeleteMode && (
-          <div className="mt-8 p-4 bg-green-50 border border-green-200 rounded-lg">
-            <div className="flex items-center">
-              <CheckCircle className="h-5 w-5 text-green-600 mr-2" />
-              <p className="text-green-800 font-medium">
-                Geweldig! Je hebt {validPhotos.length} professionele portetfotos klaar voor download.
-              </p>
-            </div>
-          </div>
-        )}
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </div>
   )
