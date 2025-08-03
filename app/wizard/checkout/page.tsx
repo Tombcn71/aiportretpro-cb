@@ -16,6 +16,7 @@ export default function CheckoutPage() {
         const sessionId = sessionStorage.getItem("wizardSessionId")
         const projectName = sessionStorage.getItem("projectName")
         const gender = sessionStorage.getItem("gender")
+        const selectedPlan = "professional" // Always professional since there's only one plan
         const uploadedPhotos = JSON.parse(sessionStorage.getItem("uploadedPhotos") || "[]")
 
         if (!sessionId || !projectName || !gender || !uploadedPhotos.length) {
@@ -28,6 +29,7 @@ export default function CheckoutPage() {
           sessionId,
           projectName,
           gender,
+          selectedPlan,
           photoCount: uploadedPhotos.length,
           userEmail: session?.user?.email,
         })
@@ -41,6 +43,7 @@ export default function CheckoutPage() {
             projectName,
             gender,
             uploadedPhotos,
+            selectedPlan,
             userEmail: session?.user?.email,
           }),
         })
@@ -53,6 +56,7 @@ export default function CheckoutPage() {
             sessionId,
             projectName,
             gender,
+            selectedPlan,
             photoCount: uploadedPhotos.length,
             userEmail: session?.user?.email,
           }),
@@ -65,11 +69,11 @@ export default function CheckoutPage() {
           window.location.href = data.url
         } else {
           console.error("No checkout URL received")
-          router.push("/wizard/upload")
+          router.push("/wizard/review")
         }
       } catch (error) {
         console.error("Checkout error:", error)
-        router.push("/wizard/upload")
+        router.push("/wizard/review")
       }
     }
 
@@ -82,7 +86,7 @@ export default function CheckoutPage() {
     <div className="min-h-screen bg-gray-50 flex items-center justify-center">
       <div className="text-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-        <p className="text-gray-600">Redirecting to secure checkout...</p>
+        <p className="text-gray-600">Doorverwijzen naar veilige checkout...</p>
       </div>
     </div>
   )

@@ -160,7 +160,8 @@ export default function UploadPage() {
         console.error("❌ Failed to save wizard data:", error)
       }
 
-      router.push("/wizard/checkout")
+      // Go to review page instead of checkout
+      router.push("/wizard/review")
     }
   }
 
@@ -274,7 +275,7 @@ export default function UploadPage() {
                 disabled={uploadedPhotos.length < 6}
                 className="bg-[#0077B5] hover:bg-[#004182] text-white"
               >
-                Naar betaling
+                Naar review
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </div>
