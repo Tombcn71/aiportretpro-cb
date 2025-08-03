@@ -1,69 +1,103 @@
 "use client"
 
-import type React from "react"
-
-import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useState, useEffect } from "react"
 import { useSession } from "next-auth/react"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Progress } from "@/components/ui/progress"
+import { ArrowRight } from "lucide-react"
+import { ProgressBar } from "@/components/ui/progress-bar"
 
 export default function ProjectNamePage() {
-  const [projectName, setProjectName] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
+  const { data: session, status } = useSession()
   const router = useRouter()
-  const { data: session } = useSession()
+  const [projectName, setProjectName] = useState("")
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!projectName.trim()) return
+  useEffect(() => {
+    if (status === "loading") return
 
-    setIsLoading(true)
+    if (!session) {
+      console.log("❌ No session, redirecting to welcome")
+      router.push("/wizard/welcome")
+      return
+    }
 
-    // Store project name in sessionStorage
-    const sessionId = crypto.randomUUID()
-    sessionStorage.setItem("wizardSessionId", sessionId)
-    sessionStorage.setItem("projectName", projectName.trim())
+    // Generate session ID if not exists
+    if (!sessionStorage.getItem("wizardSessionId")) {
+      const sessionId = `wizard_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+      sessionStorage.setItem("wizardSessionId", sessionId)
+    }
 
-    router.push("/wizard/gender")
+    // Load existing project name if available
+    const savedName = sessionStorage.getItem("projectName")
+    if (savedName) {
+      setProjectName(savedName)
+    }
+  }, [session, status, router])
+
+  const handleNext = () => {
+    if (projectName.trim()) {
+      sessionStorage.setItem("projectName", projectName.trim())
+      console.log("✅ Project name saved:", projectName.trim())
+      router.push("/wizard/gender")
+    }
+  }
+
+  if (status === "loading") {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0077B5]"></div>
+      </div>
+    )
   }
 
   if (!session) {
-    router.push("/auth/signin")
     return null
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">Project Name</CardTitle>
-          <p className="text-gray-600">Step 1 of 3</p>
-          <Progress value={33} className="mt-2" />
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <Label htmlFor="projectName">What should we call your project?</Label>
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="container mx-auto px-4 max-w-2xl">
+        {/* Progress Bar */}
+        <div className="mb-8">
+          <ProgressBar currentStep={1} totalSteps={3} />
+        </div>
+
+        <Card>
+          <CardHeader className="text-center">
+            <CardTitle className="text-2xl">Geef je project een naam</CardTitle>
+            <p className="text-gray-600">
+              Kies een naam voor je headshot project. Dit helpt je later om je foto's terug te vinden.
+            </p>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="space-y-2">
+              <Label htmlFor="projectName">Project naam</Label>
               <Input
                 id="projectName"
                 type="text"
+                placeholder="Bijv. LinkedIn Headshots, Zakelijke Foto's, ..."
                 value={projectName}
                 onChange={(e) => setProjectName(e.target.value)}
-                placeholder="e.g. Professional Headshots"
-                required
-                className="mt-1"
+                className="text-lg py-3"
+                maxLength={50}
               />
+              <p className="text-sm text-gray-500">{projectName.length}/50 karakters</p>
             </div>
-            <Button type="submit" className="w-full" disabled={!projectName.trim() || isLoading}>
-              {isLoading ? "Next..." : "Continue"}
+
+            <Button
+              onClick={handleNext}
+              disabled={!projectName.trim()}
+              className="w-full bg-[#0077B5] hover:bg-[#004182] text-white py-3 text-lg"
+            >
+              Volgende stap
+              <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
-          </form>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   )
 }

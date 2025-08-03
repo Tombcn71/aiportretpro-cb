@@ -14,9 +14,10 @@ export default function WizardWelcomePage() {
 
   useEffect(() => {
     // Clear any existing wizard data when starting fresh
-    localStorage.removeItem("wizard_project_name")
-    localStorage.removeItem("wizard_gender")
-    localStorage.removeItem("wizard_uploaded_photos")
+    sessionStorage.removeItem("wizardSessionId")
+    sessionStorage.removeItem("projectName")
+    sessionStorage.removeItem("gender")
+    sessionStorage.removeItem("uploadedPhotos")
 
     if (session) {
       console.log("✅ User already logged in, redirecting to project name")
@@ -51,12 +52,10 @@ export default function WizardWelcomePage() {
 
             <div className="space-y-6">
               <h1 className="text-5xl font-bold text-gray-900 leading-tight">
-                40 professionele headshots voor <span className="text-orange-500">€15,99</span>
+                40 professionele headshots voor <span className="text-orange-500">€19,99</span>
               </h1>
 
-              <p className="text-xl text-gray-600">
-                Maak professionele AI headshots in 5 eenvoudige stappen. Korting van €4 automatisch toegepast!
-              </p>
+              <p className="text-xl text-gray-600">Maak professionele AI headshots in 5 eenvoudige stappen.</p>
 
               <div className="space-y-4">
                 <div className="flex items-center space-x-3">
@@ -100,7 +99,7 @@ export default function WizardWelcomePage() {
                     <span className="text-white text-sm font-bold">5</span>
                   </div>
                   <div>
-                    <span className="text-gray-900 font-medium">Betaal €15,99</span>
+                    <span className="text-gray-900 font-medium">Betaal €19,99</span>
                     <p className="text-gray-600 text-sm">40 headshots in 15 min</p>
                   </div>
                 </div>
@@ -109,7 +108,7 @@ export default function WizardWelcomePage() {
               <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                 <div className="flex items-center space-x-2">
                   <CheckCircle className="h-5 w-5 text-green-600" />
-                  <span className="text-green-800 font-medium">20% korting automatisch toegepast - bespaar €4!</span>
+                  <span className="text-green-800 font-medium">Professionele kwaliteit gegarandeerd</span>
                 </div>
               </div>
             </div>
