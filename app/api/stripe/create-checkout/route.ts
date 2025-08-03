@@ -85,9 +85,9 @@ export async function POST(request: NextRequest) {
       ],
       mode: "payment",
       customer_email: session.user.email,
-      client_reference_id: projectId.toString(), // BELANGRIJK: Project ID hier
+      client_reference_id: projectId.toString(),
       metadata: {
-        projectId: projectId.toString(), // EN hier
+        projectId: projectId.toString(),
         projectName: projectName,
         gender: gender,
         userEmail: session.user.email,

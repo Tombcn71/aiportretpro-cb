@@ -31,19 +31,12 @@ export async function POST(request: NextRequest) {
     try {
       let projectId: string | undefined
 
-      // Optie 1: Probeer projectId uit metadata te halen
       if (session.metadata?.projectId) {
         projectId = session.metadata.projectId
-      }
-
-      // Optie 2: Haal projectId uit client_reference_id
-      else if (session.client_reference_id) {
+      } else if (session.client_reference_id) {
         projectId = session.client_reference_id
         console.log("📋 Using client_reference_id as projectId:", projectId)
-      }
-
-      // Optie 3: Zoek project op basis van userEmail en status 'photos_uploaded'
-      else if (session.metadata?.userEmail || session.customer_details?.email) {
+      } else if (session.metadata?.userEmail || session.customer_details?.email) {
         const userEmail = session.metadata?.userEmail || session.customer_details?.email
         console.log("🔍 Searching for photos_uploaded project for user:", userEmail)
 
@@ -71,7 +64,6 @@ export async function POST(request: NextRequest) {
           clientReferenceId: session.client_reference_id,
         })
 
-        // Log alle beschikbare data voor debugging
         console.log("🔍 Available session data:", {
           id: session.id,
           metadata: session.metadata,
@@ -169,7 +161,6 @@ export async function POST(request: NextRequest) {
         const errorText = await astriaResponse.text()
         console.error("❌ Failed to start Astria training:", errorText)
 
-        // Update project status to error
         await sql`
           UPDATE projects 
           SET status = 'error', updated_at = NOW()
@@ -185,7 +176,6 @@ export async function POST(request: NextRequest) {
         )
       } else {
         console.log("✅ Astria training started successfully")
-        // Update project status to training
         await sql`
           UPDATE projects 
           SET status = 'training', updated_at = NOW()

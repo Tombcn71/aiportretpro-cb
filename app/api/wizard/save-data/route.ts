@@ -1,7 +1,4 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { neon } from "@neondatabase/serverless"
-
-const sql = neon(process.env.DATABASE_URL!)
 
 // In-memory storage for wizard data
 const wizardDataStore = new Map<string, any>()
@@ -32,8 +29,6 @@ export async function POST(req: NextRequest) {
     }
 
     console.log("💾 Saving wizard data for session:", sessionId)
-
-    // Save to memory
     saveWizardData(sessionId, data)
 
     return NextResponse.json({ success: true })
