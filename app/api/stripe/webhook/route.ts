@@ -64,7 +64,9 @@ export async function POST(req: NextRequest) {
           wizardData = {
             projectName: row.project_name,
             gender: row.gender,
-            uploadedPhotos: JSON.parse(row.uploaded_photos),
+            uploadedPhotos: Array.isArray(row.uploaded_photos)
+              ? row.uploaded_photos
+              : JSON.parse(row.uploaded_photos || "[]"),
             userEmail: row.user_email,
           }
         }
@@ -82,90 +84,118 @@ export async function POST(req: NextRequest) {
         }
       }
 
-      // Create purchase record
-      const purchaseResult = await sql`
-        INSERT INTO purchases (
-          stripe_session_id,
-          user_email,
-          amount,
-          currency,
-          status,
-          created_at,
-          updated_at
-        ) VALUES (
-          ${session.id},
-          ${wizardData.userEmail},
-          ${session.amount_total},
-          ${session.currency},
-          'completed',
-          NOW(),
-          NOW()
-        )
-        RETURNING id
+      console.log("📸 Photos to use:", wizardData.uploadedPhotos)
+
+      // Get or create user
+      const userResult = await sql`
+        SELECT * FROM users WHERE email = ${wizardData.userEmail}
       `
 
-      const purchaseId = purchaseResult[0].id
-      console.log("✅ Purchase created:", purchaseId)
+      let user = userResult[0]
+      if (!user) {
+        const createUserResult = await sql`
+          INSERT INTO users (email, name, image, created_at, updated_at)
+          VALUES (${wizardData.userEmail}, '', '', NOW(), NOW())
+          RETURNING *
+        `
+        user = createUserResult[0]
+      }
 
-      // Create project
+      console.log("👤 User:", user.id, user.email)
+
+      // Create purchase record
+      const purchaseResult = await sql`
+        INSERT INTO purchases (user_id, stripe_session_id, plan_type, amount, headshots_included, status, created_at, updated_at)
+        VALUES (${user.id}, ${session.id}, 'professional', 1999, 40, 'completed', NOW(), NOW())
+        RETURNING *
+      `
+
+      const purchase = purchaseResult[0]
+      console.log("💰 Purchase created:", purchase.id)
+
+      // Create project - FIXED: Use proper array format for PostgreSQL
       const projectResult = await sql`
         INSERT INTO projects (
-          user_email,
+          user_id,
+          purchase_id,
           name,
           gender,
           uploaded_photos,
           status,
-          pack_id,
           created_at,
           updated_at
-        ) VALUES (
-          ${wizardData.userEmail},
+        )
+        VALUES (
+          ${user.id},
+          ${purchase.id},
           ${wizardData.projectName},
           ${wizardData.gender},
-          ${wizardData.uploadedPhotos},
-          'processing',
-          '928',
+          ${wizardData.uploadedPhotos}::text[],
+          'training',
           NOW(),
           NOW()
         )
-        RETURNING id
+        RETURNING *
       `
 
-      const projectId = projectResult[0].id
-      console.log("✅ Project created:", projectId)
+      const project = projectResult[0]
+      console.log("✅ Project created:", project.id)
 
-      // Start Astria training
-      const astriaResponse = await fetch("https://api.astria.ai/tunes", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${process.env.ASTRIA_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          tune: {
-            title: `${wizardData.projectName} - ${wizardData.gender}`,
-            name: wizardData.gender === "man" ? "man" : "woman",
-            image_urls: wizardData.uploadedPhotos,
-            callback: `${process.env.NEXTAUTH_URL}/api/astria/wizard-webhook/${projectId}`,
+      // 🚀 START ASTRIA TRAINING WITH PACK ID 928!
+      try {
+        console.log("🎯 STARTING ASTRIA TRAINING WITH PACK ID 928...")
+        console.log("📸 Using photos:", wizardData.uploadedPhotos)
+
+        const ASTRIA_API_URL = process.env.ASTRIA_API_URL || "https://api.astria.ai"
+        const ASTRIA_API_KEY = process.env.ASTRIA_API_KEY
+
+        if (!ASTRIA_API_KEY) {
+          throw new Error("ASTRIA_API_KEY not configured")
+        }
+
+        // Use pack endpoint with pack ID 928
+        const astriaResponse = await fetch(`${ASTRIA_API_URL}/p/928/tunes`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${ASTRIA_API_KEY}`,
+            "Content-Type": "application/json",
           },
-        }),
-      })
+          body: JSON.stringify({
+            tune: {
+              title: `${wizardData.projectName} - ${wizardData.gender}`,
+              name: `project_${project.id}_${Date.now()}`,
+              image_urls: wizardData.uploadedPhotos,
+              callback: `${process.env.NEXTAUTH_URL}/api/astria/wizard-webhook/${project.id}?webhookSecret=${process.env.APP_WEBHOOK_SECRET}`,
+            },
+          }),
+        })
 
-      if (!astriaResponse.ok) {
-        const errorText = await astriaResponse.text()
-        console.error("❌ ASTRIA ERROR:", astriaResponse.status, errorText)
-        throw new Error(`Astria API error: ${astriaResponse.status}`)
+        if (!astriaResponse.ok) {
+          const errorText = await astriaResponse.text()
+          console.error("❌ Astria API error:", errorText)
+          throw new Error(`Astria API error: ${astriaResponse.status}`)
+        }
+
+        const astriaResult = await astriaResponse.json()
+        console.log("🔥 ASTRIA TRAINING STARTED WITH PACK 928:", astriaResult.id)
+
+        // Update project with tune_id
+        await sql`
+          UPDATE projects 
+          SET tune_id = ${astriaResult.id}, updated_at = NOW()
+          WHERE id = ${project.id}
+        `
+
+        console.log("🎉 WIZARD FLOW COMPLETED WITH PACK 928!")
+      } catch (astriaError) {
+        console.error("❌ ASTRIA ERROR:", astriaError)
+
+        await sql`
+          UPDATE projects 
+          SET status = 'failed', updated_at = NOW()
+          WHERE id = ${project.id}
+        `
       }
-
-      const astriaData = await astriaResponse.json()
-      console.log("✅ ASTRIA TRAINING STARTED:", astriaData.id)
-
-      // Update project with tune_id
-      await sql`
-        UPDATE projects 
-        SET tune_id = ${astriaData.id.toString()}, updated_at = NOW()
-        WHERE id = ${projectId}
-      `
 
       console.log("✅ WEBHOOK COMPLETED SUCCESSFULLY")
       return NextResponse.json({ received: true })
