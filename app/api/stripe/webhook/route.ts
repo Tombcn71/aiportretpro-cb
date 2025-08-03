@@ -41,6 +41,16 @@ export async function POST(req: NextRequest) {
       console.log("📧 Customer email from Stripe:", session.customer_email)
       console.log("📋 Metadata:", session.metadata)
 
+      // 🔍 CHECK IF SESSION ALREADY PROCESSED
+      const existingPurchase = await sql`
+        SELECT id FROM purchases WHERE stripe_session_id = ${session.id}
+      `
+
+      if (existingPurchase.length > 0) {
+        console.log("⚠️ Session already processed:", session.id)
+        return NextResponse.json({ received: true, message: "Already processed" })
+      }
+
       // Handle wizard flow - check for wizardSessionId in metadata
       if (session.metadata?.wizardSessionId) {
         const wizardSessionId = session.metadata.wizardSessionId
