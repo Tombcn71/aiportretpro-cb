@@ -10,14 +10,19 @@ const wizardDataStore = new Map<string, any>()
 
 export function saveWizardData(sessionId: string, data: any) {
   wizardDataStore.set(sessionId, data)
+  console.log("💾 Saved wizard data for session:", sessionId)
 }
 
 export function getWizardData(sessionId: string) {
-  return wizardDataStore.get(sessionId)
+  const data = wizardDataStore.get(sessionId)
+  console.log("📖 Getting wizard data for:", sessionId, data ? "found" : "not found")
+  return data
 }
 
 export function deleteWizardData(sessionId: string) {
-  wizardDataStore.delete(sessionId)
+  const deleted = wizardDataStore.delete(sessionId)
+  console.log("🗑️ Deleted wizard data:", sessionId, deleted ? "success" : "not found")
+  return deleted
 }
 
 export async function POST(req: NextRequest) {

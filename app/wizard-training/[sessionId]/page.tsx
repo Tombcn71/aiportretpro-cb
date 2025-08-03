@@ -1,57 +1,45 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useParams, useRouter } from "next/navigation"
+import { useParams, useSearchParams } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
-import { CheckCircle, Clock, Zap, Sparkles, ArrowRight } from "lucide-react"
+import { CheckCircle, Clock, Zap, ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 export default function WizardTrainingPage() {
   const params = useParams()
-  const router = useRouter()
+  const searchParams = useSearchParams()
   const sessionId = params.sessionId as string
-  const [status, setStatus] = useState("training")
+  const stripeSessionId = searchParams.get("session_id")
+
+  const [status, setStatus] = useState<"processing" | "training" | "completed" | "failed">("processing")
   const [progress, setProgress] = useState(0)
-  const [projectId, setProjectId] = useState<number | null>(null)
+  const [projectId, setProjectId] = useState<string | null>(null)
+  const [timeElapsed, setTimeElapsed] = useState(0)
 
   useEffect(() => {
-    if (!sessionId) return
+    let interval: NodeJS.Timeout
 
-    let progressInterval: NodeJS.Timeout
-    let statusInterval: NodeJS.Timeout
-
-    // Simulate realistic training progress
-    const startProgress = () => {
-      progressInterval = setInterval(() => {
-        setProgress((prev) => {
-          if (prev >= 100) {
-            clearInterval(progressInterval)
-            setStatus("completed")
-            return 100
-          }
-          // Realistic progress: slower at start, faster in middle, slower at end
-          if (prev < 20) return prev + Math.random() * 2
-          if (prev < 80) return prev + Math.random() * 5
-          return prev + Math.random() * 1
-        })
-      }, 2000)
-    }
-
-    // Check actual status from database
     const checkStatus = async () => {
       try {
-        const response = await fetch(`/api/wizard-training/status?sessionId=${sessionId}`)
+        const response = await fetch(
+          `/api/wizard-training/status?sessionId=${sessionId}&stripeSessionId=${stripeSessionId}`,
+        )
         if (response.ok) {
           const data = await response.json()
-          if (data.projectId) {
-            setProjectId(data.projectId)
-          }
+          setStatus(data.status)
+          setProgress(data.progress || 0)
+          setProjectId(data.projectId)
+
           if (data.status === "completed") {
-            setStatus("completed")
-            setProgress(100)
-            clearInterval(progressInterval)
-            clearInterval(statusInterval)
+            clearInterval(interval)
+            // Redirect to dashboard after 3 seconds
+            setTimeout(() => {
+              window.location.href = "/dashboard"
+            }, 3000)
+          } else if (data.status === "failed") {
+            clearInterval(interval)
           }
         }
       } catch (error) {
@@ -59,42 +47,57 @@ export default function WizardTrainingPage() {
       }
     }
 
-    startProgress()
+    // Initial check
     checkStatus()
 
-    // Check status every 30 seconds
-    statusInterval = setInterval(checkStatus, 30000)
+    // Set up polling every 10 seconds
+    interval = setInterval(checkStatus, 10000)
 
-    // Auto redirect after completion
-    if (status === "completed") {
-      setTimeout(() => {
-        router.push("/dashboard")
-      }, 3000)
-    }
+    // Time counter
+    const timeInterval = setInterval(() => {
+      setTimeElapsed((prev) => prev + 1)
+    }, 1000)
 
     return () => {
-      if (progressInterval) clearInterval(progressInterval)
-      if (statusInterval) clearInterval(statusInterval)
+      clearInterval(interval)
+      clearInterval(timeInterval)
     }
-  }, [sessionId, router, status])
+  }, [sessionId, stripeSessionId])
 
   const getStatusMessage = () => {
-    if (status === "training") {
-      if (progress < 20) return "AI model wordt getraind met je foto's..."
-      if (progress < 40) return "Gezichtskenmerken worden geanalyseerd..."
-      if (progress < 60) return "Professionele outfits worden gegenereerd..."
-      if (progress < 80) return "Verschillende poses worden gecreëerd..."
-      if (progress < 95) return "Laatste details worden toegevoegd..."
-      return "Bijna klaar! Foto's worden geoptimaliseerd..."
+    switch (status) {
+      case "processing":
+        return "Betaling verwerken..."
+      case "training":
+        return "AI model trainen..."
+      case "completed":
+        return "Training voltooid!"
+      case "failed":
+        return "Er is een fout opgetreden"
+      default:
+        return "Bezig..."
     }
-    return "Training voltooid! Je professionele headshots zijn klaar."
   }
 
-  const getStatusIcon = () => {
-    if (status === "completed") {
-      return <CheckCircle className="h-8 w-8 text-green-600" />
+  const getProgressValue = () => {
+    switch (status) {
+      case "processing":
+        return 10
+      case "training":
+        return Math.min(progress, 90)
+      case "completed":
+        return 100
+      case "failed":
+        return 0
+      default:
+        return 0
     }
-    return <Sparkles className="h-8 w-8 text-blue-600 animate-pulse" />
+  }
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60)
+    const secs = seconds % 60
+    return `${mins}:${secs.toString().padStart(2, "0")}`
   }
 
   return (
@@ -102,76 +105,108 @@ export default function WizardTrainingPage() {
       <div className="max-w-2xl mx-auto">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">AI Training in Progress</h1>
-          <p className="text-gray-600">Je professionele portretfoto's worden gegenereerd</p>
+          <p className="text-gray-600">We zijn je professionele portretfoto's aan het genereren</p>
         </div>
 
         <Card className="mb-8">
           <CardHeader>
-            <CardTitle className="flex items-center gap-3">
-              {getStatusIcon()}
-              <span>{status === "completed" ? "Training Voltooid!" : "Training Bezig..."}</span>
+            <CardTitle className="flex items-center gap-2">
+              {status === "completed" ? (
+                <CheckCircle className="h-6 w-6 text-green-600" />
+              ) : status === "failed" ? (
+                <div className="h-6 w-6 rounded-full bg-red-100 flex items-center justify-center">
+                  <div className="h-3 w-3 bg-red-600 rounded-full"></div>
+                </div>
+              ) : (
+                <div className="h-6 w-6 rounded-full bg-blue-100 flex items-center justify-center">
+                  <div className="h-3 w-3 bg-blue-600 rounded-full animate-pulse"></div>
+                </div>
+              )}
+              {getStatusMessage()}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
             <div>
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-sm font-medium text-gray-700">Voortgang</span>
-                <span className="text-sm font-medium text-gray-700">{Math.round(progress)}%</span>
+              <div className="flex justify-between text-sm text-gray-600 mb-2">
+                <span>Voortgang</span>
+                <span>{getProgressValue()}%</span>
               </div>
-              <Progress value={progress} className="h-3" />
+              <Progress value={getProgressValue()} className="h-3" />
             </div>
 
-            <div className="text-center">
-              <p className="text-lg text-gray-700 mb-4">{getStatusMessage()}</p>
+            <div className="flex justify-between items-center text-sm">
+              <div className="flex items-center gap-2">
+                <Clock className="h-4 w-4 text-gray-500" />
+                <span>Verstreken tijd: {formatTime(timeElapsed)}</span>
+              </div>
               {status === "training" && (
-                <div className="flex items-center justify-center gap-2 text-blue-600">
-                  <Clock className="h-5 w-5" />
-                  <span>Geschatte tijd: 10-15 minuten</span>
+                <div className="flex items-center gap-2 text-blue-600">
+                  <Zap className="h-4 w-4" />
+                  <span>Geschatte tijd: ~15 min</span>
                 </div>
               )}
             </div>
 
             {status === "completed" && (
-              <div className="text-center p-6 bg-green-50 rounded-lg border border-green-200">
-                <CheckCircle className="h-16 w-16 text-green-600 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-green-800 mb-2">Je foto's zijn klaar!</h3>
-                <p className="text-green-700 mb-4">
-                  40 professionele headshots zijn succesvol gegenereerd en klaar voor download.
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                <div className="flex items-center gap-2 text-green-800 mb-2">
+                  <CheckCircle className="h-5 w-5" />
+                  <span className="font-semibold">Training voltooid!</span>
+                </div>
+                <p className="text-green-700 text-sm mb-3">
+                  Je professionele portretfoto's zijn klaar. Je wordt automatisch doorgestuurd naar je dashboard.
                 </p>
-                <Button onClick={() => router.push("/dashboard")} className="bg-green-600 hover:bg-green-700">
-                  <ArrowRight className="h-4 w-4 mr-2" />
-                  Bekijk je foto's
+                <Button
+                  onClick={() => (window.location.href = "/dashboard")}
+                  className="w-full bg-green-600 hover:bg-green-700"
+                >
+                  Ga naar Dashboard
+                  <ArrowRight className="h-4 w-4 ml-2" />
                 </Button>
-                <p className="text-sm text-green-600 mt-2">Je wordt automatisch doorgestuurd...</p>
+              </div>
+            )}
+
+            {status === "failed" && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                <div className="flex items-center gap-2 text-red-800 mb-2">
+                  <div className="h-5 w-5 rounded-full bg-red-100 flex items-center justify-center">
+                    <div className="h-2 w-2 bg-red-600 rounded-full"></div>
+                  </div>
+                  <span className="font-semibold">Training mislukt</span>
+                </div>
+                <p className="text-red-700 text-sm mb-3">
+                  Er is een fout opgetreden tijdens het trainen van je AI model. Neem contact op met support.
+                </p>
+                <Button
+                  onClick={() => (window.location.href = "/contact")}
+                  variant="outline"
+                  className="w-full border-red-300 text-red-700 hover:bg-red-50"
+                >
+                  Contact Support
+                </Button>
+              </div>
+            )}
+
+            {(status === "processing" || status === "training") && (
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div className="text-blue-800 text-sm">
+                  <p className="mb-2">
+                    <strong>Wat gebeurt er nu?</strong>
+                  </p>
+                  <ul className="space-y-1 text-xs">
+                    <li>• Je betaling wordt verwerkt</li>
+                    <li>• AI model wordt getraind met je foto's</li>
+                    <li>• 40 professionele portretfoto's worden gegenereerd</li>
+                    <li>• Resultaten worden klaargezet in je dashboard</li>
+                  </ul>
+                </div>
               </div>
             )}
           </CardContent>
         </Card>
 
-        <div className="grid md:grid-cols-3 gap-4">
-          <Card className="text-center">
-            <CardContent className="pt-6">
-              <Zap className="h-8 w-8 text-yellow-500 mx-auto mb-2" />
-              <h3 className="font-semibold mb-1">Snelle AI</h3>
-              <p className="text-sm text-gray-600">Geavanceerde AI technologie</p>
-            </CardContent>
-          </Card>
-
-          <Card className="text-center">
-            <CardContent className="pt-6">
-              <Sparkles className="h-8 w-8 text-purple-500 mx-auto mb-2" />
-              <h3 className="font-semibold mb-1">40 Foto's</h3>
-              <p className="text-sm text-gray-600">Verschillende poses & outfits</p>
-            </CardContent>
-          </Card>
-
-          <Card className="text-center">
-            <CardContent className="pt-6">
-              <CheckCircle className="h-8 w-8 text-green-500 mx-auto mb-2" />
-              <h3 className="font-semibold mb-1">HD Kwaliteit</h3>
-              <p className="text-sm text-gray-600">Professionele resultaten</p>
-            </CardContent>
-          </Card>
+        <div className="text-center text-sm text-gray-600">
+          <p>Sluit deze pagina niet af tijdens het training proces</p>
         </div>
       </div>
     </div>

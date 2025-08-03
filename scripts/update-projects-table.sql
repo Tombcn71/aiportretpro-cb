@@ -1,9 +1,32 @@
 -- Add purchase_id column to projects table if it doesn't exist
-ALTER TABLE projects 
-ADD COLUMN IF NOT EXISTS purchase_id INTEGER REFERENCES purchases(id) ON DELETE SET NULL;
+DO $$ 
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'projects' AND column_name = 'purchase_id') THEN
+    ALTER TABLE projects ADD COLUMN purchase_id INTEGER REFERENCES purchases(id) ON DELETE SET NULL;
+  END IF;
+END $$;
 
--- Create index on purchase_id for faster joins
+-- Create index on purchase_id for faster lookups
 CREATE INDEX IF NOT EXISTS idx_projects_purchase_id ON projects(purchase_id);
+
+-- Ensure projects table has all required columns
+DO $$ 
+BEGIN
+  -- Add tune_id if it doesn't exist
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'projects' AND column_name = 'tune_id') THEN
+    ALTER TABLE projects ADD COLUMN tune_id VARCHAR(255);
+  END IF;
+  
+  -- Add status if it doesn't exist
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'projects' AND column_name = 'status') THEN
+    ALTER TABLE projects ADD COLUMN status VARCHAR(50) DEFAULT 'training';
+  END IF;
+  
+  -- Add uploaded_photos if it doesn't exist
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'projects' AND column_name = 'uploaded_photos') THEN
+    ALTER TABLE projects ADD COLUMN uploaded_photos TEXT[];
+  END IF;
+END $$;
 
 -- Update existing projects to have a default purchase record if needed
 -- This is a one-time migration script
@@ -34,3 +57,5 @@ BEGIN
     AND pu.stripe_session_id = 'legacy_' || projects.id::text;
   END IF;
 END $$;
+
+SELECT 'Projects table updated successfully' as result;

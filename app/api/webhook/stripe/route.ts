@@ -2,7 +2,7 @@ import { type NextRequest, NextResponse } from "next/server"
 import Stripe from "stripe"
 import { headers } from "next/headers"
 import { neon } from "@neondatabase/serverless"
-import { getWizardData, deleteWizardData } from "../stripe/create-checkout/route"
+import { getWizardData, deleteWizardData } from "../../stripe/create-checkout/route"
 
 const sql = neon(process.env.DATABASE_URL!)
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
