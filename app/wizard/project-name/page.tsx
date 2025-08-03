@@ -1,7 +1,5 @@
 "use client"
-
-import type React from "react"
-
+import { v4 as uuidv4 } from "uuid"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
@@ -15,22 +13,13 @@ export default function ProjectNamePage() {
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!projectName.trim()) return
-
-    setIsLoading(true)
-
-    // Save to sessionStorage
-    sessionStorage.setItem(
-      "wizardData",
-      JSON.stringify({
-        projectName: projectName.trim(),
-        step: 1,
-      }),
-    )
-
-    router.push("/wizard/gender")
+  const handleNext = () => {
+    if (projectName.trim()) {
+      sessionStorage.setItem("projectName", projectName.trim())
+      sessionStorage.setItem("wizardSessionId", uuidv4())
+      console.log("✅ Project name saved:", projectName.trim())
+      router.push("/wizard/gender")
+    }
   }
 
   return (
@@ -52,7 +41,13 @@ export default function ProjectNamePage() {
           <p className="text-gray-600 mt-2">Stap 1 van 4: Kies een naam voor je AI headshot project</p>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault()
+              handleNext()
+            }}
+            className="space-y-6"
+          >
             <div className="space-y-2">
               <Label htmlFor="projectName" className="text-sm font-medium text-gray-700">
                 Project naam
@@ -69,7 +64,8 @@ export default function ProjectNamePage() {
             </div>
 
             <Button
-              type="submit"
+              type="button"
+              onClick={handleNext}
               disabled={!projectName.trim() || isLoading}
               className="w-full"
               style={{ backgroundColor: "#0077B5" }}

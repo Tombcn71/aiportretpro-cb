@@ -1,7 +1,5 @@
 "use client"
 
-import type React from "react"
-
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
@@ -22,24 +20,17 @@ export default function GenderPage() {
     }
   }, [router])
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!selectedGender) return
+  const handleGenderSelect = (gender: string) => {
+    setSelectedGender(gender)
+    sessionStorage.setItem("gender", gender)
+    console.log("✅ Gender saved:", gender)
+  }
 
-    setIsLoading(true)
-
-    // Update sessionStorage
-    const existingData = JSON.parse(sessionStorage.getItem("wizardData") || "{}")
-    sessionStorage.setItem(
-      "wizardData",
-      JSON.stringify({
-        ...existingData,
-        gender: selectedGender,
-        step: 2,
-      }),
-    )
-
-    router.push("/wizard/upload")
+  const handleNext = () => {
+    if (selectedGender) {
+      console.log("🚀 Going to upload page")
+      router.push("/wizard/upload")
+    }
   }
 
   const genderOptions = [
@@ -67,13 +58,13 @@ export default function GenderPage() {
           <p className="text-gray-600 mt-2">Stap 2 van 4: Dit helpt ons de beste AI modellen te selecteren</p>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={(e) => e.preventDefault()} className="space-y-6">
             <div className="grid gap-3">
               {genderOptions.map((option) => (
                 <button
                   key={option.value}
                   type="button"
-                  onClick={() => setSelectedGender(option.value)}
+                  onClick={() => handleGenderSelect(option.value)}
                   className={`p-4 rounded-lg border-2 transition-all duration-200 text-left ${
                     selectedGender === option.value
                       ? "border-blue-500 bg-blue-50"
@@ -89,7 +80,8 @@ export default function GenderPage() {
             </div>
 
             <Button
-              type="submit"
+              type="button"
+              onClick={handleNext}
               disabled={!selectedGender || isLoading}
               className="w-full"
               style={{ backgroundColor: "#0077B5" }}

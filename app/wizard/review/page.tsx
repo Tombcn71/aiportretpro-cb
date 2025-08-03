@@ -5,77 +5,82 @@ import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
+import { v4 as uuidv4 } from "uuid"
+import { useSession } from "next-auth/react"
 
 interface WizardData {
   projectName: string
   gender: string
-  images: string[]
-  step: number
+  uploadedPhotos: string[]
+  userEmail: string
 }
 
 export default function ReviewPage() {
   const [wizardData, setWizardData] = useState<WizardData | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const [processing, setProcessing] = useState(false)
   const router = useRouter()
+  const { data: session, status } = useSession()
 
   useEffect(() => {
-    // Check if we have wizard data
-    const data = sessionStorage.getItem("wizardData")
-    if (!data) {
+    if (status === "loading") return
+
+    if (!session) {
+      router.push("/login?flow=wizard")
+      return
+    }
+
+    // Get data from sessionStorage
+    const projectName = sessionStorage.getItem("projectName")
+    const gender = sessionStorage.getItem("gender")
+    const uploadedPhotos = JSON.parse(sessionStorage.getItem("uploadedPhotos") || "[]")
+
+    if (projectName && gender && uploadedPhotos.length >= 6) {
+      setWizardData({
+        projectName,
+        gender,
+        uploadedPhotos,
+        userEmail: session.user.email,
+      })
+    } else {
       router.push("/wizard/project-name")
-      return
     }
+  }, [session, status, router])
 
-    const parsedData = JSON.parse(data)
-    if (!parsedData.projectName || !parsedData.gender || !parsedData.images || parsedData.images.length < 4) {
-      router.push("/wizard/upload")
-      return
-    }
+  const handleConfirmAndPay = async () => {
+    if (!wizardData || !session?.user?.email) return
 
-    setWizardData(parsedData)
-  }, [router])
-
-  const handleSubmit = async () => {
-    if (!wizardData) return
-
-    setIsLoading(true)
+    setProcessing(true)
 
     try {
-      // Save wizard data to database
-      const response = await fetch("/api/wizard/save-data", {
+      const wizardSessionId = sessionStorage.getItem("wizardSessionId") || uuidv4()
+
+      // Save wizard data using the existing API
+      await fetch("/api/wizard/save-data", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(wizardData),
-      })
-
-      if (!response.ok) throw new Error("Failed to save data")
-
-      const result = await response.json()
-
-      // Create Stripe checkout session
-      const checkoutResponse = await fetch("/api/stripe/create-checkout", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          sessionId: result.sessionId,
+          sessionId: wizardSessionId,
           projectName: wizardData.projectName,
+          gender: wizardData.gender,
+          uploadedPhotos: wizardData.uploadedPhotos,
+          userEmail: wizardData.userEmail,
         }),
       })
 
-      if (!checkoutResponse.ok) throw new Error("Failed to create checkout")
+      // Use existing Stripe checkout
+      const response = await fetch("/api/stripe/create-checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ wizardSessionId }),
+      })
 
-      const checkoutData = await checkoutResponse.json()
-
-      // Redirect to Stripe
-      window.location.href = checkoutData.url
+      const { url } = await response.json()
+      window.location.href = url
     } catch (error) {
-      console.error("Error:", error)
-      alert("Er ging iets mis. Probeer opnieuw.")
-      setIsLoading(false)
+      console.error("❌ Checkout error:", error)
+      alert("Er is een fout opgetreden. Probeer het opnieuw.")
+      setProcessing(false)
     }
   }
 
@@ -113,9 +118,9 @@ export default function ReviewPage() {
           </div>
 
           <div className="bg-white p-4 rounded-lg border">
-            <h3 className="font-semibold text-gray-900 mb-2">Geüploade foto's ({wizardData.images.length})</h3>
+            <h3 className="font-semibold text-gray-900 mb-2">Geüploade foto's ({wizardData.uploadedPhotos.length})</h3>
             <div className="grid grid-cols-4 gap-2">
-              {wizardData.images.map((url, index) => (
+              {wizardData.uploadedPhotos.map((url, index) => (
                 <img
                   key={index}
                   src={url || "/placeholder.svg"}
@@ -133,12 +138,12 @@ export default function ReviewPage() {
           </div>
 
           <Button
-            onClick={handleSubmit}
-            disabled={isLoading}
+            onClick={handleConfirmAndPay}
+            disabled={processing}
             className="w-full text-lg py-3"
             style={{ backgroundColor: "#0077B5" }}
           >
-            {isLoading ? "Bezig met opslaan..." : "Doorgaan naar betaling"}
+            {processing ? "Bezig met opslaan..." : "Doorgaan naar betaling"}
           </Button>
         </CardContent>
       </Card>

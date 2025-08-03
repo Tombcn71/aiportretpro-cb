@@ -10,7 +10,7 @@ import { Progress } from "@/components/ui/progress"
 import { Upload, X } from "lucide-react"
 
 export default function UploadPage() {
-  const [uploadedImages, setUploadedImages] = useState<string[]>([])
+  const [uploadedPhotos, setUploadedPhotos] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
 
@@ -52,7 +52,7 @@ export default function UploadPage() {
       })
 
       const urls = await Promise.all(uploadPromises)
-      setUploadedImages((prev) => [...prev, ...urls])
+      setUploadedPhotos((prev) => [...prev, ...urls])
     } catch (error) {
       console.error("Upload error:", error)
       alert("Er ging iets mis bij het uploaden. Probeer opnieuw.")
@@ -62,26 +62,14 @@ export default function UploadPage() {
   }
 
   const removeImage = (index: number) => {
-    setUploadedImages((prev) => prev.filter((_, i) => i !== index))
+    setUploadedPhotos((prev) => prev.filter((_, i) => i !== index))
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (uploadedImages.length < 4) return
+  const handleContinue = () => {
+    if (uploadedPhotos.length < 6) return
 
-    setIsLoading(true)
-
-    // Update sessionStorage
-    const existingData = JSON.parse(sessionStorage.getItem("wizardData") || "{}")
-    sessionStorage.setItem(
-      "wizardData",
-      JSON.stringify({
-        ...existingData,
-        images: uploadedImages,
-        step: 3,
-      }),
-    )
-
+    sessionStorage.setItem("uploadedPhotos", JSON.stringify(uploadedPhotos))
+    console.log("✅ Photos saved, going to review")
     router.push("/wizard/review")
   }
 
@@ -101,10 +89,10 @@ export default function UploadPage() {
             </Progress>
           </div>
           <CardTitle className="text-2xl font-bold text-gray-900">Upload je foto's</CardTitle>
-          <p className="text-gray-600 mt-2">Stap 3 van 4: Upload minimaal 4 foto's voor de beste resultaten</p>
+          <p className="text-gray-600 mt-2">Stap 3 van 4: Upload minimaal 6 foto's voor de beste resultaten</p>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form className="space-y-6">
             <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
               <input
                 type="file"
@@ -122,9 +110,9 @@ export default function UploadPage() {
               </label>
             </div>
 
-            {uploadedImages.length > 0 && (
+            {uploadedPhotos.length > 0 && (
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {uploadedImages.map((url, index) => (
+                {uploadedPhotos.map((url, index) => (
                   <div key={index} className="relative">
                     <img
                       src={url || "/placeholder.svg"}
@@ -144,12 +132,13 @@ export default function UploadPage() {
             )}
 
             <div className="text-center">
-              <p className="text-sm text-gray-600">{uploadedImages.length} van minimaal 4 foto's geüpload</p>
+              <p className="text-sm text-gray-600">{uploadedPhotos.length} van minimaal 6 foto's geüpload</p>
             </div>
 
             <Button
-              type="submit"
-              disabled={uploadedImages.length < 4 || isLoading}
+              type="button"
+              onClick={handleContinue}
+              disabled={uploadedPhotos.length < 6 || isLoading}
               className="w-full"
               style={{ backgroundColor: "#0077B5" }}
             >
