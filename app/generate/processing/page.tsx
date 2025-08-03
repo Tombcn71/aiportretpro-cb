@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useSession } from "next-auth/react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useRouter } from "next/navigation"
 import { Card, CardContent } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { CheckCircle, Clock, Upload } from "lucide-react"
@@ -10,22 +10,21 @@ import { CheckCircle, Clock, Upload } from "lucide-react"
 export default function ProcessingPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
-  const searchParams = useSearchParams()
-  const sessionId = searchParams.get("session_id")
   const [progress, setProgress] = useState(0)
-  const [statusText, setStatusText] = useState("Verifying payment...")
+  const [statusText, setStatusText] = useState("Initializing...")
 
   useEffect(() => {
+    // Don't redirect if no session - user might be coming from Stripe
     if (status === "loading") return
 
-    console.log("🔄 Processing page loaded, session:", !!session, "sessionId:", sessionId)
+    console.log("🔄 Processing page loaded, session:", !!session)
 
     // Clear ALL wizard data since payment is complete
     console.log("🧹 Clearing all wizard data after successful payment")
-    sessionStorage.removeItem("wizardSessionId")
-    sessionStorage.removeItem("projectName")
-    sessionStorage.removeItem("gender")
-    sessionStorage.removeItem("uploadedPhotos")
+    localStorage.removeItem("wizard_project_name")
+    localStorage.removeItem("wizard_gender")
+    localStorage.removeItem("wizard_uploaded_photos")
+    localStorage.removeItem("wizardData")
 
     // Simulate processing steps
     const steps = [
@@ -58,7 +57,7 @@ export default function ProcessingPage() {
     }, 1500)
 
     return () => clearInterval(interval)
-  }, [session, status, router, sessionId])
+  }, [session, status, router])
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">

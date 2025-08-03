@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import { Header } from "@/components/header"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { Download, Camera, Trash2, X, CheckCircle, DownloadIcon, Clock, Zap } from "lucide-react"
+import { Download, Camera, Trash2, X, CheckCircle, DownloadIcon } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
 import JSZip from "jszip"
@@ -117,9 +117,6 @@ export default function DashboardPage() {
   const uniquePhotos = allPhotos.filter((photo, index, self) => index === self.findIndex((p) => p.url === photo.url))
 
   console.log("Total photos found:", allPhotos.length, "Unique photos:", uniquePhotos.length)
-
-  // Check for projects in progress
-  const projectsInProgress = projects.filter((p) => p.status === "training" || p.status === "generating")
 
   const handleImageError = (photoKey: string) => {
     console.log("Image error for:", photoKey)
@@ -305,7 +302,7 @@ export default function DashboardPage() {
                 </div>
                 <div className="w-full sm:w-auto">
                   {credits.credits > 0 ? (
-                    <Link href="/login?flow=wizard" className="block">
+                    <Link href="/use-credit" className="block">
                       <Button className="bg-white text-[#0077B5] hover:bg-gray-100 font-semibold w-full sm:w-auto">
                         Start Nieuw Project
                       </Button>
@@ -322,46 +319,6 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
         </div>
-
-        {/* Projects in Progress */}
-        {projectsInProgress.length > 0 && (
-          <div className="mb-8">
-            <h2 className="text-xl font-semibold mb-4">Projecten in Uitvoering</h2>
-            <div className="grid gap-4">
-              {projectsInProgress.map((project) => (
-                <Card key={project.id} className="border-orange-200 bg-orange-50">
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
-                          {project.status === "training" ? (
-                            <Zap className="w-5 h-5 text-orange-600" />
-                          ) : (
-                            <Camera className="w-5 h-5 text-orange-600" />
-                          )}
-                        </div>
-                        <div>
-                          <h3 className="font-semibold text-gray-900">{project.name}</h3>
-                          <p className="text-sm text-gray-600">
-                            {project.status === "training"
-                              ? "AI model wordt getraind..."
-                              : "Foto's worden gegenereerd..."}
-                          </p>
-                        </div>
-                      </div>
-                      <Link href={`/training/${project.id}`}>
-                        <Button variant="outline" size="sm">
-                          <Clock className="w-4 h-4 mr-2" />
-                          Bekijk Status
-                        </Button>
-                      </Link>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        )}
 
         {/* Photos Gallery */}
         <div>
@@ -426,7 +383,7 @@ export default function DashboardPage() {
             </div>
           )}
 
-          {validPhotos.length === 0 && projectsInProgress.length === 0 ? (
+          {validPhotos.length === 0 ? (
             <div className="text-center py-20">
               <Camera className="h-16 w-16 text-gray-400 mx-auto mb-6" />
               <h3 className="text-xl font-semibold mb-4">Nog geen portetfotos</h3>
@@ -436,7 +393,7 @@ export default function DashboardPage() {
                   : "Koop tegoed om je eerste professionele portetfotos te maken."}
               </p>
               {credits.credits > 0 ? (
-                <Link href="/login?flow=wizard">
+                <Link href="/use-credit">
                   <Button className="bg-[#0077B5] hover:bg-[#004182] text-white px-8 py-3">Start Nieuw Project</Button>
                 </Link>
               ) : (
@@ -444,12 +401,6 @@ export default function DashboardPage() {
                   <Button className="bg-[#0077B5] hover:bg-[#004182] text-white px-8 py-3">Portetfotos maken</Button>
                 </Link>
               )}
-            </div>
-          ) : validPhotos.length === 0 ? (
-            <div className="text-center py-12">
-              <Clock className="h-12 w-12 text-orange-500 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2">Je foto's worden nog verwerkt</h3>
-              <p className="text-gray-600">Dit duurt meestal 10-15 minuten. Check de status hierboven.</p>
             </div>
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">

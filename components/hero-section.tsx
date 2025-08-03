@@ -1,139 +1,108 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import Image from "next/image"
 import Link from "next/link"
+import Image from "next/image"
+import { ArrowRight, Star, Users, Zap } from "lucide-react"
 
 export default function HeroSection() {
   return (
-    <section className="relative bg-gradient-to-br from-blue-50 to-indigo-100 py-20 overflow-hidden">
-      <div className="container mx-auto px-4">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
-          {/* Left Content */}
-          <div className="space-y-8">
-            <div className="space-y-4">
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
-                Professionele AI
-                <span className="text-[#0077B5] block">Headshots</span>
-                in 15 minuten
-              </h1>
-              <p className="text-xl text-gray-600 leading-relaxed">
-                Upload je foto's en ontvang 40 professionele portretfoto's perfect voor LinkedIn, CV en social media.
-              </p>
+    <section className="relative bg-gradient-to-br from-blue-50 via-white to-purple-50 py-20 lg:py-32 overflow-hidden">
+      {/* Background decoration */}
+      <div className="absolute inset-0 bg-grid-slate-100 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))] -z-10" />
+
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+          {/* Left column - Text content */}
+          <div className="text-center lg:text-left">
+            <div className="inline-flex items-center gap-2 bg-orange-100 text-orange-800 px-4 py-2 rounded-full text-sm font-medium mb-6">
+              <Zap className="h-4 w-4" />
+              AI-Powered Professional Headshots
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Link href="/login?flow=wizard">
-                <Button
-                  size="lg"
-                  className="bg-[#0077B5] hover:bg-[#004182] text-white px-8 py-4 text-lg font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-200"
-                >
-                  Start Nu - €19,99
-                </Button>
-              </Link>
-              <Link href="#examples">
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="border-2 border-[#0077B5] text-[#0077B5] hover:bg-[#0077B5] hover:text-white px-8 py-4 text-lg font-semibold rounded-lg transition-all duration-200 bg-transparent"
-                >
-                  Bekijk Voorbeelden
-                </Button>
-              </Link>
+            <h1 className="tracking-tight text-2xl sm:text-4xl lg:text-6xl font-bold text-gray-900 leading-tight mb-6">
+              Professionele portretfoto's
+              <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-500">
+                slim en simpel
+              </span>{" "}
+              geregeld
+            </h1>
+
+            <p className="text-xl text-gray-600 mb-8 leading-relaxed max-w-2xl mx-auto lg:mx-0">
+              Geen gedoe met studio's, direct 40 AI-portretten in 15 min.
+              <br />
+              Makkelijk vanaf je telefoon of laptop, bespaar tijd en geld.
+            </p>
+
+            {/* Trust indicators */}
+            <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-6 mb-8">
+              <div className="flex items-center gap-2">
+                <div className="flex">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+                  ))}
+                </div>
+                <span className="text-gray-600 font-medium">4.9/5 sterren</span>
+              </div>
+              <div className="flex items-center gap-2 text-gray-600">
+                <Users className="h-5 w-5" />
+                <span className="font-medium">10.000+ tevreden klanten</span>
+              </div>
             </div>
 
-            {/* Trust Indicators */}
-            <div className="flex flex-wrap items-center gap-6 pt-4">
-              <div className="flex items-center gap-2">
-                <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
-                  <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                    <path
-                      fillRule="evenodd"
-                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </div>
-                <span className="text-sm text-gray-600">Klaar binnen 15 minuten</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
-                  <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                    <path
-                      fillRule="evenodd"
-                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </div>
-                <span className="text-sm text-gray-600">40 HD foto's</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
-                  <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                    <path
-                      fillRule="evenodd"
-                      d="16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </div>
-                <span className="text-sm text-gray-600">Geld terug garantie</span>
+            {/* CTA Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+              <Button
+                asChild
+                size="lg"
+                className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white px-8 py-4 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200"
+              >
+                <Link href="/wizard/welcome">
+                  Start Jouw Fotoshoot Nu - 29€
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Link>
+              </Button>
+            </div>
+
+            {/* Trust badges */}
+            <div className="mt-8 pt-8 border-t border-gray-200">
+              <p className="text-sm text-gray-500 mb-4">Vertrouwd door professionals van:</p>
+              <div className="flex items-center justify-center lg:justify-start gap-8 opacity-60">
+                <div className="text-gray-400 font-semibold">Microsoft</div>
+                <div className="text-gray-400 font-semibold">Google</div>
+                <div className="text-gray-400 font-semibold">Meta</div>
+                <div className="text-gray-400 font-semibold">Netflix</div>
               </div>
             </div>
           </div>
 
-          {/* Right Content - Before/After */}
+          {/* Right column - Hero image */}
           <div className="relative">
-            <div className="relative bg-white rounded-2xl shadow-2xl p-8">
-              <div className="grid grid-cols-2 gap-6">
-                {/* Before */}
-                <div className="text-center">
-                  <div className="relative mb-4">
-                    <Image
-                      src="/images/before-casual.jpg"
-                      alt="Voor - Casual foto"
-                      width={200}
-                      height={250}
-                      className="rounded-lg shadow-md mx-auto"
-                    />
-                    <div className="absolute -top-2 -left-2 bg-red-500 text-white px-2 py-1 rounded text-xs font-semibold">
-                      VOOR
-                    </div>
-                  </div>
-                  <p className="text-sm text-gray-600">Casual selfie</p>
-                </div>
+            <div className="relative bg-gradient-to-br from-orange-100 to-red-100 rounded-3xl p-8 shadow-2xl">
+              <Image
+                src="/images/transformation-hero.png"
+                alt="Voor en na transformatie - van casual foto naar professionele headshot"
+                width={600}
+                height={400}
+                className="w-full h-auto rounded-2xl shadow-lg"
+                priority
+              />
 
-                {/* Arrow */}
-                <div className="flex items-center justify-center">
-                  <Image src="/images/arrow.png" alt="Arrow" width={40} height={40} className="opacity-60" />
-                </div>
-
-                {/* After */}
+              {/* Floating elements */}
+              <div className="absolute -top-4 -right-4 bg-white rounded-full p-4 shadow-lg">
                 <div className="text-center">
-                  <div className="relative mb-4">
-                    <Image
-                      src="/images/after-professional.jpg"
-                      alt="Na - Professionele headshot"
-                      width={200}
-                      height={250}
-                      className="rounded-lg shadow-md mx-auto"
-                    />
-                    <div className="absolute -top-2 -left-2 bg-green-500 text-white px-2 py-1 rounded text-xs font-semibold">
-                      NA
-                    </div>
-                  </div>
-                  <p className="text-sm text-gray-600">Professionele headshot</p>
+                  <div className="text-2xl font-bold text-orange-500">15min</div>
+                  <div className="text-xs text-gray-600">Klaar</div>
                 </div>
               </div>
-            </div>
 
-            {/* Floating elements */}
-            <div className="absolute -top-4 -right-4 bg-[#0077B5] text-white px-4 py-2 rounded-full text-sm font-semibold shadow-lg">
-              15 min ⚡
-            </div>
-            <div className="absolute -bottom-4 -left-4 bg-green-500 text-white px-4 py-2 rounded-full text-sm font-semibold shadow-lg">
-              40 foto's 📸
+              <div className="absolute -bottom-4 -left-4 bg-white rounded-full p-4 shadow-lg">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-green-500">€29</div>
+                  <div className="text-xs text-gray-600">Totaal</div>
+                </div>
+              </div>
             </div>
           </div>
         </div>

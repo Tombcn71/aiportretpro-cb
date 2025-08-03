@@ -5,13 +5,19 @@ import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
-import { Loader2, Check } from "lucide-react"
+import { Loader2, CreditCard, Tag } from "lucide-react"
 
 export default function CheckoutPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
+  const [couponCode, setCouponCode] = useState("")
+  const [couponApplied, setCouponApplied] = useState(false)
+  const [price, setPrice] = useState(29)
+  const [originalPrice] = useState(29)
 
   useEffect(() => {
     if (status === "loading") return
@@ -35,6 +41,19 @@ export default function CheckoutPage() {
     }
   }, [session, status, router])
 
+  const applyCoupon = () => {
+    if (couponCode.toLowerCase() === "save50" && !couponApplied) {
+      setPrice(Math.round(originalPrice * 0.5))
+      setCouponApplied(true)
+    }
+  }
+
+  const removeCoupon = () => {
+    setPrice(originalPrice)
+    setCouponApplied(false)
+    setCouponCode("")
+  }
+
   const handleCheckout = async () => {
     if (!session?.user?.email) return
 
@@ -57,6 +76,8 @@ export default function CheckoutPage() {
           gender,
           uploadedPhotos,
           userEmail: session.user.email,
+          couponCode: couponApplied ? couponCode : null,
+          price: price,
         }),
       })
 
@@ -93,42 +114,79 @@ export default function CheckoutPage() {
           <p className="text-lg text-gray-600">Voltooi je bestelling om je AI headshots te ontvangen</p>
         </div>
 
-        {/* Professional Plan Card */}
-        <Card className="mb-8 border-2 border-[#0077B5] relative">
-          <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-            <Badge className="bg-[#0077B5] text-white px-4 py-1">PROFESSIONAL</Badge>
-          </div>
-
-          <CardHeader className="text-center pt-8">
-            <CardTitle className="text-2xl font-bold text-gray-900">Professional</CardTitle>
-            <div className="text-4xl font-bold text-[#0077B5] mt-2">€19,99</div>
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <CreditCard className="w-5 h-5" />
+              Bestelling Overzicht
+            </CardTitle>
           </CardHeader>
-
           <CardContent className="space-y-4">
-            <div className="text-center text-lg font-semibold text-gray-700 mb-6">40 professionele portretfoto's</div>
-
-            <div className="space-y-3">
-              <div className="flex items-center gap-3">
-                <Check className="w-5 h-5 text-green-500 flex-shrink-0" />
-                <span>Verschillende zakelijke outfits</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <Check className="w-5 h-5 text-green-500 flex-shrink-0" />
-                <span>Verschillende poses en achtergronden</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <Check className="w-5 h-5 text-green-500 flex-shrink-0" />
-                <span>HD kwaliteit downloads</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <Check className="w-5 h-5 text-green-500 flex-shrink-0" />
-                <span>Klaar binnen 15 minuten</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <Check className="w-5 h-5 text-green-500 flex-shrink-0" />
-                <span>Perfect voor LinkedIn, Social Media, CV, Website en Print</span>
-              </div>
+            <div className="flex justify-between items-center">
+              <span>40 AI Headshots</span>
+              <span className="font-semibold">€{originalPrice}</span>
             </div>
+
+            {couponApplied && (
+              <div className="flex justify-between items-center text-green-600">
+                <div className="flex items-center gap-2">
+                  <Tag className="w-4 h-4" />
+                  <span>Korting ({couponCode})</span>
+                </div>
+                <span className="font-semibold">-€{originalPrice - price}</span>
+              </div>
+            )}
+
+            <hr />
+
+            <div className="flex justify-between items-center text-lg font-bold">
+              <span>Totaal</span>
+              <span>€{price}</span>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Coupon Section */}
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Tag className="w-5 h-5" />
+              Kortingscode
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {!couponApplied ? (
+              <div className="flex gap-2">
+                <div className="flex-1">
+                  <Label htmlFor="coupon">Kortingscode</Label>
+                  <Input
+                    id="coupon"
+                    type="text"
+                    placeholder="Voer je kortingscode in"
+                    value={couponCode}
+                    onChange={(e) => setCouponCode(e.target.value)}
+                    className="mt-1"
+                  />
+                </div>
+                <div className="flex items-end">
+                  <Button onClick={applyCoupon} variant="outline" disabled={!couponCode.trim()}>
+                    Toepassen
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center justify-between bg-green-50 p-3 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <Badge variant="secondary" className="bg-green-100 text-green-800">
+                    {couponCode}
+                  </Badge>
+                  <span className="text-green-700">Kortingscode toegepast!</span>
+                </div>
+                <Button onClick={removeCoupon} variant="ghost" size="sm" className="text-red-600">
+                  Verwijderen
+                </Button>
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -136,29 +194,21 @@ export default function CheckoutPage() {
         <Button
           onClick={handleCheckout}
           disabled={isLoading}
-          className="w-full bg-[#0077B5] hover:bg-[#004182] text-white py-6 text-lg font-semibold rounded-lg"
+          className="w-full bg-[#0077B5] hover:bg-[#004182] text-white py-4 text-lg font-semibold"
         >
           {isLoading ? (
             <div className="flex items-center gap-2">
-              <Loader2 className="w-5 h-5 animate-spin" />
+              <Loader2 className="w-4 h-4 animate-spin" />
               Bezig met laden...
             </div>
           ) : (
-            "Betaal Veilig & Start Direct"
+            `Betaal €${price} - Start AI Training`
           )}
         </Button>
 
-        {/* Security Info */}
-        <div className="mt-6 space-y-2">
-          <div className="flex items-center justify-center gap-2 text-sm text-gray-600">
-            <Check className="w-4 h-4 text-green-500" />
-            <span>Veilige betaling met iDEAL en credit card</span>
-          </div>
-          <div className="flex items-center justify-center gap-2 text-sm text-gray-600">
-            <Check className="w-4 h-4 text-green-500" />
-            <span>Geld terug garantie</span>
-          </div>
-        </div>
+        <p className="text-center text-sm text-gray-500 mt-4">
+          Veilige betaling via Stripe. Je foto's worden binnen 15 minuten verwerkt.
+        </p>
       </div>
     </div>
   )
