@@ -1,8 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
 
-// Simple in-memory storage for wizard data (fallback)
+// In-memory storage for wizard data (temporary solution)
 const wizardDataStore = new Map<string, any>()
 
 export function saveWizardData(sessionId: string, data: any) {
@@ -24,33 +22,26 @@ export function deleteWizardData(sessionId: string) {
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    const { sessionId, projectName, gender, uploadedPhotos, userEmail } = await request.json()
+
+    if (!sessionId || !projectName || !gender || !uploadedPhotos || !userEmail) {
+      return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
     }
 
-    const data = await request.json()
-    const { sessionId, projectName, gender, uploadedPhotos } = data
-
-    if (!sessionId || !projectName || !gender || !uploadedPhotos) {
-      return NextResponse.json({ error: "Missing required data" }, { status: 400 })
-    }
-
-    // Save to memory as fallback
-    saveWizardData(sessionId, {
+    const wizardData = {
+      sessionId,
       projectName,
       gender,
       uploadedPhotos,
-      userEmail: session.user.email,
-    })
+      userEmail,
+      timestamp: new Date().toISOString(),
+    }
 
-    return NextResponse.json({
-      success: true,
-      sessionId,
-      message: "Wizard data saved successfully",
-    })
+    saveWizardData(sessionId, wizardData)
+
+    return NextResponse.json({ success: true, message: "Wizard data saved" })
   } catch (error) {
-    console.error("Error saving wizard data:", error)
-    return NextResponse.json({ error: "Failed to save data" }, { status: 500 })
+    console.error("❌ Error saving wizard data:", error)
+    return NextResponse.json({ error: "Failed to save wizard data" }, { status: 500 })
   }
 }

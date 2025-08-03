@@ -1,26 +1,24 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
+import { useSession } from "next-auth/react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { ArrowRight } from "lucide-react"
-import { ProgressBar } from "@/components/ui/progress-bar"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Progress } from "@/components/ui/progress"
 
 export default function ProjectNamePage() {
-  const { data: session, status } = useSession()
-  const router = useRouter()
   const [projectName, setProjectName] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
+  const router = useRouter()
+  const { data: session, status } = useSession()
 
   useEffect(() => {
     if (status === "loading") return
 
     if (!session) {
-      console.log("❌ No session, redirecting to welcome")
-      router.push("/wizard/welcome")
+      router.push("/login?flow=wizard")
       return
     }
 
@@ -32,11 +30,20 @@ export default function ProjectNamePage() {
   }, [session, status, router])
 
   const handleNext = () => {
-    if (projectName.trim()) {
-      sessionStorage.setItem("projectName", projectName.trim())
-      console.log("✅ Project name saved:", projectName.trim())
-      router.push("/wizard/gender")
+    if (!projectName.trim()) return
+
+    setIsLoading(true)
+
+    // Save to sessionStorage
+    sessionStorage.setItem("projectName", projectName.trim())
+
+    // Generate wizard session ID if not exists
+    if (!sessionStorage.getItem("wizardSessionId")) {
+      const wizardSessionId = `wizard_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+      sessionStorage.setItem("wizardSessionId", wizardSessionId)
     }
+
+    router.push("/wizard/gender")
   }
 
   if (status === "loading") {
@@ -52,46 +59,50 @@ export default function ProjectNamePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="container mx-auto px-4 max-w-2xl">
-        {/* Progress Bar */}
-        <div className="mb-8">
-          <ProgressBar currentStep={1} totalSteps={3} />
-        </div>
-
-        <Card>
-          <CardHeader className="text-center">
-            <CardTitle className="text-2xl">Geef je project een naam</CardTitle>
-            <p className="text-gray-600">
-              Kies een naam voor je headshot project. Dit helpt je later om je foto's terug te vinden.
-            </p>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="projectName">Project naam</Label>
-              <Input
-                id="projectName"
-                type="text"
-                placeholder="Bijv. LinkedIn Headshots, Zakelijke Foto's, ..."
-                value={projectName}
-                onChange={(e) => setProjectName(e.target.value)}
-                className="text-lg py-3"
-                maxLength={50}
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+      <Card className="w-full max-w-2xl">
+        <CardHeader className="text-center">
+          <div className="mb-4">
+            <Progress value={25} className="w-full h-2" style={{ backgroundColor: "#e5e7eb" }}>
+              <div
+                className="h-full transition-all duration-300 ease-in-out rounded-full"
+                style={{
+                  width: "25%",
+                  backgroundColor: "#0077B5",
+                }}
               />
-              <p className="text-sm text-gray-500">{projectName.length}/50 karakters</p>
-            </div>
+            </Progress>
+          </div>
+          <CardTitle className="text-2xl font-bold text-gray-900">Geef je project een naam</CardTitle>
+          <p className="text-gray-600 mt-2">Stap 1 van 4: Kies een naam voor je AI headshot project</p>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div>
+            <label htmlFor="projectName" className="block text-sm font-medium text-gray-700 mb-2">
+              Project naam
+            </label>
+            <Input
+              id="projectName"
+              type="text"
+              value={projectName}
+              onChange={(e) => setProjectName(e.target.value)}
+              placeholder="Bijvoorbeeld: LinkedIn Headshots"
+              className="w-full"
+              maxLength={50}
+            />
+            <p className="text-sm text-gray-500 mt-1">{projectName.length}/50 karakters</p>
+          </div>
 
-            <Button
-              onClick={handleNext}
-              disabled={!projectName.trim()}
-              className="w-full bg-[#0077B5] hover:bg-[#004182] text-white py-3 text-lg"
-            >
-              Volgende stap
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
+          <Button
+            onClick={handleNext}
+            disabled={!projectName.trim() || isLoading}
+            className="w-full text-lg py-3"
+            style={{ backgroundColor: "#0077B5" }}
+          >
+            {isLoading ? "Bezig..." : "Volgende stap"}
+          </Button>
+        </CardContent>
+      </Card>
     </div>
   )
 }

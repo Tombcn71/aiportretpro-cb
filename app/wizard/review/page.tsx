@@ -49,7 +49,14 @@ export default function ReviewPage() {
 
     try {
       // Create a wizard session ID
-      const wizardSessionId = `wizard_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+      const wizardSessionId =
+        sessionStorage.getItem("wizardSessionId") || `wizard_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+
+      console.log("🛒 Starting checkout process...")
+      console.log("📧 User email:", session.user.email)
+      console.log("📦 Project name:", wizardData.projectName)
+      console.log("👤 Gender:", wizardData.gender)
+      console.log("📸 Photos:", wizardData.uploadedPhotos.length)
 
       // Create Stripe checkout directly with all data
       const response = await fetch("/api/stripe/create-checkout", {
@@ -70,10 +77,11 @@ export default function ReviewPage() {
         console.log("✅ Redirecting to Stripe checkout:", data.url)
         window.location.href = data.url
       } else {
+        console.error("❌ No checkout URL received:", data)
         throw new Error("Failed to create checkout session")
       }
     } catch (error) {
-      console.error("Checkout error:", error)
+      console.error("❌ Checkout error:", error)
       alert("Er is een fout opgetreden. Probeer het opnieuw.")
       setProcessing(false)
     }
