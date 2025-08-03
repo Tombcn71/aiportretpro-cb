@@ -1,153 +1,129 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { headers } from "next/headers"
+import { sql } from "@/lib/db"
 import Stripe from "stripe"
-import { neon } from "@neondatabase/serverless"
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2024-06-20",
 })
 
-const sql = neon(process.env.DATABASE_URL!)
+async function getStripe() {
+  const { stripe } = await import("@/lib/stripe")
+  return stripe
+}
 
-export async function POST(req: NextRequest) {
+export async function POST(request: NextRequest) {
+  console.log("🔔 WEBHOOK RECEIVED at", new Date().toISOString())
+
+  const body = await request.text()
+  const signature = request.headers.get("stripe-signature")
+
+  if (!signature) {
+    console.log("❌ No signature")
+    return NextResponse.json({ error: "No signature" }, { status: 400 })
+  }
+
+  if (!process.env.STRIPE_WEBHOOK_SECRET) {
+    console.log("❌ No webhook secret")
+    return NextResponse.json({ error: "Webhook secret not configured" }, { status: 500 })
+  }
+
   try {
-    const body = await req.text()
-    const signature = headers().get("stripe-signature")
+    const stripeInstance = await getStripe()
+    const event = stripeInstance.webhooks.constructEvent(body, signature, process.env.STRIPE_WEBHOOK_SECRET!)
 
-    if (!signature) {
-      return NextResponse.json({ error: "No signature" }, { status: 400 })
-    }
-
-    const event = stripe.webhooks.constructEvent(body, signature, process.env.STRIPE_WEBHOOK_SECRET!)
-
-    console.log("🎯 Stripe webhook event:", event.type)
+    console.log("✅ Event type:", event.type)
 
     if (event.type === "checkout.session.completed") {
-      const session = event.data.object as Stripe.Checkout.Session
+      const session = event.data.object
+      console.log("💳 Processing checkout session:", session.id)
 
-      console.log("💳 Checkout completed:", {
-        sessionId: session.id,
-        customerEmail: session.customer_details?.email,
-        metadata: session.metadata,
-      })
+      // Find and update the purchase
+      const purchaseResult = await sql`
+        UPDATE purchases 
+        SET status = 'completed', updated_at = CURRENT_TIMESTAMP
+        WHERE stripe_session_id = ${session.id}
+        RETURNING user_id, id
+      `
 
-      // Get wizard session data
-      const wizardSessionId = session.metadata?.wizard_session_id
+      if (purchaseResult[0]) {
+        const userId = purchaseResult[0].user_id
+        console.log(`👤 Adding credit for user ${userId}`)
 
-      if (wizardSessionId) {
-        console.log("🔍 Looking for wizard session:", wizardSessionId)
-
-        const [wizardSession] = await sql`
-          SELECT * FROM wizard_sessions 
-          WHERE session_id = ${wizardSessionId}
-        `
-
-        if (wizardSession) {
-          console.log("✅ Found wizard session, creating project...")
-
-          // Create project with pack 928
-          const packId = "928"
-          const packName = wizardSession.gender === "man" ? "928 man" : "928 woman"
-
-          const [project] = await sql`
-            INSERT INTO projects (
-              user_email,
-              project_name,
-              gender,
-              uploaded_photos,
-              pack_id,
-              pack_name,
-              status,
-              stripe_session_id,
-              created_at,
-              updated_at
-            ) VALUES (
-              ${wizardSession.user_email},
-              ${wizardSession.project_name},
-              ${wizardSession.gender},
-              ${wizardSession.uploaded_photos},
-              ${packId},
-              ${packName},
-              'pending',
-              ${session.id},
-              NOW(),
-              NOW()
-            )
-            RETURNING *
+        // Add 1 credit - using INSERT with proper conflict handling
+        try {
+          const creditResult = await sql`
+            INSERT INTO credits (user_id, credits, created_at, updated_at)
+            VALUES (${userId}, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+            ON CONFLICT (user_id) 
+            DO UPDATE SET 
+              credits = credits.credits + 1,
+              updated_at = CURRENT_TIMESTAMP
+            RETURNING credits
           `
 
-          console.log("🎯 Project created:", project.id)
+          console.log(`✅ User ${userId} now has ${creditResult[0]?.credits} credits`)
 
-          // Start Astria training
-          await startAstriaTraining(project)
+          return NextResponse.json({
+            received: true,
+            userId,
+            creditsAdded: 1,
+            totalCredits: creditResult[0]?.credits,
+          })
+        } catch (creditError) {
+          console.error("❌ Credit error:", creditError)
 
-          // Mark wizard session as completed
-          await sql`
-            UPDATE wizard_sessions 
-            SET completed = true, updated_at = NOW()
-            WHERE session_id = ${wizardSessionId}
+          // Fallback: try to update existing or create new
+          const existingCredit = await sql`
+            SELECT credits FROM credits WHERE user_id = ${userId}
           `
 
-          console.log("✅ Wizard flow completed successfully")
-        } else {
-          console.error("❌ Wizard session not found:", wizardSessionId)
+          if (existingCredit[0]) {
+            // Update existing
+            const updateResult = await sql`
+              UPDATE credits 
+              SET credits = credits + 1, updated_at = CURRENT_TIMESTAMP
+              WHERE user_id = ${userId}
+              RETURNING credits
+            `
+            console.log(`✅ Updated credits for user ${userId}: ${updateResult[0]?.credits}`)
+
+            return NextResponse.json({
+              received: true,
+              userId,
+              creditsAdded: 1,
+              totalCredits: updateResult[0]?.credits,
+            })
+          } else {
+            // Create new
+            const newCredit = await sql`
+              INSERT INTO credits (user_id, credits, created_at, updated_at)
+              VALUES (${userId}, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+              RETURNING credits
+            `
+            console.log(`✅ Created new credits for user ${userId}: ${newCredit[0]?.credits}`)
+
+            return NextResponse.json({
+              received: true,
+              userId,
+              creditsAdded: 1,
+              totalCredits: newCredit[0]?.credits,
+            })
+          }
         }
+      } else {
+        console.log("❌ No purchase found for session:", session.id)
       }
     }
 
     return NextResponse.json({ received: true })
   } catch (error) {
-    console.error("❌ Stripe webhook error:", error)
-    return NextResponse.json({ error: "Webhook error" }, { status: 500 })
-  }
-}
-
-async function startAstriaTraining(project: any) {
-  try {
-    console.log("🚀 Starting Astria training for project:", project.id)
-
-    const packId = "928"
-    const packName = project.gender === "man" ? "928 man" : "928 woman"
-
-    // Create tune with Astria
-    const tuneResponse = await fetch("https://api.astria.ai/tunes", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${process.env.ASTRIA_API_KEY}`,
-        "Content-Type": "application/json",
+    console.error("❌ Webhook error:", error)
+    return NextResponse.json(
+      {
+        error: "Webhook error",
+        details: error instanceof Error ? error.message : "Unknown error",
       },
-      body: JSON.stringify({
-        tune: {
-          title: packName,
-          name: packId,
-          callback: `${process.env.NEXTAUTH_URL}/api/astria/wizard-webhook/${project.id}`,
-        },
-      }),
-    })
-
-    if (!tuneResponse.ok) {
-      throw new Error(`Astria API error: ${tuneResponse.status}`)
-    }
-
-    const tuneData = await tuneResponse.json()
-    console.log("✅ Tune created:", tuneData.id)
-
-    // Update project with tune ID
-    await sql`
-      UPDATE projects 
-      SET tune_id = ${tuneData.id}, status = 'training'
-      WHERE id = ${project.id}
-    `
-
-    console.log("🎯 Training started successfully")
-  } catch (error) {
-    console.error("❌ Error starting training:", error)
-
-    // Update project status to error
-    await sql`
-      UPDATE projects 
-      SET status = 'error', error_message = ${error.message}
-      WHERE id = ${project.id}
-    `
+      { status: 400 },
+    )
   }
 }
