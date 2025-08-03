@@ -159,7 +159,7 @@ export default function UploadPage() {
       <div className="container mx-auto px-4 max-w-4xl">
         {/* Progress Bar */}
         <div className="mb-8">
-          <ProgressBar currentStep={3} totalSteps={4} />
+          <ProgressBar currentStep={4} totalSteps={5} />
         </div>
 
         <Card>

@@ -72,7 +72,7 @@ export default function GenderPage() {
       <div className="container mx-auto px-4 max-w-2xl">
         {/* Progress Bar */}
         <div className="mb-8">
-          <ProgressBar currentStep={2} totalSteps={4} />
+          <ProgressBar currentStep={3} totalSteps={5} />
         </div>
 
         <Card>

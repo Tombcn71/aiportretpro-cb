@@ -56,7 +56,7 @@ export default function ProjectNamePage() {
       <div className="container mx-auto px-4 max-w-2xl">
         {/* Progress Bar */}
         <div className="mb-8">
-          <ProgressBar currentStep={1} totalSteps={4} />
+          <ProgressBar currentStep={2} totalSteps={5} />
         </div>
 
         <Card>

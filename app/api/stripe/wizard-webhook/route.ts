@@ -91,7 +91,7 @@ export async function POST(req: NextRequest) {
         // Create purchase record in existing purchases table
         const purchaseResult = await sql`
           INSERT INTO purchases (user_id, stripe_session_id, plan_type, amount, headshots_included, status, created_at, updated_at)
-          VALUES (${user.id}, ${session.id}, 'professional', 1999, 40, 'completed', NOW(), NOW())
+          VALUES (${user.id}, ${session.id}, 'professional', 1599, 40, 'completed', NOW(), NOW())
           RETURNING *
         `
 

@@ -5,7 +5,8 @@ import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { ArrowLeft, Check, Loader2 } from "lucide-react"
+import { ArrowLeft, Check, Loader2, Sparkles } from "lucide-react"
+import { ProgressBar } from "@/components/ui/progress-bar"
 import Link from "next/link"
 
 interface WizardData {
@@ -39,10 +40,17 @@ export default function CheckoutPage() {
       return
     }
 
+    const photos = JSON.parse(uploadedPhotos)
+    if (photos.length < 6) {
+      console.error("❌ Not enough photos, redirecting to upload")
+      router.push("/wizard/upload")
+      return
+    }
+
     setWizardData({
       projectName,
       gender,
-      uploadedPhotos: JSON.parse(uploadedPhotos),
+      uploadedPhotos: photos,
     })
   }, [router])
 
@@ -79,7 +87,7 @@ export default function CheckoutPage() {
 
       console.log("✅ Wizard data saved, creating checkout session")
 
-      // Create Stripe checkout session
+      // Create Stripe checkout session with discount
       const checkoutResponse = await fetch("/api/stripe/create-checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -94,6 +102,7 @@ export default function CheckoutPage() {
             user_email: session.user.email,
             project_name: wizardData.projectName,
             gender: wizardData.gender,
+            discount_code: "LAUNCH20",
           },
         }),
       })
@@ -141,6 +150,11 @@ export default function CheckoutPage() {
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="container mx-auto px-4 max-w-2xl">
+        {/* Progress Bar */}
+        <div className="mb-8">
+          <ProgressBar currentStep={5} totalSteps={5} />
+        </div>
+
         <Link href="/wizard/upload" className="inline-flex items-center text-gray-600 hover:text-gray-900 mb-8">
           <ArrowLeft className="h-4 w-4 mr-2" />
           Terug naar upload
@@ -154,11 +168,20 @@ export default function CheckoutPage() {
           </p>
         </div>
 
-        <Card className="border-2 border-blue-200">
+        <Card className="border-2 border-green-200">
           <CardHeader className="text-center">
+            <div className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold mb-2 inline-block">
+              <Sparkles className="inline h-4 w-4 mr-1" />
+              20% LAUNCH KORTING
+            </div>
             <CardTitle className="text-2xl">Professional</CardTitle>
-            <div className="text-4xl font-bold text-blue-600 mt-2">€19,99</div>
-            <p className="text-gray-600">40 professionele portretfoto's</p>
+            <div className="space-y-2">
+              <div className="flex items-center justify-center space-x-2">
+                <span className="text-lg text-gray-500 line-through">€19,99</span>
+                <span className="text-4xl font-bold text-green-600">€15,99</span>
+              </div>
+              <p className="text-gray-600">40 professionele portretfoto's</p>
+            </div>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-3">
@@ -188,6 +211,22 @@ export default function CheckoutPage() {
               </div>
             </div>
 
+            <div className="bg-blue-50 rounded-lg p-4">
+              <h4 className="font-medium text-blue-900 mb-2">📋 Je project samenvatting:</h4>
+              <div className="text-sm text-blue-800 space-y-1">
+                <p>
+                  <strong>Project:</strong> {wizardData.projectName}
+                </p>
+                <p>
+                  <strong>Stijl:</strong>{" "}
+                  {wizardData.gender === "man" ? "Mannelijk" : wizardData.gender === "woman" ? "Vrouwelijk" : "Unisex"}
+                </p>
+                <p>
+                  <strong>Foto's:</strong> {wizardData.uploadedPhotos.length} geüpload
+                </p>
+              </div>
+            </div>
+
             {error && (
               <div className="bg-red-50 border border-red-200 rounded-lg p-4">
                 <p className="text-red-600 text-sm">{error}</p>
@@ -197,7 +236,7 @@ export default function CheckoutPage() {
             <Button
               onClick={handleCheckout}
               disabled={loading}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white py-6 text-lg font-semibold"
+              className="w-full bg-green-600 hover:bg-green-700 text-white py-6 text-lg font-semibold"
             >
               {loading ? (
                 <>
@@ -205,13 +244,14 @@ export default function CheckoutPage() {
                   Bezig met laden...
                 </>
               ) : (
-                "Betaal Veilig & Start Training"
+                "Betaal €15,99 & Start Training"
               )}
             </Button>
 
             <div className="text-center text-sm text-gray-500 space-y-1">
               <p>✓ Veilige betaling met iDEAL en creditcard</p>
               <p>✓ Geld terug garantie</p>
+              <p>✓ 20% korting automatisch toegepast</p>
             </div>
           </CardContent>
         </Card>
