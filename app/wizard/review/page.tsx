@@ -51,12 +51,12 @@ export default function ReviewPage() {
       // Create a wizard session ID
       const wizardSessionId = `wizard_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
 
-      // Save wizard data to the existing API
-      await fetch("/api/wizard/save-data", {
+      // Create Stripe checkout directly with all data
+      const response = await fetch("/api/stripe/create-checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          sessionId: wizardSessionId,
+          wizardSessionId,
           projectName: wizardData.projectName,
           gender: wizardData.gender,
           uploadedPhotos: wizardData.uploadedPhotos,
@@ -64,16 +64,10 @@ export default function ReviewPage() {
         }),
       })
 
-      // Create Stripe checkout using existing API
-      const response = await fetch("/api/stripe/create-checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ wizardSessionId }),
-      })
-
       const data = await response.json()
 
       if (data.url) {
+        console.log("✅ Redirecting to Stripe checkout:", data.url)
         window.location.href = data.url
       } else {
         throw new Error("Failed to create checkout session")

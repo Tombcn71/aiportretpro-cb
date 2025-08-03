@@ -1,53 +1,52 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
 import Stripe from "stripe"
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2024-06-20",
 })
 
-export async function POST(request: NextRequest) {
+export async function POST(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
+    const { wizardSessionId, projectName, gender, uploadedPhotos, userEmail } = await req.json()
 
-    const { sessionId, projectName } = await request.json()
-
-    if (!sessionId || !projectName) {
+    if (!wizardSessionId || !projectName || !gender || !uploadedPhotos || !userEmail) {
       return NextResponse.json({ error: "Missing required data" }, { status: 400 })
     }
+
+    console.log("🛒 Creating Stripe checkout for wizard session:", wizardSessionId)
 
     const checkoutSession = await stripe.checkout.sessions.create({
       payment_method_types: ["card", "ideal"],
       line_items: [
         {
-          price_data: {
-            currency: "eur",
-            product_data: {
-              name: `AI Headshots - ${projectName}`,
-              description: "40+ professionele AI headshots",
-            },
-            unit_amount: 2999, // €29.99
-          },
+          price: "price_1RrFsbDswbEJWagVsEytA8rs", // Professional plan price ID
           quantity: 1,
         },
       ],
       mode: "payment",
-      success_url: `${process.env.NEXTAUTH_URL}/wizard-training/${sessionId}?success=true`,
-      cancel_url: `${process.env.NEXTAUTH_URL}/wizard/review?canceled=true`,
+      success_url: `${process.env.NEXTAUTH_URL}/generate/processing?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.NEXTAUTH_URL}/wizard/review`,
+      allow_promotion_codes: true,
       metadata: {
-        sessionId: sessionId.toString(),
-        userEmail: session.user.email,
+        wizardSessionId,
         projectName,
+        gender,
+        uploadedPhotos: JSON.stringify(uploadedPhotos),
+        userEmail,
+        packId: "928",
+        source: "wizard_flow",
+        photoCount: uploadedPhotos.length.toString(),
       },
     })
 
-    return NextResponse.json({ url: checkoutSession.url })
+    console.log("✅ Stripe checkout session created:", checkoutSession.id)
+
+    return NextResponse.json({
+      url: checkoutSession.url,
+      sessionId: checkoutSession.id,
+    })
   } catch (error) {
-    console.error("Error creating checkout session:", error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    console.error("❌ Stripe checkout error:", error)
+    return NextResponse.json({ error: "Failed to create checkout session" }, { status: 500 })
   }
 }
