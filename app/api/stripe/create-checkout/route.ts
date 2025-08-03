@@ -7,43 +7,42 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 
 export async function POST(request: NextRequest) {
   try {
-    const { sessionId, projectName, gender, photoCount, userEmail } = await request.json()
+    const { wizardSessionId, projectName, gender, photoCount } = await request.json()
 
-    console.log("🛒 Creating Stripe checkout:", {
-      sessionId,
-      projectName,
-      gender,
-      photoCount,
-      userEmail,
-    })
+    // Validate required fields
+    if (!wizardSessionId || !projectName || !gender) {
+      return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
+    }
 
-    // Ensure photoCount is a number and convert to string safely
+    // Safe photoCount conversion
     const safePhotoCount = photoCount || 0
-    const photoCountString = safePhotoCount.toString()
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card", "ideal"],
       line_items: [
         {
-          price: "price_1RrFsbDswbEJWagVsEytA8rs",
+          price_data: {
+            currency: "eur",
+            product_data: {
+              name: "Professional AI Headshots",
+              description: "40 professionele AI-gegenereerde headshots",
+            },
+            unit_amount: 1999, // €19.99
+          },
           quantity: 1,
         },
       ],
       mode: "payment",
-      success_url: `${process.env.NEXTAUTH_URL}/generate/processing?session_id={CHECKOUT_SESSION_ID}&wizard_session=${sessionId}`,
+      success_url: `${process.env.NEXTAUTH_URL}/generate/processing?session_id={CHECKOUT_SESSION_ID}&wizard_session=${wizardSessionId}`,
       cancel_url: `${process.env.NEXTAUTH_URL}/wizard/review`,
-      customer_email: userEmail,
-      allow_promotion_codes: true,
       metadata: {
-        wizardSessionId: sessionId || "",
-        projectName: projectName || "",
-        gender: gender || "",
-        photoCount: photoCountString,
-        userEmail: userEmail || "",
+        wizardSessionId,
+        projectName,
+        gender,
+        photoCount: safePhotoCount.toString(),
       },
+      allow_promotion_codes: true,
     })
-
-    console.log("✅ Stripe checkout session created:", session.id)
 
     return NextResponse.json({ url: session.url })
   } catch (error) {

@@ -1,252 +1,168 @@
 "use client"
 
-import type React from "react"
-
-import { useState, useEffect, useCallback } from "react"
-import { useSession } from "next-auth/react"
+import { useState, useCallback } from "react"
 import { useRouter } from "next/navigation"
+import { useDropzone } from "react-dropzone"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { ArrowLeft, ArrowRight, Upload, X, Check } from "lucide-react"
-import { ProgressBar } from "@/components/ui/progress-bar"
-import Image from "next/image"
+import { Progress } from "@/components/ui/progress"
+import { Upload, X, CheckCircle, AlertCircle } from "lucide-react"
 
 export default function UploadPage() {
-  const { data: session, status } = useSession()
   const router = useRouter()
   const [uploadedPhotos, setUploadedPhotos] = useState<string[]>([])
   const [uploading, setUploading] = useState(false)
+  const [uploadProgress, setUploadProgress] = useState(0)
 
-  useEffect(() => {
-    if (status === "loading") return
+  const onDrop = useCallback(async (acceptedFiles: File[]) => {
+    if (acceptedFiles.length === 0) return
 
-    if (!session) {
-      console.log("❌ No session, redirecting to welcome")
-      router.push("/wizard/welcome")
-      return
+    setUploading(true)
+    setUploadProgress(0)
+
+    const newPhotos: string[] = []
+    const totalFiles = acceptedFiles.length
+
+    for (let i = 0; i < acceptedFiles.length; i++) {
+      const file = acceptedFiles[i]
+
+      try {
+        const formData = new FormData()
+        formData.append("file", file)
+
+        const response = await fetch("/api/upload", {
+          method: "POST",
+          body: formData,
+        })
+
+        if (!response.ok) {
+          throw new Error("Upload failed")
+        }
+
+        const { url } = await response.json()
+        newPhotos.push(url)
+
+        setUploadProgress(((i + 1) / totalFiles) * 100)
+      } catch (error) {
+        console.error("Upload error:", error)
+      }
     }
 
-    // Check if previous steps are completed
+    setUploadedPhotos((prev) => [...prev, ...newPhotos])
+    setUploading(false)
+    setUploadProgress(0)
+  }, [])
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: {
+      "image/*": [".jpeg", ".jpg", ".png", ".webp"],
+    },
+    multiple: true,
+  })
+
+  const removePhoto = (index: number) => {
+    setUploadedPhotos((prev) => prev.filter((_, i) => i !== index))
+  }
+
+  const handleContinue = () => {
+    if (uploadedPhotos.length < 6) return
+
+    // Save to sessionStorage
+    sessionStorage.setItem("uploadedPhotos", JSON.stringify(uploadedPhotos))
+
+    // Save to wizard session
+    const wizardSessionId = sessionStorage.getItem("wizardSessionId")
     const projectName = sessionStorage.getItem("projectName")
     const gender = sessionStorage.getItem("gender")
 
-    if (!projectName) {
-      console.log("❌ No project name, redirecting to project-name")
-      router.push("/wizard/project-name")
-      return
+    if (wizardSessionId && projectName && gender) {
+      fetch("/api/wizard/save-data", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          wizardSessionId,
+          projectName,
+          gender,
+          uploadedPhotos,
+        }),
+      }).catch(console.error)
     }
 
-    if (!gender) {
-      console.log("❌ No gender, redirecting to gender")
-      router.push("/wizard/gender")
-      return
-    }
-
-    // Load existing photos if available
-    const savedPhotos = sessionStorage.getItem("uploadedPhotos")
-    if (savedPhotos) {
-      try {
-        const photos = JSON.parse(savedPhotos)
-        setUploadedPhotos(photos)
-        console.log("✅ Loaded existing photos:", photos.length)
-      } catch (error) {
-        console.error("Error parsing saved photos:", error)
-      }
-    }
-  }, [session, status, router])
-
-  const handleFileUpload = useCallback(
-    async (files: FileList) => {
-      if (files.length === 0) return
-
-      setUploading(true)
-
-      try {
-        const newPhotos: string[] = []
-
-        for (let i = 0; i < files.length; i++) {
-          const file = files[i]
-
-          // Check file type
-          if (!file.type.startsWith("image/")) {
-            console.error("Invalid file type:", file.type)
-            continue
-          }
-
-          // Check file size (max 10MB)
-          if (file.size > 10 * 1024 * 1024) {
-            console.error("File too large:", file.size)
-            continue
-          }
-
-          const formData = new FormData()
-          formData.append("file", file)
-
-          const response = await fetch("/api/upload", {
-            method: "POST",
-            body: formData,
-          })
-
-          if (response.ok) {
-            const data = await response.json()
-            newPhotos.push(data.url)
-            console.log("✅ Photo uploaded:", data.url)
-          } else {
-            console.error("Upload failed for file:", file.name)
-          }
-        }
-
-        if (newPhotos.length > 0) {
-          const updatedPhotos = [...uploadedPhotos, ...newPhotos]
-          setUploadedPhotos(updatedPhotos)
-          sessionStorage.setItem("uploadedPhotos", JSON.stringify(updatedPhotos))
-          console.log("✅ All photos saved to sessionStorage:", updatedPhotos.length)
-        }
-      } catch (error) {
-        console.error("Upload error:", error)
-      } finally {
-        setUploading(false)
-      }
-    },
-    [uploadedPhotos],
-  )
-
-  const handleDrop = useCallback(
-    (e: React.DragEvent) => {
-      e.preventDefault()
-      const files = e.dataTransfer.files
-      handleFileUpload(files)
-    },
-    [handleFileUpload],
-  )
-
-  const handleFileInput = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      if (e.target.files) {
-        handleFileUpload(e.target.files)
-      }
-    },
-    [handleFileUpload],
-  )
-
-  const removePhoto = (index: number) => {
-    const updatedPhotos = uploadedPhotos.filter((_, i) => i !== index)
-    setUploadedPhotos(updatedPhotos)
-    sessionStorage.setItem("uploadedPhotos", JSON.stringify(updatedPhotos))
-    console.log("✅ Photo removed, remaining:", updatedPhotos.length)
-  }
-
-  const handleNext = async () => {
-    if (uploadedPhotos.length >= 6) {
-      // Save wizard data to server
-      const sessionId = sessionStorage.getItem("wizardSessionId")
-      const projectName = sessionStorage.getItem("projectName")
-      const gender = sessionStorage.getItem("gender")
-
-      try {
-        await fetch("/api/wizard/save-data", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            sessionId,
-            projectName,
-            gender,
-            uploadedPhotos,
-            userEmail: session?.user?.email,
-          }),
-        })
-        console.log("✅ Wizard data saved to server")
-      } catch (error) {
-        console.error("❌ Failed to save wizard data:", error)
-      }
-
-      // Go to review page
-      router.push("/wizard/review")
-    }
-  }
-
-  if (status === "loading") {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0077B5]"></div>
-      </div>
-    )
-  }
-
-  if (!session) {
-    return null
+    router.push("/wizard/review")
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="container mx-auto px-4 max-w-4xl">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8">
+      <div className="max-w-4xl mx-auto px-4">
         {/* Progress Bar */}
         <div className="mb-8">
-          <ProgressBar currentStep={3} totalSteps={3} />
+          <div className="flex justify-between items-center mb-2">
+            <span className="text-sm font-medium text-gray-700">Stap 3 van 3</span>
+            <span className="text-sm text-gray-500">Upload Foto's</span>
+          </div>
+          <Progress value={100} className="h-2" />
         </div>
 
-        <Card>
-          <CardHeader className="text-center">
-            <CardTitle className="text-2xl">Upload je foto's</CardTitle>
-            <p className="text-gray-600">Upload minimaal 6 foto's van jezelf. Meer foto's = betere resultaten!</p>
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-4">Upload je foto's</h1>
+          <p className="text-lg text-gray-600">Upload minimaal 6 foto's voor de beste resultaten</p>
+        </div>
+
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle>Foto Upload</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-6">
-            {/* Upload Area */}
+          <CardContent>
+            {/* Upload Zone */}
             <div
-              onDrop={handleDrop}
-              onDragOver={(e) => e.preventDefault()}
-              className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-[#0077B5] transition-colors"
+              {...getRootProps()}
+              className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${
+                isDragActive ? "border-blue-500 bg-blue-50" : "border-gray-300 hover:border-gray-400"
+              }`}
             >
-              <Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-              <p className="text-lg font-medium text-gray-700 mb-2">Sleep foto's hierheen of klik om te uploaden</p>
-              <p className="text-sm text-gray-500 mb-4">JPG, PNG of WEBP - Max 10MB per foto</p>
-              <input
-                type="file"
-                multiple
-                accept="image/*"
-                onChange={handleFileInput}
-                className="hidden"
-                id="file-upload"
-              />
-              <Button
-                onClick={() => document.getElementById("file-upload")?.click()}
-                disabled={uploading}
-                className="bg-[#0077B5] hover:bg-[#004182] text-white"
-              >
-                {uploading ? "Uploaden..." : "Selecteer foto's"}
-              </Button>
+              <input {...getInputProps()} />
+              <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+              {isDragActive ? (
+                <p className="text-lg text-blue-600">Laat je foto's hier vallen...</p>
+              ) : (
+                <div>
+                  <p className="text-lg text-gray-600 mb-2">Sleep foto's hierheen of klik om te selecteren</p>
+                  <p className="text-sm text-gray-500">JPG, PNG, WEBP tot 10MB per foto</p>
+                </div>
+              )}
             </div>
+
+            {/* Upload Progress */}
+            {uploading && (
+              <div className="mt-4">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-sm text-gray-600">Uploaden...</span>
+                  <span className="text-sm text-gray-600">{Math.round(uploadProgress)}%</span>
+                </div>
+                <Progress value={uploadProgress} className="h-2" />
+              </div>
+            )}
 
             {/* Photo Grid */}
             {uploadedPhotos.length > 0 && (
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-medium">Geüploade foto's ({uploadedPhotos.length})</h3>
-                  {uploadedPhotos.length >= 6 && (
-                    <div className="flex items-center text-green-600">
-                      <Check className="h-5 w-5 mr-1" />
-                      <span className="text-sm font-medium">Klaar om door te gaan!</span>
-                    </div>
-                  )}
-                </div>
-
+              <div className="mt-6">
+                <h3 className="text-lg font-semibold mb-4">Geüploade foto's ({uploadedPhotos.length})</h3>
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                   {uploadedPhotos.map((photo, index) => (
                     <div key={index} className="relative group">
-                      <div className="aspect-square rounded-lg overflow-hidden bg-gray-100">
-                        <Image
-                          src={photo || "/placeholder.svg"}
-                          alt={`Upload ${index + 1}`}
-                          width={200}
-                          height={200}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
+                      <img
+                        src={photo || "/placeholder.svg"}
+                        alt={`Upload ${index + 1}`}
+                        className="w-full h-32 object-cover rounded-lg"
+                      />
                       <button
                         onClick={() => removePhoto(index)}
-                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
                       >
-                        <X className="h-4 w-4" />
+                        <X className="w-4 h-4" />
                       </button>
                     </div>
                   ))}
@@ -254,33 +170,33 @@ export default function UploadPage() {
               </div>
             )}
 
-            {/* Progress indicator */}
-            {uploadedPhotos.length > 0 && uploadedPhotos.length < 6 && (
-              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                <p className="text-yellow-800 text-sm">
-                  Je hebt nog {6 - uploadedPhotos.length} foto's nodig om door te kunnen gaan. Meer foto's geven betere
-                  resultaten!
-                </p>
-              </div>
-            )}
-
-            <div className="flex justify-between">
-              <Button variant="ghost" onClick={() => router.push("/wizard/gender")} className="text-gray-600">
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Terug
-              </Button>
-
-              <Button
-                onClick={handleNext}
-                disabled={uploadedPhotos.length < 6}
-                className="bg-[#0077B5] hover:bg-[#004182] text-white"
-              >
-                Naar review
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
+            {/* Status Messages */}
+            <div className="mt-6 space-y-2">
+              {uploadedPhotos.length >= 6 ? (
+                <div className="flex items-center gap-2 text-green-600">
+                  <CheckCircle className="w-5 h-5" />
+                  <span>Perfect! Je hebt genoeg foto's geüpload.</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 text-amber-600">
+                  <AlertCircle className="w-5 h-5" />
+                  <span>Upload nog {6 - uploadedPhotos.length} foto's om door te gaan.</span>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
+
+        {/* Continue Button */}
+        <div className="text-center">
+          <Button
+            onClick={handleContinue}
+            disabled={uploadedPhotos.length < 6 || uploading}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 text-lg font-semibold"
+          >
+            Doorgaan naar Bestelling
+          </Button>
+        </div>
       </div>
     </div>
   )
