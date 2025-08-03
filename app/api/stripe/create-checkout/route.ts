@@ -40,25 +40,27 @@ export async function POST(req: NextRequest) {
       userEmail,
     })
 
-    // Create Stripe checkout session using the specific price ID
+    // Create Stripe checkout session with promotion codes enabled
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card", "ideal"],
       line_items: [
         {
-          price: "price_1RrFsbDswbEJWagVsEytA8rs", // Use the specific price ID
+          price: "price_1RrFsbDswbEJWagVsEytA8rs", // Professional plan price ID
           quantity: 1,
         },
       ],
       mode: "payment",
       customer_email: userEmail,
       success_url: `${process.env.NEXTAUTH_URL}/generate/processing?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXTAUTH_URL}/wizard/checkout`,
+      cancel_url: `${process.env.NEXTAUTH_URL}/wizard/review`,
+      allow_promotion_codes: true, // This enables coupon code field on Stripe checkout
       metadata: {
         wizardSessionId,
         projectName,
         gender,
         userEmail,
         photoCount: uploadedPhotos?.length?.toString() || "0",
+        packId: "928", // Astria pack ID
       },
     })
 
