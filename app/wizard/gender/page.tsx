@@ -24,8 +24,10 @@ export default function GenderPage() {
 
     // Check if project name exists
     const projectName = sessionStorage.getItem("projectName")
-    if (!projectName) {
-      console.log("❌ No project name, redirecting to project-name")
+    const wizardSessionId = sessionStorage.getItem("wizardSessionId")
+
+    if (!projectName || !wizardSessionId) {
+      console.log("❌ No project name or wizard session, redirecting to project-name")
       router.push("/wizard/project-name")
       return
     }
@@ -51,6 +53,7 @@ export default function GenderPage() {
 
   const handleNext = () => {
     if (selectedGender) {
+      console.log("🚀 Going to upload page")
       router.push("/wizard/upload")
     }
   }

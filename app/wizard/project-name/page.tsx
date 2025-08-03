@@ -24,10 +24,12 @@ export default function ProjectNamePage() {
       return
     }
 
-    // Generate session ID if not exists
-    if (!sessionStorage.getItem("wizardSessionId")) {
-      const sessionId = `wizard_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-      sessionStorage.setItem("wizardSessionId", sessionId)
+    // Check if wizard session exists
+    const wizardSessionId = sessionStorage.getItem("wizardSessionId")
+    if (!wizardSessionId) {
+      console.log("❌ No wizard session, redirecting to welcome")
+      router.push("/wizard/welcome")
+      return
     }
 
     // Load existing project name if available
