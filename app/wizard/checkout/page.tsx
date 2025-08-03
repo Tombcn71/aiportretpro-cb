@@ -1,49 +1,69 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useSession } from "next-auth/react"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
-import { Check, CreditCard, Mail, Sparkles } from "lucide-react"
-import { loadStripe } from "@stripe/stripe-js"
-
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!)
+import { Loader2, CreditCard, Tag } from "lucide-react"
 
 export default function CheckoutPage() {
+  const { data: session, status } = useSession()
   const router = useRouter()
-  const searchParams = useSearchParams()
-  const sessionId = searchParams.get("session")
-  const [email, setEmail] = useState("")
   const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState("")
+  const [couponCode, setCouponCode] = useState("")
+  const [couponApplied, setCouponApplied] = useState(false)
+  const [price, setPrice] = useState(29)
+  const [originalPrice] = useState(29)
 
   useEffect(() => {
-    if (!sessionId) {
+    if (status === "loading") return
+
+    if (!session) {
+      console.log("❌ No session, redirecting to welcome")
       router.push("/wizard/welcome")
+      return
     }
-  }, [sessionId, router])
+
+    // Check if wizard data exists
+    const projectName = sessionStorage.getItem("projectName")
+    const gender = sessionStorage.getItem("gender")
+    const uploadedPhotos = JSON.parse(sessionStorage.getItem("uploadedPhotos") || "[]")
+    const wizardSessionId = sessionStorage.getItem("wizardSessionId")
+
+    if (!projectName || !gender || uploadedPhotos.length === 0 || !wizardSessionId) {
+      console.log("❌ Missing wizard data, redirecting to welcome")
+      router.push("/wizard/welcome")
+      return
+    }
+  }, [session, status, router])
+
+  const applyCoupon = () => {
+    if (couponCode.toLowerCase() === "save50" && !couponApplied) {
+      setPrice(Math.round(originalPrice * 0.5))
+      setCouponApplied(true)
+    }
+  }
+
+  const removeCoupon = () => {
+    setPrice(originalPrice)
+    setCouponApplied(false)
+    setCouponCode("")
+  }
 
   const handleCheckout = async () => {
-    if (!email) {
-      setError("Please enter your email address")
-      return
-    }
-
-    if (!email.includes("@")) {
-      setError("Please enter a valid email address")
-      return
-    }
+    if (!session?.user?.email) return
 
     setIsLoading(true)
-    setError("")
 
     try {
-      console.log("🛒 Starting checkout process...")
-      console.log("📧 Email:", email)
-      console.log("🎫 Session ID:", sessionId)
+      const wizardSessionId = sessionStorage.getItem("wizardSessionId")
+      const projectName = sessionStorage.getItem("projectName")
+      const gender = sessionStorage.getItem("gender")
+      const uploadedPhotos = JSON.parse(sessionStorage.getItem("uploadedPhotos") || "[]")
 
       const response = await fetch("/api/stripe/create-checkout", {
         method: "POST",
@@ -51,8 +71,13 @@ export default function CheckoutPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          wizardSessionId: sessionId,
-          userEmail: email,
+          wizardSessionId,
+          projectName,
+          gender,
+          uploadedPhotos,
+          userEmail: session.user.email,
+          couponCode: couponApplied ? couponCode : null,
+          price: price,
         }),
       })
 
@@ -60,127 +85,130 @@ export default function CheckoutPage() {
         throw new Error("Failed to create checkout session")
       }
 
-      const { sessionId: stripeSessionId } = await response.json()
-      console.log("✅ Stripe session created:", stripeSessionId)
-
-      const stripe = await stripePromise
-      if (!stripe) {
-        throw new Error("Stripe failed to load")
-      }
-
-      console.log("🔄 Redirecting to Stripe checkout...")
-      const { error: stripeError } = await stripe.redirectToCheckout({
-        sessionId: stripeSessionId,
-      })
-
-      if (stripeError) {
-        throw new Error(stripeError.message)
-      }
+      const { url } = await response.json()
+      console.log("✅ Redirecting to Stripe checkout:", url)
+      window.location.href = url
     } catch (error) {
       console.error("❌ Checkout error:", error)
-      setError("Something went wrong. Please try again.")
-    } finally {
       setIsLoading(false)
     }
   }
 
-  if (!sessionId) {
-    return <div>Loading...</div>
+  if (status === "loading") {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0077B5]"></div>
+      </div>
+    )
+  }
+
+  if (!session) {
+    return null
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <Card className="shadow-xl border-0">
-          <CardHeader className="text-center pb-2">
-            <div className="mx-auto mb-4 w-16 h-16 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full flex items-center justify-center">
-              <Sparkles className="w-8 h-8 text-white" />
-            </div>
-            <CardTitle className="text-2xl font-bold text-gray-900">Complete Your Order</CardTitle>
-            <CardDescription className="text-gray-600">You're one step away from amazing AI headshots!</CardDescription>
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="container mx-auto px-4 max-w-2xl">
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-4">Betaling</h1>
+          <p className="text-lg text-gray-600">Voltooi je bestelling om je AI headshots te ontvangen</p>
+        </div>
+
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <CreditCard className="w-5 h-5" />
+              Bestelling Overzicht
+            </CardTitle>
           </CardHeader>
-
-          <CardContent className="space-y-6">
-            {/* Order Summary */}
-            <div className="bg-gray-50 rounded-lg p-4 space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="font-medium text-gray-900">Professional AI Headshots</span>
-                <Badge variant="secondary" className="bg-green-100 text-green-800">
-                  40 photos
-                </Badge>
-              </div>
-
-              <div className="space-y-2 text-sm text-gray-600">
-                <div className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-green-600" />
-                  <span>40 high-quality headshots</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-green-600" />
-                  <span>Multiple professional styles</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-green-600" />
-                  <span>Ready in 30-60 minutes</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-green-600" />
-                  <span>High-resolution downloads</span>
-                </div>
-              </div>
-
-              <div className="border-t pt-3 flex items-center justify-between">
-                <span className="font-semibold text-gray-900">Total</span>
-                <span className="text-2xl font-bold text-gray-900">€19.99</span>
-              </div>
+          <CardContent className="space-y-4">
+            <div className="flex justify-between items-center">
+              <span>40 AI Headshots</span>
+              <span className="font-semibold">€{originalPrice}</span>
             </div>
 
-            {/* Email Input */}
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-sm font-medium text-gray-700">
-                Email Address
-              </Label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="your@email.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="pl-10"
-                  required
-                />
+            {couponApplied && (
+              <div className="flex justify-between items-center text-green-600">
+                <div className="flex items-center gap-2">
+                  <Tag className="w-4 h-4" />
+                  <span>Korting ({couponCode})</span>
+                </div>
+                <span className="font-semibold">-€{originalPrice - price}</span>
               </div>
-              <p className="text-xs text-gray-500">We'll send your headshots to this email address</p>
+            )}
+
+            <hr />
+
+            <div className="flex justify-between items-center text-lg font-bold">
+              <span>Totaal</span>
+              <span>€{price}</span>
             </div>
-
-            {error && <div className="text-red-600 text-sm text-center bg-red-50 p-3 rounded-lg">{error}</div>}
-
-            {/* Checkout Button */}
-            <Button
-              onClick={handleCheckout}
-              disabled={isLoading || !email}
-              className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-3 text-lg"
-            >
-              {isLoading ? (
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  Processing...
-                </div>
-              ) : (
-                <div className="flex items-center gap-2">
-                  <CreditCard className="w-5 h-5" />
-                  Complete Payment - €19.99
-                </div>
-              )}
-            </Button>
-
-            <p className="text-xs text-gray-500 text-center">
-              Secure payment powered by Stripe. Your data is protected.
-            </p>
           </CardContent>
         </Card>
+
+        {/* Coupon Section */}
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Tag className="w-5 h-5" />
+              Kortingscode
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {!couponApplied ? (
+              <div className="flex gap-2">
+                <div className="flex-1">
+                  <Label htmlFor="coupon">Kortingscode</Label>
+                  <Input
+                    id="coupon"
+                    type="text"
+                    placeholder="Voer je kortingscode in"
+                    value={couponCode}
+                    onChange={(e) => setCouponCode(e.target.value)}
+                    className="mt-1"
+                  />
+                </div>
+                <div className="flex items-end">
+                  <Button onClick={applyCoupon} variant="outline" disabled={!couponCode.trim()}>
+                    Toepassen
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center justify-between bg-green-50 p-3 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <Badge variant="secondary" className="bg-green-100 text-green-800">
+                    {couponCode}
+                  </Badge>
+                  <span className="text-green-700">Kortingscode toegepast!</span>
+                </div>
+                <Button onClick={removeCoupon} variant="ghost" size="sm" className="text-red-600">
+                  Verwijderen
+                </Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Checkout Button */}
+        <Button
+          onClick={handleCheckout}
+          disabled={isLoading}
+          className="w-full bg-[#0077B5] hover:bg-[#004182] text-white py-4 text-lg font-semibold"
+        >
+          {isLoading ? (
+            <div className="flex items-center gap-2">
+              <Loader2 className="w-4 h-4 animate-spin" />
+              Bezig met laden...
+            </div>
+          ) : (
+            `Betaal €${price} - Start AI Training`
+          )}
+        </Button>
+
+        <p className="text-center text-sm text-gray-500 mt-4">
+          Veilige betaling via Stripe. Je foto's worden binnen 15 minuten verwerkt.
+        </p>
       </div>
     </div>
   )

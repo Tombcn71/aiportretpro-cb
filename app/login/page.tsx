@@ -13,6 +13,7 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null)
   const searchParams = useSearchParams()
   const router = useRouter()
+  const flow = searchParams.get("flow")
   const selectedPlan = searchParams.get("plan")
 
   // Get plan details
@@ -22,18 +23,28 @@ export default function LoginPage() {
 
   const planDetails = selectedPlan ? plans[selectedPlan as keyof typeof plans] : null
 
-  // Redirect to checkout if user is already logged in
+  // Redirect based on flow after login
   useEffect(() => {
-    if (session && selectedPlan && status === "authenticated") {
-      handleCheckout()
+    if (session && status === "authenticated") {
+      if (flow === "wizard") {
+        // Start wizard flow
+        router.push("/wizard/project-name")
+      } else if (selectedPlan) {
+        // Old checkout flow
+        handleCheckout()
+      } else {
+        // Default to dashboard
+        router.push("/dashboard")
+      }
     }
-  }, [session, selectedPlan, status])
+  }, [session, status, flow, selectedPlan])
 
   const handleGoogleSignIn = async () => {
     setLoading(true)
     setError(null)
     try {
-      await signIn("google")
+      const callbackUrl = flow === "wizard" ? "/wizard/project-name" : "/dashboard"
+      await signIn("google", { callbackUrl })
     } catch (error) {
       setError("Er is een fout opgetreden bij het inloggen. Probeer het opnieuw.")
       setLoading(false)
@@ -91,8 +102,14 @@ export default function LoginPage() {
           <Card className="max-w-md mx-auto">
             <CardContent className="p-8">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#0077B5] mx-auto mb-4"></div>
-              <h2 className="text-xl font-semibold mb-2">Checkout voorbereiden...</h2>
-              <p className="text-gray-600">Je wordt doorgestuurd naar Stripe om je betaling te voltooien.</p>
+              <h2 className="text-xl font-semibold mb-2">
+                {flow === "wizard" ? "Wizard voorbereiden..." : "Checkout voorbereiden..."}
+              </h2>
+              <p className="text-gray-600">
+                {flow === "wizard"
+                  ? "Je wordt doorgestuurd naar de wizard om je project te maken."
+                  : "Je wordt doorgestuurd naar Stripe om je betaling te voltooien."}
+              </p>
             </CardContent>
           </Card>
         </div>
@@ -106,8 +123,16 @@ export default function LoginPage() {
       <div className="container mx-auto px-4 py-16 flex items-center justify-center">
         <Card className="max-w-md w-full">
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl mb-2">Inloggen om door te gaan</CardTitle>
-            {planDetails && (
+            <CardTitle className="text-2xl">
+              {flow === "wizard" ? "Inloggen om te beginnen" : "Inloggen om door te gaan"}
+            </CardTitle>
+            {flow === "wizard" ? (
+              <div className="bg-blue-50 p-4 rounded-lg">
+                <p className="text-sm text-gray-600 mb-1">Je gaat beginnen met:</p>
+                <p className="font-semibold text-[#0077B5]">AI Headshots - €29</p>
+                <p className="text-sm text-gray-600">40 professionele portetfotos</p>
+              </div>
+            ) : planDetails ? (
               <div className="bg-blue-50 p-4 rounded-lg">
                 <p className="text-sm text-gray-600 mb-1">Geselecteerd plan:</p>
                 <p className="font-semibold text-[#0077B5]">
@@ -115,7 +140,7 @@ export default function LoginPage() {
                 </p>
                 <p className="text-sm text-gray-600">{planDetails.photos} portetfotos</p>
               </div>
-            )}
+            ) : null}
           </CardHeader>
           <CardContent className="space-y-4">
             {error && (
@@ -151,8 +176,8 @@ export default function LoginPage() {
             </Button>
 
             <div className="text-center">
-              <Button variant="ghost" onClick={() => router.push("/pricing")} className="text-sm text-gray-600">
-                ← Terug naar prijzen
+              <Button variant="ghost" onClick={() => router.push("/")} className="text-sm text-gray-600">
+                ← Terug naar home
               </Button>
             </div>
           </CardContent>

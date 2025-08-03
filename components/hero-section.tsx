@@ -58,7 +58,7 @@ export default function HeroSection() {
                 size="lg"
                 className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white px-8 py-4 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200"
               >
-                <Link href="/wizard/welcome">
+                <Link href="/login?flow=wizard">
                   Start Jouw Fotoshoot Nu - 29€
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
