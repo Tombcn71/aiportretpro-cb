@@ -2,285 +2,231 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
+import { useSession } from "next-auth/react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Check, Star, Shield, CreditCard } from "lucide-react"
+import { ArrowLeft, Star, Shield, Check } from "lucide-react"
 import Image from "next/image"
 
-export default function WizardReview() {
+export default function ReviewPage() {
   const router = useRouter()
-  const [isLoading, setIsLoading] = useState(false)
-  const [wizardData, setWizardData] = useState<any>(null)
+  const { data: session } = useSession()
+  const [projectData, setProjectData] = useState<any>(null)
 
   useEffect(() => {
-    // Get all wizard data from sessionStorage
-    const projectData = sessionStorage.getItem("wizardProjectData")
-    const genderData = sessionStorage.getItem("wizardGenderData")
-    const uploadData = sessionStorage.getItem("wizardUploadData")
-
-    if (!projectData || !genderData || !uploadData) {
+    if (!session) {
       router.push("/wizard/welcome")
       return
     }
 
-    const project = JSON.parse(projectData)
-    const gender = JSON.parse(genderData)
-    const upload = JSON.parse(uploadData)
+    // Load project data from sessionStorage
+    const projectName = sessionStorage.getItem("projectName")
+    const gender = sessionStorage.getItem("gender")
+    const uploadedPhotos = JSON.parse(sessionStorage.getItem("uploadedPhotos") || "[]")
 
-    setWizardData({
-      projectName: project.projectName,
-      gender: gender.gender,
-      uploadedPhotos: upload.uploadedPhotos || [],
-    })
-  }, [router])
-
-  const handleCheckout = async () => {
-    if (!wizardData) return
-
-    setIsLoading(true)
-    try {
-      // Create wizard session
-      const wizardSessionId = `wizard_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-
-      // Save wizard data
-      const saveResponse = await fetch("/api/wizard/save-data", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          wizardSessionId,
-          projectName: wizardData.projectName,
-          gender: wizardData.gender,
-          uploadedPhotos: wizardData.uploadedPhotos,
-        }),
-      })
-
-      if (!saveResponse.ok) {
-        throw new Error("Failed to save wizard data")
-      }
-
-      // Create Stripe checkout
-      const checkoutResponse = await fetch("/api/stripe/create-checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          priceId: "price_professional",
-          wizardSessionId,
-          metadata: {
-            projectName: wizardData.projectName,
-            gender: wizardData.gender,
-            photoCount: wizardData.uploadedPhotos.length.toString(),
-          },
-        }),
-      })
-
-      if (!checkoutResponse.ok) {
-        throw new Error("Failed to create checkout session")
-      }
-
-      const { url } = await checkoutResponse.json()
-      window.location.href = url
-    } catch (error) {
-      console.error("Checkout error:", error)
-      alert("Er ging iets mis. Probeer opnieuw.")
-      setIsLoading(false)
+    if (!projectName || !gender || uploadedPhotos.length < 6) {
+      router.push("/wizard/upload")
+      return
     }
+
+    setProjectData({
+      projectName,
+      gender,
+      uploadedPhotos,
+    })
+  }, [session, router])
+
+  const handleContinue = () => {
+    // Store selected plan (always professional since there's only one)
+    sessionStorage.setItem("selectedPlan", "professional")
+    router.push("/wizard/checkout")
   }
 
-  if (!wizardData) {
+  if (!projectData) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0077B5]"></div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
-      <div className="max-w-4xl mx-auto">
-        <Card>
-          <CardContent className="p-8">
-            {/* Header */}
-            <div className="text-center mb-8">
-              <h1 className="text-3xl font-bold text-gray-900 mb-4">Geweldige headshots wachten op je!</h1>
-              <p className="text-gray-600">
-                We bieden een pakket voor elk budget. Betaal eenmalig, geen abonnementen of verborgen kosten.
-              </p>
-            </div>
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="container mx-auto px-4 max-w-4xl">
+        {/* Header */}
+        <div className="mb-8">
+          <Button variant="ghost" onClick={() => router.push("/wizard/upload")} className="mb-4">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back
+          </Button>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Professionele headshots wachten op je!</h1>
+          <p className="text-gray-600">
+            Krijg binnen 15 minuten 40 professionele portretfoto's. Betaal eenmalig, geen abonnementen.
+          </p>
+        </div>
+
+        <div className="grid lg:grid-cols-3 gap-8">
+          {/* Order Review */}
+          <div className="lg:col-span-1">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Jouw Bestelling</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <p className="text-sm text-gray-600">Project Naam</p>
+                  <p className="font-medium">{projectData.projectName}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Geslacht</p>
+                  <p className="font-medium capitalize">{projectData.gender === "man" ? "Man" : "Vrouw"}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Foto's Geüpload</p>
+                  <p className="font-medium">{projectData.uploadedPhotos.length} foto's</p>
+                </div>
+                <div className="grid grid-cols-3 gap-2">
+                  {projectData.uploadedPhotos.slice(0, 6).map((photo: string, index: number) => (
+                    <div key={index} className="aspect-square rounded-lg overflow-hidden bg-gray-100">
+                      <Image
+                        src={photo || "/placeholder.svg"}
+                        alt={`Foto ${index + 1}`}
+                        width={80}
+                        height={80}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  ))}
+                </div>
+                {projectData.uploadedPhotos.length > 6 && (
+                  <p className="text-sm text-gray-500">+{projectData.uploadedPhotos.length - 6} meer foto's</p>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Professional Plan */}
+          <div className="lg:col-span-2">
+            <Card className="border-2 border-[#0077B5] shadow-lg relative">
+              <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                <Badge className="bg-[#0077B5] text-white px-4 py-1">Meest Populair</Badge>
+              </div>
+
+              <CardHeader className="text-center pb-6 pt-8">
+                <CardTitle className="text-2xl font-bold">Professional</CardTitle>
+                <div className="flex items-center justify-center gap-2">
+                  <span className="text-5xl font-bold text-[#0077B5]">€19,99</span>
+                </div>
+                <p className="text-gray-600 mt-2">Eenmalige betaling, geen abonnement</p>
+              </CardHeader>
+
+              <CardContent className="space-y-4">
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3">
+                    <Check className="h-5 w-5 text-green-500" />
+                    <span className="font-medium">40 professionele portretfoto's</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Check className="h-5 w-5 text-green-500" />
+                    <span>Verschillende zakelijke outfits</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Check className="h-5 w-5 text-green-500" />
+                    <span>Verschillende poses en achtergronden</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Check className="h-5 w-5 text-green-500" />
+                    <span>HD kwaliteit downloads</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Check className="h-5 w-5 text-green-500" />
+                    <span className="font-medium">Klaar binnen 15 minuten</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Check className="h-5 w-5 text-green-500" />
+                    <span>Perfect voor LinkedIn, Social Media, CV, Website en Print</span>
+                  </div>
+                </div>
+
+                <div className="border-t pt-4 mt-6">
+                  <h4 className="font-semibold text-lg mb-3">Betaal Veilig & Start Direct</h4>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-3">
+                      <Check className="h-4 w-4 text-green-500" />
+                      <span className="text-sm">Veilige betaling met iDEAL en credit card</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <Check className="h-4 w-4 text-green-500" />
+                      <span className="text-sm">Geld terug garantie</span>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
             {/* Trust Indicators */}
-            <div className="flex items-center justify-center space-x-6 mb-8 text-sm">
-              <div className="flex items-center space-x-1">
-                <Shield className="h-4 w-4 text-green-600" />
+            <div className="flex flex-wrap items-center justify-center gap-6 mt-6 text-sm">
+              <div className="flex items-center gap-2">
+                <Shield className="h-5 w-5 text-green-600" />
                 <span className="text-gray-700">100% Geld Terug Garantie</span>
               </div>
-              <div className="flex items-center space-x-1">
-                <div className="flex text-yellow-400">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="h-4 w-4 fill-current" />
-                  ))}
-                </div>
-                <span className="text-gray-700">Google Reviews 4.8</span>
-              </div>
-              <div className="flex items-center space-x-1">
-                <div className="flex text-green-600">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="h-4 w-4 fill-current" />
-                  ))}
-                </div>
-                <span className="text-gray-700">TrustPilot 4.8</span>
-              </div>
-            </div>
-
-            <div className="grid lg:grid-cols-2 gap-8">
-              {/* Order Review */}
-              <div>
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">Je bestelling</h2>
-
-                <div className="bg-gray-50 rounded-lg p-6 mb-6">
-                  <div className="space-y-3">
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Project naam:</span>
-                      <span className="font-medium">{wizardData.projectName}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Geslacht:</span>
-                      <span className="font-medium capitalize">{wizardData.gender}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Geüploade foto's:</span>
-                      <span className="font-medium">{wizardData.uploadedPhotos.length} foto's</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Photo Preview */}
-                <div className="mb-6">
-                  <h3 className="font-medium text-gray-900 mb-3">Je foto's</h3>
-                  <div className="grid grid-cols-3 gap-2">
-                    {wizardData.uploadedPhotos.slice(0, 6).map((url: string, index: number) => (
-                      <div key={index} className="aspect-square rounded-lg overflow-hidden">
-                        <Image
-                          src={url || "/placeholder.svg"}
-                          alt={`Upload ${index + 1}`}
-                          width={100}
-                          height={100}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    ))}
-                  </div>
-                  {wizardData.uploadedPhotos.length > 6 && (
-                    <p className="text-sm text-gray-500 mt-2">+{wizardData.uploadedPhotos.length - 6} meer foto's</p>
-                  )}
-                </div>
-              </div>
-
-              {/* Pricing Plan */}
-              <div>
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">Professional Pakket</h2>
-
-                <Card className="border-2 border-blue-500 relative">
-                  <Badge className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-blue-500">
-                    Meest Populair
-                  </Badge>
-                  <CardContent className="p-6">
-                    <div className="text-center mb-6">
-                      <div className="text-4xl font-bold text-gray-900 mb-2">€19,99</div>
-                      <p className="text-gray-600">Eenmalige betaling</p>
-                    </div>
-
-                    <div className="space-y-3 mb-6">
-                      <div className="flex items-center space-x-3">
-                        <Check className="h-5 w-5 text-green-600" />
-                        <span>40 professionele portretfoto's</span>
-                      </div>
-                      <div className="flex items-center space-x-3">
-                        <Check className="h-5 w-5 text-green-600" />
-                        <span>Verschillende zakelijke outfits</span>
-                      </div>
-                      <div className="flex items-center space-x-3">
-                        <Check className="h-5 w-5 text-green-600" />
-                        <span>Verschillende poses en achtergronden</span>
-                      </div>
-                      <div className="flex items-center space-x-3">
-                        <Check className="h-5 w-5 text-green-600" />
-                        <span>HD kwaliteit downloads</span>
-                      </div>
-                      <div className="flex items-center space-x-3">
-                        <Check className="h-5 w-5 text-green-600" />
-                        <span>Klaar binnen 15 minuten</span>
-                      </div>
-                    </div>
-
-                    <div className="text-sm text-gray-600 mb-6">
-                      Perfect voor LinkedIn, Social Media, CV, Website en Print
-                    </div>
-
-                    <Button
-                      onClick={handleCheckout}
-                      disabled={isLoading}
-                      className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3"
-                      size="lg"
-                    >
-                      {isLoading ? (
-                        <div className="flex items-center space-x-2">
-                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                          <span>Bezig...</span>
-                        </div>
-                      ) : (
-                        <>
-                          <CreditCard className="w-5 h-5 mr-2" />
-                          Betaal Veilig & Start Direct
-                        </>
-                      )}
-                    </Button>
-
-                    <div className="mt-4 space-y-2 text-sm text-gray-600">
-                      <div className="flex items-center space-x-2">
-                        <Check className="h-4 w-4 text-green-600" />
-                        <span>Veilige betaling met iDEAL en credit card</span>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Check className="h-4 w-4 text-green-600" />
-                        <span>Geld terug garantie</span>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </div>
-
-            {/* Testimonial */}
-            <div className="mt-8 bg-blue-50 rounded-lg p-6">
-              <div className="flex items-start space-x-4">
-                <Image
-                  src="/placeholder.svg?height=60&width=60"
-                  alt="Customer"
-                  width={60}
-                  height={60}
-                  className="rounded-full"
-                />
-                <div>
-                  <div className="flex text-yellow-400 mb-2">
+              <div className="flex items-center gap-2">
+                <div className="flex items-center">
+                  <span className="text-gray-700 mr-2">Google Reviews</span>
+                  <div className="flex text-yellow-400">
                     {[...Array(5)].map((_, i) => (
                       <Star key={i} className="h-4 w-4 fill-current" />
                     ))}
                   </div>
-                  <p className="text-gray-700 italic mb-2">
-                    "Ik ben zo blij en verbaasd over hoeveel prachtige resultaten er gegenereerd werden. Deze foto's
-                    vertegenwoordigen mijn ware zelf"
-                  </p>
-                  <p className="text-sm text-gray-600 font-medium">Screenshot</p>
+                  <span className="ml-1 font-semibold">4.8</span>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="flex items-center">
+                  <span className="text-gray-700 mr-2">TrustPilot</span>
+                  <div className="flex text-green-500">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} className="h-4 w-4 fill-current" />
+                    ))}
+                  </div>
+                  <span className="ml-1 font-semibold">4.8</span>
                 </div>
               </div>
             </div>
 
-            {/* Back Button */}
+            {/* Continue Button */}
             <div className="mt-8 text-center">
-              <Button variant="outline" onClick={() => router.back()} disabled={isLoading}>
-                Terug naar upload
+              <Button
+                onClick={handleContinue}
+                size="lg"
+                className="bg-[#0077B5] hover:bg-[#004182] text-white px-12 py-4 text-lg font-semibold w-full max-w-md"
+              >
+                Start Nu - €19,99
               </Button>
+              <p className="text-sm text-gray-500 mt-3">
+                Veilige betaling via Stripe. Je foto's worden direct na betaling verwerkt.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Testimonial */}
+        <Card className="mt-8">
+          <CardContent className="p-6">
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 rounded-full bg-gray-200 flex-shrink-0"></div>
+              <div>
+                <div className="flex text-green-500 mb-2">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="h-4 w-4 fill-current" />
+                  ))}
+                </div>
+                <p className="text-gray-700 italic">
+                  "Ik ben zo blij en verbaasd over hoeveel prachtige resultaten er werden gegenereerd. Deze foto's
+                  vertegenwoordigen mijn echte zelf perfect voor mijn LinkedIn profiel!"
+                </p>
+              </div>
             </div>
           </CardContent>
         </Card>
