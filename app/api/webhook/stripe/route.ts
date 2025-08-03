@@ -94,7 +94,7 @@ export async function POST(req: NextRequest) {
         const purchase = purchaseResult[0]
         console.log("💰 Purchase created:", purchase.id)
 
-        // Create project
+        // Create project - CORRECT PostgreSQL array syntax
         const projectResult = await sql`
           INSERT INTO projects (
             user_id,
@@ -111,7 +111,7 @@ export async function POST(req: NextRequest) {
             ${purchase.id},
             ${wizardData.projectName},
             ${wizardData.gender},
-            ${JSON.stringify(wizardData.uploadedPhotos)},
+            ${sql.array(wizardData.uploadedPhotos, "text")},
             'training',
             NOW(),
             NOW()
