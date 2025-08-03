@@ -7,35 +7,34 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 
 export async function POST(req: NextRequest) {
   try {
-    const { priceId, successUrl, cancelUrl, customerEmail, metadata } = await req.json()
+    const { priceId, userEmail, metadata } = await req.json()
 
-    console.log("🛒 Creating checkout session:", {
+    console.log("💳 Creating checkout session:", {
       priceId,
-      customerEmail,
+      userEmail,
       metadata,
     })
 
     const session = await stripe.checkout.sessions.create({
-      mode: "payment",
-      payment_method_types: ["card", "ideal"],
+      payment_method_types: ["card"],
       line_items: [
         {
           price: priceId,
           quantity: 1,
         },
       ],
-      success_url: successUrl,
-      cancel_url: cancelUrl,
-      customer_email: customerEmail,
+      mode: "payment",
+      success_url: `${process.env.NEXTAUTH_URL}/generate/processing?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.NEXTAUTH_URL}/wizard/checkout`,
+      customer_email: userEmail,
       metadata: metadata || {},
-      allow_promotion_codes: true,
     })
 
     console.log("✅ Checkout session created:", session.id)
 
     return NextResponse.json({ url: session.url })
   } catch (error) {
-    console.error("❌ Create checkout error:", error)
-    return NextResponse.json({ error: "Failed to create checkout session" }, { status: 500 })
+    console.error("❌ Stripe checkout error:", error)
+    return NextResponse.json({ error: "Failed to create checkout" }, { status: 500 })
   }
 }

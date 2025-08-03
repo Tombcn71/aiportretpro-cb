@@ -1,65 +1,78 @@
 import { type NextRequest, NextResponse } from "next/server"
+import { neon } from "@neondatabase/serverless"
+
+const sql = neon(process.env.DATABASE_URL!)
 
 export async function POST(req: NextRequest, { params }: { params: { projectId: string } }) {
   try {
-    const projectId = Number.parseInt(params.projectId)
+    const projectId = params.projectId
     const body = await req.json()
 
-    console.log("🎨 Wizard prompt webhook for project:", projectId)
-    console.log("📦 Prompt result:", JSON.stringify(body, null, 2))
+    console.log("🖼️ Wizard prompt webhook for project:", projectId)
+    console.log("📦 Prompt webhook body:", JSON.stringify(body, null, 2))
 
-    if (!body.data || !body.data.id) {
+    // Handle both formats
+    const promptData = body.data || body.prompt
+
+    if (!promptData) {
       console.error("❌ Invalid prompt webhook body")
-      return NextResponse.json({ error: "Invalid body" }, { status: 400 })
+      return NextResponse.json({ error: "Invalid webhook body" }, { status: 400 })
     }
 
-    const promptId = body.data.id
-    const status = body.data.status
-    const images = body.data.images || []
+    const promptId = promptData.id
+    const images = promptData.images || []
 
-    console.log("🖼️ Prompt ID:", promptId, "Status:", status, "Images:", images.length)
+    console.log("📊 Prompt result:", {
+      promptId,
+      imageCount: images.length,
+    })
 
-    // Import database functions
-    const { sql, getProjectById, updateProjectWithGeneratedPhotos } = await import("@/lib/db")
-
-    if (status === "succeeded" && images.length > 0) {
-      // Get current project
-      const project = await getProjectById(projectId)
-      if (!project) {
-        console.error("❌ Project not found:", projectId)
-        return NextResponse.json({ error: "Project not found" }, { status: 404 })
+    if (images.length > 0) {
+      // Store images in database
+      for (const image of images) {
+        await sql`
+          INSERT INTO photos (
+            project_id,
+            prompt_id,
+            image_url,
+            created_at
+          ) VALUES (
+            ${projectId},
+            ${promptId},
+            ${image.url},
+            NOW()
+          )
+        `
       }
 
-      // Get current generated photos
-      let currentPhotos = []
-      try {
-        currentPhotos = project.generated_photos ? JSON.parse(project.generated_photos) : []
-      } catch (e) {
-        console.log("📸 No existing photos, starting fresh")
-        currentPhotos = []
+      console.log(`✅ Stored ${images.length} images for project ${projectId}`)
+
+      // Check if all prompts are complete
+      const [project] = await sql`
+        SELECT * FROM projects WHERE id = ${projectId}
+      `
+
+      if (project) {
+        const [photoCount] = await sql`
+          SELECT COUNT(*) as count FROM photos WHERE project_id = ${projectId}
+        `
+
+        // If we have enough photos, mark as complete
+        if (photoCount.count >= 4) {
+          await sql`
+            UPDATE projects 
+            SET status = 'completed', updated_at = NOW()
+            WHERE id = ${projectId}
+          `
+
+          console.log("🎉 Project completed with all photos!")
+        }
       }
-
-      // Add new images
-      const newImages = images.map((img: any) => img.url).filter((url: string) => url)
-      const allPhotos = [...currentPhotos, ...newImages]
-
-      console.log(`📸 Adding ${newImages.length} new photos, total: ${allPhotos.length}`)
-
-      // Update project with new photos
-      await updateProjectWithGeneratedPhotos(projectId, allPhotos, "generating")
-
-      // Check if we have enough photos (let's say 35+ is complete)
-      if (allPhotos.length >= 35) {
-        console.log("🎉 Project completed with", allPhotos.length, "photos")
-        await updateProjectWithGeneratedPhotos(projectId, allPhotos, "completed")
-      }
-    } else if (status === "failed") {
-      console.error("❌ Prompt failed:", promptId)
     }
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error("❌ Wizard prompt webhook error:", error)
-    return NextResponse.json({ error: "Webhook failed" }, { status: 500 })
+    console.error("❌ Prompt webhook error:", error)
+    return NextResponse.json({ error: "Webhook error" }, { status: 500 })
   }
 }

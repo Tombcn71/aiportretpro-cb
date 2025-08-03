@@ -1,119 +1,58 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
 import { neon } from "@neondatabase/serverless"
-import { createTuneWithPack } from "@/lib/astria"
 
 const sql = neon(process.env.DATABASE_URL!)
 
 export async function POST(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
-
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
-
-    const body = await req.json()
-    const { projectName, gender, uploadedPhotos, packId } = body
+    const { projectName, gender, uploadedPhotos, userEmail } = await req.json()
 
     console.log("🚀 Creating project with pack:", {
       projectName,
       gender,
       photosCount: uploadedPhotos?.length,
-      packId,
-      userEmail: session.user.email,
+      userEmail,
     })
 
-    if (!projectName || !gender || !uploadedPhotos || !Array.isArray(uploadedPhotos)) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
-    }
-
-    // Get user ID from email
-    const userResult = await sql`
-      SELECT id FROM users WHERE email = ${session.user.email}
-    `
-
-    if (userResult.length === 0) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 })
-    }
-
-    const userId = userResult[0].id
+    // Use pack 928 for all projects
+    const packId = "928"
+    const packName = gender === "man" ? "928 man" : "928 woman"
 
     // Create project in database
-    const projectResult = await sql`
+    const [project] = await sql`
       INSERT INTO projects (
-        user_id,
-        name,
+        user_email,
+        project_name,
         gender,
+        uploaded_photos,
+        pack_id,
+        pack_name,
         status,
         created_at,
         updated_at
       ) VALUES (
-        ${userId},
+        ${userEmail},
         ${projectName},
         ${gender},
-        'training',
+        ${uploadedPhotos},
+        ${packId},
+        ${packName},
+        'pending',
         NOW(),
         NOW()
-      ) RETURNING id
+      )
+      RETURNING *
     `
 
-    const projectId = projectResult[0].id
-    console.log("✅ Project created with ID:", projectId)
+    console.log("✅ Project created:", project.id)
 
-    // Start Astria training with CORRECT parameters
-    try {
-      console.log("🎯 Starting Astria training...")
-      const astriaResult = await createTuneWithPack(
-        packId || (gender === "man" ? "clkv6uxh40001l608ovk7lhpx" : "clkv6uy8g0003l608rk8d5vc6"),
-        {
-          title: projectName,
-          name: `project_${projectId}_${Date.now()}`,
-          imageUrls: uploadedPhotos,
-          projectId: projectId,
-          userId: userId,
-        },
-      )
-
-      console.log("✅ Astria training started:", astriaResult)
-
-      // Update project with Astria details
-      await sql`
-        UPDATE projects 
-        SET 
-          tune_id = ${astriaResult.id},
-          astria_model_id = ${astriaResult.id},
-          updated_at = NOW()
-        WHERE id = ${projectId}
-      `
-
-      return NextResponse.json({
-        success: true,
-        projectId,
-        tuneId: astriaResult.id,
-        modelId: astriaResult.id,
-      })
-    } catch (astriaError) {
-      console.error("❌ Astria training failed:", astriaError)
-
-      // Update project status to failed
-      await sql`
-        UPDATE projects 
-        SET status = 'failed', updated_at = NOW()
-        WHERE id = ${projectId}
-      `
-
-      return NextResponse.json(
-        {
-          error: "Failed to start AI training",
-          projectId,
-        },
-        { status: 500 },
-      )
-    }
+    return NextResponse.json({
+      success: true,
+      project: project,
+      packId: packId,
+    })
   } catch (error) {
-    console.error("❌ Error creating project with pack:", error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    console.error("❌ Error creating project:", error)
+    return NextResponse.json({ error: "Failed to create project" }, { status: 500 })
   }
 }
