@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 
@@ -12,94 +13,83 @@ export default function ProjectNamePage() {
   const [projectName, setProjectName] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
-  const { data: session, status } = useSession()
+  const { data: session } = useSession()
 
   useEffect(() => {
-    if (status === "loading") return
-
     if (!session) {
-      router.push("/login?flow=wizard")
+      router.push("/auth/signin")
       return
     }
 
-    // Load existing project name if available
-    const savedName = sessionStorage.getItem("projectName")
+    // Load existing project name from sessionStorage
+    const savedName = sessionStorage.getItem("wizard_projectName")
     if (savedName) {
       setProjectName(savedName)
     }
-  }, [session, status, router])
+  }, [session, router])
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (!projectName.trim()) return
 
     setIsLoading(true)
 
-    // Save to sessionStorage
-    sessionStorage.setItem("projectName", projectName.trim())
+    try {
+      // Save to sessionStorage
+      sessionStorage.setItem("wizard_projectName", projectName)
 
-    // Generate wizard session ID if not exists
-    if (!sessionStorage.getItem("wizardSessionId")) {
-      const wizardSessionId = `wizard_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-      sessionStorage.setItem("wizardSessionId", wizardSessionId)
+      // Navigate to gender selection
+      router.push("/wizard/gender")
+    } catch (error) {
+      console.error("Error saving project name:", error)
+    } finally {
+      setIsLoading(false)
     }
-
-    router.push("/wizard/gender")
-  }
-
-  if (status === "loading") {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0077B5]"></div>
-      </div>
-    )
   }
 
   if (!session) {
-    return null
+    return <div>Loading...</div>
   }
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-2xl">
+      <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <div className="mb-4">
-            <Progress value={25} className="w-full h-2" style={{ backgroundColor: "#e5e7eb" }}>
-              <div
-                className="h-full transition-all duration-300 ease-in-out rounded-full"
-                style={{
-                  width: "25%",
-                  backgroundColor: "#0077B5",
-                }}
-              />
-            </Progress>
-          </div>
           <CardTitle className="text-2xl font-bold text-gray-900">Geef je project een naam</CardTitle>
-          <p className="text-gray-600 mt-2">Stap 1 van 4: Kies een naam voor je AI headshot project</p>
+          <Progress value={25} className="w-full mt-4" style={{ backgroundColor: "#e5e7eb" }}>
+            <div
+              className="h-full transition-all duration-300 ease-in-out rounded-full"
+              style={{
+                width: "25%",
+                backgroundColor: "#0077B5",
+              }}
+            />
+          </Progress>
+          <p className="text-sm text-gray-600 mt-2">Stap 1 van 4</p>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div>
-            <label htmlFor="projectName" className="block text-sm font-medium text-gray-700 mb-2">
+          <div className="space-y-2">
+            <Label htmlFor="projectName" className="text-sm font-medium text-gray-700">
               Project naam
-            </label>
+            </Label>
             <Input
               id="projectName"
               type="text"
+              placeholder="Bijv. Mijn professionele headshots"
               value={projectName}
               onChange={(e) => setProjectName(e.target.value)}
-              placeholder="Bijvoorbeeld: LinkedIn Headshots"
               className="w-full"
               maxLength={50}
             />
-            <p className="text-sm text-gray-500 mt-1">{projectName.length}/50 karakters</p>
+            <p className="text-xs text-gray-500">{projectName.length}/50 karakters</p>
           </div>
 
           <Button
             onClick={handleNext}
             disabled={!projectName.trim() || isLoading}
-            className="w-full text-lg py-3"
+            className="w-full"
             style={{ backgroundColor: "#0077B5" }}
           >
-            {isLoading ? "Bezig..." : "Volgende stap"}
+            {isLoading ? "Bezig..." : "Volgende"}
           </Button>
         </CardContent>
       </Card>

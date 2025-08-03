@@ -102,23 +102,20 @@ export async function POST(request: NextRequest) {
         INSERT INTO purchases (
           user_id,
           stripe_session_id,
+          plan_type,
           amount,
-          currency,
+          headshots_included,
           status,
-          metadata,
           created_at,
           updated_at
         )
         VALUES (
           ${user.id},
           ${session.id},
-          ${session.amount_total || 0},
-          ${session.currency || "eur"},
+          'professional',
+          ${session.amount_total || 1999},
+          40,
           'completed',
-          ${JSON.stringify({
-            ...session.metadata,
-            projectId: projectId, // Zorg dat projectId wordt opgeslagen
-          })},
           NOW(),
           NOW()
         )
@@ -150,8 +147,7 @@ export async function POST(request: NextRequest) {
       // Start Astria training
       console.log("🚀 Starting Astria training for project:", projectId)
 
-      const uploadedPhotos =
-        typeof project.uploaded_photos === "string" ? JSON.parse(project.uploaded_photos) : project.uploaded_photos
+      const uploadedPhotos = project.uploaded_photos
 
       // Call existing Astria training API
       const astriaResponse = await fetch(`${process.env.NEXTAUTH_URL}/api/projects/create-with-pack`, {

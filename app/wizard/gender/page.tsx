@@ -11,110 +11,98 @@ export default function GenderPage() {
   const [selectedGender, setSelectedGender] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
-  const { data: session, status } = useSession()
+  const { data: session } = useSession()
 
   useEffect(() => {
-    if (status === "loading") return
-
     if (!session) {
-      router.push("/login?flow=wizard")
+      router.push("/auth/signin")
       return
     }
 
     // Check if project name exists
-    const projectName = sessionStorage.getItem("projectName")
+    const projectName = sessionStorage.getItem("wizard_projectName")
     if (!projectName) {
       router.push("/wizard/project-name")
       return
     }
 
-    // Load existing gender if available
-    const savedGender = sessionStorage.getItem("gender")
+    // Load existing gender from sessionStorage
+    const savedGender = sessionStorage.getItem("wizard_gender")
     if (savedGender) {
       setSelectedGender(savedGender)
     }
-  }, [session, status, router])
+  }, [session, router])
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (!selectedGender) return
 
     setIsLoading(true)
 
-    // Save to sessionStorage
-    sessionStorage.setItem("gender", selectedGender)
+    try {
+      // Save to sessionStorage
+      sessionStorage.setItem("wizard_gender", selectedGender)
 
-    router.push("/wizard/upload")
+      // Navigate to upload
+      router.push("/wizard/upload")
+    } catch (error) {
+      console.error("Error saving gender:", error)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const genderOptions = [
-    { value: "man", label: "Man", emoji: "👨" },
-    { value: "vrouw", label: "Vrouw", emoji: "👩" },
-    { value: "unisex", label: "Unisex", emoji: "👤" },
+    { value: "man", label: "Man", icon: "👨" },
+    { value: "vrouw", label: "Vrouw", icon: "👩" },
+    { value: "unisex", label: "Unisex", icon: "👤" },
   ]
 
-  if (status === "loading") {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0077B5]"></div>
-      </div>
-    )
-  }
-
   if (!session) {
-    return null
+    return <div>Loading...</div>
   }
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-2xl">
+      <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <div className="mb-4">
-            <Progress value={50} className="w-full h-2" style={{ backgroundColor: "#e5e7eb" }}>
-              <div
-                className="h-full transition-all duration-300 ease-in-out rounded-full"
-                style={{
-                  width: "50%",
-                  backgroundColor: "#0077B5",
-                }}
-              />
-            </Progress>
-          </div>
           <CardTitle className="text-2xl font-bold text-gray-900">Selecteer je geslacht</CardTitle>
-          <p className="text-gray-600 mt-2">Stap 2 van 4: Dit helpt ons de juiste AI modellen te kiezen</p>
+          <Progress value={50} className="w-full mt-4" style={{ backgroundColor: "#e5e7eb" }}>
+            <div
+              className="h-full transition-all duration-300 ease-in-out rounded-full"
+              style={{
+                width: "50%",
+                backgroundColor: "#0077B5",
+              }}
+            />
+          </Progress>
+          <p className="text-sm text-gray-600 mt-2">Stap 2 van 4</p>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="grid grid-cols-1 gap-4">
+          <div className="grid gap-3">
             {genderOptions.map((option) => (
               <button
                 key={option.value}
                 onClick={() => setSelectedGender(option.value)}
-                className={`p-4 rounded-lg border-2 transition-all duration-200 text-left ${
+                className={`p-4 rounded-lg border-2 transition-all duration-200 flex items-center space-x-3 ${
                   selectedGender === option.value
-                    ? "border-[#0077B5] bg-blue-50"
+                    ? "border-blue-500 bg-blue-50"
                     : "border-gray-200 hover:border-gray-300"
                 }`}
               >
-                <div className="flex items-center space-x-3">
-                  <span className="text-2xl">{option.emoji}</span>
-                  <span className="text-lg font-medium">{option.label}</span>
-                </div>
+                <span className="text-2xl">{option.icon}</span>
+                <span className="font-medium text-gray-900">{option.label}</span>
               </button>
             ))}
           </div>
 
-          <div className="flex space-x-4">
-            <Button variant="outline" onClick={() => router.back()} className="flex-1">
-              Vorige stap
-            </Button>
-            <Button
-              onClick={handleNext}
-              disabled={!selectedGender || isLoading}
-              className="flex-1 text-lg py-3"
-              style={{ backgroundColor: "#0077B5" }}
-            >
-              {isLoading ? "Bezig..." : "Volgende stap"}
-            </Button>
-          </div>
+          <Button
+            onClick={handleNext}
+            disabled={!selectedGender || isLoading}
+            className="w-full"
+            style={{ backgroundColor: "#0077B5" }}
+          >
+            {isLoading ? "Bezig..." : "Volgende"}
+          </Button>
         </CardContent>
       </Card>
     </div>

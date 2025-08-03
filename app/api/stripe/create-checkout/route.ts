@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
         ${user.id},
         ${projectName},
         ${gender},
-        ${JSON.stringify(uploadedPhotos)},
+        ${uploadedPhotos},
         'photos_uploaded',
         ${wizardSessionId},
         ${session.user.email},

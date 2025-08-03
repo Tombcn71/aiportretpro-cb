@@ -117,9 +117,6 @@ export async function POST(request: Request) {
 
     // Parse uploaded photos if they're stored as JSON with metadata
     let photoUrls = uploadedPhotos
-    if (typeof uploadedPhotos === "string") {
-      photoUrls = JSON.parse(uploadedPhotos)
-    }
 
     // Extract just the URLs if photos are stored with metadata
     if (Array.isArray(photoUrls) && photoUrls[0] && typeof photoUrls[0] === "object") {
