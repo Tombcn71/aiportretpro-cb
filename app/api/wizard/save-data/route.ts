@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { sql } from "@/lib/db"
 
+// In-memory storage for wizard sessions (fallback)
 const wizardSessions = new Map<string, any>()
 
 export function saveWizardData(sessionId: string, data: any) {
@@ -36,6 +37,7 @@ export async function POST(request: Request) {
       userEmail,
     })
 
+    // Save to memory (fallback)
     saveWizardData(sessionId, {
       sessionId,
       projectName,
@@ -45,6 +47,7 @@ export async function POST(request: Request) {
     })
 
     try {
+      // Try to save to database
       await sql`
         INSERT INTO wizard_sessions (
           session_id, 
@@ -81,5 +84,47 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("❌ Error saving wizard data:", error)
     return NextResponse.json({ error: "Failed to save wizard data" }, { status: 500 })
+  }
+}
+
+export async function GET(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url)
+    const sessionId = searchParams.get("sessionId")
+
+    if (!sessionId) {
+      return NextResponse.json({ error: "Session ID required" }, { status: 400 })
+    }
+
+    // Try memory first
+    const memoryData = getWizardData(sessionId)
+    if (memoryData) {
+      return NextResponse.json({ success: true, data: memoryData })
+    }
+
+    // Try database
+    try {
+      const result = await sql`
+        SELECT * FROM wizard_sessions WHERE session_id = ${sessionId}
+      `
+
+      if (result[0]) {
+        const data = {
+          sessionId: result[0].session_id,
+          projectName: result[0].project_name,
+          gender: result[0].gender,
+          uploadedPhotos: JSON.parse(result[0].uploaded_photos || "[]"),
+          userEmail: result[0].user_email,
+        }
+        return NextResponse.json({ success: true, data })
+      }
+    } catch (dbError) {
+      console.log("⚠️ Database read failed:", dbError)
+    }
+
+    return NextResponse.json({ error: "Session not found" }, { status: 404 })
+  } catch (error) {
+    console.error("❌ Error getting wizard data:", error)
+    return NextResponse.json({ error: "Failed to get wizard data" }, { status: 500 })
   }
 }

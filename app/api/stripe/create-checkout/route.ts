@@ -14,34 +14,58 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const { sessionId, couponCode } = await request.json()
+    const { sessionId, couponCode, projectName, gender, uploadedPhotos } = await request.json()
 
     if (!sessionId) {
       return NextResponse.json({ error: "Session ID required" }, { status: 400 })
     }
 
+    console.log("🛒 Creating Stripe checkout:", {
+      sessionId,
+      couponCode,
+      projectName,
+      gender,
+      photoCount: uploadedPhotos?.length,
+      userEmail: session.user.email,
+    })
+
+    // Create Stripe checkout session
     const checkoutSession = await stripe.checkout.sessions.create({
-      payment_method_types: ["card"],
+      payment_method_types: ["card", "ideal"],
       line_items: [
         {
-          price: "price_1QSqJhP5wjEFaQw8tOHWJhzF",
+          price: "price_1QZqJhP5wjEQJQs8mGxJYvKH", // €19.99 price ID
           quantity: 1,
         },
       ],
       mode: "payment",
-      success_url: `${process.env.NEXTAUTH_URL}/generate/processing?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXTAUTH_URL}/wizard/checkout`,
+      success_url: `${process.env.NEXTAUTH_URL}/generate/processing?session_id={CHECKOUT_SESSION_ID}&wizard_session=${sessionId}`,
+      cancel_url: `${process.env.NEXTAUTH_URL}/wizard/checkout?sessionId=${sessionId}`,
       customer_email: session.user.email,
+      allow_promotion_codes: true, // Enable coupon codes
+      discounts: couponCode ? [{ coupon: couponCode }] : undefined,
       metadata: {
-        wizardSessionId: sessionId,
-        userEmail: session.user.email,
+        wizard_session_id: sessionId,
+        project_name: projectName,
+        gender: gender,
+        user_email: session.user.email,
+        photo_count: uploadedPhotos?.length?.toString() || "0",
       },
-      ...(couponCode && { discounts: [{ coupon: couponCode }] }),
     })
 
-    return NextResponse.json({ sessionId: checkoutSession.id })
-  } catch (error: any) {
+    console.log("✅ Stripe checkout session created:", checkoutSession.id)
+
+    return NextResponse.json({
+      url: checkoutSession.url,
+      sessionId: checkoutSession.id,
+    })
+  } catch (error) {
     console.error("❌ Stripe checkout error:", error)
-    return NextResponse.json({ error: error.message || "Failed to create checkout session" }, { status: 500 })
+
+    if (error instanceof Stripe.errors.StripeError) {
+      return NextResponse.json({ error: `Stripe error: ${error.message}` }, { status: 400 })
+    }
+
+    return NextResponse.json({ error: "Failed to create checkout session" }, { status: 500 })
   }
 }
