@@ -1,135 +1,124 @@
 import { type NextRequest, NextResponse } from "next/server"
-import Stripe from "stripe"
-import { neon } from "@neondatabase/serverless"
-import { getWizardData, deleteWizardData } from "../../wizard/save-data/route"
+import { sql } from "@/lib/db"
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2024-06-20",
-})
+async function getStripe() {
+  const { stripe } = await import("@/lib/stripe")
+  return stripe
+}
 
-const sql = neon(process.env.DATABASE_URL!)
+export async function POST(request: NextRequest) {
+  console.log("🔔 WEBHOOK RECEIVED at", new Date().toISOString())
 
-export async function POST(req: NextRequest) {
+  const body = await request.text()
+  const signature = request.headers.get("stripe-signature")
+
+  if (!signature) {
+    console.log("❌ No signature")
+    return NextResponse.json({ error: "No signature" }, { status: 400 })
+  }
+
+  if (!process.env.STRIPE_WEBHOOK_SECRET) {
+    console.log("❌ No webhook secret")
+    return NextResponse.json({ error: "Webhook secret not configured" }, { status: 500 })
+  }
+
   try {
-    const body = await req.text()
-    const signature = req.headers.get("stripe-signature")!
+    const stripe = await getStripe()
+    const event = stripe.webhooks.constructEvent(body, signature, process.env.STRIPE_WEBHOOK_SECRET!)
 
-    let event: Stripe.Event
-
-    try {
-      event = stripe.webhooks.constructEvent(body, signature, process.env.STRIPE_WEBHOOK_SECRET!)
-    } catch (err) {
-      console.error("❌ Webhook signature verification failed:", err)
-      return NextResponse.json({ error: "Invalid signature" }, { status: 400 })
-    }
+    console.log("✅ Event type:", event.type)
 
     if (event.type === "checkout.session.completed") {
-      const session = event.data.object as Stripe.Checkout.Session
+      const session = event.data.object
+      console.log("💳 Processing checkout session:", session.id)
 
-      console.log("💰 Payment completed:", {
-        sessionId: session.id,
-        customerEmail: session.customer_email,
-        amountTotal: session.amount_total,
-        metadata: session.metadata,
-      })
+      // Find and update the purchase
+      const purchaseResult = await sql`
+        UPDATE purchases 
+        SET status = 'completed', updated_at = CURRENT_TIMESTAMP
+        WHERE stripe_session_id = ${session.id}
+        RETURNING user_id, id
+      `
 
-      const wizardSessionId = session.metadata?.wizardSessionId
-      const userEmail = session.customer_email || session.metadata?.userEmail
+      if (purchaseResult[0]) {
+        const userId = purchaseResult[0].user_id
+        console.log(`👤 Adding credit for user ${userId}`)
 
-      if (!wizardSessionId || !userEmail) {
-        console.error("❌ Missing wizard session ID or email")
-        return NextResponse.json({ error: "Missing required data" }, { status: 400 })
-      }
+        // Add 1 credit - using INSERT with proper conflict handling
+        try {
+          const creditResult = await sql`
+            INSERT INTO credits (user_id, credits, created_at, updated_at)
+            VALUES (${userId}, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+            ON CONFLICT (user_id) 
+            DO UPDATE SET 
+              credits = credits.credits + 1,
+              updated_at = CURRENT_TIMESTAMP
+            RETURNING credits
+          `
 
-      // Get wizard data
-      const wizardData = getWizardData(wizardSessionId)
-      if (!wizardData) {
-        console.error("❌ Wizard data not found for session:", wizardSessionId)
-        return NextResponse.json({ error: "Wizard data not found" }, { status: 404 })
-      }
+          console.log(`✅ User ${userId} now has ${creditResult[0]?.credits} credits`)
 
-      console.log("📋 Found wizard data:", {
-        projectName: wizardData.projectName,
-        gender: wizardData.gender,
-        photoCount: wizardData.uploadedPhotos?.length,
-      })
+          return NextResponse.json({
+            received: true,
+            userId,
+            creditsAdded: 1,
+            totalCredits: creditResult[0]?.credits,
+          })
+        } catch (creditError) {
+          console.error("❌ Credit error:", creditError)
 
-      try {
-        // Create project in database
-        const projectResult = await sql`
-          INSERT INTO projects (
-            user_email, 
-            name, 
-            gender, 
-            uploaded_photos, 
-            status, 
-            stripe_session_id,
-            created_at, 
-            updated_at
-          )
-          VALUES (
-            ${userEmail},
-            ${wizardData.projectName},
-            ${wizardData.gender},
-            ${sql.array(wizardData.uploadedPhotos, "text")},
-            'processing',
-            ${session.id},
-            NOW(),
-            NOW()
-          )
-          RETURNING id
-        `
+          // Fallback: try to update existing or create new
+          const existingCredit = await sql`
+            SELECT credits FROM credits WHERE user_id = ${userId}
+          `
 
-        const projectId = projectResult[0].id
-        console.log("✅ Project created with ID:", projectId)
+          if (existingCredit[0]) {
+            // Update existing
+            const updateResult = await sql`
+              UPDATE credits 
+              SET credits = credits + 1, updated_at = CURRENT_TIMESTAMP
+              WHERE user_id = ${userId}
+              RETURNING credits
+            `
+            console.log(`✅ Updated credits for user ${userId}: ${updateResult[0]?.credits}`)
 
-        // Start Astria training
-        const astriaResponse = await fetch("https://api.astria.ai/tunes", {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${process.env.ASTRIA_API_KEY}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            tune: {
-              title: `${wizardData.projectName} - ${userEmail}`,
-              name: wizardData.gender === "woman" ? "woman" : "man",
-              image_urls: wizardData.uploadedPhotos,
-              callback: `${process.env.NEXTAUTH_URL}/api/astria/wizard-webhook/${projectId}`,
-            },
-          }),
-        })
+            return NextResponse.json({
+              received: true,
+              userId,
+              creditsAdded: 1,
+              totalCredits: updateResult[0]?.credits,
+            })
+          } else {
+            // Create new
+            const newCredit = await sql`
+              INSERT INTO credits (user_id, credits, created_at, updated_at)
+              VALUES (${userId}, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+              RETURNING credits
+            `
+            console.log(`✅ Created new credits for user ${userId}: ${newCredit[0]?.credits}`)
 
-        if (!astriaResponse.ok) {
-          const errorText = await astriaResponse.text()
-          console.error("❌ Astria API error:", astriaResponse.status, errorText)
-          throw new Error(`Astria API error: ${astriaResponse.status}`)
+            return NextResponse.json({
+              received: true,
+              userId,
+              creditsAdded: 1,
+              totalCredits: newCredit[0]?.credits,
+            })
+          }
         }
-
-        const astriaData = await astriaResponse.json()
-        console.log("✅ Astria training started:", astriaData.id)
-
-        // Update project with Astria tune ID
-        await sql`
-          UPDATE projects 
-          SET astria_tune_id = ${astriaData.id}
-          WHERE id = ${projectId}
-        `
-
-        // Clean up wizard data
-        deleteWizardData(wizardSessionId)
-        console.log("🧹 Wizard data cleaned up")
-
-        return NextResponse.json({ success: true })
-      } catch (error) {
-        console.error("❌ WEBHOOK ERROR:", error)
-        return NextResponse.json({ error: "Processing failed" }, { status: 500 })
+      } else {
+        console.log("❌ No purchase found for session:", session.id)
       }
     }
 
     return NextResponse.json({ received: true })
   } catch (error) {
     console.error("❌ Webhook error:", error)
-    return NextResponse.json({ error: "Webhook failed" }, { status: 500 })
+    return NextResponse.json(
+      {
+        error: "Webhook error",
+        details: error instanceof Error ? error.message : "Unknown error",
+      },
+      { status: 400 },
+    )
   }
 }

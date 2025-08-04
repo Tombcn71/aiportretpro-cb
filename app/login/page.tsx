@@ -17,7 +17,7 @@ export default function LoginPage() {
 
   // Get plan details
   const plans = {
-    professional: { name: "Professional", price: 29, photos: 40 },
+    professional: { name: "Pro", price: 19.99, photos: 40 },
   }
 
   const planDetails = selectedPlan ? plans[selectedPlan as keyof typeof plans] : null
