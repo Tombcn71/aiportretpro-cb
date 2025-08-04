@@ -1,80 +1,86 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { ArrowLeft, ArrowRight } from "lucide-react"
+import { ArrowRight } from "lucide-react"
+import { ProgressBar } from "@/components/ui/progress-bar"
 
-export default function WizardProjectName() {
-  const { data: session } = useSession()
+export default function ProjectNamePage() {
+  const { data: session, status } = useSession()
   const router = useRouter()
   const [projectName, setProjectName] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
 
-  const handleNext = async () => {
-    if (!projectName.trim()) return
+  useEffect(() => {
+    if (status === "loading") return
 
-    setIsLoading(true)
-    try {
-      // Save project name to localStorage and database
-      const wizardData = {
-        projectName: projectName.trim(),
-        step: 1,
-      }
+    if (!session) {
+      console.log("❌ No session, redirecting to welcome")
+      router.push("/wizard/welcome")
+      return
+    }
 
-      localStorage.setItem("wizardData", JSON.stringify(wizardData))
+    // Check if wizard session exists
+    const wizardSessionId = sessionStorage.getItem("wizardSessionId")
+    if (!wizardSessionId) {
+      console.log("❌ No wizard session, redirecting to welcome")
+      router.push("/wizard/welcome")
+      return
+    }
 
-      // Save to database
-      await fetch("/api/wizard/save-data", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(wizardData),
-      })
+    // Load existing project name if available
+    const savedName = sessionStorage.getItem("projectName")
+    if (savedName) {
+      setProjectName(savedName)
+    }
+  }, [session, status, router])
 
+  const handleNext = () => {
+    if (projectName.trim()) {
+      sessionStorage.setItem("projectName", projectName.trim())
+      console.log("✅ Project name saved:", projectName.trim())
       router.push("/wizard/gender")
-    } catch (error) {
-      console.error("Error saving project name:", error)
-    } finally {
-      setIsLoading(false)
     }
   }
 
-  const handleBack = () => {
-    router.push("/wizard/welcome")
+  if (status === "loading") {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#FF8C00]"></div>
+      </div>
+    )
+  }
+
+  if (!session) {
+    return null
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-white py-12 px-4">
-      <div className="max-w-2xl mx-auto">
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="container mx-auto px-4 max-w-2xl">
         {/* Progress Bar */}
         <div className="mb-8">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-orange-600">Stap 1 van 3</span>
-            <span className="text-sm text-gray-500">Project Details</span>
-          </div>
-          <div className="w-full bg-gray-200 rounded-full h-2">
-            <div className="bg-orange-500 h-2 rounded-full" style={{ width: "33%" }}></div>
-          </div>
+          <ProgressBar currentStep={1} totalSteps={3} />
         </div>
 
         <Card>
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl font-bold text-gray-900">Geef je project een naam</CardTitle>
-            <p className="text-gray-600 mt-2">Kies een naam die je helpt dit project te herkennen</p>
+            <CardTitle className="text-2xl">Geef je project een naam</CardTitle>
+            <p className="text-gray-600">
+              Kies een naam voor je headshot project. Dit helpt je later om je foto's terug te vinden.
+            </p>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="projectName" className="text-base font-medium">
-                Project Naam
-              </Label>
+              <Label htmlFor="projectName">Project naam</Label>
               <Input
                 id="projectName"
                 type="text"
-                placeholder="Bijv. Mijn LinkedIn Foto's"
+                placeholder="Bijv. LinkedIn Headshots, Zakelijke Foto's, ..."
                 value={projectName}
                 onChange={(e) => setProjectName(e.target.value)}
                 className="text-lg py-3"
@@ -83,39 +89,14 @@ export default function WizardProjectName() {
               <p className="text-sm text-gray-500">{projectName.length}/50 karakters</p>
             </div>
 
-            <div className="bg-orange-50 p-4 rounded-lg">
-              <h4 className="font-medium text-orange-800 mb-2">💡 Tips voor een goede naam:</h4>
-              <ul className="text-sm text-orange-700 space-y-1">
-                <li>• Gebruik het doel: "LinkedIn Headshots"</li>
-                <li>• Voeg de datum toe: "Headshots December 2024"</li>
-                <li>• Houd het kort en herkenbaar</li>
-              </ul>
-            </div>
-
-            <div className="flex justify-between pt-4">
-              <Button variant="outline" onClick={handleBack} className="flex items-center bg-transparent">
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Terug
-              </Button>
-
-              <Button
-                onClick={handleNext}
-                disabled={!projectName.trim() || isLoading}
-                className="bg-orange-500 hover:bg-orange-600 text-white flex items-center"
-              >
-                {isLoading ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    Opslaan...
-                  </>
-                ) : (
-                  <>
-                    Volgende Stap
-                    <ArrowRight className="w-4 h-4 ml-2" />
-                  </>
-                )}
-              </Button>
-            </div>
+            <Button
+              onClick={handleNext}
+              disabled={!projectName.trim()}
+              className="w-full bg-[#FF8C00] hover:bg-[#FFA500] text-white py-3 text-lg"
+            >
+              Volgende stap
+              <ArrowRight className="ml-2 h-5 w-5" />
+            </Button>
           </CardContent>
         </Card>
       </div>
