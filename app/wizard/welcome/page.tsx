@@ -1,38 +1,11 @@
 "use client"
 
-import { useEffect } from "react"
-import { useRouter } from "next/navigation"
-import { useSession } from "next-auth/react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ArrowRight, Sparkles, Camera, Clock } from "lucide-react"
 import Link from "next/link"
 
 export default function WizardWelcome() {
-  const router = useRouter()
-  const { data: session, status } = useSession()
-
-  useEffect(() => {
-    if (status === "loading") return
-
-    if (!session) {
-      router.push("/login?callbackUrl=/wizard/welcome")
-      return
-    }
-  }, [session, status, router])
-
-  if (status === "loading") {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#0077B5]"></div>
-      </div>
-    )
-  }
-
-  if (!session) {
-    return null
-  }
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white flex items-center justify-center p-4">
       <Card className="w-full max-w-2xl">
