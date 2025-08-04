@@ -5,59 +5,58 @@ import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { ArrowLeft, CheckCircle, CreditCard, Sparkles } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
+import { ArrowLeft, CreditCard, Check, Sparkles, Clock, Download, Shield } from "lucide-react"
 import Image from "next/image"
 
 export default function CheckoutPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
-  const [loading, setLoading] = useState(false)
   const [wizardData, setWizardData] = useState<any>(null)
+  const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
     if (status === "loading") return
 
     if (!session) {
-      router.push("/auth/signin?callbackUrl=/wizard/welcome")
-      return
-    }
-
-    // Get wizard session ID
-    const wizardSessionId = sessionStorage.getItem("wizardSessionId")
-    if (!wizardSessionId) {
-      router.push("/wizard/welcome")
+      router.push("/auth/signin?callbackUrl=/wizard/checkout")
       return
     }
 
     // Load wizard data
+    const wizardSessionId = sessionStorage.getItem("wizardSessionId")
     const projectName = sessionStorage.getItem("projectName")
     const gender = sessionStorage.getItem("gender")
     const uploadedPhotos = sessionStorage.getItem("uploadedPhotos")
 
-    if (!projectName || !gender || !uploadedPhotos) {
+    if (!wizardSessionId || !projectName || !gender || !uploadedPhotos) {
       router.push("/wizard/welcome")
       return
     }
 
-    setWizardData({
-      wizardSessionId,
-      projectName,
-      gender,
-      photos: JSON.parse(uploadedPhotos),
-    })
+    try {
+      const photos = JSON.parse(uploadedPhotos)
+      setWizardData({
+        wizardSessionId,
+        projectName,
+        gender,
+        photos,
+      })
+    } catch (error) {
+      console.error("Error loading wizard data:", error)
+      router.push("/wizard/welcome")
+    }
   }, [session, status, router])
 
-  const handleCheckout = async () => {
+  const handlePayment = async () => {
     if (!wizardData) return
 
-    setLoading(true)
+    setIsLoading(true)
 
     try {
       const response = await fetch("/api/stripe/wizard-checkout", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           wizardSessionId: wizardData.wizardSessionId,
           projectName: wizardData.projectName,
@@ -66,19 +65,22 @@ export default function CheckoutPage() {
         }),
       })
 
-      const data = await response.json()
+      if (!response.ok) {
+        throw new Error("Failed to create checkout session")
+      }
 
-      if (data.url) {
-        window.location.href = data.url
+      const { url } = await response.json()
+
+      if (url) {
+        window.location.href = url
       } else {
-        console.error("Checkout error:", data.error)
-        alert("Er is een fout opgetreden bij het maken van de checkout. Probeer het opnieuw.")
+        throw new Error("No checkout URL received")
       }
     } catch (error) {
-      console.error("Checkout error:", error)
-      alert("Er is een fout opgetreden. Probeer het opnieuw.")
+      console.error("Payment error:", error)
+      alert("Er is een fout opgetreden bij het starten van de betaling. Probeer het opnieuw.")
     } finally {
-      setLoading(false)
+      setIsLoading(false)
     }
   }
 
@@ -88,8 +90,8 @@ export default function CheckoutPage() {
 
   if (status === "loading" || !wizardData) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-orange-50 to-indigo-100 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#FF8C00]"></div>
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 to-orange-100 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
       </div>
     )
   }
@@ -99,115 +101,170 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-indigo-100 flex items-center justify-center p-4">
-      <div className="w-full max-w-2xl">
-        <Card className="shadow-xl border-0">
-          <CardHeader className="text-center">
-            <div className="mx-auto mb-4 w-16 h-16 bg-gradient-to-r from-orange-600 to-orange-600 rounded-full flex items-center justify-center">
-              <Sparkles className="w-8 h-8 text-white" />
-            </div>
-            <CardTitle className="text-2xl font-bold text-gray-900">Klaar voor checkout!</CardTitle>
-            <p className="text-gray-600 mt-2">Controleer je bestelling en ga door naar betaling</p>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {/* Order Summary */}
-            <div className="bg-gray-50 p-6 rounded-lg">
-              <h3 className="font-semibold text-gray-900 mb-4">Bestelling overzicht</h3>
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-orange-100 p-4">
+      <div className="max-w-4xl mx-auto">
+        <div className="grid lg:grid-cols-2 gap-8">
+          {/* Order Summary */}
+          <Card className="shadow-2xl border-0 bg-white/95 backdrop-blur">
+            <CardHeader>
+              <CardTitle className="text-2xl font-bold text-gray-900 flex items-center">
+                <Sparkles className="w-6 h-6 mr-2 text-orange-500" />
+                Bestelling Overzicht
+              </CardTitle>
+            </CardHeader>
 
-              <div className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Project naam:</span>
-                  <span className="font-medium">{wizardData.projectName}</span>
+            <CardContent className="space-y-6">
+              {/* Project Details */}
+              <div className="space-y-4">
+                <div className="flex justify-between items-center p-4 bg-gray-50 rounded-xl">
+                  <div>
+                    <h3 className="font-semibold text-gray-900">Project Naam</h3>
+                    <p className="text-gray-600">{wizardData.projectName}</p>
+                  </div>
+                  <Badge variant="outline" className="bg-white">
+                    {wizardData.gender === "man" ? "Mannelijk" : "Vrouwelijk"}
+                  </Badge>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Geslacht:</span>
-                  <span className="font-medium capitalize">{wizardData.gender}</span>
+
+                <div className="p-4 bg-gray-50 rounded-xl">
+                  <h3 className="font-semibold text-gray-900 mb-3">Geüploade Foto's ({wizardData.photos.length})</h3>
+                  <div className="grid grid-cols-4 gap-2">
+                    {wizardData.photos.slice(0, 8).map((photo: string, index: number) => (
+                      <div key={index} className="aspect-square rounded-lg overflow-hidden bg-gray-200">
+                        <Image
+                          src={photo || "/placeholder.svg"}
+                          alt={`Photo ${index + 1}`}
+                          width={80}
+                          height={80}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    ))}
+                    {wizardData.photos.length > 8 && (
+                      <div className="aspect-square rounded-lg bg-gray-200 flex items-center justify-center">
+                        <span className="text-sm text-gray-600">+{wizardData.photos.length - 8}</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Aantal foto's:</span>
-                  <span className="font-medium">{wizardData.photos.length} geüpload</span>
+              </div>
+
+              {/* What You Get */}
+              <div className="space-y-4">
+                <h3 className="font-semibold text-gray-900">Dit krijg je:</h3>
+                <div className="space-y-3">
+                  <div className="flex items-center space-x-3">
+                    <Check className="w-5 h-5 text-green-500" />
+                    <span className="text-gray-700">40 professionele AI headshots</span>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <Check className="w-5 h-5 text-green-500" />
+                    <span className="text-gray-700">Hoge resolutie (1024x1024 pixels)</span>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <Check className="w-5 h-5 text-green-500" />
+                    <span className="text-gray-700">Verschillende poses en achtergronden</span>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <Check className="w-5 h-5 text-green-500" />
+                    <span className="text-gray-700">Direct downloadbaar</span>
+                  </div>
                 </div>
-                <div className="border-t pt-3 mt-3">
-                  <div className="flex justify-between text-lg font-semibold">
-                    <span>Totaal:</span>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Payment */}
+          <Card className="shadow-2xl border-0 bg-white/95 backdrop-blur">
+            <CardHeader>
+              <CardTitle className="text-2xl font-bold text-gray-900 flex items-center">
+                <CreditCard className="w-6 h-6 mr-2 text-orange-500" />
+                Betaling
+              </CardTitle>
+            </CardHeader>
+
+            <CardContent className="space-y-6">
+              {/* Pricing */}
+              <div className="space-y-4">
+                <div className="flex justify-between items-center p-6 bg-gradient-to-r from-orange-50 to-orange-100 rounded-xl border border-orange-200">
+                  <div>
+                    <h3 className="text-xl font-bold text-gray-900">AI Portrait Pro</h3>
+                    <p className="text-gray-600">40 professionele headshots</p>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-3xl font-bold text-orange-600">€29</div>
+                    <div className="text-sm text-gray-500">Eenmalig</div>
+                  </div>
+                </div>
+
+                <div className="border-t pt-4">
+                  <div className="flex justify-between items-center text-lg font-semibold">
+                    <span>Totaal</span>
                     <span className="text-orange-600">€29,00</span>
                   </div>
+                  <p className="text-sm text-gray-500 mt-1">Inclusief BTW</p>
                 </div>
               </div>
-            </div>
 
-            {/* What You Get */}
-            <div className="bg-green-50 p-6 rounded-lg">
-              <h3 className="font-semibold text-green-900 mb-4">Wat je krijgt:</h3>
-              <div className="space-y-2">
-                <div className="flex items-center">
-                  <CheckCircle className="w-5 h-5 text-green-600 mr-3" />
-                  <span className="text-green-800">40 professionele AI headshots</span>
+              {/* Features */}
+              <div className="space-y-4">
+                <div className="flex items-center space-x-3 p-3 bg-blue-50 rounded-lg">
+                  <Clock className="w-5 h-5 text-blue-500" />
+                  <span className="text-sm text-blue-800">Klaar binnen 20 minuten</span>
                 </div>
-                <div className="flex items-center">
-                  <CheckCircle className="w-5 h-5 text-green-600 mr-3" />
-                  <span className="text-green-800">Hoge resolutie (1024x1024)</span>
+                <div className="flex items-center space-x-3 p-3 bg-green-50 rounded-lg">
+                  <Download className="w-5 h-5 text-green-500" />
+                  <span className="text-sm text-green-800">Direct downloadbaar</span>
                 </div>
-                <div className="flex items-center">
-                  <CheckCircle className="w-5 h-5 text-green-600 mr-3" />
-                  <span className="text-green-800">Klaar binnen 20 minuten</span>
-                </div>
-                <div className="flex items-center">
-                  <CheckCircle className="w-5 h-5 text-green-600 mr-3" />
-                  <span className="text-green-800">Direct downloadbaar</span>
+                <div className="flex items-center space-x-3 p-3 bg-purple-50 rounded-lg">
+                  <Shield className="w-5 h-5 text-purple-500" />
+                  <span className="text-sm text-purple-800">Veilige betaling via Stripe</span>
                 </div>
               </div>
-            </div>
 
-            {/* Photo Preview */}
-            <div>
-              <h3 className="font-semibold text-gray-900 mb-3">Je geüploade foto's:</h3>
-              <div className="grid grid-cols-4 gap-2">
-                {wizardData.photos.slice(0, 8).map((photo: any, index: number) => (
-                  <div key={photo.id} className="aspect-square rounded-lg overflow-hidden bg-gray-100">
-                    <Image
-                      src={photo.preview || "/placeholder.svg"}
-                      alt={`Photo ${index + 1}`}
-                      width={100}
-                      height={100}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                ))}
-                {wizardData.photos.length > 8 && (
-                  <div className="aspect-square rounded-lg bg-gray-200 flex items-center justify-center">
-                    <span className="text-gray-600 text-sm">+{wizardData.photos.length - 8}</span>
-                  </div>
-                )}
+              {/* Payment Button */}
+              <div className="space-y-4">
+                <Button
+                  onClick={handlePayment}
+                  disabled={isLoading}
+                  className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white py-4 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
+                >
+                  {isLoading ? (
+                    <div className="flex items-center justify-center">
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                      Bezig met laden...
+                    </div>
+                  ) : (
+                    <>
+                      <CreditCard className="w-5 h-5 mr-2" />
+                      Betaal Nu - €29
+                    </>
+                  )}
+                </Button>
+
+                <Button
+                  onClick={handleBack}
+                  variant="outline"
+                  className="w-full h-12 bg-transparent"
+                  disabled={isLoading}
+                >
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  Terug naar Upload
+                </Button>
               </div>
-            </div>
 
-            <div className="flex gap-3">
-              <Button onClick={handleBack} variant="outline" className="flex-1 py-3 bg-transparent" disabled={loading}>
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Terug
-              </Button>
-              <Button
-                onClick={handleCheckout}
-                disabled={loading}
-                className="flex-1 bg-gradient-to-r from-orange-600 to-orange-600 hover:from-orange-700 hover:to-orange-700 text-white py-3 text-lg font-semibold"
-              >
-                {loading ? (
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                ) : (
-                  <>
-                    <CreditCard className="mr-2 h-5 w-5" />
-                    Betaal €29 via Stripe
-                  </>
-                )}
-              </Button>
-            </div>
-
-            <p className="text-center text-sm text-gray-500">
-              Veilige betaling via Stripe • Geen abonnement • Direct downloadbaar
-            </p>
-          </CardContent>
-        </Card>
+              {/* Trust badges */}
+              <div className="text-center space-y-2">
+                <p className="text-xs text-gray-500">Veilig betalen met</p>
+                <div className="flex justify-center space-x-4 opacity-60">
+                  <div className="text-xs bg-gray-100 px-2 py-1 rounded">iDEAL</div>
+                  <div className="text-xs bg-gray-100 px-2 py-1 rounded">Visa</div>
+                  <div className="text-xs bg-gray-100 px-2 py-1 rounded">Mastercard</div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   )

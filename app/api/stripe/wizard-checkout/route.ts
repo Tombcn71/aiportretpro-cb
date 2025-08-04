@@ -1,7 +1,11 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
-import { stripe } from "@/lib/stripe"
+import Stripe from "stripe"
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+  apiVersion: "2024-06-20",
+})
 
 export async function POST(request: NextRequest) {
   try {
@@ -12,8 +16,8 @@ export async function POST(request: NextRequest) {
 
     const { wizardSessionId, projectName, gender, photos } = await request.json()
 
-    if (!wizardSessionId || !projectName || !gender || !photos || photos.length < 4) {
-      return NextResponse.json({ error: "Missing required data" }, { status: 400 })
+    if (!wizardSessionId || !projectName || !gender || !photos || photos.length < 6) {
+      return NextResponse.json({ error: "Missing required wizard data" }, { status: 400 })
     }
 
     // Create Stripe checkout session
@@ -24,11 +28,11 @@ export async function POST(request: NextRequest) {
           price_data: {
             currency: "eur",
             product_data: {
-              name: "AI Portrait Pro - Professional Headshots",
-              description: `40 professionele AI headshots voor project: ${projectName}`,
-              images: ["https://aiportretpro.nl/images/logo-icon.png"],
+              name: "AI Portrait Pro - 40 Professionele Headshots",
+              description: `Project: ${projectName} (${gender === "man" ? "Mannelijk" : "Vrouwelijk"})`,
+              images: ["https://your-domain.com/images/product-image.jpg"],
             },
-            unit_amount: 2900, // €29.00
+            unit_amount: 2900, // €29.00 in cents
           },
           quantity: 1,
         },
@@ -38,7 +42,6 @@ export async function POST(request: NextRequest) {
       cancel_url: `${process.env.NEXTAUTH_URL}/wizard/checkout`,
       customer_email: session.user.email,
       metadata: {
-        type: "wizard_purchase",
         wizardSessionId,
         projectName,
         gender,
@@ -49,7 +52,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ url: checkoutSession.url })
   } catch (error) {
-    console.error("Wizard checkout error:", error)
+    console.error("Stripe wizard checkout error:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }
