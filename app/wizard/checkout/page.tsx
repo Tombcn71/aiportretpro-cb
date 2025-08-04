@@ -56,17 +56,22 @@ export default function WizardCheckout() {
     setIsLoading(true)
 
     try {
+      const wizardSessionId = `wizard_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+      const finalPrice = 29 - discount
+
       const response = await fetch("/api/stripe/create-checkout", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
+          wizardSessionId,
           projectName: wizardData.projectName,
           gender: wizardData.gender,
           uploadedPhotos: wizardData.uploadedPhotos,
+          userEmail: session.user?.email,
           couponCode: couponApplied ? couponCode : null,
-          discount: discount,
+          price: finalPrice,
         }),
       })
 
@@ -75,7 +80,7 @@ export default function WizardCheckout() {
         window.location.href = url
       } else {
         const error = await response.json()
-        alert(`Fout bij het maken van checkout: ${error.message}`)
+        alert(`Fout bij het maken van checkout: ${error.error}`)
       }
     } catch (error) {
       console.error("Checkout error:", error)
@@ -97,7 +102,7 @@ export default function WizardCheckout() {
     return null
   }
 
-  const originalPrice = 29.99
+  const originalPrice = 29
   const finalPrice = originalPrice - discount
 
   return (

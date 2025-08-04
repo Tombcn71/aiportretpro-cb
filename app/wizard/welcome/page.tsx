@@ -47,7 +47,7 @@ export default function WizardWelcome() {
           </div>
 
           <div className="text-center">
-            <p className="text-2xl font-bold text-[#0077B5] mb-2">€19,99</p>
+            <p className="text-2xl font-bold text-[#0077B5] mb-2">€29,00</p>
             <p className="text-sm text-gray-600 mb-6">Eenmalige betaling, geen abonnement</p>
 
             <Button asChild size="lg" className="w-full bg-[#FF8C00] hover:bg-[#FFA500] text-white">
