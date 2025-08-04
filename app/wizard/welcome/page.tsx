@@ -1,11 +1,11 @@
 "use client"
 
-import { useEffect } from "react"
-import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
+import { useRouter } from "next/navigation"
+import { useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Sparkles, Camera, Zap } from "lucide-react"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { CheckCircle, Upload, CreditCard, Sparkles } from "lucide-react"
 
 export default function WizardWelcome() {
   const { data: session, status } = useSession()
@@ -13,19 +13,11 @@ export default function WizardWelcome() {
 
   useEffect(() => {
     if (status === "loading") return
-
     if (!session) {
       router.push("/auth/signin?callbackUrl=/wizard/welcome")
       return
     }
   }, [session, status, router])
-
-  const handleStart = () => {
-    // Generate session ID for wizard
-    const sessionId = `wizard_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-    localStorage.setItem("wizardSessionId", sessionId)
-    router.push("/wizard/project-name")
-  }
 
   if (status === "loading") {
     return (
@@ -39,65 +31,100 @@ export default function WizardWelcome() {
     return null
   }
 
+  const handleStart = () => {
+    router.push("/wizard/project-name")
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-white flex items-center justify-center p-4">
-      <Card className="w-full max-w-2xl">
-        <CardHeader className="text-center">
-          <div className="mx-auto mb-4 w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center">
-            <Sparkles className="w-8 h-8 text-orange-600" />
-          </div>
-          <CardTitle className="text-3xl font-bold text-gray-900">Welkom bij AI Portrait Pro!</CardTitle>
-          <p className="text-gray-600 mt-2">Maak professionele AI-headshots in slechts 3 eenvoudige stappen</p>
-        </CardHeader>
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-white py-12 px-4">
+      <div className="max-w-4xl mx-auto">
+        <div className="text-center mb-12">
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">Welkom bij AI Portrait Pro</h1>
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            Maak professionele AI-headshots in slechts 3 eenvoudige stappen
+          </p>
+        </div>
 
-        <CardContent className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="text-center p-4">
-              <div className="mx-auto mb-3 w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
-                <span className="text-orange-600 font-bold">1</span>
+        <div className="grid md:grid-cols-3 gap-8 mb-12">
+          <Card className="text-center">
+            <CardHeader>
+              <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <CheckCircle className="w-8 h-8 text-orange-600" />
               </div>
-              <h3 className="font-semibold text-gray-900">Project Details</h3>
-              <p className="text-sm text-gray-600">Geef je project een naam en selecteer je geslacht</p>
-            </div>
+              <CardTitle className="text-xl">Stap 1: Project Details</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <CardDescription className="text-base">
+                Geef je project een naam en selecteer je geslacht voor de beste resultaten
+              </CardDescription>
+            </CardContent>
+          </Card>
 
-            <div className="text-center p-4">
-              <div className="mx-auto mb-3 w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
-                <Camera className="w-6 h-6 text-orange-600" />
+          <Card className="text-center">
+            <CardHeader>
+              <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Upload className="w-8 h-8 text-orange-600" />
               </div>
-              <h3 className="font-semibold text-gray-900">Upload Foto's</h3>
-              <p className="text-sm text-gray-600">Upload 4-10 foto's van jezelf voor de beste resultaten</p>
-            </div>
+              <CardTitle className="text-xl">Stap 2: Upload Foto's</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <CardDescription className="text-base">
+                Upload 4-10 foto's van jezelf voor de beste AI-training resultaten
+              </CardDescription>
+            </CardContent>
+          </Card>
 
-            <div className="text-center p-4">
-              <div className="mx-auto mb-3 w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
-                <Zap className="w-6 h-6 text-orange-600" />
+          <Card className="text-center">
+            <CardHeader>
+              <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <CreditCard className="w-8 h-8 text-orange-600" />
               </div>
-              <h3 className="font-semibold text-gray-900">AI Training</h3>
-              <p className="text-sm text-gray-600">Onze AI maakt professionele headshots van je foto's</p>
+              <CardTitle className="text-xl">Stap 3: Betaling</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <CardDescription className="text-base">
+                Eenmalige betaling van €29 voor 40 professionele AI-headshots
+              </CardDescription>
+            </CardContent>
+          </Card>
+        </div>
+
+        <Card className="bg-gradient-to-r from-orange-500 to-orange-600 text-white mb-8">
+          <CardContent className="p-8 text-center">
+            <Sparkles className="w-12 h-12 mx-auto mb-4" />
+            <h3 className="text-2xl font-bold mb-2">Wat krijg je?</h3>
+            <div className="grid md:grid-cols-2 gap-4 text-left max-w-2xl mx-auto">
+              <div className="flex items-center">
+                <CheckCircle className="w-5 h-5 mr-2 flex-shrink-0" />
+                <span>40 professionele AI-headshots</span>
+              </div>
+              <div className="flex items-center">
+                <CheckCircle className="w-5 h-5 mr-2 flex-shrink-0" />
+                <span>Hoge resolutie (1024x1024)</span>
+              </div>
+              <div className="flex items-center">
+                <CheckCircle className="w-5 h-5 mr-2 flex-shrink-0" />
+                <span>Verschillende stijlen & poses</span>
+              </div>
+              <div className="flex items-center">
+                <CheckCircle className="w-5 h-5 mr-2 flex-shrink-0" />
+                <span>Klaar binnen 20 minuten</span>
+              </div>
             </div>
-          </div>
+          </CardContent>
+        </Card>
 
-          <div className="bg-orange-50 p-4 rounded-lg">
-            <h4 className="font-semibold text-gray-900 mb-2">💡 Tips voor de beste resultaten:</h4>
-            <ul className="text-sm text-gray-600 space-y-1">
-              <li>• Upload foto's met goede belichting</li>
-              <li>• Zorg dat je gezicht duidelijk zichtbaar is</li>
-              <li>• Gebruik verschillende hoeken en uitdrukkingen</li>
-              <li>• Vermijd zonnebrillen of petten</li>
-            </ul>
-          </div>
-
+        <div className="text-center">
           <Button
             onClick={handleStart}
-            className="w-full bg-orange-500 hover:bg-orange-600 text-white py-3 text-lg font-semibold"
             size="lg"
+            className="bg-orange-500 hover:bg-orange-600 text-white px-12 py-4 text-lg font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-200"
           >
-            Start Nu - Maak Je AI Headshots
+            Start Nu - Stap 1 van 3
           </Button>
-
-          <p className="text-center text-sm text-gray-500">Het hele proces duurt ongeveer 5 minuten</p>
-        </CardContent>
-      </Card>
+          <p className="text-sm text-gray-500 mt-4">Geen verborgen kosten • Veilige betaling via Stripe</p>
+        </div>
+      </div>
     </div>
   )
 }

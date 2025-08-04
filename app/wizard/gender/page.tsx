@@ -1,72 +1,52 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { ArrowLeft, ArrowRight, User, Users } from "lucide-react"
+import { ArrowLeft, ArrowRight, User } from "lucide-react"
 
 export default function WizardGender() {
-  const { data: session, status } = useSession()
+  const { data: session } = useSession()
   const router = useRouter()
-  const [selectedGender, setSelectedGender] = useState<string>("")
+  const [selectedGender, setSelectedGender] = useState<"man" | "woman" | "">("")
   const [isLoading, setIsLoading] = useState(false)
+  const [wizardData, setWizardData] = useState<any>(null)
 
   useEffect(() => {
-    if (status === "loading") return
-
-    if (!session) {
-      router.push("/auth/signin?callbackUrl=/wizard/gender")
-      return
-    }
-
-    // Check if we have a wizard session
-    const sessionId = localStorage.getItem("wizardSessionId")
-    if (!sessionId) {
-      router.push("/wizard/welcome")
-      return
-    }
-
-    // Load existing data if any
-    const savedData = localStorage.getItem(`wizard_${sessionId}`)
-    if (savedData) {
-      const data = JSON.parse(savedData)
+    // Load existing wizard data
+    const saved = localStorage.getItem("wizardData")
+    if (saved) {
+      const data = JSON.parse(saved)
+      setWizardData(data)
       if (data.gender) {
         setSelectedGender(data.gender)
       }
+    } else {
+      // No wizard data found, redirect to start
+      router.push("/wizard/welcome")
     }
-  }, [session, status, router])
+  }, [router])
 
   const handleNext = async () => {
     if (!selectedGender) return
 
     setIsLoading(true)
-
     try {
-      const sessionId = localStorage.getItem("wizardSessionId")
-      if (!sessionId) {
-        router.push("/wizard/welcome")
-        return
+      const updatedData = {
+        ...wizardData,
+        gender: selectedGender,
+        step: 2,
       }
 
-      // Save to localStorage
-      const existingData = localStorage.getItem(`wizard_${sessionId}`)
-      const wizardData = existingData ? JSON.parse(existingData) : {}
-      wizardData.gender = selectedGender
-      wizardData.userEmail = session?.user?.email
-      localStorage.setItem(`wizard_${sessionId}`, JSON.stringify(wizardData))
+      localStorage.setItem("wizardData", JSON.stringify(updatedData))
 
       // Save to database
       await fetch("/api/wizard/save-data", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          sessionId,
-          gender: selectedGender,
-          userEmail: session?.user?.email,
-          ...wizardData,
-        }),
+        body: JSON.stringify(updatedData),
       })
 
       router.push("/wizard/upload")
@@ -81,7 +61,7 @@ export default function WizardGender() {
     router.push("/wizard/project-name")
   }
 
-  if (status === "loading") {
+  if (!wizardData) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-orange-500"></div>
@@ -89,103 +69,105 @@ export default function WizardGender() {
     )
   }
 
-  if (!session) {
-    return null
-  }
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-white flex items-center justify-center p-4">
-      <Card className="w-full max-w-lg">
-        <CardHeader>
-          <div className="flex items-center justify-between mb-4">
-            <Button variant="ghost" onClick={handleBack} className="p-2">
-              <ArrowLeft className="w-4 h-4" />
-            </Button>
-            <div className="flex space-x-2">
-              <div className="w-8 h-2 bg-orange-500 rounded-full"></div>
-              <div className="w-8 h-2 bg-orange-500 rounded-full"></div>
-              <div className="w-8 h-2 bg-gray-200 rounded-full"></div>
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-white py-12 px-4">
+      <div className="max-w-2xl mx-auto">
+        {/* Progress Bar */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm font-medium text-orange-600">Stap 2 van 3</span>
+            <span className="text-sm text-gray-500">Geslacht Selectie</span>
+          </div>
+          <div className="w-full bg-gray-200 rounded-full h-2">
+            <div className="bg-orange-500 h-2 rounded-full" style={{ width: "66%" }}></div>
+          </div>
+        </div>
+
+        <Card>
+          <CardHeader className="text-center">
+            <CardTitle className="text-2xl font-bold text-gray-900">Selecteer je geslacht</CardTitle>
+            <p className="text-gray-600 mt-2">Dit helpt onze AI om de beste headshots voor jou te genereren</p>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <button
+                onClick={() => setSelectedGender("man")}
+                className={`p-6 rounded-lg border-2 transition-all duration-200 ${
+                  selectedGender === "man"
+                    ? "border-orange-500 bg-orange-50"
+                    : "border-gray-200 hover:border-orange-300"
+                }`}
+              >
+                <div className="text-center">
+                  <div
+                    className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${
+                      selectedGender === "man" ? "bg-orange-500 text-white" : "bg-gray-100 text-gray-600"
+                    }`}
+                  >
+                    <User className="w-8 h-8" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900">Man</h3>
+                  <p className="text-sm text-gray-600 mt-1">Geoptimaliseerd voor mannelijke gezichtskenmerken</p>
+                </div>
+              </button>
+
+              <button
+                onClick={() => setSelectedGender("woman")}
+                className={`p-6 rounded-lg border-2 transition-all duration-200 ${
+                  selectedGender === "woman"
+                    ? "border-orange-500 bg-orange-50"
+                    : "border-gray-200 hover:border-orange-300"
+                }`}
+              >
+                <div className="text-center">
+                  <div
+                    className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${
+                      selectedGender === "woman" ? "bg-orange-500 text-white" : "bg-gray-100 text-gray-600"
+                    }`}
+                  >
+                    <User className="w-8 h-8" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900">Vrouw</h3>
+                  <p className="text-sm text-gray-600 mt-1">Geoptimaliseerd voor vrouwelijke gezichtskenmerken</p>
+                </div>
+              </button>
             </div>
-            <div className="w-8"></div>
-          </div>
 
-          <CardTitle className="text-2xl font-bold text-center text-gray-900">Stap 2: Geslacht</CardTitle>
-          <p className="text-center text-gray-600">Selecteer je geslacht voor de beste AI-resultaten</p>
-        </CardHeader>
+            <div className="bg-blue-50 p-4 rounded-lg">
+              <h4 className="font-medium text-blue-800 mb-2">ℹ️ Waarom vragen we dit?</h4>
+              <p className="text-sm text-blue-700">
+                Onze AI gebruikt verschillende modellen voor mannen en vrouwen om de meest realistische en professionele
+                headshots te genereren die passen bij jouw gezichtsstructuur.
+              </p>
+            </div>
 
-        <CardContent className="space-y-6">
-          <div className="grid grid-cols-1 gap-4">
-            <button
-              onClick={() => setSelectedGender("man")}
-              className={`p-6 rounded-lg border-2 transition-all ${
-                selectedGender === "man" ? "border-orange-500 bg-orange-50" : "border-gray-200 hover:border-gray-300"
-              }`}
-            >
-              <div className="flex items-center space-x-4">
-                <div
-                  className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                    selectedGender === "man" ? "bg-orange-500" : "bg-gray-100"
-                  }`}
-                >
-                  <User className={`w-6 h-6 ${selectedGender === "man" ? "text-white" : "text-gray-600"}`} />
-                </div>
-                <div className="text-left">
-                  <h3 className="font-semibold text-gray-900">Man</h3>
-                  <p className="text-sm text-gray-600">Mannelijke AI-headshots</p>
-                </div>
-              </div>
-            </button>
+            <div className="flex justify-between pt-4">
+              <Button variant="outline" onClick={handleBack} className="flex items-center bg-transparent">
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Terug
+              </Button>
 
-            <button
-              onClick={() => setSelectedGender("vrouw")}
-              className={`p-6 rounded-lg border-2 transition-all ${
-                selectedGender === "vrouw" ? "border-orange-500 bg-orange-50" : "border-gray-200 hover:border-gray-300"
-              }`}
-            >
-              <div className="flex items-center space-x-4">
-                <div
-                  className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                    selectedGender === "vrouw" ? "bg-orange-500" : "bg-gray-100"
-                  }`}
-                >
-                  <Users className={`w-6 h-6 ${selectedGender === "vrouw" ? "text-white" : "text-gray-600"}`} />
-                </div>
-                <div className="text-left">
-                  <h3 className="font-semibold text-gray-900">Vrouw</h3>
-                  <p className="text-sm text-gray-600">Vrouwelijke AI-headshots</p>
-                </div>
-              </div>
-            </button>
-          </div>
-
-          <div className="bg-blue-50 p-4 rounded-lg">
-            <h4 className="font-semibold text-gray-900 mb-2">🎯 Waarom is dit belangrijk?</h4>
-            <p className="text-sm text-gray-600">
-              Onze AI gebruikt verschillende modellen voor mannen en vrouwen om de meest natuurlijke en professionele
-              resultaten te leveren.
-            </p>
-          </div>
-
-          <Button
-            onClick={handleNext}
-            disabled={!selectedGender || isLoading}
-            className="w-full bg-orange-500 hover:bg-orange-600 text-white py-3 font-semibold"
-            size="lg"
-          >
-            {isLoading ? (
-              <div className="flex items-center space-x-2">
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                <span>Opslaan...</span>
-              </div>
-            ) : (
-              <div className="flex items-center space-x-2">
-                <span>Volgende Stap</span>
-                <ArrowRight className="w-4 h-4" />
-              </div>
-            )}
-          </Button>
-        </CardContent>
-      </Card>
+              <Button
+                onClick={handleNext}
+                disabled={!selectedGender || isLoading}
+                className="bg-orange-500 hover:bg-orange-600 text-white flex items-center"
+              >
+                {isLoading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Opslaan...
+                  </>
+                ) : (
+                  <>
+                    Volgende Stap
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </>
+                )}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   )
 }
