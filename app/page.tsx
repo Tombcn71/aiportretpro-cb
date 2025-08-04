@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button"
 import { X, ChevronDown, ChevronUp } from "lucide-react"
 import { Header } from "@/components/header"
 import { HeroSection } from "@/components/hero-section"
-import { HowItWorks } from "@/components/how-it-works"
 import { PricingSection } from "@/components/pricing-section"
 import { AIHeadshotsShowcase } from "@/components/ai-headshots-showcase"
 import { FloatingCTAButton } from "@/components/floating-cta-button"
@@ -153,7 +152,6 @@ export default function HomePage() {
       <Header />
       <HeroSection />
       <AIHeadshotsShowcase />
-      <HowItWorks />
       <PricingSection />
       <FloatingCTAButton />
       <DiscountPopup isOpen={showDiscountPopup} onClose={() => setShowDiscountPopup(false)} />
