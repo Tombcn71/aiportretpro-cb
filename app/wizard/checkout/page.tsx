@@ -4,81 +4,105 @@ import { useState, useEffect } from "react"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { ArrowLeft, CreditCard, Check, Sparkles, Clock, Download, Shield } from "lucide-react"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { ArrowLeft, Check, Tag } from "lucide-react"
 import Image from "next/image"
 
-export default function CheckoutPage() {
+interface CouponData {
+  valid: boolean
+  code: string
+  discount: {
+    type: "percentage" | "amount"
+    value: number
+  }
+  error?: string
+}
+
+export default function WizardCheckoutPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
-  const [wizardData, setWizardData] = useState<any>(null)
+  const [couponCode, setCouponCode] = useState("")
+  const [appliedCoupon, setAppliedCoupon] = useState<CouponData | null>(null)
+  const [isValidatingCoupon, setIsValidatingCoupon] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
 
+  const basePrice = 19.99
+  const discountAmount = appliedCoupon?.valid
+    ? appliedCoupon.discount.type === "percentage"
+      ? (basePrice * appliedCoupon.discount.value) / 100
+      : appliedCoupon.discount.value
+    : 0
+  const finalPrice = Math.max(0, basePrice - discountAmount)
+
   useEffect(() => {
-    if (status === "loading") return
-
-    if (!session) {
-      router.push("/auth/signin?callbackUrl=/wizard/checkout")
-      return
+    if (status === "unauthenticated") {
+      router.push("/wizard/login")
     }
+  }, [status, router])
 
-    // Load wizard data
-    const wizardSessionId = sessionStorage.getItem("wizardSessionId")
-    const projectName = sessionStorage.getItem("projectName")
-    const gender = sessionStorage.getItem("gender")
-    const uploadedPhotos = sessionStorage.getItem("uploadedPhotos")
+  const validateCoupon = async () => {
+    if (!couponCode.trim()) return
 
-    if (!wizardSessionId || !projectName || !gender || !uploadedPhotos) {
-      router.push("/wizard/welcome")
-      return
-    }
+    setIsValidatingCoupon(true)
 
     try {
-      const photos = JSON.parse(uploadedPhotos)
-      setWizardData({
-        wizardSessionId,
-        projectName,
-        gender,
-        photos,
+      const response = await fetch("/api/stripe/validate-coupon", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          couponCode: couponCode.trim(),
+        }),
       })
+
+      const data = await response.json()
+
+      if (data.valid) {
+        setAppliedCoupon(data)
+      } else {
+        setAppliedCoupon({ ...data, valid: false })
+      }
     } catch (error) {
-      console.error("Error loading wizard data:", error)
-      router.push("/wizard/welcome")
+      setAppliedCoupon({
+        valid: false,
+        code: couponCode,
+        discount: { type: "percentage", value: 0 },
+        error: "Er is een fout opgetreden bij het valideren van de coupon.",
+      })
+    } finally {
+      setIsValidatingCoupon(false)
     }
-  }, [session, status, router])
+  }
 
-  const handlePayment = async () => {
-    if (!wizardData) return
+  const removeCoupon = () => {
+    setAppliedCoupon(null)
+    setCouponCode("")
+  }
 
+  const handleCheckout = async () => {
     setIsLoading(true)
 
     try {
       const response = await fetch("/api/stripe/wizard-checkout", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({
-          wizardSessionId: wizardData.wizardSessionId,
-          projectName: wizardData.projectName,
-          gender: wizardData.gender,
-          photos: wizardData.photos,
+          userId: session?.user?.email,
+          couponCode: appliedCoupon?.valid ? appliedCoupon.code : null,
         }),
       })
 
-      if (!response.ok) {
-        throw new Error("Failed to create checkout session")
-      }
+      const data = await response.json()
 
-      const { url } = await response.json()
-
-      if (url) {
-        window.location.href = url
-      } else {
-        throw new Error("No checkout URL received")
+      if (data.url) {
+        window.location.href = data.url
       }
     } catch (error) {
-      console.error("Payment error:", error)
-      alert("Er is een fout opgetreden bij het starten van de betaling. Probeer het opnieuw.")
+      console.error("Error creating checkout:", error)
     } finally {
       setIsLoading(false)
     }
@@ -88,182 +112,165 @@ export default function CheckoutPage() {
     router.push("/wizard/upload")
   }
 
-  if (status === "loading" || !wizardData) {
+  if (status === "loading") {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-orange-50 to-orange-100 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#FF8C00]"></div>
       </div>
     )
   }
 
-  if (!session) {
-    return null
-  }
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-orange-100 p-4">
-      <div className="max-w-4xl mx-auto">
-        <div className="grid lg:grid-cols-2 gap-8">
-          {/* Order Summary */}
-          <Card className="shadow-2xl border-0 bg-white/95 backdrop-blur">
-            <CardHeader>
-              <CardTitle className="text-2xl font-bold text-gray-900 flex items-center">
-                <Sparkles className="w-6 h-6 mr-2 text-orange-500" />
-                Bestelling Overzicht
-              </CardTitle>
-            </CardHeader>
+    <div className="min-h-screen bg-white flex flex-col items-center justify-center px-4">
+      <div className="w-full max-w-6xl">
+        {/* Title */}
+        <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4 text-center">
+          Fantastische portretfoto's wachten op je!
+        </h1>
 
-            <CardContent className="space-y-6">
-              {/* Project Details */}
-              <div className="space-y-4">
-                <div className="flex justify-between items-center p-4 bg-gray-50 rounded-xl">
-                  <div>
-                    <h3 className="font-semibold text-gray-900">Project Naam</h3>
-                    <p className="text-gray-600">{wizardData.projectName}</p>
-                  </div>
-                  <Badge variant="outline" className="bg-white">
-                    {wizardData.gender === "man" ? "Mannelijk" : "Vrouwelijk"}
-                  </Badge>
+        <p className="text-lg text-gray-600 mb-12 text-center">Bespaar tot 75% op traditionele fotoshoots</p>
+
+        <div className="flex flex-col lg:flex-row gap-8 items-center">
+          {/* Left Side - Pricing Card */}
+          <div className="w-full lg:w-1/2">
+            <div className="border-2 border-[#0077B5] rounded-lg p-8 bg-white shadow-lg">
+              <div className="text-center mb-6">
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">Professional</h2>
+                <div className="flex items-center justify-center gap-2 mb-4">
+                  {appliedCoupon?.valid && (
+                    <span className="text-lg text-gray-500 line-through">€{basePrice.toFixed(2)}</span>
+                  )}
+                  <span className="text-4xl font-bold text-[#0077B5]">€{finalPrice.toFixed(2)}</span>
                 </div>
-
-                <div className="p-4 bg-gray-50 rounded-xl">
-                  <h3 className="font-semibold text-gray-900 mb-3">Geüploade Foto's ({wizardData.photos.length})</h3>
-                  <div className="grid grid-cols-4 gap-2">
-                    {wizardData.photos.slice(0, 8).map((photo: string, index: number) => (
-                      <div key={index} className="aspect-square rounded-lg overflow-hidden bg-gray-200">
-                        <Image
-                          src={photo || "/placeholder.svg"}
-                          alt={`Photo ${index + 1}`}
-                          width={80}
-                          height={80}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    ))}
-                    {wizardData.photos.length > 8 && (
-                      <div className="aspect-square rounded-lg bg-gray-200 flex items-center justify-center">
-                        <span className="text-sm text-gray-600">+{wizardData.photos.length - 8}</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* What You Get */}
-              <div className="space-y-4">
-                <h3 className="font-semibold text-gray-900">Dit krijg je:</h3>
-                <div className="space-y-3">
-                  <div className="flex items-center space-x-3">
-                    <Check className="w-5 h-5 text-green-500" />
-                    <span className="text-gray-700">40 professionele AI headshots</span>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <Check className="w-5 h-5 text-green-500" />
-                    <span className="text-gray-700">Hoge resolutie (1024x1024 pixels)</span>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <Check className="w-5 h-5 text-green-500" />
-                    <span className="text-gray-700">Verschillende poses en achtergronden</span>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <Check className="w-5 h-5 text-green-500" />
-                    <span className="text-gray-700">Direct downloadbaar</span>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Payment */}
-          <Card className="shadow-2xl border-0 bg-white/95 backdrop-blur">
-            <CardHeader>
-              <CardTitle className="text-2xl font-bold text-gray-900 flex items-center">
-                <CreditCard className="w-6 h-6 mr-2 text-orange-500" />
-                Betaling
-              </CardTitle>
-            </CardHeader>
-
-            <CardContent className="space-y-6">
-              {/* Pricing */}
-              <div className="space-y-4">
-                <div className="flex justify-between items-center p-6 bg-gradient-to-r from-orange-50 to-orange-100 rounded-xl border border-orange-200">
-                  <div>
-                    <h3 className="text-xl font-bold text-gray-900">AI Portrait Pro</h3>
-                    <p className="text-gray-600">40 professionele headshots</p>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-3xl font-bold text-orange-600">€29</div>
-                    <div className="text-sm text-gray-500">Eenmalig</div>
-                  </div>
-                </div>
-
-                <div className="border-t pt-4">
-                  <div className="flex justify-between items-center text-lg font-semibold">
-                    <span>Totaal</span>
-                    <span className="text-orange-600">€29,00</span>
-                  </div>
-                  <p className="text-sm text-gray-500 mt-1">Inclusief BTW</p>
-                </div>
+                <p className="text-gray-600">40 professionele portretfoto's</p>
               </div>
 
               {/* Features */}
-              <div className="space-y-4">
-                <div className="flex items-center space-x-3 p-3 bg-blue-50 rounded-lg">
-                  <Clock className="w-5 h-5 text-blue-500" />
-                  <span className="text-sm text-blue-800">Klaar binnen 20 minuten</span>
-                </div>
-                <div className="flex items-center space-x-3 p-3 bg-green-50 rounded-lg">
-                  <Download className="w-5 h-5 text-green-500" />
-                  <span className="text-sm text-green-800">Direct downloadbaar</span>
-                </div>
-                <div className="flex items-center space-x-3 p-3 bg-purple-50 rounded-lg">
-                  <Shield className="w-5 h-5 text-purple-500" />
-                  <span className="text-sm text-purple-800">Veilige betaling via Stripe</span>
-                </div>
+              <div className="space-y-3 mb-6">
+                {[
+                  "Verschillende zakelijke outfits",
+                  "Verschillende poses en achtergronden",
+                  "HD kwaliteit downloads",
+                  "Klaar binnen 15 minuten",
+                  "Perfect voor LinkedIn, Social Media, CV, Website en Print",
+                ].map((feature, index) => (
+                  <div key={index} className="flex items-center gap-3">
+                    <Check className="h-5 w-5 text-green-500 flex-shrink-0" />
+                    <span className="text-gray-700">{feature}</span>
+                  </div>
+                ))}
               </div>
 
-              {/* Payment Button */}
-              <div className="space-y-4">
-                <Button
-                  onClick={handlePayment}
-                  disabled={isLoading}
-                  className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white py-4 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
-                >
-                  {isLoading ? (
-                    <div className="flex items-center justify-center">
-                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                      Bezig met laden...
+              {/* Coupon Section */}
+              <div className="border-t pt-6 mb-6">
+                <Label htmlFor="coupon" className="text-sm font-medium text-gray-700 mb-2 block">
+                  Kortingscode (optioneel)
+                </Label>
+
+                {appliedCoupon?.valid ? (
+                  <div className="flex items-center justify-between bg-green-50 border border-green-200 rounded-lg p-3">
+                    <div className="flex items-center gap-2">
+                      <Tag className="h-4 w-4 text-green-600" />
+                      <span className="text-green-800 font-medium">{appliedCoupon.code}</span>
+                      <span className="text-green-600 text-sm">
+                        -
+                        {appliedCoupon.discount.type === "percentage"
+                          ? `${appliedCoupon.discount.value}%`
+                          : `€${appliedCoupon.discount.value}`}
+                      </span>
                     </div>
-                  ) : (
-                    <>
-                      <CreditCard className="w-5 h-5 mr-2" />
-                      Betaal Nu - €29
-                    </>
-                  )}
-                </Button>
+                    <button onClick={removeCoupon} className="text-green-600 hover:text-green-800 text-sm underline">
+                      Verwijderen
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex gap-2">
+                    <Input
+                      id="coupon"
+                      type="text"
+                      value={couponCode}
+                      onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                      placeholder="LAUNCH"
+                      className="flex-1"
+                    />
+                    <Button
+                      onClick={validateCoupon}
+                      disabled={!couponCode.trim() || isValidatingCoupon}
+                      variant="outline"
+                      className="px-4 bg-transparent"
+                    >
+                      {isValidatingCoupon ? (
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600"></div>
+                      ) : (
+                        "Toepassen"
+                      )}
+                    </Button>
+                  </div>
+                )}
 
-                <Button
-                  onClick={handleBack}
-                  variant="outline"
-                  className="w-full h-12 bg-transparent"
-                  disabled={isLoading}
-                >
-                  <ArrowLeft className="w-4 h-4 mr-2" />
-                  Terug naar Upload
-                </Button>
+                {appliedCoupon && !appliedCoupon.valid && (
+                  <p className="text-red-600 text-sm mt-2">{appliedCoupon.error || "Ongeldige kortingscode"}</p>
+                )}
               </div>
 
-              {/* Trust badges */}
-              <div className="text-center space-y-2">
-                <p className="text-xs text-gray-500">Veilig betalen met</p>
-                <div className="flex justify-center space-x-4 opacity-60">
-                  <div className="text-xs bg-gray-100 px-2 py-1 rounded">iDEAL</div>
-                  <div className="text-xs bg-gray-100 px-2 py-1 rounded">Visa</div>
-                  <div className="text-xs bg-gray-100 px-2 py-1 rounded">Mastercard</div>
-                </div>
+              {/* Checkout Button */}
+              <Button
+                onClick={handleCheckout}
+                disabled={isLoading}
+                className="w-full bg-[#FF8C00] hover:bg-[#E67E00] text-white py-4 text-lg font-semibold"
+              >
+                {isLoading ? (
+                  <div className="flex items-center gap-2">
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                    Bezig...
+                  </div>
+                ) : (
+                  "verder"
+                )}
+              </Button>
+            </div>
+          </div>
+
+          {/* Right Side - Photo Grid */}
+          <div className="w-full lg:w-1/2">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="aspect-[3/4] rounded-lg overflow-hidden bg-gray-100 shadow-lg">
+                <Image
+                  src="/images/professional-man-1.jpg"
+                  alt="Professional headshot man"
+                  width={300}
+                  height={400}
+                  className="w-full h-full object-cover brightness-110 contrast-105"
+                />
               </div>
-            </CardContent>
-          </Card>
+              <div className="aspect-[3/4] rounded-lg overflow-hidden bg-gray-100 shadow-lg">
+                <Image
+                  src="/images/professional-woman-2.jpg"
+                  alt="Professional headshot woman"
+                  width={300}
+                  height={400}
+                  className="w-full h-full object-cover brightness-110 contrast-105"
+                />
+              </div>
+              <div className="aspect-[3/4] rounded-lg overflow-hidden bg-gray-100 shadow-lg">
+                <Image
+                  src="/images/professional-man-2.jpg"
+                  alt="Professional headshot man"
+                  width={300}
+                  height={400}
+                  className="w-full h-full object-cover brightness-110 contrast-105"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Back Button */}
+        <div className="flex justify-center mt-8">
+          <Button onClick={handleBack} variant="outline" className="flex items-center gap-2 px-6 py-3 bg-transparent">
+            <ArrowLeft className="h-4 w-4" />
+            Terug naar Upload
+          </Button>
         </div>
       </div>
     </div>

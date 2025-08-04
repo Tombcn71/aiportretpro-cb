@@ -108,7 +108,7 @@ export default function DiscountPopup({ isOpen, onClose }: DiscountPopupProps) {
             className="bg-[#0077B5] hover:bg-[#005885] text-white px-6 py-3 text-sm w-full mb-3"
           >
             <Link href="/pricing" onClick={onClose}>
-             Gebruik je 20% Korting
+              Gebruik je 20% Korting
             </Link>
           </Button>
 
@@ -182,7 +182,7 @@ export default function DiscountPopup({ isOpen, onClose }: DiscountPopupProps) {
                 className="bg-[#0077B5] hover:bg-[#005885] text-white px-8 py-4 text-lg w-full mb-4"
               >
                 <Link href="/pricing" onClick={onClose}>
-                 Gebruik  je 20% Korting
+                  Gebruik je 20% Korting
                 </Link>
               </Button>
 

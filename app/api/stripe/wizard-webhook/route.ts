@@ -1,11 +1,12 @@
 import { type NextRequest, NextResponse } from "next/server"
 import Stripe from "stripe"
-import { sql } from "@/lib/db"
+import { neon } from "@neondatabase/serverless"
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2024-06-20",
 })
 
+const sql = neon(process.env.DATABASE_URL!)
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET!
 
 export async function POST(request: NextRequest) {
@@ -17,112 +18,99 @@ export async function POST(request: NextRequest) {
 
     try {
       event = stripe.webhooks.constructEvent(body, signature, endpointSecret)
-    } catch (err) {
-      console.error("Webhook signature verification failed:", err)
-      return NextResponse.json({ error: "Invalid signature" }, { status: 400 })
+    } catch (err: any) {
+      console.error("Webhook signature verification failed:", err.message)
+      return NextResponse.json({ error: "Webhook signature verification failed" }, { status: 400 })
     }
 
+    // Handle the checkout.session.completed event
     if (event.type === "checkout.session.completed") {
       const session = event.data.object as Stripe.Checkout.Session
 
-      const { wizardSessionId, projectName, gender, photoCount, userEmail } = session.metadata || {}
-
-      if (!wizardSessionId || !projectName || !gender || !userEmail) {
-        console.error("Missing metadata in webhook:", session.metadata)
-        return NextResponse.json({ error: "Missing metadata" }, { status: 400 })
-      }
-
-      console.log("🎉 Wizard payment completed:", {
-        wizardSessionId,
-        projectName,
-        gender,
-        photoCount,
-        userEmail,
-      })
+      const { userId, wizardSessionId, projectName, gender, uploadedFiles } = session.metadata!
 
       try {
-        // Get user ID
-        const userResult = await sql`
-          SELECT id FROM users WHERE email = ${userEmail}
-        `
-
-        if (userResult.length === 0) {
-          throw new Error("User not found")
-        }
-
-        const userId = userResult[0].id
-
-        // Get wizard session data
-        const wizardResult = await sql`
-          SELECT * FROM wizard_sessions 
-          WHERE id = ${wizardSessionId} AND user_id = ${userId}
-        `
-
-        if (wizardResult.length === 0) {
-          throw new Error("Wizard session not found")
-        }
-
-        const wizardData = wizardResult[0]
-        const photos = wizardData.photos ? JSON.parse(wizardData.photos) : []
-
-        // Create project
-        const projectResult = await sql`
+        // Create project in database
+        const project = await sql`
           INSERT INTO projects (
-            user_id, 
-            name, 
-            gender, 
-            status, 
+            user_id,
+            name,
+            status,
+            created_at,
             stripe_session_id,
-            created_at, 
-            updated_at
+            gender,
+            uploaded_files_count
           )
           VALUES (
-            ${userId}, 
-            ${projectName}, 
-            ${gender}, 
-            'processing',
+            ${userId},
+            ${projectName || "Wizard Project"},
+            'payment_completed',
+            NOW(),
             ${session.id},
-            CURRENT_TIMESTAMP, 
-            CURRENT_TIMESTAMP
+            ${gender || "unknown"},
+            ${Number.parseInt(uploadedFiles || "0")}
           )
           RETURNING id
         `
 
-        const projectId = projectResult[0].id
+        const projectId = project[0].id
 
-        // Save photos to project
-        for (const photoUrl of photos) {
-          await sql`
-            INSERT INTO photos (project_id, url, created_at)
-            VALUES (${projectId}, ${photoUrl}, CURRENT_TIMESTAMP)
-          `
-        }
-
-        // Start AI training (placeholder - implement actual AI training)
-        console.log("🚀 Starting AI training for project:", projectId)
-
-        // Update project status to training
+        // Update wizard session
         await sql`
-          UPDATE projects 
-          SET status = 'training', updated_at = CURRENT_TIMESTAMP
-          WHERE id = ${projectId}
+          UPDATE wizard_sessions 
+          SET status = 'completed',
+              project_id = ${projectId},
+              completed_at = NOW()
+          WHERE id = ${wizardSessionId}
         `
 
-        // Clean up wizard session
+        // Log successful webhook processing
         await sql`
-          DELETE FROM wizard_sessions WHERE id = ${wizardSessionId}
+          INSERT INTO webhook_logs (
+            event_type,
+            stripe_session_id,
+            project_id,
+            status,
+            created_at
+          )
+          VALUES (
+            'wizard_checkout_completed',
+            ${session.id},
+            ${projectId},
+            'success',
+            NOW()
+          )
         `
 
-        console.log("✅ Wizard project created successfully:", projectId)
+        console.log(`Wizard project created successfully: ${projectId}`)
       } catch (error) {
-        console.error("Error processing wizard payment:", error)
-        return NextResponse.json({ error: "Processing failed" }, { status: 500 })
+        console.error("Error processing wizard webhook:", error)
+
+        // Log failed webhook processing
+        await sql`
+          INSERT INTO webhook_logs (
+            event_type,
+            stripe_session_id,
+            status,
+            error_message,
+            created_at
+          )
+          VALUES (
+            'wizard_checkout_completed',
+            ${session.id},
+            'error',
+            ${error instanceof Error ? error.message : "Unknown error"},
+            NOW()
+          )
+        `
+
+        return NextResponse.json({ error: "Failed to process webhook" }, { status: 500 })
       }
     }
 
     return NextResponse.json({ received: true })
   } catch (error) {
-    console.error("Wizard webhook error:", error)
-    return NextResponse.json({ error: "Webhook failed" }, { status: 500 })
+    console.error("Webhook error:", error)
+    return NextResponse.json({ error: "Webhook processing failed" }, { status: 500 })
   }
 }

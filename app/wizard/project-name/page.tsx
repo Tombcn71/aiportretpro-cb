@@ -4,39 +4,33 @@ import { useState, useEffect } from "react"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Progress } from "@/components/ui/progress"
-import { ArrowRight, ArrowLeft, Sparkles } from "lucide-react"
+import { ArrowLeft, ArrowRight } from "lucide-react"
 
-export default function ProjectNamePage() {
+const projectSuggestions = [
+  "LinkedIn Profiel",
+  "CV Foto",
+  "Website Portret",
+  "Zakelijke Foto",
+  "Social Media",
+  "Bedrijfsprofiel",
+  "Professional Headshot",
+  "Corporate Foto",
+]
+
+export default function WizardProjectNamePage() {
   const { data: session, status } = useSession()
   const router = useRouter()
   const [projectName, setProjectName] = useState("")
   const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
-    if (status === "loading") return
-
-    if (!session) {
-      router.push("/auth/signin?callbackUrl=/wizard/project-name")
-      return
+    if (status === "unauthenticated") {
+      router.push("/wizard/login")
     }
-
-    // Check if we have a wizard session
-    const wizardSessionId = sessionStorage.getItem("wizardSessionId")
-    if (!wizardSessionId) {
-      router.push("/wizard/welcome")
-      return
-    }
-
-    // Load existing project name if available
-    const savedProjectName = sessionStorage.getItem("projectName")
-    if (savedProjectName) {
-      setProjectName(savedProjectName)
-    }
-  }, [session, status, router])
+  }, [status, router])
 
   const handleNext = async () => {
     if (!projectName.trim()) return
@@ -44,27 +38,25 @@ export default function ProjectNamePage() {
     setIsLoading(true)
 
     try {
-      // Save to sessionStorage
-      sessionStorage.setItem("projectName", projectName.trim())
-
-      // Save to database
-      const wizardSessionId = sessionStorage.getItem("wizardSessionId")
-      if (wizardSessionId) {
-        await fetch("/api/wizard/save-data", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            wizardSessionId,
+      const response = await fetch("/api/wizard/save-data", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          step: "project-name",
+          data: {
             projectName: projectName.trim(),
-          }),
-        })
-      }
+            userId: session?.user?.email,
+          },
+        }),
+      })
 
-      router.push("/wizard/gender")
+      if (response.ok) {
+        router.push("/wizard/gender")
+      }
     } catch (error) {
       console.error("Error saving project name:", error)
-      // Continue anyway with sessionStorage
-      router.push("/wizard/gender")
     } finally {
       setIsLoading(false)
     }
@@ -74,85 +66,93 @@ export default function ProjectNamePage() {
     router.push("/wizard/welcome")
   }
 
+  const handleSuggestionClick = (suggestion: string) => {
+    setProjectName(suggestion)
+  }
+
   if (status === "loading") {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-orange-50 to-orange-100 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#FF8C00]"></div>
       </div>
     )
   }
 
-  if (!session) {
-    return null
-  }
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-orange-100 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <Card className="shadow-2xl border-0 bg-white/95 backdrop-blur">
-          <CardHeader className="text-center">
-            <div className="mx-auto mb-4 w-16 h-16 bg-gradient-to-r from-orange-500 to-orange-600 rounded-full flex items-center justify-center">
-              <Sparkles className="w-8 h-8 text-white" />
-            </div>
-            <CardTitle className="text-2xl font-bold text-gray-900">Project Naam</CardTitle>
-            <p className="text-gray-600 mt-2">Geef je AI headshot project een naam</p>
+    <div className="min-h-screen bg-white flex flex-col">
+      {/* Progress Bar */}
+      <div className="w-full bg-gray-100 p-4">
+        <div className="max-w-2xl mx-auto">
+          <Progress value={33} className="h-2" />
+          <p className="text-sm text-gray-600 mt-2">Stap 1 van 3</p>
+        </div>
+      </div>
 
-            {/* Progress */}
-            <div className="mt-6">
-              <div className="flex justify-between text-sm text-gray-500 mb-2">
-                <span>Stap 1 van 3</span>
-                <span>33%</span>
-              </div>
-              <Progress value={33} className="h-2" />
-            </div>
-          </CardHeader>
+      <div className="flex-1 flex flex-col items-center justify-center px-4">
+        <div className="w-full max-w-2xl">
+          {/* Title */}
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4 text-center">Geef je project een naam</h1>
 
-          <CardContent className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="projectName" className="text-sm font-medium text-gray-700">
-                Project Naam
-              </Label>
-              <Input
-                id="projectName"
-                type="text"
-                placeholder="Bijv. LinkedIn Headshots 2025"
-                value={projectName}
-                onChange={(e) => setProjectName(e.target.value)}
-                className="h-12 text-lg"
-                maxLength={50}
-                autoFocus
-              />
-              <p className="text-xs text-gray-500">Dit helpt je om je project later terug te vinden</p>
-            </div>
+          <p className="text-lg text-gray-600 mb-8 text-center">
+            Dit helpt ons je foto's te organiseren en maakt het makkelijker om ze later terug te vinden.
+          </p>
 
-            <div className="flex gap-3">
-              <Button
-                onClick={handleBack}
-                variant="outline"
-                className="flex-1 h-12 bg-transparent"
-                disabled={isLoading}
-              >
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Terug
-              </Button>
+          {/* Input Field */}
+          <div className="mb-6">
+            <Label htmlFor="projectName" className="text-base font-medium text-gray-700 mb-2 block">
+              Project naam
+            </Label>
+            <Input
+              id="projectName"
+              type="text"
+              value={projectName}
+              onChange={(e) => setProjectName(e.target.value)}
+              placeholder="Bijv. LinkedIn Profiel 2025"
+              className="w-full p-4 text-lg border-2 border-gray-200 rounded-lg focus:border-[#FF8C00] focus:ring-0"
+              maxLength={50}
+            />
+            <p className="text-sm text-gray-500 mt-1">{projectName.length}/50 karakters</p>
+          </div>
 
-              <Button
-                onClick={handleNext}
-                disabled={!projectName.trim() || isLoading}
-                className="flex-1 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white h-12"
-              >
-                {isLoading ? (
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                ) : (
-                  <>
-                    Volgende
-                    <ArrowRight className="w-4 h-4 ml-2" />
-                  </>
-                )}
-              </Button>
+          {/* Suggestions */}
+          <div className="mb-8">
+            <p className="text-sm font-medium text-gray-700 mb-3">Populaire namen:</p>
+            <div className="flex flex-wrap gap-2">
+              {projectSuggestions.map((suggestion, index) => (
+                <button
+                  key={index}
+                  onClick={() => handleSuggestionClick(suggestion)}
+                  className="px-3 py-2 bg-gray-100 hover:bg-[#FF8C00] hover:text-white text-gray-700 rounded-full text-sm transition-colors duration-200"
+                >
+                  {suggestion}
+                </button>
+              ))}
             </div>
-          </CardContent>
-        </Card>
+          </div>
+
+          {/* Navigation Buttons */}
+          <div className="flex justify-between items-center">
+            <Button onClick={handleBack} variant="outline" className="flex items-center gap-2 px-6 py-3 bg-transparent">
+              <ArrowLeft className="h-4 w-4" />
+              Terug
+            </Button>
+
+            <Button
+              onClick={handleNext}
+              disabled={!projectName.trim() || isLoading}
+              className="bg-[#FF8C00] hover:bg-[#E67E00] text-white px-8 py-3 flex items-center gap-2"
+            >
+              {isLoading ? (
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+              ) : (
+                <>
+                  Volgende
+                  <ArrowRight className="h-4 w-4" />
+                </>
+              )}
+            </Button>
+          </div>
+        </div>
       </div>
     </div>
   )

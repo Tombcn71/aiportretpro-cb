@@ -4,39 +4,41 @@ import { useState, useEffect } from "react"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
-import { ArrowRight, ArrowLeft, User, Users } from "lucide-react"
+import { ArrowLeft, ArrowRight, User, Users } from "lucide-react"
 
-export default function GenderPage() {
+const genderOptions = [
+  {
+    id: "man",
+    label: "Man",
+    icon: User,
+    description: "Mannelijke portretfoto's",
+  },
+  {
+    id: "vrouw",
+    label: "Vrouw",
+    icon: User,
+    description: "Vrouwelijke portretfoto's",
+  },
+  {
+    id: "anders",
+    label: "Anders",
+    icon: Users,
+    description: "Neutrale portretfoto's",
+  },
+]
+
+export default function WizardGenderPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
   const [selectedGender, setSelectedGender] = useState<string>("")
   const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
-    if (status === "loading") return
-
-    if (!session) {
-      router.push("/auth/signin?callbackUrl=/wizard/gender")
-      return
+    if (status === "unauthenticated") {
+      router.push("/wizard/login")
     }
-
-    // Check if we have a wizard session and project name
-    const wizardSessionId = sessionStorage.getItem("wizardSessionId")
-    const projectName = sessionStorage.getItem("projectName")
-
-    if (!wizardSessionId || !projectName) {
-      router.push("/wizard/welcome")
-      return
-    }
-
-    // Load existing gender if available
-    const savedGender = sessionStorage.getItem("gender")
-    if (savedGender) {
-      setSelectedGender(savedGender)
-    }
-  }, [session, status, router])
+  }, [status, router])
 
   const handleNext = async () => {
     if (!selectedGender) return
@@ -44,30 +46,25 @@ export default function GenderPage() {
     setIsLoading(true)
 
     try {
-      // Save to sessionStorage
-      sessionStorage.setItem("gender", selectedGender)
-
-      // Save to database
-      const wizardSessionId = sessionStorage.getItem("wizardSessionId")
-      const projectName = sessionStorage.getItem("projectName")
-
-      if (wizardSessionId) {
-        await fetch("/api/wizard/save-data", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            wizardSessionId,
-            projectName,
+      const response = await fetch("/api/wizard/save-data", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          step: "gender",
+          data: {
             gender: selectedGender,
-          }),
-        })
-      }
+            userId: session?.user?.email,
+          },
+        }),
+      })
 
-      router.push("/wizard/upload")
+      if (response.ok) {
+        router.push("/wizard/upload")
+      }
     } catch (error) {
       console.error("Error saving gender:", error)
-      // Continue anyway with sessionStorage
-      router.push("/wizard/upload")
     } finally {
       setIsLoading(false)
     }
@@ -79,121 +76,84 @@ export default function GenderPage() {
 
   if (status === "loading") {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-orange-50 to-orange-100 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#FF8C00]"></div>
       </div>
     )
   }
 
-  if (!session) {
-    return null
-  }
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-orange-100 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <Card className="shadow-2xl border-0 bg-white/95 backdrop-blur">
-          <CardHeader className="text-center">
-            <div className="mx-auto mb-4 w-16 h-16 bg-gradient-to-r from-orange-500 to-orange-600 rounded-full flex items-center justify-center">
-              <Users className="w-8 h-8 text-white" />
-            </div>
-            <CardTitle className="text-2xl font-bold text-gray-900">Geslacht</CardTitle>
-            <p className="text-gray-600 mt-2">Kies je geslacht voor de beste AI resultaten</p>
+    <div className="min-h-screen bg-white flex flex-col">
+      {/* Progress Bar */}
+      <div className="w-full bg-gray-100 p-4">
+        <div className="max-w-2xl mx-auto">
+          <Progress value={67} className="h-2" />
+          <p className="text-sm text-gray-600 mt-2">Stap 2 van 3</p>
+        </div>
+      </div>
 
-            {/* Progress */}
-            <div className="mt-6">
-              <div className="flex justify-between text-sm text-gray-500 mb-2">
-                <span>Stap 2 van 3</span>
-                <span>67%</span>
-              </div>
-              <Progress value={67} className="h-2" />
-            </div>
-          </CardHeader>
+      <div className="flex-1 flex flex-col items-center justify-center px-4">
+        <div className="w-full max-w-2xl">
+          {/* Title */}
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4 text-center">Selecteer je geslacht</h1>
 
-          <CardContent className="space-y-6">
-            <div className="space-y-4">
-              <button
-                onClick={() => setSelectedGender("man")}
-                className={`w-full p-6 rounded-xl border-2 transition-all duration-200 ${
-                  selectedGender === "man"
-                    ? "border-orange-500 bg-orange-50 shadow-lg"
-                    : "border-gray-200 hover:border-orange-300 hover:bg-orange-25"
-                }`}
-              >
-                <div className="flex items-center justify-center space-x-4">
-                  <div
-                    className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                      selectedGender === "man" ? "bg-orange-500 text-white" : "bg-gray-100 text-gray-600"
-                    }`}
-                  >
-                    <User className="w-6 h-6" />
+          <p className="text-lg text-gray-600 mb-8 text-center">
+            Dit helpt ons de juiste stijl en poses voor je portretfoto's te kiezen.
+          </p>
+
+          {/* Gender Options */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+            {genderOptions.map((option) => {
+              const IconComponent = option.icon
+              return (
+                <button
+                  key={option.id}
+                  onClick={() => setSelectedGender(option.id)}
+                  className={`p-6 rounded-lg border-2 transition-all duration-200 text-center ${
+                    selectedGender === option.id
+                      ? "border-[#FF8C00] bg-[#FF8C00]/5 shadow-lg"
+                      : "border-gray-200 hover:border-[#FF8C00]/50 hover:bg-gray-50"
+                  }`}
+                >
+                  <div className="flex flex-col items-center">
+                    <div
+                      className={`p-4 rounded-full mb-4 ${
+                        selectedGender === option.id ? "bg-[#FF8C00] text-white" : "bg-gray-100 text-gray-600"
+                      }`}
+                    >
+                      <IconComponent className="h-8 w-8" />
+                    </div>
+                    <h3 className="text-xl font-semibold text-gray-900 mb-2">{option.label}</h3>
+                    <p className="text-sm text-gray-600">{option.description}</p>
                   </div>
-                  <div className="text-left">
-                    <h3 className="font-semibold text-lg text-gray-900">Man</h3>
-                    <p className="text-sm text-gray-600">Mannelijke AI headshots</p>
-                  </div>
-                </div>
-              </button>
+                </button>
+              )
+            })}
+          </div>
 
-              <button
-                onClick={() => setSelectedGender("vrouw")}
-                className={`w-full p-6 rounded-xl border-2 transition-all duration-200 ${
-                  selectedGender === "vrouw"
-                    ? "border-orange-500 bg-orange-50 shadow-lg"
-                    : "border-gray-200 hover:border-orange-300 hover:bg-orange-25"
-                }`}
-              >
-                <div className="flex items-center justify-center space-x-4">
-                  <div
-                    className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                      selectedGender === "vrouw" ? "bg-orange-500 text-white" : "bg-gray-100 text-gray-600"
-                    }`}
-                  >
-                    <User className="w-6 h-6" />
-                  </div>
-                  <div className="text-left">
-                    <h3 className="font-semibold text-lg text-gray-900">Vrouw</h3>
-                    <p className="text-sm text-gray-600">Vrouwelijke AI headshots</p>
-                  </div>
-                </div>
-              </button>
-            </div>
+          {/* Navigation Buttons */}
+          <div className="flex justify-between items-center">
+            <Button onClick={handleBack} variant="outline" className="flex items-center gap-2 px-6 py-3 bg-transparent">
+              <ArrowLeft className="h-4 w-4" />
+              Terug
+            </Button>
 
-            <div className="bg-blue-50 p-4 rounded-xl border border-blue-200">
-              <p className="text-sm text-blue-800">
-                💡 <strong>Tip:</strong> De AI gebruikt deze informatie om de meest geschikte professionele stijlen en
-                poses te selecteren.
-              </p>
-            </div>
-
-            <div className="flex gap-3">
-              <Button
-                onClick={handleBack}
-                variant="outline"
-                className="flex-1 h-12 bg-transparent"
-                disabled={isLoading}
-              >
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Terug
-              </Button>
-
-              <Button
-                onClick={handleNext}
-                disabled={!selectedGender || isLoading}
-                className="flex-1 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white h-12"
-              >
-                {isLoading ? (
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                ) : (
-                  <>
-                    Volgende
-                    <ArrowRight className="w-4 h-4 ml-2" />
-                  </>
-                )}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+            <Button
+              onClick={handleNext}
+              disabled={!selectedGender || isLoading}
+              className="bg-[#FF8C00] hover:bg-[#E67E00] text-white px-8 py-3 flex items-center gap-2"
+            >
+              {isLoading ? (
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+              ) : (
+                <>
+                  Volgende
+                  <ArrowRight className="h-4 w-4" />
+                </>
+              )}
+            </Button>
+          </div>
+        </div>
       </div>
     </div>
   )

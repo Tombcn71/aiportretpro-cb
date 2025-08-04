@@ -1,196 +1,82 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
-import { sql } from "@/lib/db"
+import { neon } from "@neondatabase/serverless"
+
+const sql = neon(process.env.DATABASE_URL!)
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    const { step, data } = await request.json()
+
+    if (!step || !data || !data.userId) {
+      return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
     }
 
-    const { wizardSessionId, projectName, gender, photos } = await request.json()
+    // Get or create wizard session
+    let sessionId: string
 
-    if (!wizardSessionId) {
-      return NextResponse.json({ error: "Wizard session ID required" }, { status: 400 })
-    }
-
-    // Get user ID
-    const userResult = await sql`
-      SELECT id FROM users WHERE email = ${session.user.email}
+    const existingSessions = await sql`
+      SELECT id FROM wizard_sessions 
+      WHERE user_id = ${data.userId} 
+      AND status = 'active'
+      ORDER BY created_at DESC 
+      LIMIT 1
     `
 
-    if (userResult.length === 0) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 })
+    if (existingSessions.length > 0) {
+      sessionId = existingSessions[0].id
+    } else {
+      const newSession = await sql`
+        INSERT INTO wizard_sessions (user_id, status, created_at)
+        VALUES (${data.userId}, 'active', NOW())
+        RETURNING id
+      `
+      sessionId = newSession[0].id
     }
 
-    const userId = userResult[0].id
+    // Update session data based on step
+    switch (step) {
+      case "welcome":
+        await sql`
+          UPDATE wizard_sessions 
+          SET started_at = ${data.startedAt}
+          WHERE id = ${sessionId}
+        `
+        break
 
-    // Save or update wizard session
-    await sql`
-      INSERT INTO wizard_sessions (id, user_id, project_name, gender, photos, created_at, updated_at)
-      VALUES (${wizardSessionId}, ${userId}, ${projectName || null}, ${gender || null}, ${JSON.stringify(photos || [])}, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-      ON CONFLICT (id) 
-      DO UPDATE SET 
-        project_name = EXCLUDED.project_name,
-        gender = EXCLUDED.gender,
-        photos = EXCLUDED.photos,
-        updated_at = CURRENT_TIMESTAMP
-    `
+      case "project-name":
+        await sql`
+          UPDATE wizard_sessions 
+          SET project_name = ${data.projectName}
+          WHERE id = ${sessionId}
+        `
+        break
 
-    return NextResponse.json({ success: true })
-  } catch (error) {
-    console.error("Save wizard data error:", error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
-  }
-}
+      case "gender":
+        await sql`
+          UPDATE wizard_sessions 
+          SET gender = ${data.gender}
+          WHERE id = ${sessionId}
+        `
+        break
 
-export async function GET(request: NextRequest) {
-  try {
-    const session = await getServerSession(authOptions)
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      case "upload":
+        await sql`
+          UPDATE wizard_sessions 
+          SET uploaded_files = ${data.uploadedFiles}
+          WHERE id = ${sessionId}
+        `
+        break
+
+      default:
+        return NextResponse.json({ error: "Invalid step" }, { status: 400 })
     }
 
-    const { searchParams } = new URL(request.url)
-    const wizardSessionId = searchParams.get("wizardSessionId")
-
-    if (!wizardSessionId) {
-      return NextResponse.json({ error: "Wizard session ID required" }, { status: 400 })
-    }
-
-    // Get user ID
-    const userResult = await sql`
-      SELECT id FROM users WHERE email = ${session.user.email}
-    `
-
-    if (userResult.length === 0) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 })
-    }
-
-    const userId = userResult[0].id
-
-    // Get wizard session data
-    const wizardResult = await sql`
-      SELECT * FROM wizard_sessions 
-      WHERE id = ${wizardSessionId} AND user_id = ${userId}
-    `
-
-    if (wizardResult.length === 0) {
-      return NextResponse.json({ error: "Wizard session not found" }, { status: 404 })
-    }
-
-    const wizardData = wizardResult[0]
     return NextResponse.json({
-      wizardSessionId: wizardData.id,
-      projectName: wizardData.project_name,
-      gender: wizardData.gender,
-      photos: wizardData.photos ? JSON.parse(wizardData.photos) : [],
+      success: true,
+      sessionId,
     })
   } catch (error) {
-    console.error("Get wizard data error:", error)
+    console.error("Error saving wizard data:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
-  }
-}
-
-export async function DELETE(request: NextRequest) {
-  try {
-    const session = await getServerSession(authOptions)
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
-
-    const { searchParams } = new URL(request.url)
-    const wizardSessionId = searchParams.get("wizardSessionId")
-
-    if (!wizardSessionId) {
-      return NextResponse.json({ error: "Wizard session ID required" }, { status: 400 })
-    }
-
-    // Get user ID
-    const userResult = await sql`
-      SELECT id FROM users WHERE email = ${session.user.email}
-    `
-
-    if (userResult.length === 0) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 })
-    }
-
-    const userId = userResult[0].id
-
-    // Delete wizard session
-    await sql`
-      DELETE FROM wizard_sessions 
-      WHERE id = ${wizardSessionId} AND user_id = ${userId}
-    `
-
-    return NextResponse.json({ success: true })
-  } catch (error) {
-    console.error("Delete wizard data error:", error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
-  }
-}
-
-// Export functions for use in other files
-export async function getWizardData(wizardSessionId: string, userEmail: string) {
-  try {
-    // Get user ID
-    const userResult = await sql`
-      SELECT id FROM users WHERE email = ${userEmail}
-    `
-
-    if (userResult.length === 0) {
-      throw new Error("User not found")
-    }
-
-    const userId = userResult[0].id
-
-    // Get wizard session data
-    const wizardResult = await sql`
-      SELECT * FROM wizard_sessions 
-      WHERE id = ${wizardSessionId} AND user_id = ${userId}
-    `
-
-    if (wizardResult.length === 0) {
-      return null
-    }
-
-    const wizardData = wizardResult[0]
-    return {
-      wizardSessionId: wizardData.id,
-      projectName: wizardData.project_name,
-      gender: wizardData.gender,
-      photos: wizardData.photos ? JSON.parse(wizardData.photos) : [],
-    }
-  } catch (error) {
-    console.error("Get wizard data error:", error)
-    return null
-  }
-}
-
-export async function deleteWizardData(wizardSessionId: string, userEmail: string) {
-  try {
-    // Get user ID
-    const userResult = await sql`
-      SELECT id FROM users WHERE email = ${userEmail}
-    `
-
-    if (userResult.length === 0) {
-      throw new Error("User not found")
-    }
-
-    const userId = userResult[0].id
-
-    // Delete wizard session
-    await sql`
-      DELETE FROM wizard_sessions 
-      WHERE id = ${wizardSessionId} AND user_id = ${userId}
-    `
-
-    return true
-  } catch (error) {
-    console.error("Delete wizard data error:", error)
-    return false
   }
 }
