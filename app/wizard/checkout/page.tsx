@@ -5,98 +5,90 @@ import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Badge } from "@/components/ui/badge"
-import { Loader2, CreditCard, Tag } from "lucide-react"
+import { ArrowLeft, CheckCircle, CreditCard, Sparkles } from "lucide-react"
+import Image from "next/image"
 
 export default function CheckoutPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
-  const [isLoading, setIsLoading] = useState(false)
-  const [couponCode, setCouponCode] = useState("")
-  const [couponApplied, setCouponApplied] = useState(false)
-  const [price, setPrice] = useState(29)
-  const [originalPrice] = useState(29)
+  const [loading, setLoading] = useState(false)
+  const [wizardData, setWizardData] = useState<any>(null)
 
   useEffect(() => {
     if (status === "loading") return
 
     if (!session) {
-      console.log("❌ No session, redirecting to welcome")
+      router.push("/auth/signin?callbackUrl=/wizard/welcome")
+      return
+    }
+
+    // Get wizard session ID
+    const wizardSessionId = sessionStorage.getItem("wizardSessionId")
+    if (!wizardSessionId) {
       router.push("/wizard/welcome")
       return
     }
 
-    // Check if wizard data exists
+    // Load wizard data
     const projectName = sessionStorage.getItem("projectName")
     const gender = sessionStorage.getItem("gender")
-    const uploadedPhotos = JSON.parse(sessionStorage.getItem("uploadedPhotos") || "[]")
-    const wizardSessionId = sessionStorage.getItem("wizardSessionId")
+    const uploadedPhotos = sessionStorage.getItem("uploadedPhotos")
 
-    if (!projectName || !gender || uploadedPhotos.length === 0 || !wizardSessionId) {
-      console.log("❌ Missing wizard data, redirecting to welcome")
+    if (!projectName || !gender || !uploadedPhotos) {
       router.push("/wizard/welcome")
       return
     }
+
+    setWizardData({
+      wizardSessionId,
+      projectName,
+      gender,
+      photos: JSON.parse(uploadedPhotos),
+    })
   }, [session, status, router])
 
-  const applyCoupon = () => {
-    if (couponCode.toLowerCase() === "save50" && !couponApplied) {
-      setPrice(Math.round(originalPrice * 0.5))
-      setCouponApplied(true)
-    }
-  }
-
-  const removeCoupon = () => {
-    setPrice(originalPrice)
-    setCouponApplied(false)
-    setCouponCode("")
-  }
-
   const handleCheckout = async () => {
-    if (!session?.user?.email) return
+    if (!wizardData) return
 
-    setIsLoading(true)
+    setLoading(true)
 
     try {
-      const wizardSessionId = sessionStorage.getItem("wizardSessionId")
-      const projectName = sessionStorage.getItem("projectName")
-      const gender = sessionStorage.getItem("gender")
-      const uploadedPhotos = JSON.parse(sessionStorage.getItem("uploadedPhotos") || "[]")
-
-      const response = await fetch("/api/stripe/create-checkout", {
+      const response = await fetch("/api/stripe/wizard-checkout", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          wizardSessionId,
-          projectName,
-          gender,
-          uploadedPhotos,
-          userEmail: session.user.email,
-          couponCode: couponApplied ? couponCode : null,
-          price: price,
+          wizardSessionId: wizardData.wizardSessionId,
+          projectName: wizardData.projectName,
+          gender: wizardData.gender,
+          photos: wizardData.photos,
         }),
       })
 
-      if (!response.ok) {
-        throw new Error("Failed to create checkout session")
-      }
+      const data = await response.json()
 
-      const { url } = await response.json()
-      console.log("✅ Redirecting to Stripe checkout:", url)
-      window.location.href = url
+      if (data.url) {
+        window.location.href = data.url
+      } else {
+        console.error("Checkout error:", data.error)
+        alert("Er is een fout opgetreden bij het maken van de checkout. Probeer het opnieuw.")
+      }
     } catch (error) {
-      console.error("❌ Checkout error:", error)
-      setIsLoading(false)
+      console.error("Checkout error:", error)
+      alert("Er is een fout opgetreden. Probeer het opnieuw.")
+    } finally {
+      setLoading(false)
     }
   }
 
-  if (status === "loading") {
+  const handleBack = () => {
+    router.push("/wizard/upload")
+  }
+
+  if (status === "loading" || !wizardData) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 to-indigo-100 flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#FF8C00]"></div>
       </div>
     )
@@ -107,108 +99,115 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="container mx-auto px-4 max-w-2xl">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">Betaling</h1>
-          <p className="text-lg text-gray-600">Voltooi je bestelling om je AI headshots te ontvangen</p>
-        </div>
-
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <CreditCard className="w-5 h-5" />
-              Bestelling Overzicht
-            </CardTitle>
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-indigo-100 flex items-center justify-center p-4">
+      <div className="w-full max-w-2xl">
+        <Card className="shadow-xl border-0">
+          <CardHeader className="text-center">
+            <div className="mx-auto mb-4 w-16 h-16 bg-gradient-to-r from-orange-600 to-orange-600 rounded-full flex items-center justify-center">
+              <Sparkles className="w-8 h-8 text-white" />
+            </div>
+            <CardTitle className="text-2xl font-bold text-gray-900">Klaar voor checkout!</CardTitle>
+            <p className="text-gray-600 mt-2">Controleer je bestelling en ga door naar betaling</p>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex justify-between items-center">
-              <span>40 AI Headshots</span>
-              <span className="font-semibold">€{originalPrice}</span>
-            </div>
+          <CardContent className="space-y-6">
+            {/* Order Summary */}
+            <div className="bg-gray-50 p-6 rounded-lg">
+              <h3 className="font-semibold text-gray-900 mb-4">Bestelling overzicht</h3>
 
-            {couponApplied && (
-              <div className="flex justify-between items-center text-green-600">
-                <div className="flex items-center gap-2">
-                  <Tag className="w-4 h-4" />
-                  <span>Korting ({couponCode})</span>
+              <div className="space-y-3">
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Project naam:</span>
+                  <span className="font-medium">{wizardData.projectName}</span>
                 </div>
-                <span className="font-semibold">-€{originalPrice - price}</span>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Geslacht:</span>
+                  <span className="font-medium capitalize">{wizardData.gender}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Aantal foto's:</span>
+                  <span className="font-medium">{wizardData.photos.length} geüpload</span>
+                </div>
+                <div className="border-t pt-3 mt-3">
+                  <div className="flex justify-between text-lg font-semibold">
+                    <span>Totaal:</span>
+                    <span className="text-orange-600">€29,00</span>
+                  </div>
+                </div>
               </div>
-            )}
-
-            <hr />
-
-            <div className="flex justify-between items-center text-lg font-bold">
-              <span>Totaal</span>
-              <span>€{price}</span>
             </div>
+
+            {/* What You Get */}
+            <div className="bg-green-50 p-6 rounded-lg">
+              <h3 className="font-semibold text-green-900 mb-4">Wat je krijgt:</h3>
+              <div className="space-y-2">
+                <div className="flex items-center">
+                  <CheckCircle className="w-5 h-5 text-green-600 mr-3" />
+                  <span className="text-green-800">40 professionele AI headshots</span>
+                </div>
+                <div className="flex items-center">
+                  <CheckCircle className="w-5 h-5 text-green-600 mr-3" />
+                  <span className="text-green-800">Hoge resolutie (1024x1024)</span>
+                </div>
+                <div className="flex items-center">
+                  <CheckCircle className="w-5 h-5 text-green-600 mr-3" />
+                  <span className="text-green-800">Klaar binnen 20 minuten</span>
+                </div>
+                <div className="flex items-center">
+                  <CheckCircle className="w-5 h-5 text-green-600 mr-3" />
+                  <span className="text-green-800">Direct downloadbaar</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Photo Preview */}
+            <div>
+              <h3 className="font-semibold text-gray-900 mb-3">Je geüploade foto's:</h3>
+              <div className="grid grid-cols-4 gap-2">
+                {wizardData.photos.slice(0, 8).map((photo: any, index: number) => (
+                  <div key={photo.id} className="aspect-square rounded-lg overflow-hidden bg-gray-100">
+                    <Image
+                      src={photo.preview || "/placeholder.svg"}
+                      alt={`Photo ${index + 1}`}
+                      width={100}
+                      height={100}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                ))}
+                {wizardData.photos.length > 8 && (
+                  <div className="aspect-square rounded-lg bg-gray-200 flex items-center justify-center">
+                    <span className="text-gray-600 text-sm">+{wizardData.photos.length - 8}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <Button onClick={handleBack} variant="outline" className="flex-1 py-3 bg-transparent" disabled={loading}>
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Terug
+              </Button>
+              <Button
+                onClick={handleCheckout}
+                disabled={loading}
+                className="flex-1 bg-gradient-to-r from-orange-600 to-orange-600 hover:from-orange-700 hover:to-orange-700 text-white py-3 text-lg font-semibold"
+              >
+                {loading ? (
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                ) : (
+                  <>
+                    <CreditCard className="mr-2 h-5 w-5" />
+                    Betaal €29 via Stripe
+                  </>
+                )}
+              </Button>
+            </div>
+
+            <p className="text-center text-sm text-gray-500">
+              Veilige betaling via Stripe • Geen abonnement • Direct downloadbaar
+            </p>
           </CardContent>
         </Card>
-
-        {/* Coupon Section */}
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Tag className="w-5 h-5" />
-              Kortingscode
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {!couponApplied ? (
-              <div className="flex gap-2">
-                <div className="flex-1">
-                  <Label htmlFor="coupon">Kortingscode</Label>
-                  <Input
-                    id="coupon"
-                    type="text"
-                    placeholder="Voer je kortingscode in"
-                    value={couponCode}
-                    onChange={(e) => setCouponCode(e.target.value)}
-                    className="mt-1"
-                  />
-                </div>
-                <div className="flex items-end">
-                  <Button onClick={applyCoupon} variant="outline" disabled={!couponCode.trim()}>
-                    Toepassen
-                  </Button>
-                </div>
-              </div>
-            ) : (
-              <div className="flex items-center justify-between bg-green-50 p-3 rounded-lg">
-                <div className="flex items-center gap-2">
-                  <Badge variant="secondary" className="bg-green-100 text-green-800">
-                    {couponCode}
-                  </Badge>
-                  <span className="text-green-700">Kortingscode toegepast!</span>
-                </div>
-                <Button onClick={removeCoupon} variant="ghost" size="sm" className="text-red-600">
-                  Verwijderen
-                </Button>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Checkout Button */}
-        <Button
-          onClick={handleCheckout}
-          disabled={isLoading}
-          className="w-full bg-[#FF8C00] hover:bg-[#FFA500] text-white py-4 text-lg font-semibold"
-        >
-          {isLoading ? (
-            <div className="flex items-center gap-2">
-              <Loader2 className="w-4 h-4 animate-spin" />
-              Bezig met laden...
-            </div>
-          ) : (
-            `Betaal €${price} - Start AI Training`
-          )}
-        </Button>
-
-        <p className="text-center text-sm text-gray-500 mt-4">
-          Veilige betaling via Stripe. Je foto's worden binnen 15 minuten verwerkt.
-        </p>
       </div>
     </div>
   )
