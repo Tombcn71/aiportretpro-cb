@@ -44,15 +44,9 @@ export async function POST(req: NextRequest) {
           quantity: 1,
         },
       ],
-      discounts: couponCode
-        ? [
-            {
-              coupon: couponCode,
-            },
-          ]
-        : undefined,
       mode: "payment",
       customer_email: userEmail,
+      allow_promotion_codes: true, // Enable coupon codes in Stripe
       success_url: `${process.env.NEXTAUTH_URL}/generate/processing?session_id={CHECKOUT_SESSION_ID}&wizard=true`,
       cancel_url: `${process.env.NEXTAUTH_URL}/wizard/checkout`,
       metadata: {
