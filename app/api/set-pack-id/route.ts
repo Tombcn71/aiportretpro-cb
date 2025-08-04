@@ -3,7 +3,7 @@ import { NextResponse } from "next/server"
 export async function POST() {
   try {
     // This endpoint helps you verify the pack ID is being used correctly
-    const packId = process.env.ASTRIA_PACK_ID || "928"
+    const packId = "928"
 
     return NextResponse.json({
       success: true,

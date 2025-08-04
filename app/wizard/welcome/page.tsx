@@ -1,84 +1,99 @@
 "use client"
 
-import { useState } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useEffect } from "react"
+import { useRouter } from "next/navigation"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { ArrowRight, CheckCircle } from "lucide-react"
-import Image from "next/image"
+import { ArrowRight, Sparkles, Clock, Shield } from "lucide-react"
 
-export default function WelcomePage() {
+export default function WizardWelcomePage() {
   const router = useRouter()
-  const searchParams = useSearchParams()
-  const [isLoading, setIsLoading] = useState(false)
 
-  const handleContinue = () => {
-    setIsLoading(true)
+  useEffect(() => {
+    // Generate unique session ID for this wizard flow
+    const sessionId = `wizard_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    localStorage.setItem("wizardSessionId", sessionId)
+  }, [])
+
+  const startWizard = () => {
     router.push("/wizard/project-name")
   }
 
-  // Headshot images for collage - reduced to 6 photos
-  const headshotImages = [
-    "/images/man1.jpg",
-    "/images/woman1.jpg",
-    "/images/man2.jpg",
-    "/images/woman2.jpg",
-    "/images/man3.jpg",
-    "/images/woman3.jpg",
-  ]
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white flex items-center justify-center p-4">
-      <div className="w-full max-w-2xl">
-        
-
-        <Card className="border-[#0077B5]/20 shadow-xl">
-          <CardContent className="p-6 md:p-8 text-center">
-            {/* Success Icon */}
-            <div className="flex justify-center mb-4">
-              <CheckCircle className="h-12 w-12 text-green-500" />
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
+      <div className="max-w-2xl mx-auto pt-8">
+        <Card className="shadow-xl">
+          <CardHeader className="text-center pb-6">
+            <div className="mx-auto w-16 h-16 bg-[#0077B5] rounded-full flex items-center justify-center mb-4">
+              <Sparkles className="w-8 h-8 text-white" />
             </div>
+            <CardTitle className="text-3xl font-bold text-gray-900 mb-2">Welkom bij AI Headshots</CardTitle>
+            <p className="text-lg text-gray-600">Maak professionele portretten in slechts 3 eenvoudige stappen</p>
+          </CardHeader>
 
-            {/* Welcome Text */}
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3">Welkom!</h1>
+          <CardContent className="space-y-6">
+            {/* Process Steps */}
+            <div className="grid gap-4">
+              <div className="flex items-center space-x-4 p-4 bg-blue-50 rounded-lg">
+                <div className="w-8 h-8 bg-[#0077B5] text-white rounded-full flex items-center justify-center font-bold">
+                  1
+                </div>
+                <div>
+                  <h3 className="font-semibold">Project Details</h3>
+                  <p className="text-sm text-gray-600">Geef je project een naam en kies je geslacht</p>
+                </div>
+              </div>
 
-            <p className="text-base text-gray-600 mb-6 max-w-xl mx-auto">
-              Je betaling is succesvol verwerkt. Laten we beginnen met het maken van je professionele headshots!
-            </p>
+              <div className="flex items-center space-x-4 p-4 bg-blue-50 rounded-lg">
+                <div className="w-8 h-8 bg-[#0077B5] text-white rounded-full flex items-center justify-center font-bold">
+                  2
+                </div>
+                <div>
+                  <h3 className="font-semibold">Upload Foto's</h3>
+                  <p className="text-sm text-gray-600">Upload 10-20 foto's van jezelf voor de beste resultaten</p>
+                </div>
+              </div>
 
-            {/* Headshot Collage - 2x3 grid with 6 photos */}
-            <div className="mb-6">
-              
-
-              <div className="grid grid-cols-3 gap-2 md:gap-3 max-w-md mx-auto">
-                {headshotImages.map((image, index) => (
-                  <div
-                    key={index}
-                    className="relative aspect-square rounded-md overflow-hidden shadow-sm border border-[#0077B5]/20 hover:border-[#0077B5]/40 transition-colors"
-                  >
-                    <Image
-                      src={image || "/placeholder.svg"}
-                      alt={`Professional headshot example ${index + 1}`}
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                ))}
+              <div className="flex items-center space-x-4 p-4 bg-blue-50 rounded-lg">
+                <div className="w-8 h-8 bg-[#0077B5] text-white rounded-full flex items-center justify-center font-bold">
+                  3
+                </div>
+                <div>
+                  <h3 className="font-semibold">Betaal & Ontvang</h3>
+                  <p className="text-sm text-gray-600">Betaal €29,99 en ontvang 40 professionele AI portretten</p>
+                </div>
               </div>
             </div>
 
-            
+            {/* Features */}
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <h3 className="font-semibold mb-3">Wat je krijgt:</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
+                <div className="flex items-center space-x-2">
+                  <Clock className="w-4 h-4 text-[#0077B5]" />
+                  <span>Klaar in 15 minuten</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Sparkles className="w-4 h-4 text-[#0077B5]" />
+                  <span>40 unieke portretten</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Shield className="w-4 h-4 text-[#0077B5]" />
+                  <span>100% privé & veilig</span>
+                </div>
+              </div>
+            </div>
 
-            {/* Continue Button */}
+            {/* CTA Button */}
             <Button
-              onClick={handleContinue}
-              disabled={isLoading}
-              size="lg"
-              className="bg-[#0077B5] hover:bg-[#004182] text-white px-6 py-3 text-base font-semibold"
+              onClick={startWizard}
+              className="w-full bg-[#0077B5] hover:bg-[#004182] text-white py-4 text-lg font-semibold"
             >
-              {isLoading ? "Laden..." : "Laten we beginnen"}
-              <ArrowRight className="ml-2 h-4 w-4" />
+              Start Nu - Maak Je Portretten
+              <ArrowRight className="ml-2 w-5 h-5" />
             </Button>
+
+            <p className="text-center text-sm text-gray-500">Geen abonnement • Eenmalige betaling • Direct resultaat</p>
           </CardContent>
         </Card>
       </div>

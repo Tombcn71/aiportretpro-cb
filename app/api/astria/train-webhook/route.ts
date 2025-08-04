@@ -42,9 +42,7 @@ export async function POST(request: NextRequest) {
     console.log(`🔍 Processing tune ${tuneId} with status: ${status}`)
 
     // Find project by tune_id
-    const projects = await sql`
-      SELECT * FROM projects WHERE tune_id = ${tuneId.toString()}
-    `
+    const projects = await sql`SELECT * FROM projects WHERE tune_id = ${tuneId.toString()}`
 
     if (projects.length === 0) {
       console.error(`❌ No project found for tune_id: ${tuneId}`)
@@ -77,7 +75,6 @@ export async function POST(request: NextRequest) {
           console.log(`📸 Found ${promptsData.length} prompts`)
 
           const allImageUrls: string[] = []
-
           for (const prompt of promptsData) {
             if (prompt.images && Array.isArray(prompt.images)) {
               for (const image of prompt.images) {
