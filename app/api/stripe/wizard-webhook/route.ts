@@ -1,25 +1,18 @@
 import { type NextRequest, NextResponse } from "next/server"
 import Stripe from "stripe"
-import { headers } from "next/headers"
-import { sql } from "@/lib/db"
-import { getWizardData, deleteWizardData } from "@/app/api/wizard/save-data/route"
+import { neon } from "@neondatabase/serverless"
+import { getWizardData, deleteWizardData } from "../../wizard/save-data/route"
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2024-06-20",
 })
 
-export async function POST(req: NextRequest) {
-  console.log("🔔 WIZARD WEBHOOK RECEIVED")
+const sql = neon(process.env.DATABASE_URL!)
 
+export async function POST(req: NextRequest) {
   try {
     const body = await req.text()
-    const headersList = await headers()
-    const signature = headersList.get("stripe-signature")
-
-    if (!signature) {
-      console.error("❌ No signature")
-      return NextResponse.json({ error: "No signature" }, { status: 400 })
-    }
+    const signature = req.headers.get("stripe-signature")!
 
     let event: Stripe.Event
 
@@ -30,146 +23,92 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid signature" }, { status: 400 })
     }
 
-    console.log("✅ Event type:", event.type)
+    console.log("🎯 Stripe webhook received:", event.type)
 
     if (event.type === "checkout.session.completed") {
-      const session = event.data.object as Stripe.CheckoutSession
+      const session = event.data.object as Stripe.Checkout.Session
 
-      console.log("💳 Processing checkout session:", session.id)
-      console.log("📋 Metadata:", session.metadata)
+      // Check if this is a wizard purchase
+      if (session.metadata?.type === "wizard_purchase") {
+        console.log("🧙‍♂️ Processing wizard purchase:", session.metadata)
 
-      if (session.metadata?.type === "wizard") {
-        const wizardSessionId = session.metadata.session_id
+        const wizardSessionId = session.metadata.wizard_session_id
+        const userEmail = session.metadata.user_email || session.customer_email
 
-        if (!wizardSessionId) {
-          console.error("❌ No wizard session ID in metadata")
-          return NextResponse.json({ error: "No wizard session ID" }, { status: 400 })
-        }
-
-        console.log("🧙‍♂️ Getting wizard data for session:", wizardSessionId)
-
-        // Get wizard data from memory
+        // Get wizard data
         const wizardData = getWizardData(wizardSessionId)
 
         if (!wizardData) {
-          console.error("❌ Wizard session not found:", wizardSessionId)
-          return NextResponse.json({ error: "Wizard session not found" }, { status: 400 })
+          console.error("❌ Wizard data not found for session:", wizardSessionId)
+          return NextResponse.json({ error: "Wizard data not found" }, { status: 404 })
         }
 
-        console.log("✅ Found wizard data:", {
-          projectName: wizardData.projectName,
-          gender: wizardData.gender,
-          photoCount: wizardData.uploadedPhotos.length,
-        })
-
-        // Get customer email from session
-        const customerEmail = session.customer_email || wizardData.userEmail
-
-        if (!customerEmail) {
-          console.error("❌ No customer email")
-          return NextResponse.json({ error: "No customer email" }, { status: 400 })
-        }
-
-        // Get or create user in existing users table
-        const userResult = await sql`
-          SELECT * FROM users WHERE email = ${customerEmail}
-        `
-
-        let user = userResult[0]
-        if (!user) {
-          // Create user if doesn't exist
-          const createUserResult = await sql`
-            INSERT INTO users (email, name, image, created_at, updated_at)
-            VALUES (${customerEmail}, '', '', NOW(), NOW())
-            RETURNING *
-          `
-          user = createUserResult[0]
-        }
-
-        console.log("👤 User:", user.id, user.email)
-
-        // Create purchase record in existing purchases table
-        const purchaseResult = await sql`
-          INSERT INTO purchases (user_id, stripe_session_id, plan_type, amount, headshots_included, status, created_at, updated_at)
-          VALUES (${user.id}, ${session.id}, 'professional', 1999, 40, 'completed', NOW(), NOW())
-          RETURNING *
-        `
-
-        const purchase = purchaseResult[0]
-        console.log("💰 Purchase created:", purchase.id)
-
-        // Create project in existing projects table
-        const projectResult = await sql`
-          INSERT INTO projects (
-            user_id,
-            purchase_id,
-            name,
-            gender,
-            uploaded_photos,
-            status,
-            created_at,
-            updated_at
-          )
-          VALUES (
-            ${user.id},
-            ${purchase.id},
-            ${wizardData.projectName},
-            ${wizardData.gender},
-            ${JSON.stringify(wizardData.uploadedPhotos)},
-            'training',
-            NOW(),
-            NOW()
-          )
-          RETURNING *
-        `
-
-        const project = projectResult[0]
-        console.log("✅ Project created:", project.id)
-
-        // Start Astria training with pack ID 928
         try {
-          const { createTuneWithPack } = await import("@/lib/astria")
+          // Create project in database
+          const projectResult = await sql`
+            INSERT INTO projects (
+              user_email,
+              name,
+              gender,
+              status,
+              stripe_session_id,
+              created_at,
+              updated_at
+            ) VALUES (
+              ${userEmail},
+              ${wizardData.projectName},
+              ${wizardData.gender},
+              'payment_completed',
+              ${session.id},
+              NOW(),
+              NOW()
+            )
+            RETURNING id
+          `
 
-          console.log("🚀 Starting Astria training with pack 928...")
+          const projectId = projectResult[0].id
+          console.log("✅ Project created with ID:", projectId)
 
-          const astriaResult = await createTuneWithPack("928", {
-            title: `${wizardData.projectName} - ${wizardData.gender}`,
-            name: `project_${project.id}_${Date.now()}`,
-            imageUrls: wizardData.uploadedPhotos,
-            projectId: project.id,
-            userId: user.id,
+          // Start Astria training
+          const astriaResponse = await fetch(`${process.env.NEXTAUTH_URL}/api/projects/create-with-pack`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              projectId,
+              projectName: wizardData.projectName,
+              gender: wizardData.gender,
+              uploadedPhotos: wizardData.uploadedPhotos,
+              userEmail,
+            }),
           })
 
-          console.log("🎯 Astria training started:", astriaResult.id)
+          if (astriaResponse.ok) {
+            console.log("✅ Astria training started for project:", projectId)
 
-          // Update project with tune_id
-          await sql`
-            UPDATE projects 
-            SET tune_id = ${astriaResult.id}, updated_at = NOW()
-            WHERE id = ${project.id}
-          `
+            // Update project status
+            await sql`
+              UPDATE projects 
+              SET status = 'training_started', updated_at = NOW()
+              WHERE id = ${projectId}
+            `
+          } else {
+            console.error("❌ Failed to start Astria training")
+          }
 
-          console.log("✅ Project updated with tune_id:", astriaResult.id)
-
-          // Clean up wizard session from memory
+          // Clean up wizard data
           deleteWizardData(wizardSessionId)
 
-          console.log("🎉 Wizard flow completed successfully!")
-        } catch (astriaError) {
-          console.error("❌ Error starting Astria training:", astriaError)
-
-          await sql`
-            UPDATE projects 
-            SET status = 'failed', updated_at = NOW()
-            WHERE id = ${project.id}
-          `
+          console.log("🎉 Wizard purchase completed successfully")
+        } catch (error) {
+          console.error("❌ Error processing wizard purchase:", error)
+          return NextResponse.json({ error: "Processing failed" }, { status: 500 })
         }
       }
     }
 
     return NextResponse.json({ received: true })
   } catch (error) {
-    console.error("❌ Wizard webhook error:", error)
+    console.error("❌ Webhook error:", error)
     return NextResponse.json({ error: "Webhook failed" }, { status: 500 })
   }
 }
