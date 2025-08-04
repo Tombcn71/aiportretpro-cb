@@ -1,119 +1,124 @@
 import { type NextRequest, NextResponse } from "next/server"
-import Stripe from "stripe"
-import { neon } from "@neondatabase/serverless"
-import { createTuneWithPack } from "@/lib/astria"
+import { sql } from "@/lib/db"
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2024-06-20",
-})
+async function getStripe() {
+  const { stripe } = await import("@/lib/stripe")
+  return stripe
+}
 
-const sql = neon(process.env.DATABASE_URL!)
-const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET!
+export async function POST(request: NextRequest) {
+  console.log("🔔 WEBHOOK RECEIVED at", new Date().toISOString())
 
-export async function POST(req: NextRequest) {
-  const body = await req.text()
-  const sig = req.headers.get("stripe-signature")!
+  const body = await request.text()
+  const signature = request.headers.get("stripe-signature")
 
-  let event: Stripe.Event
+  if (!signature) {
+    console.log("❌ No signature")
+    return NextResponse.json({ error: "No signature" }, { status: 400 })
+  }
+
+  if (!process.env.STRIPE_WEBHOOK_SECRET) {
+    console.log("❌ No webhook secret")
+    return NextResponse.json({ error: "Webhook secret not configured" }, { status: 500 })
+  }
 
   try {
-    event = stripe.webhooks.constructEvent(body, sig, endpointSecret)
-  } catch (err) {
-    console.error("❌ Webhook signature verification failed:", err)
-    return NextResponse.json({ error: "Webhook signature verification failed" }, { status: 400 })
-  }
+    const stripe = await getStripe()
+    const event = stripe.webhooks.constructEvent(body, signature, process.env.STRIPE_WEBHOOK_SECRET!)
 
-  console.log("🎯 Stripe webhook event:", event.type)
+    console.log("✅ Event type:", event.type)
 
-  if (event.type === "checkout.session.completed") {
-    const session = event.data.object as Stripe.Checkout.Session
+    if (event.type === "checkout.session.completed") {
+      const session = event.data.object
+      console.log("💳 Processing checkout session:", session.id)
 
-    console.log("💳 Payment completed:", {
-      sessionId: session.id,
-      customerEmail: session.customer_email,
-      metadata: session.metadata,
-    })
-
-    try {
-      const { wizardSessionId, projectName, gender, userEmail } = session.metadata!
-
-      // Get wizard data from database
-      const wizardResult = await sql`
-        SELECT uploaded_photos FROM wizard_sessions 
-        WHERE id = ${wizardSessionId} AND expires_at > CURRENT_TIMESTAMP
+      // Find and update the purchase
+      const purchaseResult = await sql`
+        UPDATE purchases 
+        SET status = 'completed', updated_at = CURRENT_TIMESTAMP
+        WHERE stripe_session_id = ${session.id}
+        RETURNING user_id, id
       `
 
-      if (wizardResult.length === 0) {
-        console.error("❌ No wizard data found for session:", wizardSessionId)
-        return NextResponse.json({ error: "Wizard data not found" }, { status: 400 })
+      if (purchaseResult[0]) {
+        const userId = purchaseResult[0].user_id
+        console.log(`👤 Adding credit for user ${userId}`)
+
+        // Add 1 credit - using INSERT with proper conflict handling
+        try {
+          const creditResult = await sql`
+            INSERT INTO credits (user_id, credits, created_at, updated_at)
+            VALUES (${userId}, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+            ON CONFLICT (user_id) 
+            DO UPDATE SET 
+              credits = credits.credits + 1,
+              updated_at = CURRENT_TIMESTAMP
+            RETURNING credits
+          `
+
+          console.log(`✅ User ${userId} now has ${creditResult[0]?.credits} credits`)
+
+          return NextResponse.json({
+            received: true,
+            userId,
+            creditsAdded: 1,
+            totalCredits: creditResult[0]?.credits,
+          })
+        } catch (creditError) {
+          console.error("❌ Credit error:", creditError)
+
+          // Fallback: try to update existing or create new
+          const existingCredit = await sql`
+            SELECT credits FROM credits WHERE user_id = ${userId}
+          `
+
+          if (existingCredit[0]) {
+            // Update existing
+            const updateResult = await sql`
+              UPDATE credits 
+              SET credits = credits + 1, updated_at = CURRENT_TIMESTAMP
+              WHERE user_id = ${userId}
+              RETURNING credits
+            `
+            console.log(`✅ Updated credits for user ${userId}: ${updateResult[0]?.credits}`)
+
+            return NextResponse.json({
+              received: true,
+              userId,
+              creditsAdded: 1,
+              totalCredits: updateResult[0]?.credits,
+            })
+          } else {
+            // Create new
+            const newCredit = await sql`
+              INSERT INTO credits (user_id, credits, created_at, updated_at)
+              VALUES (${userId}, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+              RETURNING credits
+            `
+            console.log(`✅ Created new credits for user ${userId}: ${newCredit[0]?.credits}`)
+
+            return NextResponse.json({
+              received: true,
+              userId,
+              creditsAdded: 1,
+              totalCredits: newCredit[0]?.credits,
+            })
+          }
+        }
+      } else {
+        console.log("❌ No purchase found for session:", session.id)
       }
-
-      const uploadedPhotos = wizardResult[0].uploaded_photos
-
-      console.log("🎨 Creating project after payment:", {
-        projectName,
-        gender,
-        userEmail,
-        photoCount: uploadedPhotos?.length,
-      })
-
-      // Find or create user
-      let user = await sql`
-        SELECT id FROM users WHERE email = ${userEmail}
-      `
-
-      if (user.length === 0) {
-        const newUser = await sql`
-          INSERT INTO users (email, name, created_at)
-          VALUES (${userEmail}, ${userEmail.split("@")[0]}, CURRENT_TIMESTAMP)
-          RETURNING id
-        `
-        user = newUser
-      }
-
-      const userId = user[0].id
-
-      // Create project
-      const project = await sql`
-        INSERT INTO projects (user_id, name, gender, uploaded_photos, status, created_at)
-        VALUES (${userId}, ${projectName}, ${gender}, ${JSON.stringify(uploadedPhotos)}, 'training', CURRENT_TIMESTAMP)
-        RETURNING id
-      `
-
-      const projectId = project[0].id
-
-      console.log("✅ Project created:", projectId)
-
-      // Start Astria training with pack 928
-      const packId = "928"
-      const tuneResult = await createTuneWithPack(packId, {
-        title: `${projectName}_${projectId}`,
-        name: gender,
-        imageUrls: uploadedPhotos,
-        projectId: projectId,
-        userId: userId,
-      })
-
-      // Update project with tune ID
-      await sql`
-        UPDATE projects 
-        SET tune_id = ${tuneResult.id.toString()}, status = 'training'
-        WHERE id = ${projectId}
-      `
-
-      console.log("🚀 Astria training started:", tuneResult.id)
-
-      // Clean up wizard data
-      await sql`
-        DELETE FROM wizard_sessions WHERE id = ${wizardSessionId}
-      `
-
-      return NextResponse.json({ success: true })
-    } catch (error) {
-      console.error("❌ Error processing payment:", error)
-      return NextResponse.json({ error: "Failed to process payment" }, { status: 500 })
     }
-  }
 
-  return NextResponse.json({ received: true })
+    return NextResponse.json({ received: true })
+  } catch (error) {
+    console.error("❌ Webhook error:", error)
+    return NextResponse.json(
+      {
+        error: "Webhook error",
+        details: error instanceof Error ? error.message : "Unknown error",
+      },
+      { status: 400 },
+    )
+  }
 }

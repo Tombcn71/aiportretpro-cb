@@ -1,137 +1,86 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { useSession } from "next-auth/react"
-import { useRouter } from "next/navigation"
+import { useState } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
+import { ArrowRight, CheckCircle } from "lucide-react"
 import Image from "next/image"
 
-export default function WizardWelcomePage() {
-  const { data: session, status } = useSession()
+export default function WelcomePage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [isLoading, setIsLoading] = useState(false)
 
-  useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/wizard/login")
-    }
-  }, [status, router])
-
-  const handleStartPhotoshoot = async () => {
+  const handleContinue = () => {
     setIsLoading(true)
-
-    try {
-      // Initialize wizard session
-      const response = await fetch("/api/wizard/save-data", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          step: "welcome",
-          data: {
-            userId: session?.user?.email,
-            startedAt: new Date().toISOString(),
-          },
-        }),
-      })
-
-      if (response.ok) {
-        router.push("/wizard/project-name")
-      }
-    } catch (error) {
-      console.error("Error starting wizard:", error)
-    } finally {
-      setIsLoading(false)
-    }
+    router.push("/wizard/project-name")
   }
 
-  if (status === "loading") {
-    return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#FF8C00]"></div>
-      </div>
-    )
-  }
+  // Headshot images for collage - reduced to 6 photos
+  const headshotImages = [
+    "/images/man1.jpg",
+    "/images/woman1.jpg",
+    "/images/man2.jpg",
+    "/images/woman2.jpg",
+    "/images/man3.jpg",
+    "/images/woman3.jpg",
+  ]
 
   return (
-    <div className="min-h-screen bg-white flex flex-col items-center justify-center px-4">
-      <div className="w-full max-w-4xl text-center">
-        {/* Title */}
-        <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-4 leading-tight">
-          Welkom bij onze portretfoto generator
-        </h1>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white flex items-center justify-center p-4">
+      <div className="w-full max-w-2xl">
+        
 
-        {/* Subtitle */}
-        <p className="text-lg md:text-xl text-gray-600 mb-4 max-w-3xl mx-auto leading-relaxed">
-          Onze AI tovert jou gewone foto's om in professionele portretfoto's.
-        </p>
-        <p className="text-lg md:text-xl text-gray-600 mb-12 max-w-3xl mx-auto leading-relaxed">
-          Perfect voor LinkedIn, Social Media, CV, Website en Print
-        </p>
-
-        {/* Photo Grid */}
-        <div className="grid grid-cols-2 gap-4 max-w-2xl mx-auto mb-12">
-          <div className="aspect-[3/4] rounded-lg overflow-hidden bg-gray-100 shadow-lg">
-            <Image
-              src="/images/professional-man-1.jpg"
-              alt="Professional headshot man"
-              width={300}
-              height={400}
-              className="w-full h-full object-cover brightness-110 contrast-105"
-            />
-          </div>
-          <div className="aspect-[3/4] rounded-lg overflow-hidden bg-gray-100 shadow-lg">
-            <Image
-              src="/images/professional-woman-1.jpg"
-              alt="Professional headshot woman"
-              width={300}
-              height={400}
-              className="w-full h-full object-cover brightness-110 contrast-105"
-            />
-          </div>
-          <div className="aspect-[3/4] rounded-lg overflow-hidden bg-gray-100 shadow-lg">
-            <Image
-              src="/images/professional-woman-2.jpg"
-              alt="Professional headshot woman"
-              width={300}
-              height={400}
-              className="w-full h-full object-cover brightness-110 contrast-105"
-            />
-          </div>
-          <div className="aspect-[3/4] rounded-lg overflow-hidden bg-gray-100 shadow-lg">
-            <Image
-              src="/images/professional-man-2.jpg"
-              alt="Professional headshot man"
-              width={300}
-              height={400}
-              className="w-full h-full object-cover brightness-110 contrast-105"
-            />
-          </div>
-        </div>
-
-        {/* Start Button */}
-        <Button
-          onClick={handleStartPhotoshoot}
-          disabled={isLoading}
-          className="bg-[#FF8C00] hover:bg-[#E67E00] text-white px-12 py-4 text-xl font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-200"
-        >
-          {isLoading ? (
-            <div className="flex items-center gap-2">
-              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-              Bezig...
+        <Card className="border-[#0077B5]/20 shadow-xl">
+          <CardContent className="p-6 md:p-8 text-center">
+            {/* Success Icon */}
+            <div className="flex justify-center mb-4">
+              <CheckCircle className="h-12 w-12 text-green-500" />
             </div>
-          ) : (
-            "begin fotoshoot"
-          )}
-        </Button>
 
-        {/* Welcome Message */}
-        {session?.user?.name && (
-          <p className="text-gray-600 mt-6">
-            Welkom, {session.user.name}! Laten we beginnen met het maken van jouw professionele portretfoto's.
-          </p>
-        )}
+            {/* Welcome Text */}
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3">Welkom!</h1>
+
+            <p className="text-base text-gray-600 mb-6 max-w-xl mx-auto">
+              Je betaling is succesvol verwerkt. Laten we beginnen met het maken van je professionele headshots!
+            </p>
+
+            {/* Headshot Collage - 2x3 grid with 6 photos */}
+            <div className="mb-6">
+              
+
+              <div className="grid grid-cols-3 gap-2 md:gap-3 max-w-md mx-auto">
+                {headshotImages.map((image, index) => (
+                  <div
+                    key={index}
+                    className="relative aspect-square rounded-md overflow-hidden shadow-sm border border-[#0077B5]/20 hover:border-[#0077B5]/40 transition-colors"
+                  >
+                    <Image
+                      src={image || "/placeholder.svg"}
+                      alt={`Professional headshot example ${index + 1}`}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            
+
+            {/* Continue Button */}
+            <Button
+              onClick={handleContinue}
+              disabled={isLoading}
+              size="lg"
+              className="bg-[#0077B5] hover:bg-[#004182] text-white px-6 py-3 text-base font-semibold"
+            >
+              {isLoading ? "Laden..." : "Laten we beginnen"}
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     </div>
   )
