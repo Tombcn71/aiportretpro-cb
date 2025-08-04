@@ -11,7 +11,7 @@ import { PricingSection } from "@/components/pricing-section"
 import { AIHeadshotsShowcase } from "@/components/ai-headshots-showcase"
 import { FloatingCTAButton } from "@/components/floating-cta-button"
 import DiscountPopup from "@/components/discount-popup"
-import { PromoBanner } from "@/components/promo-banner"
+import  PromoBanner from "@/components/promo-banner"
 import { Facebook, Instagram, Linkedin } from "lucide-react"
 
 const galleryPhotos = [
