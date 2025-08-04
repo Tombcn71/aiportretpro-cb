@@ -1,53 +1,84 @@
 "use client"
 
+import type React from "react"
+
 import { useState, useEffect, useCallback } from "react"
 import { useRouter } from "next/navigation"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { useSession } from "next-auth/react"
 import { Button } from "@/components/ui/button"
-import { ArrowRight, ArrowLeft, Upload, X, Check, AlertCircle } from "lucide-react"
-import { useDropzone } from "react-dropzone"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { ArrowRight, ArrowLeft, Upload, X, AlertCircle } from "lucide-react"
+import Link from "next/link"
+import Image from "next/image"
 
-export default function WizardUploadPage() {
+export default function WizardUpload() {
+  const router = useRouter()
+  const { data: session, status } = useSession()
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([])
   const [uploadedUrls, setUploadedUrls] = useState<string[]>([])
   const [isUploading, setIsUploading] = useState(false)
-  const [uploadProgress, setUploadProgress] = useState<{ [key: string]: number }>({})
-  const router = useRouter()
+  const [isLoading, setIsLoading] = useState(false)
+  const [dragActive, setDragActive] = useState(false)
 
   useEffect(() => {
-    // Load existing data if available
-    const savedData = localStorage.getItem("wizardData")
-    if (savedData) {
-      const data = JSON.parse(savedData)
-      if (data.uploadedPhotos) {
-        setUploadedUrls(data.uploadedPhotos)
+    if (status === "loading") return
+
+    if (!session) {
+      router.push("/login?callbackUrl=/wizard/upload")
+      return
+    }
+
+    // Load saved photos from localStorage
+    const savedUrls = localStorage.getItem("wizard_uploaded_photos")
+    if (savedUrls) {
+      try {
+        setUploadedUrls(JSON.parse(savedUrls))
+      } catch (error) {
+        console.error("Error loading saved photos:", error)
       }
+    }
+  }, [session, status, router])
+
+  const handleDrag = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setDragActive(true)
+    } else if (e.type === "dragleave") {
+      setDragActive(false)
     }
   }, [])
 
-  const onDrop = useCallback((acceptedFiles: File[]) => {
-    const newFiles = acceptedFiles.filter((file) => file.type.startsWith("image/") && file.size <= 10 * 1024 * 1024)
-    setUploadedFiles((prev) => [...prev, ...newFiles])
-    uploadFiles(newFiles)
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setDragActive(false)
+
+    const files = Array.from(e.dataTransfer.files).filter((file) => file.type.startsWith("image/"))
+
+    if (files.length > 0) {
+      handleFiles(files)
+    }
   }, [])
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
-    accept: {
-      "image/*": [".jpeg", ".jpg", ".png", ".webp"],
-    },
-    multiple: true,
-    maxSize: 10 * 1024 * 1024,
-  })
+  const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const files = Array.from(e.target.files)
+      handleFiles(files)
+    }
+  }
 
-  const uploadFiles = async (files: File[]) => {
+  const handleFiles = async (files: File[]) => {
+    if (uploadedFiles.length + files.length > 20) {
+      alert("Je kunt maximaal 20 foto's uploaden")
+      return
+    }
+
     setIsUploading(true)
     const newUrls: string[] = []
 
-    for (const file of files) {
-      try {
-        setUploadProgress((prev) => ({ ...prev, [file.name]: 0 }))
-
+    try {
+      for (const file of files) {
         const formData = new FormData()
         formData.append("file", file)
 
@@ -57,128 +88,151 @@ export default function WizardUploadPage() {
         })
 
         if (response.ok) {
-          const { url } = await response.json()
-          newUrls.push(url)
-          setUploadProgress((prev) => ({ ...prev, [file.name]: 100 }))
+          const data = await response.json()
+          newUrls.push(data.url)
         } else {
-          console.error("Upload failed for", file.name)
+          console.error("Upload failed for file:", file.name)
         }
-      } catch (error) {
-        console.error("Upload error:", error)
       }
+
+      const updatedFiles = [...uploadedFiles, ...files]
+      const updatedUrls = [...uploadedUrls, ...newUrls]
+
+      setUploadedFiles(updatedFiles)
+      setUploadedUrls(updatedUrls)
+
+      // Save to localStorage
+      localStorage.setItem("wizard_uploaded_photos", JSON.stringify(updatedUrls))
+    } catch (error) {
+      console.error("Error uploading files:", error)
+      alert("Er ging iets mis bij het uploaden. Probeer het opnieuw.")
+    } finally {
+      setIsUploading(false)
+    }
+  }
+
+  const removePhoto = (index: number) => {
+    const newFiles = uploadedFiles.filter((_, i) => i !== index)
+    const newUrls = uploadedUrls.filter((_, i) => i !== index)
+
+    setUploadedFiles(newFiles)
+    setUploadedUrls(newUrls)
+
+    localStorage.setItem("wizard_uploaded_photos", JSON.stringify(newUrls))
+  }
+
+  const handleContinue = async () => {
+    if (uploadedUrls.length < 6) {
+      alert("Upload minimaal 6 foto's voor het beste resultaat")
+      return
     }
 
-    setUploadedUrls((prev) => [...prev, ...newUrls])
-    setIsUploading(false)
-  }
+    setIsLoading(true)
 
-  const removeFile = (index: number) => {
-    setUploadedFiles((prev) => prev.filter((_, i) => i !== index))
-    setUploadedUrls((prev) => prev.filter((_, i) => i !== index))
-  }
+    try {
+      // Save all wizard data to localStorage
+      const wizardData = {
+        projectName: localStorage.getItem("wizard_project_name"),
+        gender: localStorage.getItem("wizard_gender"),
+        uploadedPhotos: uploadedUrls,
+      }
 
-  const handleNext = () => {
-    if (uploadedUrls.length < 10) return
+      localStorage.setItem("wizard_data", JSON.stringify(wizardData))
 
-    // Save data to localStorage
-    const existingData = localStorage.getItem("wizardData")
-    const data = existingData ? JSON.parse(existingData) : {}
-
-    const updatedData = {
-      ...data,
-      uploadedPhotos: uploadedUrls,
-      step: "upload",
+      // Navigate to checkout
+      router.push("/wizard/checkout")
+    } catch (error) {
+      console.error("Error saving data:", error)
+      alert("Er ging iets mis. Probeer het opnieuw.")
+    } finally {
+      setIsLoading(false)
     }
-
-    localStorage.setItem("wizardData", JSON.stringify(updatedData))
-    router.push("/wizard/checkout")
   }
 
-  const handleBack = () => {
-    router.push("/wizard/gender")
+  if (status === "loading") {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#0077B5]"></div>
+      </div>
+    )
+  }
+
+  if (!session) {
+    return null
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
-      <div className="max-w-4xl mx-auto pt-8">
-        {/* Progress Bar */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-[#0077B5]">Stap 3 van 3</span>
-            <span className="text-sm text-gray-500">Upload Foto's</span>
-          </div>
-          <div className="w-full bg-gray-200 rounded-full h-2">
-            <div className="bg-[#0077B5] h-2 rounded-full" style={{ width: "100%" }}></div>
-          </div>
-        </div>
-
-        <Card className="shadow-xl">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white p-4">
+      <div className="max-w-4xl mx-auto">
+        <Card>
           <CardHeader className="text-center">
             <CardTitle className="text-2xl font-bold text-gray-900">Upload je foto's</CardTitle>
-            <p className="text-gray-600">
-              Upload 10-20 foto's voor de beste resultaten. Meer foto's = betere AI portretten.
-            </p>
+            <p className="text-gray-600">Upload minimaal 6 foto's voor het beste resultaat (max 20)</p>
           </CardHeader>
 
           <CardContent className="space-y-6">
-            {/* Upload Status */}
-            <div className="flex items-center justify-between bg-gray-50 p-4 rounded-lg">
-              <div className="flex items-center space-x-2">
-                {uploadedUrls.length >= 10 ? (
-                  <Check className="w-5 h-5 text-green-600" />
-                ) : (
-                  <AlertCircle className="w-5 h-5 text-orange-500" />
-                )}
-                <span className="font-medium">{uploadedUrls.length} van minimaal 10 foto's geüpload</span>
-              </div>
-              {uploadedUrls.length >= 10 && <span className="text-green-600 font-medium">Klaar voor training!</span>}
-            </div>
-
             {/* Upload Area */}
             <div
-              {...getRootProps()}
-              className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${
-                isDragActive ? "border-[#0077B5] bg-blue-50" : "border-gray-300 hover:border-gray-400"
+              className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+                dragActive ? "border-[#0077B5] bg-blue-50" : "border-gray-300 hover:border-gray-400"
               }`}
+              onDragEnter={handleDrag}
+              onDragLeave={handleDrag}
+              onDragOver={handleDrag}
+              onDrop={handleDrop}
             >
-              <input {...getInputProps()} />
-              <Upload className="mx-auto w-12 h-12 text-gray-400 mb-4" />
-              {isDragActive ? (
-                <p className="text-lg text-[#0077B5]">Sleep je foto's hier...</p>
-              ) : (
-                <div>
-                  <p className="text-lg font-medium mb-2">Sleep foto's hier of klik om te selecteren</p>
-                  <p className="text-sm text-gray-500">JPG, PNG, WebP tot 10MB per foto</p>
-                </div>
-              )}
+              <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+              <p className="text-lg font-semibold text-gray-900 mb-2">Sleep foto's hierheen of klik om te uploaden</p>
+              <p className="text-gray-600 mb-4">Ondersteunde formaten: JPG, PNG, WEBP</p>
+              <input
+                type="file"
+                multiple
+                accept="image/*"
+                onChange={handleFileInput}
+                className="hidden"
+                id="file-upload"
+              />
+              <Button asChild variant="outline">
+                <label htmlFor="file-upload" className="cursor-pointer">
+                  Selecteer Foto's
+                </label>
+              </Button>
             </div>
 
-            {/* Photo Guidelines */}
+            {/* Tips */}
             <div className="bg-blue-50 p-4 rounded-lg">
-              <h3 className="font-semibold mb-2">Tips voor de beste resultaten:</h3>
-              <ul className="text-sm space-y-1 text-gray-700">
-                <li>• Upload 10-20 foto's van verschillende hoeken</li>
-                <li>• Zorg voor goede belichting en scherpte</li>
-                <li>• Varieer in gezichtsuitdrukkingen en poses</li>
-                <li>• Vermijd zonnebrillen, hoeden of filters</li>
-                <li>• Gebruik foto's waar je gezicht duidelijk zichtbaar is</li>
-              </ul>
+              <div className="flex items-start gap-3">
+                <AlertCircle className="w-5 h-5 text-[#0077B5] mt-0.5 flex-shrink-0" />
+                <div>
+                  <h4 className="font-semibold text-gray-900 mb-2">Tips voor de beste resultaten:</h4>
+                  <ul className="text-sm text-gray-700 space-y-1">
+                    <li>• Upload foto's met goede belichting</li>
+                    <li>• Zorg dat je gezicht duidelijk zichtbaar is</li>
+                    <li>• Gebruik verschillende poses en achtergronden</li>
+                    <li>• Vermijd groepsfoto's of foto's met zonnebrillen</li>
+                  </ul>
+                </div>
+              </div>
             </div>
 
             {/* Uploaded Photos Grid */}
             {uploadedUrls.length > 0 && (
               <div>
-                <h3 className="font-semibold mb-3">Geüploade foto's ({uploadedUrls.length})</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Geüploade foto's ({uploadedUrls.length})</h3>
                 <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
                   {uploadedUrls.map((url, index) => (
                     <div key={index} className="relative group">
-                      <img
-                        src={url || "/placeholder.svg"}
-                        alt={`Upload ${index + 1}`}
-                        className="w-full h-24 object-cover rounded-lg"
-                      />
+                      <div className="aspect-square rounded-lg overflow-hidden bg-gray-100">
+                        <Image
+                          src={url || "/placeholder.svg"}
+                          alt={`Upload ${index + 1}`}
+                          width={150}
+                          height={150}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
                       <button
-                        onClick={() => removeFile(index)}
+                        onClick={() => removePhoto(index)}
                         className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                       >
                         <X className="w-4 h-4" />
@@ -189,47 +243,38 @@ export default function WizardUploadPage() {
               </div>
             )}
 
-            {/* Upload Progress */}
+            {/* Loading State */}
             {isUploading && (
-              <div className="space-y-2">
-                <p className="font-medium">Uploaden...</p>
-                {Object.entries(uploadProgress).map(([filename, progress]) => (
-                  <div key={filename} className="space-y-1">
-                    <div className="flex justify-between text-sm">
-                      <span className="truncate">{filename}</span>
-                      <span>{progress}%</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div
-                        className="bg-[#0077B5] h-2 rounded-full transition-all"
-                        style={{ width: `${progress}%` }}
-                      ></div>
-                    </div>
-                  </div>
-                ))}
+              <div className="text-center py-4">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0077B5] mx-auto mb-2"></div>
+                <p className="text-gray-600">Foto's uploaden...</p>
               </div>
             )}
 
             {/* Navigation */}
-            <div className="flex justify-between pt-4">
-              <Button
-                variant="outline"
-                onClick={handleBack}
-                className="flex items-center bg-transparent"
-                disabled={isUploading}
-              >
-                <ArrowLeft className="mr-2 w-4 h-4" />
-                Terug
+            <div className="flex gap-3">
+              <Button variant="outline" asChild className="flex-1 bg-transparent">
+                <Link href="/wizard/gender">
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  Terug
+                </Link>
               </Button>
 
               <Button
-                onClick={handleNext}
-                disabled={uploadedUrls.length < 10 || isUploading}
-                className="bg-[#0077B5] hover:bg-[#004182] text-white flex items-center"
+                onClick={handleContinue}
+                disabled={uploadedUrls.length < 6 || isLoading}
+                className="flex-1 bg-[#FF8C00] hover:bg-[#FFA500] text-white"
               >
-                Naar Betaling
-                <ArrowRight className="ml-2 w-4 h-4" />
+                {isLoading ? "Bezig..." : "Naar Betaling"}
+                <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
+            </div>
+
+            <div className="text-center">
+              <p className="text-sm text-gray-500">Stap 3 van 3</p>
+              <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
+                <div className="bg-[#0077B5] h-2 rounded-full w-full"></div>
+              </div>
             </div>
           </CardContent>
         </Card>

@@ -2,101 +2,100 @@
 
 import { useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { useSession } from "next-auth/react"
 import { Button } from "@/components/ui/button"
-import { ArrowRight, Sparkles, Clock, Shield } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { ArrowRight, Sparkles, Camera, Clock } from "lucide-react"
+import Link from "next/link"
 
-export default function WizardWelcomePage() {
+export default function WizardWelcome() {
   const router = useRouter()
+  const { data: session, status } = useSession()
 
   useEffect(() => {
-    // Generate unique session ID for this wizard flow
-    const sessionId = `wizard_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-    localStorage.setItem("wizardSessionId", sessionId)
-  }, [])
+    if (status === "loading") return
 
-  const startWizard = () => {
-    router.push("/wizard/project-name")
+    if (!session) {
+      router.push("/login?callbackUrl=/wizard/welcome")
+      return
+    }
+  }, [session, status, router])
+
+  if (status === "loading") {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#0077B5]"></div>
+      </div>
+    )
+  }
+
+  if (!session) {
+    return null
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
-      <div className="max-w-2xl mx-auto pt-8">
-        <Card className="shadow-xl">
-          <CardHeader className="text-center pb-6">
-            <div className="mx-auto w-16 h-16 bg-[#0077B5] rounded-full flex items-center justify-center mb-4">
-              <Sparkles className="w-8 h-8 text-white" />
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white flex items-center justify-center p-4">
+      <Card className="w-full max-w-2xl">
+        <CardHeader className="text-center">
+          <div className="mx-auto mb-4 w-16 h-16 bg-[#0077B5] rounded-full flex items-center justify-center">
+            <Sparkles className="w-8 h-8 text-white" />
+          </div>
+          <CardTitle className="text-3xl font-bold text-gray-900">Welkom bij AI Portret Pro!</CardTitle>
+          <p className="text-lg text-gray-600 mt-2">Laten we samen jouw professionele AI-portretten maken</p>
+        </CardHeader>
+
+        <CardContent className="space-y-6">
+          <div className="grid md:grid-cols-3 gap-4">
+            <div className="text-center p-4">
+              <Camera className="w-8 h-8 text-[#0077B5] mx-auto mb-2" />
+              <h3 className="font-semibold text-gray-900">Upload Foto's</h3>
+              <p className="text-sm text-gray-600">Minimaal 6 foto's voor beste resultaat</p>
             </div>
-            <CardTitle className="text-3xl font-bold text-gray-900 mb-2">Welkom bij AI Headshots</CardTitle>
-            <p className="text-lg text-gray-600">Maak professionele portretten in slechts 3 eenvoudige stappen</p>
-          </CardHeader>
-
-          <CardContent className="space-y-6">
-            {/* Process Steps */}
-            <div className="grid gap-4">
-              <div className="flex items-center space-x-4 p-4 bg-blue-50 rounded-lg">
-                <div className="w-8 h-8 bg-[#0077B5] text-white rounded-full flex items-center justify-center font-bold">
-                  1
-                </div>
-                <div>
-                  <h3 className="font-semibold">Project Details</h3>
-                  <p className="text-sm text-gray-600">Geef je project een naam en kies je geslacht</p>
-                </div>
-              </div>
-
-              <div className="flex items-center space-x-4 p-4 bg-blue-50 rounded-lg">
-                <div className="w-8 h-8 bg-[#0077B5] text-white rounded-full flex items-center justify-center font-bold">
-                  2
-                </div>
-                <div>
-                  <h3 className="font-semibold">Upload Foto's</h3>
-                  <p className="text-sm text-gray-600">Upload 10-20 foto's van jezelf voor de beste resultaten</p>
-                </div>
-              </div>
-
-              <div className="flex items-center space-x-4 p-4 bg-blue-50 rounded-lg">
-                <div className="w-8 h-8 bg-[#0077B5] text-white rounded-full flex items-center justify-center font-bold">
-                  3
-                </div>
-                <div>
-                  <h3 className="font-semibold">Betaal & Ontvang</h3>
-                  <p className="text-sm text-gray-600">Betaal €29,99 en ontvang 40 professionele AI portretten</p>
-                </div>
-              </div>
+            <div className="text-center p-4">
+              <Clock className="w-8 h-8 text-[#0077B5] mx-auto mb-2" />
+              <h3 className="font-semibold text-gray-900">15 Minuten</h3>
+              <p className="text-sm text-gray-600">AI training en generatie</p>
             </div>
-
-            {/* Features */}
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <h3 className="font-semibold mb-3">Wat je krijgt:</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
-                <div className="flex items-center space-x-2">
-                  <Clock className="w-4 h-4 text-[#0077B5]" />
-                  <span>Klaar in 15 minuten</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Sparkles className="w-4 h-4 text-[#0077B5]" />
-                  <span>40 unieke portretten</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Shield className="w-4 h-4 text-[#0077B5]" />
-                  <span>100% privé & veilig</span>
-                </div>
-              </div>
+            <div className="text-center p-4">
+              <Sparkles className="w-8 h-8 text-[#0077B5] mx-auto mb-2" />
+              <h3 className="font-semibold text-gray-900">40 Portretten</h3>
+              <p className="text-sm text-gray-600">Professionele AI-gegenereerde foto's</p>
             </div>
+          </div>
 
-            {/* CTA Button */}
-            <Button
-              onClick={startWizard}
-              className="w-full bg-[#0077B5] hover:bg-[#004182] text-white py-4 text-lg font-semibold"
-            >
-              Start Nu - Maak Je Portretten
-              <ArrowRight className="ml-2 w-5 h-5" />
+          <div className="bg-blue-50 p-4 rounded-lg">
+            <h4 className="font-semibold text-gray-900 mb-2">Wat je krijgt:</h4>
+            <ul className="text-sm text-gray-700 space-y-1">
+              <li>• 40 professionele AI-portretten</li>
+              <li>• Verschillende poses en achtergronden</li>
+              <li>• Hoge resolutie downloads</li>
+              <li>• Commerciële gebruiksrechten</li>
+            </ul>
+          </div>
+
+          <div className="text-center">
+            <p className="text-2xl font-bold text-[#0077B5] mb-2">€19,99</p>
+            <p className="text-sm text-gray-600 mb-6">Eenmalige betaling, geen abonnement</p>
+
+            <Button asChild size="lg" className="w-full bg-[#FF8C00] hover:bg-[#FFA500] text-white">
+              <Link href="/wizard/project-name">
+                Start Nu <ArrowRight className="ml-2 h-5 w-5" />
+              </Link>
             </Button>
+          </div>
 
-            <p className="text-center text-sm text-gray-500">Geen abonnement • Eenmalige betaling • Direct resultaat</p>
-          </CardContent>
-        </Card>
-      </div>
+          <p className="text-xs text-gray-500 text-center">
+            Door verder te gaan ga je akkoord met onze{" "}
+            <Link href="/terms" className="text-[#0077B5] hover:underline">
+              Algemene Voorwaarden
+            </Link>{" "}
+            en{" "}
+            <Link href="/privacy" className="text-[#0077B5] hover:underline">
+              Privacy Policy
+            </Link>
+          </p>
+        </CardContent>
+      </Card>
     </div>
   )
 }
