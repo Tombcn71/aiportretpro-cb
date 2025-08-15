@@ -14,14 +14,6 @@ import Image from "next/image"
 interface WizardData {
   projectName: string
   gender: string
-  characteristics: {
-    age: string
-    eyeColor: string
-    hairColor: string
-    hairLength: string
-    hairType: string
-    bodyType: string
-  }
 }
 
 export default function UploadPage() {
@@ -119,7 +111,7 @@ export default function UploadPage() {
         body: JSON.stringify({
           projectName: wizardData.projectName,
           gender: wizardData.gender,
-          characteristics: wizardData.characteristics,
+
           selectedPackId: "928", // Portetfotos m/v pack
           uploadedPhotos: uploadedUrls,
         }),
@@ -170,7 +162,7 @@ export default function UploadPage() {
     <div className="min-h-screen bg-gray-50 p-4">
       <div className="max-w-4xl mx-auto">
         <div className="mb-8">
-          <ProgressBar currentStep={9} totalSteps={9} className="bg-[#0077B5]" />
+          <ProgressBar currentStep={3} totalSteps={3} className="bg-[#0077B5]" />
         </div>
 
         <Card className="mb-8">

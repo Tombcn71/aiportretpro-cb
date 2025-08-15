@@ -50,8 +50,8 @@ export default function GenderPage() {
           backgrounds: ["office"], // Default background
         }),
       )
-      // Go to characteristics step
-      router.push("/wizard/leeftijd")
+      // Go directly to upload
+      router.push("/wizard/upload")
     }
   }
 
@@ -65,7 +65,7 @@ export default function GenderPage() {
     <div className="min-h-screen bg-gray-50 p-4">
       <div className="max-w-2xl mx-auto">
         <div className="mb-8">
-          <ProgressBar currentStep={2} totalSteps={9} className="bg-[#0077B5]" />
+          <ProgressBar currentStep={2} totalSteps={3} className="bg-[#0077B5]" />
         </div>
 
         <Card className="w-full">
