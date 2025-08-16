@@ -28,7 +28,7 @@ export async function POST(request: Request) {
     const saltRounds = 12
     const passwordHash = await bcrypt.hash(password, saltRounds)
 
-    // Create new user
+    // Create new user with password_hash
     const newUser = await sql`
       INSERT INTO users (email, password_hash, created_at, updated_at)
       VALUES (${email}, ${passwordHash}, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)

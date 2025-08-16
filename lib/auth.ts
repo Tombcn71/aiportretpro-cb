@@ -22,7 +22,7 @@ export const authOptions: NextAuthOptions = {
         }
 
         try {
-          // Check if user exists
+          // Check if user exists with password_hash
           const user = await sql`
             SELECT id, email, name, image, password_hash FROM users WHERE email = ${credentials.email}
           `
@@ -51,6 +51,7 @@ export const authOptions: NextAuthOptions = {
             name: userData.name,
             image: userData.image,
           }
+
         } catch (error) {
           console.error("Credentials auth error:", error)
           return null
@@ -93,7 +94,7 @@ export const authOptions: NextAuthOptions = {
             SELECT id, email, name, image FROM users WHERE email = ${session.user.email}
           `
           if (user.length > 0) {
-            session.user.id = user[0].id.toString()
+            (session.user as any).id = user[0].id.toString()
           }
         } catch (error) {
           console.error("Session error:", error)
