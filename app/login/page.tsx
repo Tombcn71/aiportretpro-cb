@@ -12,18 +12,6 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const router = useRouter()
 
-  // If already logged in, go to pricing
-  useEffect(() => {
-    if (status === "authenticated" && session) {
-      router.push("/pricing")
-    }
-  }, [status, session, router])
-
-  // Don't render if already authenticated
-  if (status === "authenticated" && session) {
-    return null
-  }
-
   const handleGoogleSignIn = async () => {
     setLoading(true)
     try {

@@ -125,7 +125,7 @@ export function Header() {
               </>
             ) : (
               <Button
-                onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
+                onClick={() => signIn("google", { callbackUrl: "/pricing" })}
                 className="bg-[#0077B5] hover:bg-[#005885]"
               >
                 Inloggen
@@ -166,7 +166,7 @@ export function Header() {
               </DropdownMenu>
             ) : (
               <Button
-                onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
+                onClick={() => signIn("google", { callbackUrl: "/pricing" })}
                 className="bg-[#0077B5] hover:bg-[#005885] text-sm px-3 py-2"
                 size="sm"
               >
