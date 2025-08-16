@@ -5,16 +5,24 @@ import { useSession, signIn } from "next-auth/react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { Header } from "@/components/header"
+import { Separator } from "@/components/ui/separator"
 
 export default function LoginPage() {
   const { data: session, status } = useSession()
   const [loading, setLoading] = useState(false)
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [isSignUp, setIsSignUp] = useState(false)
+  const [error, setError] = useState("")
   const router = useRouter()
   const searchParams = useSearchParams()
 
   const handleGoogleSignIn = async () => {
     setLoading(true)
+    setError("")
     try {
       // Check if this is a homepage CTA login
       const isHomepageCTA = searchParams.get("source") === "homepage"
@@ -23,6 +31,50 @@ export default function LoginPage() {
       await signIn("google", { callbackUrl })
     } catch (error) {
       console.error("Login error:", error)
+      setError("Er is een fout opgetreden bij het inloggen met Google")
+      setLoading(false)
+    }
+  }
+
+  const handleEmailAuth = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+    setError("")
+
+    try {
+      if (isSignUp) {
+        // Handle sign up
+        const response = await fetch("/api/auth/signup", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password }),
+        })
+
+        if (!response.ok) {
+          const data = await response.json()
+          throw new Error(data.error || "Registratie mislukt")
+        }
+      }
+
+      // Handle sign in
+      const result = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+      })
+
+      if (result?.error) {
+        setError("Ongeldige email of wachtwoord")
+      } else if (result?.ok) {
+        // Check if this is a homepage CTA login
+        const isHomepageCTA = searchParams.get("source") === "homepage"
+        const callbackUrl = isHomepageCTA ? "/pricing" : "/dashboard"
+        router.push(callbackUrl)
+      }
+    } catch (error) {
+      console.error("Email auth error:", error)
+      setError(error instanceof Error ? error.message : "Er is een fout opgetreden")
+    } finally {
       setLoading(false)
     }
   }
@@ -33,10 +85,18 @@ export default function LoginPage() {
       <div className="container mx-auto px-4 py-16 flex items-center justify-center">
         <Card className="max-w-md w-full">
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl mb-2">Inloggen om door te gaan</CardTitle>
-            <p className="text-gray-600">Log in met je Google account om je fotoshoot te starten</p>
+            <CardTitle className="text-2xl mb-2">
+              {isSignUp ? "Account aanmaken" : "Inloggen om door te gaan"}
+            </CardTitle>
+            <p className="text-gray-600">
+              {isSignUp 
+                ? "Maak een account aan om je fotoshoot te starten"
+                : "Log in met je Google account of email/wachtwoord"
+              }
+            </p>
           </CardHeader>
           <CardContent className="space-y-4">
+            {/* Google OAuth Button */}
             <Button
               onClick={handleGoogleSignIn}
               disabled={loading}
@@ -62,6 +122,70 @@ export default function LoginPage() {
               </svg>
               <span>{loading ? "Inloggen..." : "Doorgaan met Google"}</span>
             </Button>
+
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <Separator className="w-full" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-white px-2 text-gray-500">Of</span>
+              </div>
+            </div>
+
+            {/* Email/Password Form */}
+            <form onSubmit={handleEmailAuth} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="jouw@email.com"
+                  required
+                  disabled={loading}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="password">Wachtwoord</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  required
+                  disabled={loading}
+                  minLength={6}
+                />
+              </div>
+
+              {error && (
+                <div className="text-red-600 text-sm text-center bg-red-50 p-3 rounded-md">
+                  {error}
+                </div>
+              )}
+
+              <Button
+                type="submit"
+                disabled={loading || !email || !password}
+                className="w-full bg-[#0077B5] hover:bg-[#005885] text-white"
+              >
+                {loading ? "Bezig..." : (isSignUp ? "Account aanmaken" : "Inloggen")}
+              </Button>
+            </form>
+
+            <div className="text-center">
+              <Button
+                variant="ghost"
+                onClick={() => setIsSignUp(!isSignUp)}
+                className="text-sm text-gray-600"
+                disabled={loading}
+              >
+                {isSignUp ? "Al een account? Log in" : "Geen account? Maak er een aan"}
+              </Button>
+            </div>
 
             <div className="text-center">
               <Button variant="ghost" onClick={() => router.push("/")} className="text-sm text-gray-600">

@@ -1,6 +1,8 @@
 import type { NextAuthOptions } from "next-auth"
 import GoogleProvider from "next-auth/providers/google"
+import CredentialsProvider from "next-auth/providers/credentials"
 import { sql } from "@/lib/db"
+import bcrypt from "bcryptjs"
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -8,30 +10,67 @@ export const authOptions: NextAuthOptions = {
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     }),
+    CredentialsProvider({
+      name: "credentials",
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" }
+      },
+      async authorize(credentials) {
+        if (!credentials?.email || !credentials?.password) {
+          return null
+        }
+
+        try {
+          // Check if user exists
+          const user = await sql`
+            SELECT id, email, name, image, password_hash FROM users WHERE email = ${credentials.email}
+          `
+
+          if (user.length === 0) {
+            return null
+          }
+
+          const userData = user[0]
+
+          // If user has no password_hash, they signed up with Google
+          if (!userData.password_hash) {
+            return null
+          }
+
+          // Verify password
+          const isPasswordValid = await bcrypt.compare(credentials.password, userData.password_hash)
+
+          if (!isPasswordValid) {
+            return null
+          }
+
+          return {
+            id: userData.id.toString(),
+            email: userData.email,
+            name: userData.name,
+            image: userData.image,
+          }
+        } catch (error) {
+          console.error("Credentials auth error:", error)
+          return null
+        }
+      }
+    }),
   ],
   callbacks: {
     async signIn({ user, account, profile }) {
       try {
         if (account?.provider === "google" && user.email) {
-          // Check if user exists
-          const existingUser = await sql`
-            SELECT id FROM users WHERE email = ${user.email}
-          `
-
-          if (existingUser.length === 0) {
-            // Create new user
-            await sql`
-              INSERT INTO users (email, name, image, created_at, updated_at)
-              VALUES (${user.email}, ${user.name || ""}, ${user.image || ""}, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-            `
-          } else {
-            // Update existing user
-            await sql`
-              UPDATE users 
-              SET name = ${user.name || ""}, image = ${user.image || ""}, updated_at = CURRENT_TIMESTAMP
-              WHERE email = ${user.email}
-            `
-          }
+          // Import database functions
+          const { createUser } = await import("@/lib/db")
+          
+          // Create or update user using the createUser function
+          await createUser({
+            email: user.email,
+            name: user.name || "",
+            image: user.image || "",
+          })
         }
         return true
       } catch (error) {

@@ -20,16 +20,18 @@ export async function getUserByEmail(email: string) {
 
 export async function createUser(data: {
   email: string
-  name: string
-  image: string
+  name?: string
+  image?: string
+  password_hash?: string
 }) {
   try {
     const result = await sql`
-      INSERT INTO users (email, name, image)
-      VALUES (${data.email}, ${data.name}, ${data.image})
+      INSERT INTO users (email, name, image, password_hash)
+      VALUES (${data.email}, ${data.name || ""}, ${data.image || ""}, ${data.password_hash || null})
       ON CONFLICT (email) DO UPDATE SET
         name = EXCLUDED.name,
         image = EXCLUDED.image,
+        password_hash = COALESCE(EXCLUDED.password_hash, users.password_hash),
         updated_at = CURRENT_TIMESTAMP
       RETURNING *
     `
