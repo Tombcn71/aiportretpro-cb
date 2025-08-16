@@ -170,8 +170,8 @@ export default function HomePage() {
           size="lg"
           className=" bg-[#FF8C00] hover:bg-[#FFA500] text-white px-6 md:px-10 py-8 md:py-8 text-base md:text-lg mb-8 md:max-w-sm"
         >
-          <Link href="/login">
-            Start je gratis fotoshoot <ArrowRight className="ml-2 h-6 md:h-7 w-6 md:w-7" />
+          <Link href="/login?source=homepage">
+            Start jouw fotoshoot nu - 19,99€ <ArrowRight className="ml-2 h-6 md:h-7 w-6 md:w-7" />
           </Link>
         </Button>
       </section>
@@ -272,9 +272,9 @@ export default function HomePage() {
           </h2>
           <p className="text-xl text-gray-600 mb-8">Laat zien wie je bent met een krachtige, professionele foto</p>
           {isClient && (
-            <Link href="/login">
+            <Link href="/login?source=homepage">
               <Button size="lg" className="bg-[#FFA500] hover:bg-[#FF8C00] text-white px-8 py-4 text-lg">
-                Start je gratis fotoshoot <ArrowRight className="ml-2 h-5 w-5" />
+                Start jouw fotoshoot nu - 19,99€ <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </Link>
           )}

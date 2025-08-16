@@ -34,9 +34,9 @@ export default function FloatingCTAButton() {
         size="lg"
         className="w-full max-w-sm mx-auto bg-[#FFA500] hover:bg-[#FF8C00] text-white py-3 text-base font-semibold shadow-lg"
       >
-        <Link href="/login">
+        <Link href="/login?source=homepage">
           <Camera className="mr-2 h-4 w-4" />
-          Start gratis fotoshoot
+          Start jouw fotoshoot nu - 19,99€
           <ArrowRight className="ml-2 h-4 w-4" />
         </Link>
       </Button>

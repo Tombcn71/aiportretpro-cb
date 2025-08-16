@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useSession, signIn } from "next-auth/react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Header } from "@/components/header"
@@ -11,11 +11,16 @@ export default function LoginPage() {
   const { data: session, status } = useSession()
   const [loading, setLoading] = useState(false)
   const router = useRouter()
+  const searchParams = useSearchParams()
 
   const handleGoogleSignIn = async () => {
     setLoading(true)
     try {
-      await signIn("google", { callbackUrl: "/pricing" })
+      // Check if this is a homepage CTA login
+      const isHomepageCTA = searchParams.get("source") === "homepage"
+      const callbackUrl = isHomepageCTA ? "/pricing" : "/dashboard"
+      
+      await signIn("google", { callbackUrl })
     } catch (error) {
       console.error("Login error:", error)
       setLoading(false)

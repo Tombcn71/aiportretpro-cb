@@ -44,8 +44,8 @@ export const authOptions: NextAuthOptions = {
       if (url.startsWith("/")) return `${baseUrl}${url}`
       // If the url is on the same origin, allow it
       else if (new URL(url).origin === baseUrl) return url
-      // Otherwise, redirect to pricing page
-      return `${baseUrl}/pricing`
+      // Otherwise, redirect to dashboard (default for header login)
+      return `${baseUrl}/dashboard`
     },
     async session({ session, token }) {
       if (session.user?.email) {
