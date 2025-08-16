@@ -42,17 +42,27 @@ export default function LoginPage() {
     setError("")
 
     try {
+      // Get the source parameter to determine where user came from
+      const source = searchParams.get("source") || "header"
+
       if (isSignUp) {
         // Handle sign up
         const response = await fetch("/api/auth/signup", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password }),
+          body: JSON.stringify({ email, password, source }),
         })
 
         if (!response.ok) {
           const data = await response.json()
           throw new Error(data.error || "Registratie mislukt")
+        }
+
+        // Get the redirect URL from the signup response
+        const data = await response.json()
+        if (data.redirectUrl) {
+          router.push(data.redirectUrl)
+          return
         }
       }
 

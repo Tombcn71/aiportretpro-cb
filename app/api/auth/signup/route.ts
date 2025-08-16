@@ -4,7 +4,7 @@ import bcrypt from "bcryptjs"
 
 export async function POST(request: Request) {
   try {
-    const { email, password } = await request.json()
+    const { email, password, source } = await request.json()
 
     // Validate input
     if (!email || !password) {
@@ -39,12 +39,16 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Fout bij het aanmaken van account" }, { status: 500 })
     }
 
+    // Determine redirect URL based on source
+    const redirectUrl = source === "homepage" ? "/pricing" : "/dashboard"
+
     return NextResponse.json({ 
       message: "Account succesvol aangemaakt",
       user: {
         id: newUser[0].id,
         email: newUser[0].email
-      }
+      },
+      redirectUrl
     })
 
   } catch (error) {
