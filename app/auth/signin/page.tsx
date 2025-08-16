@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 export default function SignIn() {
   const [providers, setProviders] = useState<any>(null)
   const searchParams = useSearchParams()
-  const callbackUrl = searchParams.get("callbackUrl") || "/dashboard"
+  const callbackUrl = searchParams.get("callbackUrl") || "/pricing"
 
   useEffect(() => {
     const fetchProviders = async () => {
