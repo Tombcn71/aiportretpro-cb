@@ -129,7 +129,7 @@ export default function UploadPage() {
         }))
         // Clear wizard data
         localStorage.removeItem("wizardData")
-        router.push(`/pricing?projectId=${result.projectId}`)
+        router.push(`/generate/${result.projectId}`)
       } else {
         // Even if Astria API fails, continue to pricing with uploaded photos
         console.warn("Astria API failed, but continuing to pricing with uploaded photos")
@@ -140,7 +140,7 @@ export default function UploadPage() {
           uploadedPhotos: uploadedUrls,
         }))
         localStorage.removeItem("wizardData")
-        router.push(`/pricing`)
+        router.push(`/generate/temp`)
       }
     } catch (error) {
       console.error("Error:", error)

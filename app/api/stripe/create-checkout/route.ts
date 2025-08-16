@@ -69,8 +69,8 @@ export async function POST(request: NextRequest) {
       ],
       mode: "payment",
       success_url: isTemporaryProject 
-        ? `${process.env.NEXTAUTH_URL}/generate/temp?session_id={CHECKOUT_SESSION_ID}&temp_project_id=${projectId}`
-        : `${process.env.NEXTAUTH_URL}/generate/${projectId}?session_id={CHECKOUT_SESSION_ID}`,
+        ? `${process.env.NEXTAUTH_URL}/wizard/project-name?session_id={CHECKOUT_SESSION_ID}&temp_project_id=${projectId}`
+        : `${process.env.NEXTAUTH_URL}/wizard/project-name?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.NEXTAUTH_URL}/pricing`,
       metadata: {
         userId: user.id.toString(),

@@ -1,8 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
-import { useSession } from "next-auth/react"
+import { useRouter, useSearchParams } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -12,31 +11,17 @@ import { ProgressBar } from "@/components/ui/progress-bar"
 export default function ProjectNamePage() {
   const [projectName, setProjectName] = useState("")
   const router = useRouter()
-  const { data: session, status } = useSession()
+  const searchParams = useSearchParams()
 
-  // Redirect to login if not authenticated
+  // Handle successful payment
   useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/login")
-    } else if (status === "authenticated" && session) {
-      // User is authenticated, we can proceed
-      console.log("User authenticated:", session.user?.email)
+    const sessionId = searchParams.get("session_id")
+    if (sessionId) {
+      console.log("Payment successful, session ID:", sessionId)
+      // Clear any pending project data since payment was successful
+      localStorage.removeItem("pendingProject")
     }
-  }, [status, router, session])
-
-  // Show loading while checking authentication
-  if (status === "loading") {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0077B5]"></div>
-      </div>
-    )
-  }
-
-  // Don't render if not authenticated
-  if (status === "unauthenticated") {
-    return null
-  }
+  }, [searchParams])
 
   const handleContinue = () => {
     if (projectName.trim()) {

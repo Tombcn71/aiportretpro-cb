@@ -12,10 +12,10 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const router = useRouter()
 
-  // If already logged in, go to wizard
+  // If already logged in, go to pricing
   useEffect(() => {
     if (status === "authenticated" && session) {
-      router.push("/wizard/welcome")
+      router.push("/pricing")
     }
   }, [status, session, router])
 
@@ -27,7 +27,7 @@ export default function LoginPage() {
   const handleGoogleSignIn = async () => {
     setLoading(true)
     try {
-      await signIn("google", { callbackUrl: "/wizard/welcome" })
+      await signIn("google", { callbackUrl: "/pricing" })
     } catch (error) {
       console.error("Login error:", error)
       setLoading(false)
