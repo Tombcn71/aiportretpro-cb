@@ -72,3 +72,20 @@ export const authOptions: NextAuthOptions = {
   },
   secret: process.env.NEXTAUTH_SECRET,
 }
+
+// Function to check if user has paid
+export async function checkUserPayment(userId: string): Promise<boolean> {
+  try {
+    const result = await sql`
+      SELECT id FROM purchases 
+      WHERE user_id = ${userId} 
+      AND stripe_session_id IS NOT NULL 
+      AND created_at > NOW() - INTERVAL '24 hours'
+      LIMIT 1
+    `
+    return result.length > 0
+  } catch (error) {
+    console.error("Error checking user payment:", error)
+    return false
+  }
+}

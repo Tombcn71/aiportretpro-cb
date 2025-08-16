@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
+import { useSession } from "next-auth/react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -10,8 +11,42 @@ import { ProgressBar } from "@/components/ui/progress-bar"
 
 export default function ProjectNamePage() {
   const [projectName, setProjectName] = useState("")
+  const [checkingPayment, setCheckingPayment] = useState(true)
+  const [hasPaid, setHasPaid] = useState(false)
   const router = useRouter()
   const searchParams = useSearchParams()
+  const { data: session, status } = useSession()
+
+  // Check if user has paid
+  useEffect(() => {
+    const checkPayment = async () => {
+      if (status === "authenticated" && session?.user?.email) {
+        try {
+          const response = await fetch("/api/auth/check-payment")
+          const data = await response.json()
+          
+          if (data.hasPaid) {
+            setHasPaid(true)
+          } else {
+            // User hasn't paid, redirect to pricing
+            router.push("/pricing")
+            return
+          }
+        } catch (error) {
+          console.error("Error checking payment:", error)
+          router.push("/pricing")
+          return
+        }
+      }
+      setCheckingPayment(false)
+    }
+
+    if (status === "unauthenticated") {
+      router.push("/login")
+    } else if (status === "authenticated") {
+      checkPayment()
+    }
+  }, [status, session, router])
 
   // Handle successful payment
   useEffect(() => {
@@ -20,8 +55,25 @@ export default function ProjectNamePage() {
       console.log("Payment successful, session ID:", sessionId)
       // Clear any pending project data since payment was successful
       localStorage.removeItem("pendingProject")
+      // Set hasPaid to true since they just paid
+      setHasPaid(true)
+      setCheckingPayment(false)
     }
   }, [searchParams])
+
+  // Show loading while checking authentication and payment
+  if (status === "loading" || checkingPayment) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0077B5]"></div>
+      </div>
+    )
+  }
+
+  // Don't render if not authenticated or hasn't paid
+  if (status === "unauthenticated" || !hasPaid) {
+    return null
+  }
 
   const handleContinue = () => {
     if (projectName.trim()) {
