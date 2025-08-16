@@ -13,6 +13,7 @@ export default function PricingPage() {
   const { data: session } = useSession()
   const [loading, setLoading] = useState(false)
   const [projectData, setProjectData] = useState<any>(null)
+  const [hasExistingProject, setHasExistingProject] = useState(false)
   const router = useRouter()
 
   // Track pricing page view
@@ -24,14 +25,17 @@ export default function PricingPage() {
     if (pendingProject) {
       const projectData = JSON.parse(pendingProject)
       setProjectData(projectData)
+      setHasExistingProject(true)
       
       // If it's a temporary project ID, we'll create the real project after payment
       if (projectData.projectId && typeof projectData.projectId === "string" && projectData.projectId.startsWith("temp_")) {
         console.log("Using temporary project ID, will create real project after payment")
       }
     } else {
-      // If no pending project, redirect to home
-      router.push("/")
+      // No pending project - user came directly after login
+      // This is fine, they can pay first and then go through the wizard
+      setHasExistingProject(false)
+      console.log("No pending project - user will pay first, then go through wizard")
     }
   }, [router])
 
@@ -77,7 +81,6 @@ export default function PricingPage() {
   }
 
   const features = [
-   
     "Verschillende zakelijke outfits",
     "Verschillende poses en achtergronden",
     "HD kwaliteit downloads",
@@ -90,14 +93,21 @@ export default function PricingPage() {
       <Header />
       <div className="container mx-auto px-4 py-20">
         <div className="text-center mb-6">
-          <h1 className="text-2xl md:text-4xl font-bold text-gray-900 mb-2">🎉 Je foto's zijn geüpload!</h1>
-          <p className="text-md text-gray-600">Nu nog een snelle betaling en je krijgt je professionele headshots</p>
+          {hasExistingProject ? (
+            <>
+              <h1 className="text-2xl md:text-4xl font-bold text-gray-900 mb-2">🎉 Je foto's zijn geüpload!</h1>
+              <p className="text-md text-gray-600">Nu nog een snelle betaling en je krijgt je professionele headshots</p>
+            </>
+          ) : (
+            <>
+              <h1 className="text-2xl md:text-4xl font-bold text-gray-900 mb-2">🚀 Start je professionele fotoshoot</h1>
+              <p className="text-md text-gray-600">Betaal eerst en ga dan door de wizard om je foto's te uploaden</p>
+            </>
+          )}
         </div>
 
         <div className="max-w-md mx-auto">
           <Card className="relative border-2 border-[#0077B5] shadow-xl">
-            
-
             <CardHeader className="text-center pt-8">
               <CardTitle className="text-2xl font-bold">Professional</CardTitle>
               <div className="mt-4">
@@ -123,16 +133,9 @@ export default function PricingPage() {
               >
                 {loading ? "Laden..." : "Betaal Veilig & Start Direct"}
               </Button>
-
-              <div className="text-center text-sm text-gray-500">
-                <p>✓ Veilige betaling met ideal en credit card</p>
-                <p>✓ Geld terug garantie</p>
-              </div>
             </CardContent>
           </Card>
         </div>
-
-        
       </div>
     </div>
   )
