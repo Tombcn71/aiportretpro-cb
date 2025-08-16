@@ -39,6 +39,14 @@ export const authOptions: NextAuthOptions = {
         return false
       }
     },
+    async redirect({ url, baseUrl }) {
+      // If the url is relative, prefix it with the base url
+      if (url.startsWith("/")) return `${baseUrl}${url}`
+      // If the url is on the same origin, allow it
+      else if (new URL(url).origin === baseUrl) return url
+      // Otherwise, redirect to pricing page
+      return `${baseUrl}/pricing`
+    },
     async session({ session, token }) {
       if (session.user?.email) {
         try {
