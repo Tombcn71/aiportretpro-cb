@@ -123,15 +123,15 @@ export default function LoginPage() {
               <Image
                 src="/images/logo-icon.png"
                 alt="AI Portrait Pro Logo"
-                width={40}
-                height={40}
+                width={32}
+                height={32}
                 className="rounded-lg"
               />
-              <span className="text-xl text-gray-900">AI Portret Pro</span>
+              <span className="text-lg text-gray-900">AIPortretPro</span>
             </div>
             
             {/* Main title */}
-            <CardTitle className="text-2xl md:text-3xl text-gray-900 mb-3 font-normal">
+            <CardTitle className="text-xl md:text-2xl text-gray-900 mb-3 font-normal">
               Professionele portretfoto's,
               <br />
               <span className="text-[#0077B5]">slim en simpel</span> geregeld
@@ -253,7 +253,7 @@ export default function LoginPage() {
             )}
 
             <div className="text-center">
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-gray-500 mb-4">
                 Nieuwe accounts vallen onder onze{" "}
                 <Button variant="link" className="text-xs text-[#0077B5] p-0 h-auto font-normal underline">
                   <a href="/terms" target="_blank" rel="noopener noreferrer">
@@ -268,6 +268,28 @@ export default function LoginPage() {
                 </Button>
                 .
               </p>
+              
+              {/* Benefits with green checkmarks */}
+              <div className="space-y-2 text-sm text-gray-600">
+                <div className="flex items-center justify-center space-x-2">
+                  <svg className="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                  <span>14 dagen geld terug garantie</span>
+                </div>
+                <div className="flex items-center justify-center space-x-2">
+                  <svg className="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                  <span>Nederlandse klantenservice</span>
+                </div>
+                <div className="flex items-center justify-center space-x-2">
+                  <svg className="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                  <span>Klaar in 15 minuten</span>
+                </div>
+              </div>
             </div>
           </CardContent>
         </Card>
