@@ -253,9 +253,21 @@ export default function LoginPage() {
             )}
 
             <div className="text-center">
-              <Button variant="ghost" onClick={() => router.push("/")} className="text-sm text-gray-600">
-                ← Terug naar home
-              </Button>
+              <p className="text-xs text-gray-500">
+                Nieuwe accounts vallen onder onze{" "}
+                <Button variant="link" className="text-xs text-[#0077B5] p-0 h-auto font-normal underline">
+                  <a href="/terms" target="_blank" rel="noopener noreferrer">
+                    algemene voorwaarden
+                  </a>
+                </Button>
+                {" "}en ons{" "}
+                <Button variant="link" className="text-xs text-[#0077B5] p-0 h-auto font-normal underline">
+                  <a href="/privacy" target="_blank" rel="noopener noreferrer">
+                    privacybeleid
+                  </a>
+                </Button>
+                .
+              </p>
             </div>
           </CardContent>
         </Card>
