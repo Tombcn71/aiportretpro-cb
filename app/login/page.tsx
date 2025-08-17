@@ -113,9 +113,9 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
       <Header />
-      <div className="container mx-auto px-4 py-16 flex items-center justify-center">
+      <div className="absolute inset-0 flex items-center justify-center px-4">
         <Card className="max-w-md w-full">
           <CardHeader className="text-center">
             {/* Logo with text */}
@@ -127,11 +127,11 @@ export default function LoginPage() {
                 height={40}
                 className="rounded-lg"
               />
-              <span className="text-xl font-bold text-gray-900">AI Portret Pro</span>
+              <span className="text-xl text-gray-900">AI Portret Pro</span>
             </div>
             
             {/* Main title */}
-            <CardTitle className="text-2xl md:text-3xl font-bold text-gray-900 mb-3">
+            <CardTitle className="text-2xl md:text-3xl text-gray-900 mb-3 font-normal">
               Professionele portretfoto's,
               <br />
               <span className="text-[#0077B5]">slim en simpel</span> geregeld
@@ -150,7 +150,7 @@ export default function LoginPage() {
                   onClick={() => setShowEmailForm(true)}
                   disabled={loading}
                   variant="outline"
-                  className="w-full border-2 border-[#0077B5] text-[#0077B5] hover:bg-[#0077B5] hover:text-white flex items-center justify-center space-x-3 py-4 text-lg font-semibold"
+                  className="w-full border-2 border-[#0077B5] text-[#0077B5] hover:bg-[#0077B5] hover:text-white flex items-center justify-center space-x-3 py-6 text-lg font-semibold"
                 >
                   <MailPlus className="h-6 w-6" />
                   <span>Ga door met email</span>
@@ -159,7 +159,7 @@ export default function LoginPage() {
                 <Button
                   onClick={handleGoogleSignIn}
                   disabled={loading}
-                  className="w-full bg-[#4285f4] hover:bg-[#3367d6] text-white flex items-center justify-center space-x-3 py-4 text-lg font-semibold"
+                  className="w-full bg-[#4285f4] hover:bg-[#3367d6] text-white flex items-center justify-center space-x-3 py-6 text-lg font-semibold"
                 >
                   <svg className="w-6 h-6" viewBox="0 0 24 24">
                     <path
@@ -224,7 +224,7 @@ export default function LoginPage() {
                   <Button
                     type="submit"
                     disabled={loading || !email || !password}
-                    className="w-full bg-[#0077B5] hover:bg-[#005885] text-white py-4 text-lg font-semibold"
+                    className="w-full bg-[#0077B5] hover:bg-[#005885] text-white py-6 text-lg font-semibold"
                   >
                     {loading ? "Bezig..." : (isSignUp ? "Account aanmaken" : "Inloggen")}
                   </Button>
