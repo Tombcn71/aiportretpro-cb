@@ -6,7 +6,6 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Header } from "@/components/header"
-import { Separator } from "@/components/ui/separator"
 import { Mail, MailPlus } from "lucide-react"
 import Image from "next/image"
 
@@ -16,7 +15,7 @@ export default function LoginPage() {
   const [showEmailForm, setShowEmailForm] = useState(false)
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
-  const [isSignUp, setIsSignUp] = useState(false)
+  const [isSignUp, setIsSignUp] = useState(true) // Default to signup for CTA users
   const [error, setError] = useState("")
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -150,27 +149,19 @@ export default function LoginPage() {
                 <Button
                   onClick={() => setShowEmailForm(true)}
                   disabled={loading}
-                  className="w-full bg-[#0077B5] hover:bg-[#005885] text-white flex items-center justify-center space-x-3 py-3"
+                  variant="outline"
+                  className="w-full border-2 border-[#0077B5] text-[#0077B5] hover:bg-[#0077B5] hover:text-white flex items-center justify-center space-x-3 py-4 text-lg font-semibold"
                 >
-                  <MailPlus className="h-5 w-5" />
+                  <MailPlus className="h-6 w-6" />
                   <span>Ga door met email</span>
                 </Button>
-
-                <div className="relative">
-                  <div className="absolute inset-0 flex items-center">
-                    <Separator className="w-full" />
-                  </div>
-                  <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-white px-2 text-gray-500">Of</span>
-                  </div>
-                </div>
 
                 <Button
                   onClick={handleGoogleSignIn}
                   disabled={loading}
-                  className="w-full bg-[#4285f4] hover:bg-[#3367d6] text-white flex items-center justify-center space-x-3 py-3"
+                  className="w-full bg-[#4285f4] hover:bg-[#3367d6] text-white flex items-center justify-center space-x-3 py-4 text-lg font-semibold"
                 >
-                  <svg className="w-5 h-5" viewBox="0 0 24 24">
+                  <svg className="w-6 h-6" viewBox="0 0 24 24">
                     <path
                       fill="currentColor"
                       d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -233,7 +224,7 @@ export default function LoginPage() {
                   <Button
                     type="submit"
                     disabled={loading || !email || !password}
-                    className="w-full bg-[#0077B5] hover:bg-[#005885] text-white"
+                    className="w-full bg-[#0077B5] hover:bg-[#005885] text-white py-4 text-lg font-semibold"
                   >
                     {loading ? "Bezig..." : (isSignUp ? "Account aanmaken" : "Inloggen")}
                   </Button>
