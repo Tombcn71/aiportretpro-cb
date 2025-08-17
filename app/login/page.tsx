@@ -136,7 +136,7 @@ export default function LoginPage() {
             </CardTitle>
             
             {/* Subtitle */}
-            <p className="text-gray-600 text-lg">
+            <p className="text-gray-600 text-base">
               Maak een account aan of login
             </p>
           </CardHeader>
@@ -236,15 +236,6 @@ export default function LoginPage() {
                     disabled={loading}
                   >
                     {isSignUp ? "Al een account? Log in" : "Geen account? Maak er een aan"}
-                  </Button>
-                  
-                  <Button
-                    variant="ghost"
-                    onClick={() => setShowEmailForm(false)}
-                    className="text-sm text-gray-600"
-                    disabled={loading}
-                  >
-                    ← Terug naar keuze
                   </Button>
                 </div>
               </>
