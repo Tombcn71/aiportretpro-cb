@@ -131,7 +131,7 @@ export default function LoginPage() {
             </div>
             
             {/* Main title */}
-            <CardTitle className="text-xl md:text-2xl text-gray-900 mb-3 font-normal">
+            <CardTitle className="text-xl md:text-2xl text-gray-900 mb-3 font-normal pl-0">
               Professionele portretfoto's,
               <br />
               <span className="text-[#0077B5]">slim en simpel</span> geregeld
