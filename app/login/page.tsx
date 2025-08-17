@@ -5,7 +5,6 @@ import { useSession, signIn } from "next-auth/react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Header } from "@/components/header"
 import { Mail, MailPlus } from "lucide-react"
 import Image from "next/image"
 
@@ -114,7 +113,6 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-      <Header />
       <div className="absolute inset-0 flex items-center justify-center px-4">
         <Card className="max-w-md w-full">
           <CardHeader className="text-left">
