@@ -117,9 +117,9 @@ export default function LoginPage() {
       <Header />
       <div className="absolute inset-0 flex items-center justify-center px-4">
         <Card className="max-w-md w-full">
-          <CardHeader className="text-center">
+          <CardHeader className="text-left">
             {/* Logo with text */}
-            <div className="flex items-center justify-center space-x-3 mb-6">
+            <div className="flex items-center space-x-3 mb-6">
               <Image
                 src="/images/logo-icon.png"
                 alt="AI Portrait Pro Logo"
@@ -252,7 +252,7 @@ export default function LoginPage() {
               </>
             )}
 
-            <div className="text-center">
+            <div className="text-left">
               <p className="text-xs text-gray-500 mb-4">
                 Nieuwe accounts vallen onder onze{" "}
                 <Button variant="link" className="text-xs text-[#0077B5] p-0 h-auto font-normal underline">
@@ -271,19 +271,19 @@ export default function LoginPage() {
               
               {/* Benefits with green checkmarks */}
               <div className="space-y-2 text-sm text-gray-600">
-                <div className="flex items-center justify-center space-x-2">
+                <div className="flex items-center space-x-2">
                   <svg className="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
                   <span>14 dagen geld terug garantie</span>
                 </div>
-                <div className="flex items-center justify-center space-x-2">
+                <div className="flex items-center space-x-2">
                   <svg className="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
                   <span>Nederlandse klantenservice</span>
                 </div>
-                <div className="flex items-center justify-center space-x-2">
+                <div className="flex items-center space-x-2">
                   <svg className="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
