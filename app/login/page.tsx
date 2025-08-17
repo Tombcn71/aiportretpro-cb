@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Header } from "@/components/header"
 import { Separator } from "@/components/ui/separator"
 import { Mail, MailPlus } from "lucide-react"
+import Image from "next/image"
 
 export default function LoginPage() {
   const { data: session, status } = useSession()
@@ -118,17 +119,28 @@ export default function LoginPage() {
       <div className="container mx-auto px-4 py-16 flex items-center justify-center">
         <Card className="max-w-md w-full">
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl mb-2">
-              {showEmailForm ? (isSignUp ? "Account aanmaken" : "Inloggen") : "Kies je manier om door te gaan"}
+            {/* Logo with text */}
+            <div className="flex items-center justify-center space-x-3 mb-6">
+              <Image
+                src="/images/logo-icon.png"
+                alt="AI Portrait Pro Logo"
+                width={40}
+                height={40}
+                className="rounded-lg"
+              />
+              <span className="text-xl font-bold text-gray-900">AI Portret Pro</span>
+            </div>
+            
+            {/* Main title */}
+            <CardTitle className="text-2xl md:text-3xl font-bold text-gray-900 mb-3">
+              Professionele portretfoto's,
+              <br />
+              <span className="text-[#0077B5]">slim en simpel</span> geregeld
             </CardTitle>
-            <p className="text-gray-600">
-              {showEmailForm 
-                ? (isSignUp 
-                    ? "Maak een account aan om je fotoshoot te starten"
-                    : "Log in met je email en wachtwoord"
-                  )
-                : "Kies hoe je wilt inloggen of een account aanmaken"
-              }
+            
+            {/* Subtitle */}
+            <p className="text-gray-600 text-lg">
+              Maak een account aan of login
             </p>
           </CardHeader>
           <CardContent className="space-y-4">
