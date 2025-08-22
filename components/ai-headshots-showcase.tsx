@@ -51,11 +51,9 @@ export default function AIHeadshotsShowcase() {
       <div className="max-w-7xl mx-auto px-4">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            Van selfies naar professionele portretten
-          </h2>
+Voorbeelden          </h2>
           <p className="text-xl text-gray-600">
-            Zie hoe onze AI gewone foto's transformeert naar professionele headshots
-          </p>
+Na het uploaden van een paar foto's gaat onze AI aan de slag je krijgt verbluffende resultaten na 15 minuten          </p>
         </div>
 
         <div className="lg:grid-cols-2 gap-20 max-w-6xl mx-auto grid">
