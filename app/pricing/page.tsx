@@ -18,7 +18,7 @@ export default function PricingPage() {
 
   // Track pricing page view
   useEffect(() => {
-    trackViewContent("Pricing Page", 19,99)
+    trackViewContent("Pricing Page", "19.99")
     
     // Get project data from localStorage
     const pendingProject = localStorage.getItem("pendingProject")
@@ -41,10 +41,11 @@ export default function PricingPage() {
 
   const handlePlanSelect = () => {
     // Track checkout initiation
-    trackInitiateCheckout(19,99)
+    trackInitiateCheckout(19.99)
 
     if (!session) {
-      router.push(`/login?plan=professional`)
+      // Redirect to login with callback to payment (not back to pricing)
+      router.push(`/login?callbackUrl=/api/stripe/create-checkout`)
       return
     }
     handleCheckout()

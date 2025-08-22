@@ -23,9 +23,9 @@ export default function LoginPage() {
     setLoading(true)
     setError("")
     try {
-      // Check if this is a homepage CTA login
+      // Check if this is a homepage CTA login or has callbackUrl
       const isHomepageCTA = searchParams.get("source") === "homepage"
-      const callbackUrl = isHomepageCTA ? "/pricing" : "/dashboard"
+      const callbackUrl = searchParams.get("callbackUrl") || (isHomepageCTA ? "/pricing" : "/dashboard")
       
       await signIn("google", { callbackUrl })
     } catch (error) {
@@ -130,9 +130,9 @@ export default function LoginPage() {
             
             {/* Main title */}
             <CardTitle className="text-xl md:text-2xl text-gray-900 mb-3 font-normal pl-0">
-              Professionele portretfoto's,
+              Professionele zakelijkeportretfoto's,
               <br />
-              <span className="text-[#0077B5]">slim en simpel</span> geregeld
+              <span className="text-[#0077B5]">zonder fotograaf of studio</span> 
             </CardTitle>
             
             {/* Subtitle */}
