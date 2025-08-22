@@ -161,7 +161,7 @@ export default function HomePage() {
         </h1>
 
         <p className="text-md md:text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
-        💰 Bespaar tot 75% op fotograaf kosten  <br />
+        💰 75% goedkoper dan een fotograaf  <br />
         📸 Profesionele studio kwaliteit in 15 min  <br />
         👍 Perfect voor linkedin, website en print        </p>
 
