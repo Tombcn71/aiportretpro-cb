@@ -37,22 +37,15 @@ export default function PricingPage() {
       setHasExistingProject(false)
       console.log("No pending project - user will pay first, then go through wizard")
     }
-
-    // Check if user should auto-start payment after login
-    const searchParams = new URLSearchParams(window.location.search)
-    if (searchParams.get("autoPayment") === "true" && session) {
-      console.log("Auto-starting payment after login")
-      handleCheckout()
-    }
-  }, [router, session])
+  }, [router])
 
   const handlePlanSelect = () => {
     // Track checkout initiation
     trackInitiateCheckout(19.99)
 
     if (!session) {
-      // Redirect to login with callback to pricing page, then auto-start payment
-      router.push(`/login?callbackUrl=/pricing&autoPayment=true`)
+      // Redirect to login with callback to payment page
+      router.push(`/login?callbackUrl=/payment`)
       return
     }
     handleCheckout()
