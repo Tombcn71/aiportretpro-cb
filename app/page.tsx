@@ -155,15 +155,15 @@ export default function HomePage() {
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-6 text-center">
         <h1 className="tracking-tight text-2xl md:text-4xl font-bold mb-6">
-          Professionele portretfoto's,
+        Professionele zakelijke portretfoto's
           <br />
-          <span className="text-[#0077B5]"> slim en simpel </span>geregeld
+          <span className="text-[#0077B5]"> zonder fotograaf of studio </span>
         </h1>
 
         <p className="text-md md:text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
-          Geen gedoe met studio's, direct 40 AI-portretten in 15 min.<span className="text-[#0077B5] font-bold"> Tijdelijk voor slechts 19,99€. </span>
-          Makkelijk vanaf je telefoon of laptop, bespaar tijd en geld.
-        </p>
+        💰 Bespaar tot 75% op fotograaf kosten  <br />
+        📸 Profesionele studio kwaliteit in 15 min  <br />
+        👍 Perfect voor linkedin, website en print        </p>
 
         <Button
           asChild
@@ -218,12 +218,11 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* How It Works - New Component */}
-      <HowItWorks />
 
       {/* AI Headshots Showcase - Replaces Photo Gallery */}
       <AIHeadshotsShowcase />
-
+ {/* How It Works - New Component */}
+ <HowItWorks />
       {/* FAQ Section */}
       <section id="faq" className="container mx-auto px-4 py-12 md:py-16 bg-gray-50">
         <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-center mb-4">Veelgestelde Vragen</h2>
@@ -409,9 +408,9 @@ export default function HomePage() {
               size="lg"
               className="w-full bg-[#FF8C00] hover:bg-[#FFA500] text-white px-6 py-8 text-base font-semibold"
             >
-              <Link href="/pricing" className="flex items-center justify-center">
-                Start jouw fotoshoot nu - 19,99€ <ArrowRight className="ml-2 h-6 w-6" />
-              </Link>
+                       <Link href="/login?source=homepage">
+            Start jouw fotoshoot nu - 19,99€ <ArrowRight className="ml-2 h-6 md:h-7 w-6 md:w-7" />
+          </Link>
             </Button>
           </div>
         </div>
