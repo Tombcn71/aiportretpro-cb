@@ -155,9 +155,9 @@ export default function HomePage() {
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-6 text-center">
         <h1 className="tracking-tight text-2xl md:text-4xl font-bold mb-6">
-        Professionele zakelijke portretfoto's
-          
-          <span className="text-[#0077B5]"> zonder fotograaf of studio </span>
+          Professionele zakelijke portretfoto's
+          <br />
+          <span className="text-[#0077B5]">zonder fotograaf of studio</span>
         </h1>
 
         <div className="text-md md:text-lg text-gray-600 mb-8 max-w-2xl mx-auto text-center">
