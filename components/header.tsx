@@ -20,7 +20,7 @@ export function Header() {
   }, [])
 
   const handleSignIn = () => {
-    // Always go to dashboard - if not logged in, NextAuth will handle the redirect
+    // Simple redirect to dashboard - NextAuth will handle authentication
     window.location.href = "/dashboard"
   }
 
