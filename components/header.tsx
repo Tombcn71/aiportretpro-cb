@@ -19,6 +19,16 @@ export function Header() {
     setMounted(true)
   }, [])
 
+  const handleSignIn = async () => {
+    try {
+      await signIn("google", { callbackUrl: "/dashboard" })
+    } catch (error) {
+      console.error("Sign in error:", error)
+      // Fallback to default signin if there's an error
+      window.location.href = "/auth/signin?callbackUrl=/dashboard"
+    }
+  }
+
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen)
   }
@@ -125,7 +135,7 @@ export function Header() {
               </>
             ) : (
               <Button
-                onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
+                onClick={handleSignIn}
                 className="bg-[#0077B5] hover:bg-[#005885]"
               >
                 Inloggen
@@ -165,13 +175,8 @@ export function Header() {
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <Button
-                onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
-                className="bg-[#0077B5] hover:bg-[#005885] text-sm px-3 py-2"
-                size="sm"
-              >
-                Inloggen
-              </Button>
+              // Mobile login button is now hidden - users must use the mobile menu
+              null
             )}
 
             <Button variant="ghost" size="sm" onClick={toggleMobileMenu} className="p-2" aria-label="Menu">
@@ -206,7 +211,7 @@ export function Header() {
             >
               Contact
             </Link>
-            {session && (
+            {session ? (
               <Link
                 href="/dashboard"
                 className="block text-gray-600 hover:text-gray-900 py-2 text-lg border-t pt-4"
@@ -214,6 +219,13 @@ export function Header() {
               >
                 Dashboard
               </Link>
+            ) : (
+              <Button
+                onClick={handleSignIn}
+                className="w-full bg-[#0077B5] hover:bg-[#005885] text-white py-2 text-lg"
+              >
+                Inloggen
+              </Button>
             )}
           </nav>
         </div>
