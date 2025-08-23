@@ -13,6 +13,7 @@ export function Header() {
   const { data: session, status } = useSession()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
+  const [hasError, setHasError] = useState(false)
 
   // Prevent hydration mismatch
   useEffect(() => {
@@ -21,20 +22,57 @@ export function Header() {
 
   const handleSignIn = async () => {
     try {
+      setHasError(false)
       await signIn("google", { callbackUrl: "/dashboard" })
     } catch (error) {
       console.error("Sign in error:", error)
+      setHasError(true)
       // Fallback to default signin if there's an error
-      window.location.href = "/auth/signin?callbackUrl=/dashboard"
+      setTimeout(() => {
+        window.location.href = "/auth/signin?callbackUrl=/dashboard"
+      }, 100)
     }
   }
 
   const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen)
+    try {
+      setIsMobileMenuOpen(!isMobileMenuOpen)
+    } catch (error) {
+      console.error("Toggle mobile menu error:", error)
+      setIsMobileMenuOpen(false)
+    }
   }
 
   const closeMobileMenu = () => {
-    setIsMobileMenuOpen(false)
+    try {
+      setIsMobileMenuOpen(false)
+    } catch (error) {
+      console.error("Close mobile menu error:", error)
+      setIsMobileMenuOpen(false)
+    }
+  }
+
+  // Error boundary - if there's an error, show a simple header
+  if (hasError) {
+    return (
+      <header className="bg-white shadow-sm border-b fixed top-0 left-0 right-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center">
+              <Logo />
+            </div>
+            <div className="flex items-center space-x-4">
+              <Button
+                onClick={() => window.location.href = "/auth/signin?callbackUrl=/dashboard"}
+                className="bg-[#0077B5] hover:bg-[#005885]"
+              >
+                Inloggen
+              </Button>
+            </div>
+          </div>
+        </div>
+      </header>
+    )
   }
 
   // Don't render auth buttons until mounted to prevent hydration mismatch
@@ -78,42 +116,83 @@ export function Header() {
     )
   }
 
-  return (
-    <header className="bg-white shadow-sm border-b fixed top-0 left-0 right-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          <div className="flex items-center" onClick={closeMobileMenu}>
-            <Logo />
-          </div>
+  try {
+    return (
+      <header className="bg-white shadow-sm border-b fixed top-0 left-0 right-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center" onClick={closeMobileMenu}>
+              <Logo />
+            </div>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-8">
-            <Link href="/pricing" className="text-gray-600 hover:text-gray-900">
-              Prijzen
-            </Link>
-            <Link href="/#faq" className="text-gray-600 hover:text-gray-900">
-              FAQ
-            </Link>
-            <Link href="/contact" className="text-gray-600 hover:text-gray-900">
-              Contact
-            </Link>
-          </nav>
+            {/* Desktop Navigation */}
+            <nav className="hidden md:flex items-center space-x-8">
+              <Link href="/pricing" className="text-gray-600 hover:text-gray-900">
+                Prijzen
+              </Link>
+              <Link href="/#faq" className="text-gray-600 hover:text-gray-900">
+                FAQ
+              </Link>
+              <Link href="/contact" className="text-gray-600 hover:text-gray-900">
+                Contact
+              </Link>
+            </nav>
 
-          {/* Desktop Auth */}
-          <div className="hidden md:flex items-center space-x-4">
-            {status === "loading" ? (
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0077B5]"></div>
-            ) : session ? (
-              <>
-                <Link href="/dashboard">
-                  <Button variant="ghost">Dashboard</Button>
-                </Link>
+            {/* Desktop Auth */}
+            <div className="hidden md:flex items-center space-x-4">
+              {status === "loading" ? (
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0077B5]"></div>
+              ) : session ? (
+                <>
+                  <Link href="/dashboard">
+                    <Button variant="ghost">Dashboard</Button>
+                  </Link>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                        <Avatar className="h-8 w-8">
+                          <AvatarImage src={session.user?.image || ""} alt={session.user?.name || ""} />
+                          <AvatarFallback>
+                            {session.user?.name?.charAt(0) || session.user?.email?.charAt(0) || "U"}
+                          </AvatarFallback>
+                        </Avatar>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-56" align="end" forceMount>
+                      <DropdownMenuItem className="font-normal">
+                        <div className="flex flex-col space-y-1">
+                          <p className="text-sm font-medium leading-none">{session.user?.name}</p>
+                          <p className="text-xs leading-none text-muted-foreground">{session.user?.email}</p>
+                        </div>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link href="/dashboard">Dashboard</Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => signOut({ callbackUrl: "/" })}>Uitloggen</DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </>
+              ) : (
+                <Button
+                  onClick={handleSignIn}
+                  className="bg-[#0077B5] hover:bg-[#005885]"
+                >
+                  Inloggen
+                </Button>
+              )}
+            </div>
+
+            {/* Mobile Menu Button and Auth */}
+            <div className="md:hidden flex items-center space-x-2">
+              {status === "loading" ? (
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#0077B5]"></div>
+              ) : session ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                       <Avatar className="h-8 w-8">
                         <AvatarImage src={session.user?.image || ""} alt={session.user?.name || ""} />
-                        <AvatarFallback>
+                        <AvatarFallback className="text-xs">
                           {session.user?.name?.charAt(0) || session.user?.email?.charAt(0) || "U"}
                         </AvatarFallback>
                       </Avatar>
@@ -127,111 +206,94 @@ export function Header() {
                       </div>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link href="/dashboard">Dashboard</Link>
+                      <Link href="/dashboard" onClick={closeMobileMenu}>
+                        Dashboard
+                      </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => signOut({ callbackUrl: "/" })}>Uitloggen</DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
-              </>
-            ) : (
+              ) : (
+                // Mobile login button is now hidden - users must use the mobile menu
+                null
+              )}
+
+              <Button variant="ghost" size="sm" onClick={toggleMobileMenu} className="p-2" aria-label="Menu">
+                {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile Menu Overlay */}
+        {isMobileMenuOpen && (
+          <div className="md:hidden absolute top-16 left-0 right-0 bg-white border-b shadow-lg z-50">
+            <nav className="px-4 py-4 space-y-4">
+              <Link
+                href="/pricing"
+                className="block text-gray-600 hover:text-gray-900 py-2 text-lg"
+                onClick={closeMobileMenu}
+              >
+                Prijzen
+              </Link>
+              <Link
+                href="/#faq"
+                className="block text-gray-600 hover:text-gray-900 py-2 text-lg"
+                onClick={closeMobileMenu}
+              >
+                FAQ
+              </Link>
+              <Link
+                href="/contact"
+                className="block text-gray-600 hover:text-gray-900 py-2 text-lg"
+                onClick={closeMobileMenu}
+              >
+                Contact
+              </Link>
+              {session ? (
+                <Link
+                  href="/dashboard"
+                  className="block text-gray-600 hover:text-gray-900 py-2 text-lg border-t pt-4"
+                  onClick={closeMobileMenu}
+                >
+                  Dashboard
+                </Link>
+              ) : (
+                <Button
+                  onClick={handleSignIn}
+                  className="w-full bg-[#0077B5] hover:bg-[#005885] text-white py-2 text-lg"
+                >
+                  Inloggen
+                </Button>
+              )}
+            </nav>
+          </div>
+        )}
+      </header>
+    )
+  } catch (error) {
+    console.error("Header rendering error:", error)
+    // Fallback to simple header if there's a rendering error
+    return (
+      <header className="bg-white shadow-sm border-b fixed top-0 left-0 right-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center">
+              <Logo />
+            </div>
+            <div className="flex items-center space-x-4">
               <Button
-                onClick={handleSignIn}
+                onClick={() => window.location.href = "/auth/signin?callbackUrl=/dashboard"}
                 className="bg-[#0077B5] hover:bg-[#005885]"
               >
                 Inloggen
               </Button>
-            )}
-          </div>
-
-          {/* Mobile Menu Button and Auth */}
-          <div className="md:hidden flex items-center space-x-2">
-            {status === "loading" ? (
-              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#0077B5]"></div>
-            ) : session ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage src={session.user?.image || ""} alt={session.user?.name || ""} />
-                      <AvatarFallback className="text-xs">
-                        {session.user?.name?.charAt(0) || session.user?.email?.charAt(0) || "U"}
-                      </AvatarFallback>
-                    </Avatar>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56" align="end" forceMount>
-                  <DropdownMenuItem className="font-normal">
-                    <div className="flex flex-col space-y-1">
-                      <p className="text-sm font-medium leading-none">{session.user?.name}</p>
-                      <p className="text-xs leading-none text-muted-foreground">{session.user?.email}</p>
-                    </div>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/dashboard" onClick={closeMobileMenu}>
-                      Dashboard
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => signOut({ callbackUrl: "/" })}>Uitloggen</DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            ) : (
-              // Mobile login button is now hidden - users must use the mobile menu
-              null
-            )}
-
-            <Button variant="ghost" size="sm" onClick={toggleMobileMenu} className="p-2" aria-label="Menu">
-              {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-            </Button>
+            </div>
           </div>
         </div>
-      </div>
-
-      {/* Mobile Menu Overlay */}
-      {isMobileMenuOpen && (
-        <div className="md:hidden absolute top-16 left-0 right-0 bg-white border-b shadow-lg z-50">
-          <nav className="px-4 py-4 space-y-4">
-            <Link
-              href="/pricing"
-              className="block text-gray-600 hover:text-gray-900 py-2 text-lg"
-              onClick={closeMobileMenu}
-            >
-              Prijzen
-            </Link>
-            <Link
-              href="/#faq"
-              className="block text-gray-600 hover:text-gray-900 py-2 text-lg"
-              onClick={closeMobileMenu}
-            >
-              FAQ
-            </Link>
-            <Link
-              href="/contact"
-              className="block text-gray-600 hover:text-gray-900 py-2 text-lg"
-              onClick={closeMobileMenu}
-            >
-              Contact
-            </Link>
-            {session ? (
-              <Link
-                href="/dashboard"
-                className="block text-gray-600 hover:text-gray-900 py-2 text-lg border-t pt-4"
-                onClick={closeMobileMenu}
-              >
-                Dashboard
-              </Link>
-            ) : (
-              <Button
-                onClick={handleSignIn}
-                className="w-full bg-[#0077B5] hover:bg-[#005885] text-white py-2 text-lg"
-              >
-                Inloggen
-              </Button>
-            )}
-          </nav>
-        </div>
-      )}
-    </header>
-  )
+      </header>
+    )
+  }
 }
 
 // Export as default as well to satisfy both import styles
