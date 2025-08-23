@@ -160,10 +160,11 @@ export default function HomePage() {
           <span className="text-[#0077B5]"> zonder fotograaf of studio </span>
         </h1>
 
-        <p className="text-md md:text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
-        💰 75% goedkoper dan een fotograaf  <br />
-        📸 Profesionele studio kwaliteit in 15 min  <br />
-        👍 Perfect voor linkedin, website en print        </p>
+        <p className="text-md md:text-lg text-gray-600 mb-8 max-w-2xl mx-auto text-left">
+          ✅ Bespaar tot 75% op fotograaf kosten<br />
+          ✅ Profesionele studio kwaliteit in 15 min<br />
+          ✅ Perfect voor linkedin, website en print
+        </p>
 
         <Button
           asChild
