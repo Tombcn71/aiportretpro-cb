@@ -23,7 +23,8 @@ export function Header() {
   const handleSignIn = async () => {
     try {
       setHasError(false)
-      await signIn("google", { callbackUrl: "/dashboard" })
+      // Use direct redirect instead of NextAuth signIn to avoid errors
+      window.location.href = "/auth/signin?callbackUrl=/dashboard"
     } catch (error) {
       console.error("Sign in error:", error)
       setHasError(true)
