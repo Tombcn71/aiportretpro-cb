@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useSession, signOut } from "next-auth/react"
+import { useSession, signIn, signOut } from "next-auth/react"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -19,8 +19,21 @@ export function Header() {
     setMounted(true)
   }, [])
 
-  const handleSignIn = () => {
-    window.location.href = "/dashboard"
+  const handleSignIn = async () => {
+    try {
+      // Try to sign in with Google first (for existing users)
+      await signIn("google", { callbackUrl: "/dashboard" })
+    } catch (error) {
+      console.error("Google sign in error:", error)
+      try {
+        // Fallback to credentials provider (email/password)
+        await signIn("credentials", { callbackUrl: "/dashboard" })
+      } catch (credentialsError) {
+        console.error("Credentials sign in error:", credentialsError)
+        // Final fallback to dashboard
+        window.location.href = "/dashboard"
+      }
+    }
   }
 
   const toggleMobileMenu = () => {
