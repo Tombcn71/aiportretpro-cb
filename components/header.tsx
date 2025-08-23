@@ -20,14 +20,8 @@ export function Header() {
   }, [])
 
   const handleSignIn = () => {
-    // If user is already logged in, go to dashboard
-    if (session) {
-      window.location.href = "/dashboard"
-      return
-    }
-    
-    // If not logged in, redirect to login page
-    window.location.href = "/login?callbackUrl=/dashboard"
+    // Always go to dashboard - if not logged in, NextAuth will handle the redirect
+    window.location.href = "/dashboard"
   }
 
   const toggleMobileMenu = () => {
