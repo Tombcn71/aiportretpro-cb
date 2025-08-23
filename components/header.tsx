@@ -19,21 +19,15 @@ export function Header() {
     setMounted(true)
   }, [])
 
-  const handleSignIn = async () => {
-    try {
-      // Try to sign in with Google first (for existing users)
-      await signIn("google", { callbackUrl: "/dashboard" })
-    } catch (error) {
-      console.error("Google sign in error:", error)
-      try {
-        // Fallback to credentials provider (email/password)
-        await signIn("credentials", { callbackUrl: "/dashboard" })
-      } catch (credentialsError) {
-        console.error("Credentials sign in error:", credentialsError)
-        // Final fallback to dashboard
-        window.location.href = "/dashboard"
-      }
+  const handleSignIn = () => {
+    // If user is already logged in, go to dashboard
+    if (session) {
+      window.location.href = "/dashboard"
+      return
     }
+    
+    // If not logged in, redirect to login page
+    window.location.href = "/login?callbackUrl=/dashboard"
   }
 
   const toggleMobileMenu = () => {
