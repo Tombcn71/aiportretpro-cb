@@ -23,14 +23,14 @@ export function Header() {
   const handleSignIn = async () => {
     try {
       setHasError(false)
-      // Use direct redirect instead of NextAuth signIn to avoid errors
-      window.location.href = "/auth/signin?callbackUrl=/dashboard"
+      // Existing users go directly to dashboard
+      window.location.href = "/dashboard"
     } catch (error) {
       console.error("Sign in error:", error)
       setHasError(true)
-      // Fallback to default signin if there's an error
+      // Fallback to dashboard
       setTimeout(() => {
-        window.location.href = "/auth/signin?callbackUrl=/dashboard"
+        window.location.href = "/dashboard"
       }, 100)
     }
   }
@@ -64,7 +64,7 @@ export function Header() {
             </div>
             <div className="flex items-center space-x-4">
               <Button
-                onClick={() => window.location.href = "/auth/signin?callbackUrl=/dashboard"}
+                onClick={() => window.location.href = "/dashboard"}
                 className="bg-[#0077B5] hover:bg-[#005885]"
               >
                 Inloggen
@@ -284,7 +284,7 @@ export function Header() {
             </div>
             <div className="flex items-center space-x-4">
               <Button
-                onClick={() => window.location.href = "/auth/signin?callbackUrl=/dashboard"}
+                onClick={() => window.location.href = "/login?callbackUrl=/dashboard"}
                 className="bg-[#0077B5] hover:bg-[#005885]"
               >
                 Inloggen
