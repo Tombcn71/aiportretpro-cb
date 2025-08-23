@@ -20,8 +20,8 @@ export function Header() {
   }, [])
 
   const handleSignIn = () => {
-    // Simple redirect to dashboard - NextAuth will handle authentication
-    window.location.href = "/dashboard"
+    // Go to custom login page for new users to follow the flow
+    window.location.href = "/login"
   }
 
   const toggleMobileMenu = () => {
