@@ -95,6 +95,8 @@ export default function LoginPage() {
       const redirectUrl = isHomepageCTA ? "/pricing" : "/dashboard"
       router.push(redirectUrl)
     }
+    // Return undefined (no cleanup function needed)
+    return undefined
   }, [status, session, router, searchParams])
 
   // Show loading while checking authentication

@@ -37,6 +37,9 @@ export default function PricingPage() {
       setHasExistingProject(false)
       console.log("No pending project - user will pay first, then go through wizard")
     }
+    
+    // Return undefined (no cleanup function needed)
+    return undefined
   }, [router])
 
   const handlePlanSelect = () => {
