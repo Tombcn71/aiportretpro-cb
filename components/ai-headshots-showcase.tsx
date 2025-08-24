@@ -58,7 +58,7 @@ Na 15 minuten AI training ontvang je 40 professioneleportretfoto's  </p>
 
         <div className="lg:grid-cols-2 gap-20 max-w-6xl mx-auto grid">
           {profiles.map((profile, profileIndex) => (
-            <div key={profileIndex} className="space-y-2">
+            <div key={profileIndex} className={`space-y-2 ${profileIndex === 1 ? 'hidden lg:block' : ''}`}>
               {/* Small photos row */}
               <div className="flex justify-center">
                 <div className="grid grid-cols-4 gap-3">
