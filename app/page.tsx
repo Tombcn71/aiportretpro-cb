@@ -186,7 +186,7 @@ export default function HomePage() {
         </Button>
 
         {/* Trust Shield */}
-        <div className="flex items-center justify-center gap-2 text-[#0077B5] font-medium text-sm mb-8">
+        <div className="flex items-center justify-center gap-2 text-[#0077B5] font-medium text-sm mb-6 mt-6">
           <div className="relative">
             <Shield className="h-5 w-5 fill-current text-[#0077B5]" />
             <Check className="h-3 w-3 text-white absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" strokeWidth={3} />
