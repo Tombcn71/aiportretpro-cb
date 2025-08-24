@@ -38,8 +38,8 @@ export default function TestPixelPage() {
         addEvent("Purchase (€29.99)")
         break
       case "addtocart":
-        trackAddToCart(19.99, "EUR")
-        addEvent("AddToCart (€19.99)")
+        trackAddToCart(29, "EUR")
+        addEvent("AddToCart (€29)")
         break
       case "viewcontent":
         trackViewContent("AI Headshot Package")

@@ -18,7 +18,7 @@ export default function PricingPage() {
 
   // Track pricing page view
   useEffect(() => {
-    trackViewContent("Pricing Page", "19.99")
+    trackViewContent("Pricing Page", "29")
     
     // Get project data from localStorage
     const pendingProject = localStorage.getItem("pendingProject")
@@ -44,7 +44,7 @@ export default function PricingPage() {
 
   const handlePlanSelect = () => {
     // Track checkout initiation
-    trackInitiateCheckout(19.99)
+    trackInitiateCheckout(29)
 
     if (!session) {
       // Redirect to login with callback to payment page
@@ -117,7 +117,7 @@ export default function PricingPage() {
             <CardHeader className="text-center pt-8">
               <CardTitle className="text-2xl font-bold">Professional</CardTitle>
               <div className="mt-4">
-                <span className="text-2xl md:text-4xl font-bold text-[#0077B5]">€19,99</span>
+                <span className="text-2xl md:text-4xl font-bold text-[#0077B5]">€29</span>
               </div>
               <p className="text-gray-600 mt-2">40 professionele portretfoto's</p>
             </CardHeader>
