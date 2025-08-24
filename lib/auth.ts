@@ -64,20 +64,33 @@ export const authOptions: NextAuthOptions = {
       try {
         if (account?.provider === "google" && user.email) {
           // Import database functions
-          const { createUser } = await import("@/lib/db")
+          const { createUser, getUserByEmail } = await import("@/lib/db")
           
-          // Create or update user using the createUser function
-          await createUser({
-            email: user.email,
-            name: user.name || "",
-            image: user.image || "",
-          })
+          // Check if user already exists before creating
+          const existingUser = await getUserByEmail(user.email)
+          
+          if (!existingUser) {
+            // Only create user if they don't exist
+            await createUser({
+              email: user.email,
+              name: user.name || "",
+              image: user.image || "",
+            })
+          }
         }
         return true
       } catch (error) {
         console.error("Sign in error:", error)
         return false
       }
+    },
+    // New: Add JWT callback for better efficiency
+    async jwt({ token, user, account, profile }) {
+      if (user) {
+        // 'user' is the object returned by the provider (e.g., Google or Credentials)
+        token.id = user.id
+      }
+      return token
     },
     async redirect({ url, baseUrl }) {
       // If the url is relative, prefix it with the base url
@@ -88,17 +101,9 @@ export const authOptions: NextAuthOptions = {
       return `${baseUrl}/dashboard`
     },
     async session({ session, token }) {
-      if (session.user?.email) {
-        try {
-          const user = await sql`
-            SELECT id, email, name, image FROM users WHERE email = ${session.user.email}
-          `
-          if (user.length > 0) {
-            (session.user as any).id = user[0].id.toString()
-          }
-        } catch (error) {
-          console.error("Session error:", error)
-        }
+      if (token.id) {
+        // Use ID from JWT token instead of database query
+        (session.user as any).id = token.id
       }
       return session
     },
