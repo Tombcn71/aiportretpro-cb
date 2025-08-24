@@ -178,7 +178,7 @@ export default function HomePage() {
         <Button
           asChild
           size="lg"
-          className=" bg-[#FF8C00] hover:bg-[#FFA500] text-white px-6 md:px-10 py-8 md:py-8 text-base md:text-lg mb-4 md:max-w-sm"
+          className=" bg-[#FF8C00] hover:bg-[#FFA500] text-white px-6 md:px-10 py-8 md:py-8 text-base md:text-lg mb-3 md:max-w-sm"
         >
           <Link href="/login?source=homepage">
             Start jouw fotoshoot nu - € 29 <ArrowRight className="ml-2 h-6 md:h-7 w-6 md:w-7" />
@@ -186,7 +186,7 @@ export default function HomePage() {
         </Button>
 
         {/* Trust Shield */}
-        <div className="flex items-center justify-center gap-2 text-[#0077B5] font-medium text-sm mb-6 mt-6">
+        <div className="flex items-center justify-center gap-2 text-[#0077B5] font-medium text-sm mb-8">
           <div className="relative">
             <Shield className="h-5 w-5 fill-current text-[#0077B5]" />
             <Check className="h-3 w-3 text-white absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" strokeWidth={3} />
