@@ -24,6 +24,9 @@ export default function PaymentPage() {
     if (status === "authenticated" && session) {
       handleCheckout()
     }
+    
+    // Return undefined (no cleanup function needed)
+    return undefined
   }, [status, session, router])
 
   const handleCheckout = async () => {
