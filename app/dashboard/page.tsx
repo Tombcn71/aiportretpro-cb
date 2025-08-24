@@ -42,6 +42,8 @@ export default function DashboardPage() {
   const [showDeleteMode, setShowDeleteMode] = useState(false)
   const [selectedPhotos, setSelectedPhotos] = useState<Set<string>>(new Set())
   const [bulkDownloading, setBulkDownloading] = useState(false)
+  const [showSelectiveMode, setShowSelectiveMode] = useState(false)
+  const [downloadingAll, setDownloadingAll] = useState(false)
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -267,6 +269,42 @@ export default function DashboardPage() {
     setSelectedPhotos(new Set())
   }
 
+  const downloadAllPhotos = async () => {
+    if (validPhotos.length === 0) return
+
+    setDownloadingAll(true)
+    const zip = new JSZip()
+
+    try {
+      const photosToDownload = validPhotos.filter((photo) => !imageErrors.has(photo.key))
+
+      for (const photo of photosToDownload) {
+        try {
+          const response = await fetch(photo.url)
+          const blob = await response.blob()
+          const filename = `${photo.projectName}_portretfoto_${photo.index + 1}.jpg`
+          zip.file(filename, blob)
+        } catch (error) {
+          console.error(`Failed to download ${photo.url}:`, error)
+        }
+      }
+
+      const zipBlob = await zip.generateAsync({ type: "blob" })
+      const link = document.createElement("a")
+      link.href = URL.createObjectURL(zipBlob)
+      link.download = `alle_portretfotos_${new Date().toISOString().split("T")[0]}.zip`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(link.href)
+    } catch (error) {
+      console.error("Error creating zip file:", error)
+      alert("Er ging iets mis bij het maken van het zip bestand.")
+    } finally {
+      setDownloadingAll(false)
+    }
+  }
+
   const bulkDownloadPhotos = async () => {
     if (selectedPhotos.size === 0) return
 
@@ -361,9 +399,46 @@ export default function DashboardPage() {
             <h2 className="text-2xl font-semibold">Jouw Portetfotos</h2>
             {validPhotos.length > 0 && (
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-4 w-full sm:w-auto">
-                {/* Bulk Download Controls */}
-                {!showDeleteMode && (
+                {/* Main Download Button - Always visible when not in delete mode */}
+                {!showDeleteMode && !showSelectiveMode && (
                   <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                    <Button
+                      onClick={downloadAllPhotos}
+                      disabled={downloadingAll}
+                      className="bg-[#0077B5] hover:bg-[#004182] text-white w-full sm:w-auto"
+                      size="default"
+                    >
+                      <DownloadIcon className="h-4 w-4 mr-2" />
+                      {downloadingAll ? "Downloaden..." : `📥 Download alle foto's (${validPhotos.length})`}
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        setShowSelectiveMode(true)
+                        setSelectedPhotos(new Set())
+                      }}
+                      variant="outline"
+                      size="default"
+                      className="w-full sm:w-auto text-sm"
+                    >
+                      📋 Selecteer foto's
+                    </Button>
+                  </div>
+                )}
+
+                {/* Selective Download Controls */}
+                {!showDeleteMode && showSelectiveMode && (
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                    <Button
+                      onClick={() => {
+                        setShowSelectiveMode(false)
+                        setSelectedPhotos(new Set())
+                      }}
+                      variant="outline"
+                      size="sm"
+                      className="w-full sm:w-auto"
+                    >
+                      ← Terug naar hoofdmodus
+                    </Button>
                     <Button
                       onClick={selectedPhotos.size === validPhotos.length ? deselectAllPhotos : selectAllPhotos}
                       variant="outline"
@@ -389,6 +464,7 @@ export default function DashboardPage() {
                 <Button
                   onClick={() => {
                     setShowDeleteMode(!showDeleteMode)
+                    setShowSelectiveMode(false)
                     setSelectedPhotos(new Set()) // Clear selection when toggling modes
                   }}
                   variant={showDeleteMode ? "destructive" : "outline"}
@@ -447,7 +523,7 @@ export default function DashboardPage() {
                     } ${deletingPhotos.has(photo.key) ? "opacity-50" : ""} ${
                       !showDeleteMode && selectedPhotos.has(photo.key) ? "ring-2 ring-[#0077B5]" : ""
                     }`}
-                    onClick={showDeleteMode ? () => deletePhoto(photo) : () => togglePhotoSelection(photo.key)}
+                    onClick={showDeleteMode ? () => deletePhoto(photo) : (showSelectiveMode ? () => togglePhotoSelection(photo.key) : undefined)}
                   >
                     <Image
                       src={photo.url || "/placeholder.svg"}
@@ -461,7 +537,7 @@ export default function DashboardPage() {
                     />
 
                     {/* Selection indicator */}
-                    {!showDeleteMode && selectedPhotos.has(photo.key) && (
+                    {!showDeleteMode && showSelectiveMode && selectedPhotos.has(photo.key) && (
                       <div className="absolute top-2 right-2 bg-[#0077B5] text-white rounded-full p-1">
                         <CheckCircle className="h-4 w-4" />
                       </div>
