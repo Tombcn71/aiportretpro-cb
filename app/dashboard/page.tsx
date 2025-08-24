@@ -44,6 +44,8 @@ export default function DashboardPage() {
   const [bulkDownloading, setBulkDownloading] = useState(false)
   const [showSelectiveMode, setShowSelectiveMode] = useState(false)
   const [downloadingAll, setDownloadingAll] = useState(false)
+  const [selectedPhotosForDelete, setSelectedPhotosForDelete] = useState<Set<string>>(new Set())
+  const [bulkDeleting, setBulkDeleting] = useState(false)
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -235,6 +237,13 @@ export default function DashboardPage() {
         return newSet
       })
 
+      // Remove from delete selection if it was selected
+      setSelectedPhotosForDelete((prev) => {
+        const newSet = new Set(prev)
+        newSet.delete(photo.key)
+        return newSet
+      })
+
       console.log("Photo deleted successfully")
     } catch (error) {
       console.error("Error deleting photo:", error)
@@ -246,6 +255,113 @@ export default function DashboardPage() {
         return newSet
       })
     }
+  }
+
+  const bulkDeletePhotos = async () => {
+    if (selectedPhotosForDelete.size === 0) return
+
+    const count = selectedPhotosForDelete.size
+    if (!confirm(`Weet je zeker dat je ${count} foto's wilt verwijderen? Dit kan niet ongedaan worden gemaakt.`)) {
+      return
+    }
+
+    setBulkDeleting(true)
+    const photosToDelete = validPhotos.filter((photo) => selectedPhotosForDelete.has(photo.key))
+
+    try {
+      // Delete all selected photos
+      for (const photo of photosToDelete) {
+        setDeletingPhotos((prev) => new Set([...prev, photo.key]))
+        
+        try {
+          const response = await fetch("/api/photos/delete", {
+            method: "DELETE",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              photoUrl: photo.url,
+              projectId: photo.projectId,
+            }),
+          })
+
+          if (!response.ok) {
+            throw new Error(`Failed to delete photo ${photo.key}`)
+          }
+        } catch (error) {
+          console.error(`Error deleting photo ${photo.key}:`, error)
+          // Continue with other photos even if one fails
+        }
+      }
+
+      // Update the projects state to reflect all deletions
+      setProjects((prevProjects) =>
+        prevProjects.map((project) => {
+          let currentPhotos: string[] = []
+
+          if (project.generated_photos) {
+            try {
+              if (typeof project.generated_photos === "string") {
+                if (project.generated_photos.startsWith("[")) {
+                  currentPhotos = JSON.parse(project.generated_photos)
+                } else {
+                  currentPhotos = [project.generated_photos]
+                }
+              } else if (Array.isArray(project.generated_photos)) {
+                currentPhotos = project.generated_photos
+              }
+            } catch (e) {
+              currentPhotos = []
+            }
+          }
+
+          // Remove all selected photos from this project
+          const photosToRemove = photosToDelete
+            .filter((photo) => photo.projectId === project.id)
+            .map((photo) => photo.url)
+          
+          const updatedPhotos = currentPhotos.filter((url) => !photosToRemove.includes(url))
+
+          return {
+            ...project,
+            generated_photos: updatedPhotos,
+          }
+        }),
+      )
+
+      // Clear selections
+      setSelectedPhotosForDelete(new Set())
+      setSelectedPhotos(new Set())
+      
+      console.log(`Successfully deleted ${count} photos`)
+    } catch (error) {
+      console.error("Error in bulk delete:", error)
+      alert("Er ging iets mis bij het verwijderen van foto's. Sommige foto's zijn mogelijk niet verwijderd.")
+    } finally {
+      setBulkDeleting(false)
+      setDeletingPhotos(new Set())
+    }
+  }
+
+  const togglePhotoForDelete = (photoKey: string) => {
+    setSelectedPhotosForDelete((prev) => {
+      const newSet = new Set(prev)
+      if (newSet.has(photoKey)) {
+        newSet.delete(photoKey)
+      } else {
+        newSet.add(photoKey)
+      }
+      return newSet
+    })
+  }
+
+  const selectAllPhotosForDelete = () => {
+    const validPhotoKeys = validPhotos.filter((photo) => !imageErrors.has(photo.key)).map((photo) => photo.key)
+    setSelectedPhotosForDelete(new Set(validPhotoKeys))
+  }
+
+  const deselectAllPhotosForDelete = () => {
+    setSelectedPhotosForDelete(new Set())
   }
 
   const togglePhotoSelection = (photoKey: string) => {
@@ -461,11 +577,38 @@ export default function DashboardPage() {
                   </div>
                 )}
 
+                {/* Delete Mode Controls */}
+                {showDeleteMode && (
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                    <Button
+                      onClick={selectedPhotosForDelete.size === validPhotos.length ? deselectAllPhotosForDelete : selectAllPhotosForDelete}
+                      variant="outline"
+                      size="sm"
+                      className="w-full sm:w-auto"
+                    >
+                      {selectedPhotosForDelete.size === validPhotos.length ? "Deselecteer Alles" : "Selecteer Alles"}
+                    </Button>
+                    {selectedPhotosForDelete.size > 0 && (
+                      <Button
+                        onClick={bulkDeletePhotos}
+                        disabled={bulkDeleting}
+                        variant="destructive"
+                        size="sm"
+                        className="w-full sm:w-auto"
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        {bulkDeleting ? "Verwijderen..." : `Verwijder ${selectedPhotosForDelete.size} foto's`}
+                      </Button>
+                    )}
+                  </div>
+                )}
+
                 <Button
                   onClick={() => {
                     setShowDeleteMode(!showDeleteMode)
                     setShowSelectiveMode(false)
                     setSelectedPhotos(new Set()) // Clear selection when toggling modes
+                    setSelectedPhotosForDelete(new Set()) // Clear delete selection when toggling modes
                   }}
                   variant={showDeleteMode ? "destructive" : "outline"}
                   className="flex items-center gap-2 w-full sm:w-auto"
@@ -489,8 +632,13 @@ export default function DashboardPage() {
           {showDeleteMode && (
             <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
               <p className="text-red-800 font-medium">
-                ⚠️ Verwijder modus actief - Klik op een foto om deze permanent te verwijderen
+                ⚠️ Verwijder modus actief - Klik op foto's om ze te selecteren voor verwijdering
               </p>
+              {selectedPhotosForDelete.size > 0 && (
+                <p className="text-red-700 text-sm mt-2">
+                  {selectedPhotosForDelete.size} foto{selectedPhotosForDelete.size === 1 ? '' : 's'} geselecteerd voor verwijdering
+                </p>
+              )}
             </div>
           )}
 
@@ -521,9 +669,11 @@ export default function DashboardPage() {
                     className={`aspect-[3/4] rounded-lg overflow-hidden bg-gray-100 shadow-md hover:shadow-lg transition-all ${
                       showDeleteMode ? "cursor-pointer hover:ring-2 hover:ring-red-500" : ""
                     } ${deletingPhotos.has(photo.key) ? "opacity-50" : ""} ${
-                      !showDeleteMode && selectedPhotos.has(photo.key) ? "ring-2 ring-[#0077B5]" : ""
+                      !showDeleteMode && showSelectiveMode && selectedPhotos.has(photo.key) ? "ring-2 ring-[#0077B5]" : ""
+                    } ${
+                      showDeleteMode && selectedPhotosForDelete.has(photo.key) ? "ring-2 ring-red-500" : ""
                     }`}
-                    onClick={showDeleteMode ? () => deletePhoto(photo) : (showSelectiveMode ? () => togglePhotoSelection(photo.key) : undefined)}
+                    onClick={showDeleteMode ? () => togglePhotoForDelete(photo.key) : (showSelectiveMode ? () => togglePhotoSelection(photo.key) : undefined)}
                   >
                     <Image
                       src={photo.url || "/placeholder.svg"}
@@ -536,15 +686,22 @@ export default function DashboardPage() {
                       crossOrigin="anonymous"
                     />
 
-                    {/* Selection indicator */}
+                    {/* Selection indicator for download mode */}
                     {!showDeleteMode && showSelectiveMode && selectedPhotos.has(photo.key) && (
                       <div className="absolute top-2 right-2 bg-[#0077B5] text-white rounded-full p-1">
                         <CheckCircle className="h-4 w-4" />
                       </div>
                     )}
 
+                    {/* Selection indicator for delete mode */}
+                    {showDeleteMode && selectedPhotosForDelete.has(photo.key) && (
+                      <div className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1">
+                        <CheckCircle className="h-4 w-4" />
+                      </div>
+                    )}
+
                     {/* Delete overlay */}
-                    {showDeleteMode && (
+                    {showDeleteMode && !selectedPhotosForDelete.has(photo.key) && (
                       <div className="absolute inset-0 bg-red-500 bg-opacity-0 hover:bg-opacity-20 transition-all flex items-center justify-center">
                         <Trash2 className="h-8 w-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
                       </div>
