@@ -17,6 +17,8 @@ export function Header() {
   // Prevent hydration mismatch
   useEffect(() => {
     setMounted(true)
+    // Return undefined (no cleanup function needed)
+    return undefined
   }, [])
 
   const handleSignIn = () => {
