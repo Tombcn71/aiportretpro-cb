@@ -116,10 +116,14 @@ export default function HomePage() {
   // Prevent hydration mismatch
   useEffect(() => {
     setIsClient(true)
+    // Return undefined (no cleanup function needed)
+    return undefined
   }, [])
 
   useEffect(() => {
     setIsClient(true)
+    // Return undefined (no cleanup function needed)
+    return undefined
   }, [])
 
   useEffect(() => {
