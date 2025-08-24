@@ -50,10 +50,10 @@ export default function AIHeadshotsShowcase() {
     <section className="py-16 bg-white">
       <div className="max-w-7xl mx-auto px-4">
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+          <h2 className="text-2xl md:text-4xl font-bold text-gray-900 mb-4">
 Voorbeelden          </h2>
-          <p className="text-xl text-gray-600">Upload een paar foto's
-Na 15 minuten AI training ontvang je 40 professioneleportretfoto's  </p>
+          <p className="text-lg text-gray-600">
+Na 15 min ontvang je 40 professionele portretfoto's in je dashboard </p>
         </div>
 
         <div className="lg:grid-cols-2 gap-20 max-w-6xl mx-auto grid">
