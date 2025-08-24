@@ -48,6 +48,8 @@ export default function DashboardPage() {
     if (status === "unauthenticated") {
       router.push("/login")
     }
+    // Return undefined (no cleanup function needed)
+    return undefined
   }, [status, router])
 
   // Don't render if not authenticated
