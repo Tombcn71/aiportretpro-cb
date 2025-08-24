@@ -85,8 +85,8 @@ export default function PricingPage() {
   }
 
   const features = [
-    "Verschillende zakelijke outfits",
-    "Verschillende poses en achtergronden",
+    "5 Verschillende zakelijke outfits",
+    "5 Verschillende poses en achtergronden",
     "HD kwaliteit downloads",
     "Klaar binnen 15 minuten",
     "Perfect voor LinkedIn, Social Media, CV, Website en Print",
@@ -104,8 +104,10 @@ export default function PricingPage() {
             </>
           ) : (
             <>
-              <h1 className="text-2xl md:text-4xl font-bold text-gray-900 mb-2">🚀 Start je professionele fotoshoot</h1>
-              <p className="text-md text-gray-600">Betaal eerst en ga dan door de wizard om je foto's te uploaden</p>
+              <h1 className="text-2xl md:text-4xl font-bold text-gray-900 mb-2"> Bespaar zeker 75% op fotograaf en studio kosten</h1>
+              <p className="text-md text-gray-600"> De prijzen van een professionele portretfoto fotoshoot in NL beginnen vanaf ongeveer €100-€250 .
+
+</p>
             </>
           )}
         </div>

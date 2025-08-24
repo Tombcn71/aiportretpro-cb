@@ -164,9 +164,9 @@ export default function HomePage() {
         </h1>
 
         <div className="text-md md:text-lg text-gray-600 mb-8 max-w-2xl mx-auto text-center">
-          <div className="inline-grid grid-cols-[auto_1fr] gap-x-2 items-start justify-center">
+          <div className="inline-grid grid-cols-[auto_1fr] gap-x-2 items-start text-start justify-center">
             <span className="text-center">✅</span>
-            <span>Bespaar tot 75% aan fotograaf kosten</span>
+            <span>75% goedkoper dan een fotograaf</span>
             <span className="text-center">✅</span>
             <span>Profesionele studio kwaliteit in 15 min</span>
             <span className="text-center">✅</span>

@@ -1,5 +1,6 @@
 import Link from "next/link"
 import Image from "next/image"
+import { RiCameraAiLine } from "react-icons/ri"
 
 interface LogoProps {
   size?: "sm" | "md" | "lg"
@@ -8,41 +9,8 @@ interface LogoProps {
 }
 
 export function Logo({ size = "md", variant = "default", showText = true }: LogoProps) {
-  const sizeClasses = {
-    sm: "h-5 w-5",
-    md: "h-5 w-5",
-    lg: "h-6 w-6",
-  }
-
-  const textSizeClasses = {
-    sm: "text-sm",
-    md: "text-md",
-    lg: "text-lg",
-  }
-
-  return (
-    <Link href="/" className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
-      {/* Your exact logo image */}
-      <div className={`${sizeClasses[size]} relative flex-shrink-0`}>
-        <Image
-          src="/images/logo-icon.png"
-          alt="AI Portret Pro Logo"
-          width={40}
-          height={40}
-          className="w-full h-full object-contain"
-        />
-      </div>
-
-      {showText && (
-        <div className="flex flex-col">
-          <span className={`${textSizeClasses[size]}  text-black leading-tight`}>AiPortretPro</span>
-          {size === "lg" && (
-            <span className="text-xs text-gray-500 font-medium tracking-wide">PROFESSIONELE HEADSHOTS</span>
-          )}
-        </div>
-      )}
-    </Link>
-  )
+  // Use the new Camera AI Logo by default
+  return <CameraAiLogo size={size} />
 }
 
 // EXACT LinkedIn-style logo zoals in de afbeelding
@@ -115,6 +83,45 @@ export function LightningLogo({ size = "md" }: { size?: "sm" | "md" | "lg" }) {
       {/* Logo Text - Now in black */}
       <div className="flex flex-col">
         <span className={`${textSizes[size]}  text-black leading-tight`}>AiPortretPro</span>
+        {size === "lg" && (
+          <span className="text-xs text-gray-500 font-medium tracking-wide">PROFESSIONELE HEADSHOTS</span>
+        )}
+      </div>
+    </Link>
+  )
+}
+
+// Camera AI Logo in LinkedIn Blue
+export function CameraAiLogo({ size = "md" }: { size?: "sm" | "md" | "lg" }) {
+  const containerSizes = {
+    sm: "h-8",
+    md: "h-10", 
+    lg: "h-12",
+  }
+
+  const iconSizes = {
+    sm: "text-xl",
+    md: "text-3xl",
+    lg: "text-4xl",
+  }
+
+  const textSizes = {
+    sm: "text-sm",
+    md: "text-lg",
+    lg: "text-xl",
+  }
+
+  return (
+    <Link
+      href="/"
+      className={`flex items-center space-x-2 hover:opacity-80 transition-opacity ${containerSizes[size]}`}
+    >
+      {/* Camera AI Icon in LinkedIn Blue */}
+      <RiCameraAiLine className={`${iconSizes[size]} text-[#0077B5]`} />
+
+      {/* Logo Text */}
+      <div className="flex flex-col">
+        <span className={`${textSizes[size]} font-normal text-gray-900 leading-tight`}>AiportretPro</span>
         {size === "lg" && (
           <span className="text-xs text-gray-500 font-medium tracking-wide">PROFESSIONELE HEADSHOTS</span>
         )}
