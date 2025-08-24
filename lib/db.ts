@@ -25,19 +25,35 @@ export async function createUser(data: {
   password_hash?: string
 }) {
   try {
-    const result = await sql`
-      INSERT INTO users (email, name, image, password_hash)
-      VALUES (${data.email}, ${data.name || ""}, ${data.image || ""}, ${data.password_hash || null})
-      ON CONFLICT (email) DO UPDATE SET
-        name = EXCLUDED.name,
-        image = EXCLUDED.image,
-        password_hash = COALESCE(EXCLUDED.password_hash, users.password_hash),
-        updated_at = CURRENT_TIMESTAMP
-      RETURNING *
+    // First check if user exists
+    const existingUser = await sql`
+      SELECT id, email, name, image, password_hash FROM users WHERE email = ${data.email}
     `
-    return result[0]
+
+    if (existingUser.length > 0) {
+      // User exists, update if needed
+      const result = await sql`
+        UPDATE users 
+        SET 
+          name = COALESCE(${data.name || ""}, users.name),
+          image = COALESCE(${data.image || ""}, users.image),
+          password_hash = COALESCE(${data.password_hash || null}, users.password_hash),
+          updated_at = CURRENT_TIMESTAMP
+        WHERE email = ${data.email}
+        RETURNING *
+      `
+      return result[0]
+    } else {
+      // User doesn't exist, create new
+      const result = await sql`
+        INSERT INTO users (email, name, image, password_hash)
+        VALUES (${data.email}, ${data.name || ""}, ${data.image || ""}, ${data.password_hash || null})
+        RETURNING *
+      `
+      return result[0]
+    }
   } catch (error) {
-    console.error("Error creating user:", error)
+    console.error("Error creating/updating user:", error)
     throw error
   }
 }
