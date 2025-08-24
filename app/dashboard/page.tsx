@@ -95,7 +95,11 @@ export default function DashboardPage() {
       }
     }
 
+    // Call the async function properly - this fixes React Error #310
     fetchData()
+    
+    // Return undefined (no cleanup function needed)
+    return undefined
   }, [status])
 
   // Parse generated photos and filter out invalid ones - ONLY COUNT UNIQUE PHOTOS
