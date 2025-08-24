@@ -162,6 +162,7 @@ export default function HomePage() {
           <span className="inline md:block">Professionele zakelijke portretfoto's </span>
           <span className="text-[#0077B5] inline md:block">zonder fotograaf of studio</span>
         </h1>
+        <p className="text-gray-500 text-lg mb-6 font-light italic">Even 6 foto's uploaden, dat is alles.</p>
 
         <div className="text-md md:text-lg text-gray-600 mb-8 max-w-2xl mx-auto text-center">
           <div className="inline-grid grid-cols-[auto_1fr] gap-x-2 items-start text-start justify-center">
@@ -180,7 +181,7 @@ export default function HomePage() {
           className=" bg-[#FF8C00] hover:bg-[#FFA500] text-white px-6 md:px-10 py-8 md:py-8 text-base md:text-lg mb-8 md:max-w-sm"
         >
           <Link href="/login?source=homepage">
-            Start jouw fotoshoot nu - 19,99€ <ArrowRight className="ml-2 h-6 md:h-7 w-6 md:w-7" />
+            Start jouw fotoshoot - € 29 <ArrowRight className="ml-2 h-6 md:h-7 w-6 md:w-7" />
           </Link>
         </Button>
       </section>
@@ -282,7 +283,7 @@ export default function HomePage() {
           {isClient && (
             <Link href="/login?source=homepage">
               <Button size="lg" className="bg-[#FFA500] hover:bg-[#FF8C00] text-white px-8 py-4 text-lg">
-                Start jouw fotoshoot nu - 19,99€ <ArrowRight className="ml-2 h-5 w-5" />
+                Start jouw fotoshoot - € 29 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </Link>
           )}
@@ -418,7 +419,7 @@ export default function HomePage() {
               className="w-full bg-[#FF8C00] hover:bg-[#FFA500] text-white px-6 py-8 text-base font-semibold"
             >
                        <Link href="/login?source=homepage">
-            Start jouw fotoshoot nu - 19,99€ <ArrowRight className="ml-2 h-6 md:h-7 w-6 md:w-7" />
+            Start jouw fotoshoot - € 29 <ArrowRight className="ml-2 h-6 md:h-7 w-6 md:w-7" />
           </Link>
             </Button>
           </div>
