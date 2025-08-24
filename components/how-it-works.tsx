@@ -13,8 +13,8 @@ export default function HowItWorks() {
         </p>
 
         {/* Mobile: Compact numbered list */}
-        <div className="md:hidden space-y-4 max-w-lg mx-auto">
-          <div className="flex items-start gap-3 text-left">
+        <div className="md:hidden space-y-4 max-w-lg mx-auto px-4">
+          <div className="flex items-start gap-4 text-left">
             <div className="w-6 h-6 bg-[#0077B5] text-white rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 mt-0.5">
               1
             </div>
@@ -24,7 +24,7 @@ export default function HowItWorks() {
             </div>
           </div>
           
-          <div className="flex items-start gap-3 text-left">
+          <div className="flex items-start gap-4 text-left">
             <div className="w-6 h-6 bg-[#0077B5] text-white rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 mt-0.5">
               2
             </div>
@@ -34,7 +34,7 @@ export default function HowItWorks() {
             </div>
           </div>
           
-          <div className="flex items-start gap-3 text-left">
+          <div className="flex items-start gap-4 text-left">
             <div className="w-6 h-6 bg-[#0077B5] text-white rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 mt-0.5">
               3
             </div>
