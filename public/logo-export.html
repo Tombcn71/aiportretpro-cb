@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AiportretPro Logo Export</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f9fafb;
+            padding: 40px;
+            margin: 0;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .logo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 40px;
+            margin-top: 40px;
+        }
+        
+        .logo-item {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            text-align: center;
+        }
+        
+        .logo-item h3 {
+            margin: 0 0 20px 0;
+            color: #374151;
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        .logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+        
+        .logo-sm {
+            height: 32px;
+        }
+        
+        .logo-md {
+            height: 40px;
+        }
+        
+        .logo-lg {
+            height: 48px;
+        }
+        
+        .logo-xl {
+            height: 64px;
+        }
+        
+        .icon-sm { font-size: 20px; }
+        .icon-md { font-size: 24px; }
+        .icon-lg { font-size: 32px; }
+        .icon-xl { font-size: 40px; }
+        
+        .text-sm { font-size: 14px; }
+        .text-md { font-size: 18px; }
+        .text-lg { font-size: 20px; }
+        .text-xl { font-size: 24px; }
+        
+        .icon {
+            color: #0077B5;
+        }
+        
+        .logo-text {
+            color: #111827;
+            font-weight: 400;
+            line-height: 1.1;
+        }
+        
+        .logo-square {
+            width: 80px;
+            height: 80px;
+            background: #0077B5;
+            border-radius: 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 40px;
+        }
+        
+        .instructions {
+            background: #eff6ff;
+            border: 1px solid #3b82f6;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 32px;
+        }
+        
+        .instructions h2 {
+            margin: 0 0 8px 0;
+            color: #1e40af;
+            font-size: 18px;
+        }
+        
+        .instructions p {
+            margin: 0;
+            color: #1e40af;
+            font-size: 14px;
+        }
+        
+        .download-btn {
+            background: #0077B5;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 16px;
+        }
+        
+        .download-btn:hover {
+            background: #005885;
+        }
+        
+        canvas {
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 style="text-align: center; color: #111827; margin-bottom: 8px;">AiportretPro Logo Export</h1>
+        <p style="text-align: center; color: #6b7280; margin-bottom: 32px;">Rechtsklik op een logo om het op te slaan als afbeelding</p>
+        
+        <div class="instructions">
+            <h2>📥 Hoe te gebruiken:</h2>
+            <p>1. Klik op de "Download" knop onder het logo dat je wilt<br>
+               2. Het bestand wordt automatisch gedownload als PNG<br>
+               3. Klaar! Nu heb je je logo als PNG bestand</p>
+        </div>
+        
+        <div class="logo-grid">
+            <!-- Small Icon -->
+            <div class="logo-item">
+                <h3>Small (64x64px) - Favicon</h3>
+                <canvas id="canvas-sm" width="64" height="64"></canvas>
+                <br><button class="download-btn" onclick="downloadLogo('sm', 'AiportretPro-icon-small.png')">Download PNG</button>
+            </div>
+            
+            <!-- Medium Icon -->
+            <div class="logo-item">
+                <h3>Medium (128x128px) - Apps</h3>
+                <canvas id="canvas-md" width="128" height="128"></canvas>
+                <br><button class="download-btn" onclick="downloadLogo('md', 'AiportretPro-icon-medium.png')">Download PNG</button>
+            </div>
+            
+            <!-- Large Icon -->
+            <div class="logo-item">
+                <h3>Large (256x256px) - Social media</h3>
+                <canvas id="canvas-lg" width="256" height="256"></canvas>
+                <br><button class="download-btn" onclick="downloadLogo('lg', 'AiportretPro-icon-large.png')">Download PNG</button>
+            </div>
+            
+            <!-- White version -->
+            <div class="logo-item" style="background: #111827;">
+                <h3 style="color: white;">White (128x128px) - Dark backgrounds</h3>
+                <canvas id="canvas-white" width="128" height="128"></canvas>
+                <br><button class="download-btn" onclick="downloadLogo('white', 'AiportretPro-icon-white.png')">Download PNG</button>
+            </div>
+        </div>
+        
+        <div style="margin-top: 40px; text-align: center; color: #6b7280; font-size: 14px;">
+            <p>💡 Tip: Klik op "Download PNG" voor directe download in hoge kwaliteit</p>
+        </div>
+    </div>
+
+    <script>
+        // RiCameraAiLine correct SVG path 
+        const cameraAiPath = "M4 8h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V8zm3-6h10v2H7V2zm6 8a3 3 0 100 6 3 3 0 000-6zm0 2a1 1 0 110 2 1 1 0 010-2zm5-1a1 1 0 110 2 1 1 0 010-2z";
+        
+        function drawLogo(canvasId, size) {
+            const canvas = document.getElementById(canvasId);
+            const ctx = canvas.getContext('2d');
+            
+            // Clear canvas with transparent background
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            const iconSize = Math.min(canvas.width, canvas.height) * 0.8;
+            const x = (canvas.width - iconSize) / 2;
+            const y = (canvas.height - iconSize) / 2;
+            
+            if (size === 'white') {
+                // Dark background for white icon
+                ctx.fillStyle = '#111827';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                drawCameraAiIcon(ctx, x, y, iconSize, 'white');
+            } else {
+                // Transparent background with blue icon
+                drawCameraAiIcon(ctx, x, y, iconSize, '#0077B5');
+            }
+        }
+        
+        function drawCameraAiIcon(ctx, x, y, size, color) {
+            ctx.save();
+            ctx.fillStyle = color;
+            
+            // Scale and position the icon
+            const scale = size / 24; // Original icon is 24x24
+            ctx.translate(x, y);
+            ctx.scale(scale, scale);
+            
+            // Draw the RiCameraAiLine icon using SVG path
+            const path = new Path2D(cameraAiPath);
+            ctx.fill(path);
+            
+            ctx.restore();
+        }
+        
+        function downloadLogo(size, filename) {
+            const canvas = document.getElementById(`canvas-${size}`);
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+        
+        // Draw all logos when page loads
+        window.onload = function() {
+            drawLogo('canvas-sm', 'sm');
+            drawLogo('canvas-md', 'md');
+            drawLogo('canvas-lg', 'lg');
+            drawLogo('canvas-white', 'white');
+        };
+    </script>
+</body>
+</html>

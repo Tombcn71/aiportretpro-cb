@@ -9,8 +9,8 @@ interface LogoProps {
 }
 
 export function Logo({ size = "md", variant = "default", showText = true }: LogoProps) {
-  // Use the new Camera AI Logo by default
-  return <CameraAiLogo size={size} />
+  // Use the original Lightning Logo with your logo.png
+  return <LightningLogo size={size} />
 }
 
 // EXACT LinkedIn-style logo zoals in de afbeelding
