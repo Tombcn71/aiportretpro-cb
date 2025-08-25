@@ -97,19 +97,21 @@ export default function PricingPage() {
       <Header />
       <div className="container mx-auto px-4 py-20">
         <div className="text-center mb-6">
-          {hasExistingProject ? (
-            <>
-              <h1 className="text-2xl md:text-4xl font-bold text-gray-900 mb-2">🎉 Je foto's zijn geüpload!</h1>
-              <p className="text-md text-gray-600">Nu nog een snelle betaling en je krijgt je professionele headshots</p>
-            </>
-          ) : (
-            <>
-              <h1 className="text-2xl md:text-4xl font-bold text-gray-900 mb-2"> Bespaar zeker 75% op fotograaf en studio kosten</h1>
-              <p className="text-md text-gray-600"> De prijzen van een professionele portretfoto fotoshoot in NL beginnen vanaf ongeveer €100-€250 .
-
-</p>
-            </>
-          )}
+        
+           
+       
+        <div className="text-center mb-8 max-w-3xl mx-auto px-4">
+          <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 mb-4 leading-tight">
+            Professionele portretfoto's via ons zijn 
+            <span className="text-[#0077B5]"> 75% goedkoper</span> dan bij een fotograaf
+          </h1>
+          <p className="text-base md:text-lg text-gray-600 leading-relaxed">
+            De prijzen van professionele zakelijke portretfoto's in Nederland liggen tussen de 
+            <span className="font-semibold text-gray-800"> €100-€250</span>
+          </p>
+        </div>
+            
+        
         </div>
 
         <div className="max-w-md mx-auto">
