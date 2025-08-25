@@ -45,13 +45,9 @@ const faqData = [
   {
     question: "Hoe werkt deze app precies?",
     answer:
-      "Onze app gebruikt slimme computerprogramma's (we noemen dat Artificiële Intelligentie of AI) om jouw gewone foto's om te toveren in professionele portretfoto's. Je uploadt een paar van je eigen foto's – hoe meer, hoe beter! De AI leert van deze foto's hoe jij eruitziet. Daarna kan het nieuwe foto's van jou maken in allerlei stijlen, alsof je bij een professionele fotograaf bent geweest.",
+      "Onze app gebruikt slimme computerprogramma's (we noemen dat Artificiële Intelligentie of AI) om jouw gewone foto's om te toveren in professionele portretfoto's. Je uploadt een paar van je eigen foto's. De AI leert van deze foto's hoe jij eruitziet. Daarna kan het nieuwe foto's van jou maken in allerlei stijlen, alsof je bij een professionele fotograaf bent geweest.",
   },
-  {
-    question: "Maakt de app dan allemaal 'nieuwe' foto's van mijn gezicht?",
-    answer:
-      "Ja, dat klopt! De app maakt allemaal nieuwe foto's van jou. Het werkt zo: de AI is als een super slimme leerling die precies onthoudt hoe jouw ogen, neus, mond en haar eruitzien en hoe ze bewegen. Wanneer je jouw foto's uploadt, bestudeert de AI jou van top tot teen. Het leert jouw unieke kenmerken en stijl. Vervolgens combineert de AI deze kennis van jou met alles wat het al heeft geleerd van talloze andere professionele foto's (denk aan poses, belichting, en achtergronden). Hierdoor kan de AI compleet nieuwe, realistische beelden van jou genereren die er professioneel uitzien, zonder dat die beelden ooit echt zijn genomen.",
-  },
+  
   {
     question: "Is het veilig om mijn foto's te uploaden? Wat gebeurt ermee?",
     answer:
@@ -62,20 +58,12 @@ const faqData = [
     answer:
       "Om de AI zo goed mogelijk te laten leren hoe jij eruitziet, raden we aan om minimaal 6 foto's te uploaden. Upload foto's met goede belichting, gemaakt op verschillende dagen met verschillende kleding en verschillende achtergronden. Een mix van close-ups en mid-range shots werkt het beste. Zorg ervoor dat je gezicht duidelijk zichtbaar is.",
   },
+  
+  
   {
-    question: "Kan ik de gegenereerde portretfoto's nog aanpassen?",
+    question: "Hoe lang duurt het voordat mijn portretfoto's klaar zijn?",
     answer:
-      "De app maakt de headshots automatisch, en je kunt ze niet direct in de app bewerken. Je krijgt 40 verschillende professionele headshots waaruit je kunt kiezen. Als je daarna nog kleine aanpassingen wilt doen, kun je daarvoor een aparte fotobewerkingsapp gebruiken.",
-  },
-  {
-    question: "Werkt de app ook met groepsfoto's of foto's waar ik niet duidelijk op sta?",
-    answer:
-      "Nee, voor de beste resultaten is het belangrijk dat jij het hoofdonderwerp bent op de foto's die je uploadt. Zorg ervoor dat je gezicht duidelijk zichtbaar is en dat er zo min mogelijk andere mensen op de foto staan. Selfies en close-ups werken vaak het beste!",
-  },
-  {
-    question: "Hoe lang duurt het voordat mijn headshots klaar zijn?",
-    answer:
-      "De AI training en het genereren van je professionele headshots duurt ongeveer 15 minuten. Ze verschijnen automatisch in je dashboard. De tijd kan soms iets variëren afhankelijk van hoe druk het is.",
+      "De AI training en het genereren van je professionele portretfoto's duurt ongeveer 15 minuten. Ze verschijnen automatisch in je dashboard. De tijd kan soms iets variëren afhankelijk van hoe druk het is.",
   },
   {
     question: "Wat voor kleding draag ik tijdens de fotoshoot?",
@@ -98,7 +86,7 @@ const faqData = [
   {
     question: "Hoe kan ik contact met jullie opnemen?",
     answer:
-      "Stuur ons een bericht via de live chat of het sontactformulier, indien niet direct, zullen wij contact met je opnemen via het e-mailadres dat je hebt opgegeven via de chat. Je kunt ook via de contact knop onder de faq contact opnemen. Ons team spreekt Nederlands.",
+      "Stuur ons een bericht via de live chat of het contactformulier, indien niet direct, zullen wij contact met je opnemen via het e-mailadres dat je hebt opgegeven via de chat. Je kunt ook via de contact knop onder de faq contact opnemen. Ons team spreekt Nederlands.",
   },
   {
     question: "Kan ik een terugbetaling krijgen als ik niet tevreden ben?",
