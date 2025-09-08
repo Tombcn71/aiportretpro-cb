@@ -1,11 +1,11 @@
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: "AI Portret Pro | LinkedIn foto's laten maken? kan nu ook online",
+  title: "AI Portret Pro | LinkedIn foto's laten maken? kan nu online zonder fotograaf",
   description: "Even wat foto's uploaden dat is alles. 6 x goedkoper dan een traditionele fotograaf, 40 professionele foto's in slechts 15 minuten, perfecte maat voor linkedin, website en print",
   keywords: "LinkedIn profielfoto, LinkedIn foto, professionele profielfoto, LinkedIn headshot, AI profielfoto, LinkedIn zichtbaarheid, recruiters LinkedIn, zakelijke portretfoto",
   openGraph: {
-    title: "AI Portret Pro | LinkedIn foto's laten maken? kan nu ook online",
+    title: "AI Portret Pro | LinkedIn foto's laten maken? kan nu online zonder fotograaf",
     description: "Even wat foto's uploaden dat is alles. 6 x goedkoper dan een traditionele fotograaf, 40 professionele foto's in slechts 15 minuten, perfecte maat voor linkedin, website en print",
     url: "https://aiportretpro.nl/linkedin-foto-laten-maken",
     siteName: "AI Portret Pro",

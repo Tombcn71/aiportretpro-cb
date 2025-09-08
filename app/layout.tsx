@@ -15,7 +15,7 @@ const inter = Inter({ subsets: ["latin"] })
 const CrispWithNoSSR = dynamic(() => import("../components/crisp"))
 
 export const metadata: Metadata = {
-  title: "AI Portret Pro | Professionele fotoshoot nodig? kan nu ook online",
+  title: "AI Portret Pro | Professionele fotoshoot nodig? kan nu online zonder fotograaf",
   description:
     "Even wat foto's uploaden dat is alles. 6 x goedkoper dan een traditionele fotograaf, 40 professionele foto's in slechts 15 minuten, perfecte maat voor linkedin, website en print",
   icons: {

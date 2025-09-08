@@ -1,0 +1,723 @@
+"use client"
+
+import { useState, useEffect } from "react"
+import Image from "next/image"
+import Link from "next/link"
+import { Button } from "@/components/ui/button"
+import { ArrowRight, X, ChevronDown, ChevronUp, Shield, Check, LinkedinIcon } from "lucide-react"
+import Header from "@/components/header"
+import { Facebook, Instagram } from "lucide-react"
+import AIHeadshotsShowcase from "@/components/ai-headshots-showcase"
+import HowItWorks from "@/components/how-it-works"
+
+// Gallery photos: New 16 professional photos in man-woman alternating order
+const galleryPhotos = [
+  "/images/professional-man-1.jpg", // Position 1 - Man
+  "/images/professional-woman-1.jpg", // Position 2 - Woman
+  "/images/professional-man-2.jpg", // Position 3 - Man
+  "/images/professional-woman-2.jpg", // Position 4 - Woman
+  "/images/professional-man-3.jpg", // Position 5 - Man
+  "/images/professional-woman-1.jpg", // Position 6 - Woman
+  "/images/professional-man-4.jpg", // Position 7 - Man
+  "/images/professional-woman-4.jpg", // Position 8 - Woman
+  "/images/professional-man-5.jpg", // Position 9 - Man
+  "/images/professional-woman-5.jpg", // Position 10 - Woman
+  "/images/professional-man-6.jpg", // Position 11 - Man
+  "/images/professional-woman-6.jpg", // Position 12 - Woman
+  "/images/professional-man-7.jpg", // Position 13 - Man
+  "/images/professional-woman-7.jpg", // Position 14 - Woman
+  "/images/professional-man-8.jpg", // Position 15 - Man
+  "/images/professional-woman-8.jpg", // Position 16 - Woman
+]
+
+const companies = [
+  { name: "Microsoft", logo: "/placeholder.svg?height=40&width=120&text=Microsoft" },
+  { name: "Google", logo: "/placeholder.svg?height=40&width=120&text=Google" },
+  { name: "Apple", logo: "/placeholder.svg?height=40&width=120&text=Apple" },
+  { name: "Amazon", logo: "/placeholder.svg?height=40&width=120&text=Amazon" },
+  { name: "Meta", logo: "/placeholder.svg?height=40&width=120&text=Meta" },
+  { name: "Netflix", logo: "/placeholder.svg?height=40&width=120&text=Netflix" },
+  { name: "Tesla", logo: "/placeholder.svg?height=40&width=120&text=Tesla" },
+  { name: "Spotify", logo: "/placeholder.svg?height=40&width=120&text=Spotify" },
+]
+
+// LinkedIn-specific FAQ data with SEO keywords
+const faqData = [
+  {
+    question: "Waarom is een LinkedIn profielfoto zo belangrijk voor mijn carrière?",
+    answer:
+      "Je LinkedIn profielfoto is vaak het eerste wat potentiële werkgevers, recruiters en zakelijke contacten van je zien. Onderzoek toont aan dat profielen met professionele LinkedIn foto's 14x meer profielweergaves krijgen en 36% meer berichten ontvangen. Een krachtige LinkedIn profielfoto verhoogt je zichtbaarheid, vertrouwen en professionele uitstraling aanzienlijk.",
+  },
+  {
+    question: "Wat maakt een perfecte LinkedIn profielfoto?",
+    answer:
+      "De perfecte LinkedIn profielfoto is professioneel, helder en vertrouwenwekkend. Key elementen zijn: gezicht vult 60% van de foto, professionele kleding, neutrale achtergrond, natuurlijke glimlach, en goede belichting. Onze AI genereert automatisch LinkedIn-geoptimaliseerde foto's die voldoen aan alle LinkedIn richtlijnen en best practices.",
+  },
+  {
+    question: "Kan ik verschillende achtergrondkleuren krijgen voor mijn LinkedIn foto?",
+    answer:
+      "Ja! We bieden verschillende professionele achtergrondkleuren speciaal voor LinkedIn foto's: LinkedIn blauw voor corporate sectoren, executive grijs voor tech en consulting, studio wit voor veelzijdigheid, en subtiele warme tinten voor creatievere branches. Onze AI kiest automatisch de beste achtergrondkleuren die passen bij jouw professionele sector.",
+  },
+  {
+    question: "Hoeveel LinkedIn foto's krijg ik en hoe snel zijn ze klaar?",
+    answer:
+      "Je ontvangt 40 verschillende professionele LinkedIn profielfoto variaties binnen 15 minuten. Alle foto's zijn geoptimaliseerd voor LinkedIn's specificaties (minimaal 400x400 pixels) en perfect bruikbaar voor je LinkedIn profiel, website, email handtekening en andere professionele doeleinden.",
+  },
+  {
+    question: "Zijn de AI-gegenereerde LinkedIn foto's even professioneel als studio foto's?",
+    answer:
+      "Absoluut! Onze AI is gespecialiseerd in het creëren van studio-kwaliteit LinkedIn profielfoto's. Ze zijn onherkenbaar van traditionele fotograaf foto's maar dan 75% goedkoper en binnen 15 minuten klaar. Perfect voor professionals die snel een professionele LinkedIn foto nodig hebben zonder de hoge kosten van een fotostudio.",
+  },
+  {
+    question: "Voldoen de foto's aan alle LinkedIn richtlijnen en specificaties?",
+    answer:
+      "Ja, alle LinkedIn foto's voldoen volledig aan LinkedIn's community richtlijnen en technische specificaties. Ze zijn professioneel, passend gekleed, en geoptimaliseerd voor maximale impact op het LinkedIn platform. Je kunt ze direct uploaden als LinkedIn profielfoto zonder zorgen over policy violations.",
+  },
+  {
+    question: "Kan ik de LinkedIn foto's ook gebruiken voor andere professionele doeleinden?",
+    answer:
+      "Zeker! Hoewel geoptimaliseerd voor LinkedIn, zijn alle foto's perfect bruikbaar voor je zakelijke website, email handtekening, corporate presentaties, persberichten, en andere professionele toepassingen. Je hebt volledige commerciële rechten op alle foto's.",
+  },
+  {
+    question: "Hoe verhoogt een professionele LinkedIn foto mijn carrièrekansen?",
+    answer:
+      "Een sterke LinkedIn profielfoto verhoogt significant je zichtbaarheid bij recruiters en potentiële werkgevers. Studies tonen aan dat professionals met professionele LinkedIn foto's meer wordt benaderd voor jobs, hebben hogere klik-through rates op hun profiel, en worden gezien als betrouwbaarder en competenter. Het is een investering in je professionele brand.",
+  }
+]
+
+
+
+export default function LinkedInProfielFotoPage() {
+  const [isClient, setIsClient] = useState(false)
+  const [selectedImage, setSelectedImage] = useState<string | null>(null)
+  const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null)
+  const [isVisible, setIsVisible] = useState(false)
+
+  // Prevent hydration mismatch
+  useEffect(() => {
+    setIsClient(true)
+    // Return undefined (no cleanup function needed)
+    return undefined
+  }, [])
+
+  useEffect(() => {
+    setIsClient(true)
+    // Return undefined (no cleanup function needed)
+    return undefined
+  }, [])
+
+  useEffect(() => {
+    const toggleVisibility = () => {
+      if (window.pageYOffset > 300) {
+        setIsVisible(true)
+      } else {
+        setIsVisible(false)
+      }
+    }
+
+    window.addEventListener("scroll", toggleVisibility)
+
+    return () => window.removeEventListener("scroll", toggleVisibility)
+  }, [])
+
+  const openLightbox = (imageSrc: string) => {
+    setSelectedImage(imageSrc)
+  }
+
+  const closeLightbox = () => {
+    setSelectedImage(null)
+  }
+
+  const toggleFaq = (index: number) => {
+    setOpenFaqIndex(openFaqIndex === index ? null : index)
+  }
+
+  return (
+    <div className="min-h-screen pt-20">
+      <Header />
+
+      {/* Hero Section - LinkedIn Optimized */}
+      <section className="container mx-auto px-4 py-6 text-center">
+        <h1 className="tracking-tight text-2xl md:text-4xl font-bold mb-6">
+          <span className="block">LinkedIn profielfoto's laten maken? </span>
+          <span className="text-[#0077B5] block">kan nu online zonder fotograaf</span>
+        </h1>
+        <p className="text-gray-500 text-lg mb-6 font-light italic">Even wat foto's uploaden, dat is alles.
+
+</p>
+
+        <div className="text-md md:text-lg text-gray-600 mb-8 max-w-2xl mx-auto text-center">
+          <div className="inline-grid grid-cols-[auto_1fr] gap-x-2 items-start text-start justify-center">
+            <span className="text-center">✅</span>
+            <span>6 x goedkoper dan een traditionele fotograaf</span>
+            <span className="text-center">✅</span>
+            <span>Geen wachttijd, 40 professionele foto's in 15 min</span>
+            <span className="text-center">✅</span>
+            <span>Perfecte maat voor linkedin, website en print</span>
+          </div>
+        </div>
+
+        <Button
+          asChild
+          size="lg"
+          className=" bg-[#FF8C00] hover:bg-[#FFA500] text-white px-6 md:px-10 py-8 md:py-8 text-base md:text-lg mb-3 md:max-w-sm"
+        >
+          <Link href="/login?source=linkedin">
+            <LinkedinIcon className="mr-2 h-5 md:h-6 w-5 md:w-6" />
+            Start je LinkedIn fotoshoot - € 29 <ArrowRight className="ml-2 h-6 md:h-7 w-6 md:w-7" />
+          </Link>
+        </Button>
+
+        {/* Trust Shield */}
+        <div className="flex items-center justify-center gap-2 text-[#0077B5] font-medium text-sm mb-8">
+          <div className="relative">
+            <Shield className="h-5 w-5 fill-current text-[#0077B5]" />
+            <Check className="h-3 w-3 text-white absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" strokeWidth={3} />
+          </div>
+          <span>14-DAGEN GELD TERUG GARANTIE</span>
+        </div>
+      </section>
+
+      {/* Photo Carousel - FIXED: Smooth continuous scrolling */}
+      <section className="w-full overflow-hidden mb-16 md:mb-24 bg-gradient-to-r from-blue-50 via-white to-blue-50">
+        <div className="relative">
+          <div className="carousel-container">
+            <div className="carousel-track">
+              {galleryPhotos.map((photo, index) => (
+                <div key={`carousel-${index}`} className="carousel-item">
+                  <div className="relative">
+                    <div className="w-52 h-[10.11rem] md:w-80 md:h-[15.56rem] rounded-xl md:rounded-2xl overflow-hidden bg-gray-100 shadow-md md:shadow-lg">
+                      <Image
+                        src={photo || "/placeholder.svg"}
+                        alt={`LinkedIn portret voorbeeld ${index + 1}`}
+                        width={1152}
+                        height={896}
+                        className="w-full h-full object-contain bg-gray-50 brightness-110 contrast-105"
+                        priority={index < 10}
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
+              {/* Duplicate items for seamless looping */}
+              {galleryPhotos.map((photo, index) => (
+                <div key={`carousel-dup-${index}`} className="carousel-item">
+                  <div className="relative">
+                    <div className="w-52 h-[10.11rem] md:w-80 md:h-[15.56rem] rounded-xl md:rounded-2xl overflow-hidden bg-gray-100 shadow-md md:shadow-lg">
+                      <Image
+                        src={photo || "/placeholder.svg"}
+                        alt={`LinkedIn portret voorbeeld ${index + 1}`}
+                        width={1152}
+                        height={896}
+                        className="w-full h-full object-contain bg-gray-50 brightness-110 contrast-105"
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      {/* AI Headshots Showcase - Replaces Photo Gallery */}
+      <AIHeadshotsShowcase />
+ {/* How It Works - New Component */}
+ <HowItWorks />
+      {/* AI vs Traditional Comparison */}
+      <section className="py-16 bg-gradient-to-r from-[#0077B5]/5 to-blue-50">
+        <div className="container mx-auto px-4">
+          <div className="max-w-6xl mx-auto">
+            <h2 className="text-3xl md:text-4xl font-bold text-center mb-4">
+              AI fotografie vs. traditionele fotograaf
+            </h2>
+            <p className="text-lg text-gray-600 text-center mb-12 max-w-2xl mx-auto">
+              Waarom 85% van onze klanten nooit meer naar een fotostudio gaat
+            </p>
+
+            <div className="grid md:grid-cols-2 gap-8">
+              {/* Traditional Photography */}
+              <div className="bg-white p-8 rounded-lg border border-gray-200">
+                <h3 className="text-2xl font-semibold mb-6 text-gray-800">Traditionele Fotograaf</h3>
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                    <span className="text-gray-600">€195+ per sessie</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                    <span className="text-gray-600">Halve dag kwijt + reistijd</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                    <span className="text-gray-600">5-10 foto's maximum</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                    <span className="text-gray-600">Weken wachten op afspraak</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                    <span className="text-gray-600">Stress voor de camera</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* AI Photography */}
+              <div className="bg-[#0077B5] p-8 rounded-lg text-white relative overflow-hidden">
+                <div className="absolute top-4 right-4 bg-yellow-400 text-black px-3 py-1 rounded-full text-sm font-semibold">
+                  POPULAIR
+                </div>
+                <h3 className="text-2xl font-semibold mb-6">AI Portret Pro</h3>
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                    <span>Slechts €29 totaal</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                    <span>15 minuten resultaat</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                    <span>40 professionele variaties</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                    <span>Direct beschikbaar 24/7</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                    <span>Gewoon thuis op je bank</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="text-center mt-12">
+              <div className="inline-flex items-center gap-4 bg-white p-4 rounded-lg shadow-lg">
+                <span className="text-gray-600">Besparing:</span>
+                <span className="text-3xl font-bold text-green-600">€166</span>
+                <span className="text-gray-600">per fotoshoot</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Success Stories */}
+      <section className="py-16 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto">
+            <h2 className="text-3xl md:text-4xl font-bold text-center mb-4">
+              Echte resultaten van onze LinkedIn foto's
+            </h2>
+            <p className="text-lg text-gray-600 text-center mb-12 max-w-2xl mx-auto">
+              Ontdek hoe professionals hun LinkedIn succes hebben verhoogd
+            </p>
+
+            <div className="grid md:grid-cols-3 gap-8">
+              <div className="text-center p-6 bg-gray-50 rounded-lg">
+                <div className="w-20 h-20 bg-[#0077B5] rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span className="text-white text-xl font-bold">🚀</span>
+                </div>
+                <h3 className="text-xl font-semibold mb-2">Startups & Scale-ups</h3>
+                <p className="text-gray-600 text-sm">
+                  "Binnen een week 3x zoveel LinkedIn berichten van investeerders. 
+                  De AI foto's geven instant vertrouwen."
+                </p>
+                <div className="mt-4 text-[#0077B5] font-semibold">+340% meer bereik</div>
+              </div>
+
+              <div className="text-center p-6 bg-gray-50 rounded-lg">
+                <div className="w-20 h-20 bg-[#0077B5] rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span className="text-white text-xl font-bold">💼</span>
+                </div>
+                <h3 className="text-xl font-semibold mb-2">Consultants & Freelancers</h3>
+                <p className="text-gray-600 text-sm">
+                  "Klanten boeken me nu direct via LinkedIn. Mijn AI profielfoto 
+                  werkt als een magneet voor nieuwe opdrachten."
+                </p>
+                <div className="mt-4 text-[#0077B5] font-semibold">+250% meer leads</div>
+              </div>
+
+              <div className="text-center p-6 bg-gray-50 rounded-lg">
+                <div className="w-20 h-20 bg-[#0077B5] rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span className="text-white text-xl font-bold">🎯</span>
+                </div>
+                <h3 className="text-xl font-semibold mb-2">Job Seekers</h3>
+                <p className="text-gray-600 text-sm">
+                  "Na 6 maanden zoeken kreeg ik binnen 2 weken 4 sollicitatiegesprekken. 
+                  De nieuwe foto maakte het verschil."
+                </p>
+                <div className="mt-4 text-[#0077B5] font-semibold">+180% meer interviews</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Target Professionals Section */}
+      <section className="py-16 bg-gray-50">
+        <div className="container mx-auto px-4">
+          <div className="max-w-5xl mx-auto">
+            <h2 className="text-3xl md:text-4xl font-bold text-center mb-4">
+              Voor welke professionals is dit perfect?
+            </h2>
+            <p className="text-lg text-gray-600 text-center mb-12 max-w-2xl mx-auto">
+              Van ambitieuze starters tot ervaren leiders - onze AI helpt elke professional 
+              hun LinkedIn impact te maximaliseren
+            </p>
+
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow">
+                <div className="flex items-start gap-4">
+                  <div className="bg-[#0077B5] p-3 rounded-lg flex-shrink-0">
+                    <span className="text-white text-xl">🚀</span>
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold mb-2 text-[#0077B5]">ZZP'ers & Ondernemers</h3>
+                    <p className="text-gray-600 mb-3">
+                      Jij bent je eigen merk. Stop met amateuristische selfies en laat zien dat je serieus bent. 
+                      Onze AI creëert foto's die vertrouwen wekken bij potentiële klanten.
+                    </p>
+                    <div className="text-sm text-[#0077B5] font-semibold">
+                      → Meer klanten via LinkedIn DM's
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow">
+                <div className="flex items-start gap-4">
+                  <div className="bg-[#0077B5] p-3 rounded-lg flex-shrink-0">
+                    <span className="text-white text-xl">🎯</span>
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold mb-2 text-[#0077B5]">Sollicitanten & Carrièrestarters</h3>
+                    <p className="text-gray-600 mb-3">
+                      Recruiters scrollen door honderden profielen. Een sterke AI-foto zorgt ervoor 
+                      dat je opvalt en uitgenodigd wordt voor gesprekken - geen wegkijken meer.
+                    </p>
+                    <div className="text-sm text-[#0077B5] font-semibold">
+                      → 3x meer recruiter berichten
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow">
+                <div className="flex items-start gap-4">
+                  <div className="bg-[#0077B5] p-3 rounded-lg flex-shrink-0">
+                    <span className="text-white text-xl">⚡</span>
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold mb-2 text-[#0077B5]">Young Professionals</h3>
+                    <p className="text-gray-600 mb-3">
+                      Jouw generatie snapt de kracht van social media. Zorg dat senior professionals 
+                      je willen connecten - niet wegklikken omdat je foto niet professioneel genoeg is.
+                    </p>
+                    <div className="text-sm text-[#0077B5] font-semibold">
+                      → Sneller senior netwerk opbouwen
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow">
+                <div className="flex items-start gap-4">
+                  <div className="bg-[#0077B5] p-3 rounded-lg flex-shrink-0">
+                    <span className="text-white text-xl">👑</span>
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold mb-2 text-[#0077B5]">Managers & Leidinggevenden</h3>
+                    <p className="text-gray-600 mb-3">
+                      Jouw leidinggevende positie verdient een foto die autoriteit uitstraalt. 
+                      Geen tijd voor fotoshoots? Onze AI begrijpt executive presence.
+                    </p>
+                    <div className="text-sm text-[#0077B5] font-semibold">
+                      → Meer thought leadership engagement
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="text-center mt-12">
+              <div className="bg-yellow-50 border border-yellow-200 p-6 rounded-lg max-w-2xl mx-auto">
+                <p className="text-gray-700 mb-4">
+                  <strong>Niet zeker of het iets voor jou is?</strong> 
+                  Probeer het gewoon - met onze 14-dagen geld-terug-garantie heb je niks te verliezen.
+                </p>
+                <Button
+                  asChild
+                  size="lg"
+                  className="bg-[#FF8C00] hover:bg-[#FFA500] text-white px-8 py-3"
+                >
+                  <Link href="/login?source=linkedin">
+                    <LinkedinIcon className="mr-2 h-5 w-5" />
+                    Test risicoloos voor €29 <ArrowRight className="ml-2 h-5 w-5" />
+                  </Link>
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ Section - LinkedIn Optimized */}
+      <section id="faq" className="container mx-auto px-4 py-12 md:py-16 bg-white">
+        <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-center mb-4">LinkedIn Profielfoto FAQ</h2>
+        <p className="text-lg text-gray-600 text-center mb-8 md:mb-12 max-w-2xl mx-auto">
+          Alles over professionele LinkedIn foto's en hoe ze je carrière kunnen boosten!
+        </p>
+        <div className="max-w-3xl mx-auto">
+          {faqData.map((faq, index) => (
+            <div key={index} className="mb-4">
+              <button
+                onClick={() => toggleFaq(index)}
+                className="w-full bg-white rounded-lg p-4 md:p-6 text-left hover:shadow-md transition-shadow duration-200 border border-gray-200"
+              >
+                <div className="flex justify-between items-center">
+                  <h3 className="text-base md:text-lg font-semibold text-gray-900 pr-4">{faq.question}</h3>
+                  {openFaqIndex === index ? (
+                    <ChevronUp className="h-5 w-5 text-[#0077B5] flex-shrink-0" />
+                  ) : (
+                    <ChevronDown className="h-5 w-5 text-[#0077B5] flex-shrink-0" />
+                  )}
+                </div>
+                {openFaqIndex === index && (
+                  <div className="mt-4 text-gray-600 text-sm md:text-base leading-relaxed">{faq.answer}</div>
+                )}
+              </button>
+            </div>
+          ))}
+        </div>
+        <div className="text-center mt-8 md:mt-12">
+          <p className="text-gray-600 mb-4 text-sm md:text-base">Nog vragen? We helpen je graag!</p>
+          <Button
+            asChild
+            variant="outline"
+            className="border-[#0077B5] text-[#0077B5] hover:bg-[#0077B5] hover:text-white bg-transparent"
+          >
+            <Link href="/contact">Neem Contact Op</Link>
+          </Button>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-16">
+        <div className="max-w-4xl mx-auto text-center px-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            Klaar voor je professionele LinkedIn foto?
+          </h2>
+          <p className="text-xl text-gray-600 mb-8">Verhoog je LinkedIn zichtbaarheid met een krachtige profielfoto</p>
+          {isClient && (
+            <Link href="/login?source=linkedin">
+              <Button size="lg" className="bg-[#FFA500] hover:bg-[#FF8C00] text-white px-8 py-4 text-lg">
+                <LinkedinIcon className="mr-2 h-5 w-5" />
+                Start je LinkedIn fotoshoot - € 29 <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+            </Link>
+          )}
+        </div>
+      </section>
+
+      {/* Lightbox Modal */}
+      {selectedImage && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4"
+          onClick={closeLightbox}
+        >
+          <div className="relative max-w-4xl max-h-full">
+            <button
+              onClick={closeLightbox}
+              className="absolute -top-8 md:-top-12 right-0 text-white hover:text-gray-300 transition-colors"
+            >
+              <X className="h-6 w-6 md:h-8 md:w-8" />
+            </button>
+            <Image
+              src={selectedImage || "/placeholder.svg"}
+              alt="Vergroot LinkedIn portret"
+              width={800}
+              height={1000}
+              className="max-w-full max-h-[90vh] object-contain rounded-lg brightness-110 contrast-105"
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Footer */}
+      <footer className="bg-black text-white py-8 px-6">
+        <div className="container mx-auto">
+          <div className="flex flex-col lg:flex-row lg:justify-between space-y-8 lg:space-y-0">
+            {/* Logo and Company Info */}
+            <div className="flex flex-col space-y-4">
+              <div className="flex items-center space-x-3">
+                <Image
+                  src="/images/logo-icon.png"
+                  alt="AI Portrait Pro Logo"
+                  width={30}
+                  height={30}
+                  className="rounded-lg"
+                />
+                <h3 className="text-xl font-bold text-white">AI Portret Pro</h3>
+              </div>
+              <p className="text-gray-300 text-sm leading-relaxed max-w-xs">
+                Professionele AI LinkedIn portretten in minuten.
+              </p>
+            </div>
+
+            {/* Navigation Links */}
+            <div className="flex flex-col space-y-4">
+              <h4 className="text-white font-semibold text-sm uppercase tracking-wide">Navigatie</h4>
+              <div className="flex flex-col space-y-2">
+                <Link
+                  href="/over-ons"
+                  className="text-gray-300 hover:text-white transition-colors duration-200 text-sm"
+                >
+                  Over Ons
+                </Link>
+                <Link href="/pricing" className="text-gray-300 hover:text-white transition-colors duration-200 text-sm">
+                  Prijzen
+                </Link>
+                <Link href="/contact" className="text-gray-300 hover:text-white transition-colors duration-200 text-sm">
+                  Contact
+                </Link>
+              </div>
+            </div>
+
+            {/* Legal Links */}
+            <div className="flex flex-col space-y-4">
+              <h4 className="text-white font-semibold text-sm uppercase tracking-wide">Juridisch</h4>
+              <div className="flex flex-col space-y-2">
+                <Link href="/privacy" className="text-gray-300 hover:text-white transition-colors duration-200 text-sm">
+                  Privacy Policy
+                </Link>
+                <Link href="/terms" className="text-gray-300 hover:text-white transition-colors duration-200 text-sm">
+                  Terms
+                </Link>
+              </div>
+            </div>
+
+            {/* Social Media */}
+            <div className="flex flex-col space-y-4">
+              <h4 className="text-white font-semibold text-sm uppercase tracking-wide">Volg Ons</h4>
+              <div className="flex space-x-4">
+                <Link
+                  href="https://linkedin.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-300 hover:text-white transition-colors duration-200"
+                  aria-label="LinkedIn"
+                >
+                  <LinkedinIcon size={20} />
+                </Link>
+                <Link
+                  href="https://www.facebook.com/profile.php?id=61578343760041"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-300 hover:text-white transition-colors duration-200"
+                  aria-label="Facebook"
+                >
+                  <Facebook size={20} />
+                </Link>
+                <Link
+                  href="https://www.instagram.com/aiportretpro.nl"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-300 hover:text-white transition-colors duration-200"
+                  aria-label="Instagram"
+                >
+                  <Instagram size={20} />
+                </Link>
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom Border */}
+          <div className="border-t border-gray-800 mt-8 pt-6">
+            <p className="text-gray-400 text-xs text-center">© 2025 AI Portret Pro. Alle rechten voorbehouden.</p>
+          </div>
+        </div>
+      </footer>
+
+      {/* Floating CTA Button - Mobile Only */}
+      {isVisible && (
+        <div className="fixed bottom-4 left-4 right-4 z-[2147483647] md:hidden">
+          <div className="bg-white rounded-lg shadow-lg p-2">
+            <Button
+              asChild
+              size="lg"
+              className="w-full bg-[#FF8C00] hover:bg-[#FFA500] text-white px-6 py-8 text-base font-semibold"
+            >
+                       <Link href="/login?source=linkedin">
+                <LinkedinIcon className="mr-2 h-5 w-5" />
+            LinkedIn fotoshoot - € 29 <ArrowRight className="ml-2 h-6 md:h-7 w-6 md:w-7" />
+          </Link>
+            </Button>
+          </div>
+        </div>
+      )}
+
+      <style jsx>{`
+    @keyframes scroll {
+      0% {
+        transform: translateX(0);
+      }
+      100% {
+        transform: translateX(-50%);
+      }
+    }
+
+    .animate-scroll {
+      animation: scroll 15s linear infinite;
+    }
+
+    .animate-scroll:hover {
+      animation-play-state: paused;
+    }
+
+    .carousel-container {
+      width: 100%;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .carousel-track {
+      display: flex;
+      width: fit-content;
+      animation: carousel 140s linear infinite;
+    }
+
+    .carousel-item {
+      flex-shrink: 0;
+      margin: 0 0.5rem;
+    }
+
+    @keyframes carousel {
+      0% {
+        transform: translateX(calc(-100% / 2));
+      }
+      100% {
+        transform: translateX(0);
+      }
+    }
+
+    .carousel-track:hover {
+      animation-play-state: paused;
+    }
+
+    @media (max-width: 768px) {
+      .animate-scroll {
+        animation: scroll 10s linear infinite;
+      }
+      .carousel-track {
+        animation: carousel 140s linear infinite;
+      }
+    }
+  `}</style>
+    </div>
+  )
+}
