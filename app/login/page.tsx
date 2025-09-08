@@ -132,9 +132,9 @@ export default function LoginPage() {
             
             {/* Main title */}
             <CardTitle className="text-xl md:text-2xl text-gray-900 mb-3 font-normal pl-0">
-              Professionele zakelijkeportretfoto's,
+              Een professionele fotoshoot,
               <br />
-              <span className="text-[#0077B5]">zonder fotograaf of studio</span> 
+              <span className="text-[#0077B5]">kan nu online zonder fotograaf</span> 
             </CardTitle>
             
             {/* Subtitle */}

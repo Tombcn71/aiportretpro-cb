@@ -75,15 +75,15 @@ export default function PhotoGallery({
         {galleryPhotos.map((photo, index) => (
           <div
             key={index}
-            className="aspect-[3/4] rounded-lg overflow-hidden bg-gray-100 shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer group relative"
+            className="aspect-[9/7] rounded-lg overflow-hidden bg-gray-100 shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer group relative"
             onClick={() => openLightbox(photo)}
           >
             <Image
               src={photo || "/placeholder.svg"}
               alt={`AI portret voorbeeld ${index + 1}`}
-              width={300}
-              height={400}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 brightness-110 contrast-105"
+              width={1152}
+              height={896}
+              className="w-full h-full object-contain bg-gray-50 group-hover:scale-105 transition-transform duration-300 brightness-110 contrast-105"
             />
             <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all duration-300 flex items-center justify-center">
               <span className="text-white font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-center px-4 text-sm md:text-base">

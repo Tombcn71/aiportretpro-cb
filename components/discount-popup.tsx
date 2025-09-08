@@ -123,13 +123,13 @@ export default function DiscountPopup({ isOpen, onClose }: DiscountPopupProps) {
           <div className="md:w-1/2 bg-[#F3F2EF] p-6">
             <div className="grid grid-cols-3 gap-2 h-full">
               {[...headshots, ...headshots.slice(0, 3)].map((photo, index) => (
-                <div key={index} className="aspect-[3/4] rounded-lg overflow-hidden bg-gray-100 shadow-sm">
+                <div key={index} className="aspect-[9/7] rounded-lg overflow-hidden bg-gray-100 shadow-sm">
                   <Image
                     src={photo || "/placeholder.svg"}
                     alt={`Professional headshot ${index + 1}`}
-                    width={200}
-                    height={267}
-                    className="w-full h-full object-cover brightness-110 contrast-105"
+                    width={1152}
+                    height={896}
+                    className="w-full h-full object-contain bg-gray-50 brightness-110 contrast-105"
                   />
                 </div>
               ))}

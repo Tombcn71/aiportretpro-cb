@@ -666,7 +666,7 @@ export default function DashboardPage() {
               {validPhotos.map((photo) => (
                 <div key={photo.key} className="group relative">
                   <div
-                    className={`aspect-[3/4] rounded-lg overflow-hidden bg-gray-100 shadow-md hover:shadow-lg transition-all ${
+                    className={`aspect-[9/7] rounded-lg overflow-hidden bg-gray-100 shadow-md hover:shadow-lg transition-all ${
                       showDeleteMode ? "cursor-pointer hover:ring-2 hover:ring-red-500" : ""
                     } ${deletingPhotos.has(photo.key) ? "opacity-50" : ""} ${
                       !showDeleteMode && showSelectiveMode && selectedPhotos.has(photo.key) ? "ring-2 ring-[#0077B5]" : ""
@@ -678,9 +678,9 @@ export default function DashboardPage() {
                     <Image
                       src={photo.url || "/placeholder.svg"}
                       alt={`Portretfoto ${photo.index + 1} van ${photo.projectName}`}
-                      width={300}
-                      height={400}
-                      className="w-full h-full object-cover"
+                      width={1152}
+                      height={896}
+                      className="w-full h-full object-contain bg-gray-50"
                       onError={() => handleImageError(photo.key)}
                       unoptimized
                       crossOrigin="anonymous"

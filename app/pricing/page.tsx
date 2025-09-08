@@ -102,8 +102,7 @@ export default function PricingPage() {
        
         <div className="text-center mb-8 max-w-3xl mx-auto px-4">
           <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 mb-4 leading-tight">
-            Professionele portretfoto's via ons zijn 
-            <span className="text-[#0077B5]"> 75% goedkoper</span> dan bij een fotograaf
+Je fotoshoot online doen via ons is            <span className="text-[#0077B5]"> 6x goedkoper</span> dan bij een fotograaf
           </h1>
           <p className="text-base md:text-lg text-gray-600 leading-relaxed">
             De prijzen van professionele zakelijke portretfoto's in Nederland liggen tussen de 

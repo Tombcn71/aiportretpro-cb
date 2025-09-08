@@ -31,10 +31,11 @@ export default function TermsOfService() {
                 <ul className="list-disc list-inside text-gray-700 space-y-1">
                   <li>AI-gegenereerde professionele portretfoto's</li>
                   <li>40 gegenereerde foto's per sessie</li>
-                  <li>Garantie van 10-18 hoogwaardige resultaten</li>
+                  <li>Garantie van 1 hoogwaardig resultaat</li>
                   <li>Commerciële en persoonlijke gebruiksrechten</li>
                   <li>30 dagen toegang tot uw resultaten</li>
                 </ul>
+              
               </div>
             </section>
 
@@ -79,8 +80,7 @@ export default function TermsOfService() {
                   <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded">
                     <p className="text-gray-700">
                       <strong>Belangrijke informatie:</strong> Vanwege de aard van onze AI-service en de directe
-                      levering van digitale producten, bieden wij geen terugbetalingen aan nadat de verwerking is
-                      gestart. Wij garanderen echter wel 10-18 hoogwaardige resultaten per sessie.
+                      levering van digitale producten, bieden wij een 100% terugbetaling aan als u niet tenminste 1 bruikbare portretfoto heeft. Voorwaarde is wel dat u geen enkele foto heeft gedownload.
                     </p>
                   </div>
                 </div>

@@ -19,8 +19,8 @@ export default function HowItWorks() {
               1
             </div>
             <div>
-              <h3 className="font-semibold text-gray-900 mb-1">Upload een paar selfies</h3>
-              <p className="text-gray-600 text-sm">Kijk naar de camera met verschillende kleding verschillende achtergrond.</p>
+              <h3 className="font-semibold text-gray-900 mb-1">Upload een paar foto's</h3>
+              <p className="text-gray-600 text-sm">Recht in de camera kijkend met verschillende kleding en verschillende achtergronden.</p>
             </div>
           </div>
           
@@ -52,9 +52,9 @@ export default function HowItWorks() {
             <div className="w-16 h-16 mb-4 flex items-center justify-center">
               <TbCameraSelfie className="w-12 h-12 text-[#0077B5]" />
             </div>
-            <h3 className="text-xl font-semibold mb-2">Upload een paar selfies</h3>
+            <h3 className="text-xl font-semibold mb-2">Upload een paar foto's</h3>
             <p className="text-gray-600 text-sm">
-              Kijk naar de camera met verschillende kleding verschillende achtergrond.
+             Recht in de camera kijkend met verschillende kleding en verschillende achtergrondenden.
             </p>
           </div>
 

@@ -185,9 +185,7 @@ export default function GeneratePage({
               <p className="text-sm text-gray-500">
                 Project: <span className="font-medium text-gray-700">{project?.name}</span>
               </p>
-              <p className="text-xs text-gray-400 mt-2">
-                Je kunt deze pagina veilig verlaten, we sturen je een bericht wanneer je foto's klaar zijn
-              </p>
+              
             </div>
           </CardContent>
         </Card>

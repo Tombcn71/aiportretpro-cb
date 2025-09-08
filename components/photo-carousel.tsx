@@ -61,12 +61,12 @@ export default function PhotoCarousel() {
 
         <div className="relative">
           <div className="flex justify-center">
-            <div className="relative w-80 h-96 rounded-lg overflow-hidden shadow-lg">
+            <div className="relative w-96 h-[18.67rem] rounded-lg overflow-hidden shadow-lg">
               <Image
                 src={photos[currentIndex].src || "/placeholder.svg"}
                 alt={photos[currentIndex].alt}
                 fill
-                className="object-cover transition-opacity duration-700"
+                className="object-contain bg-gray-50 transition-opacity duration-700"
               />
             </div>
           </div>

@@ -15,8 +15,8 @@ const profiles = [
     afterImages: [
       "/images/professional-woman-1.jpg",
       "/images/professional-woman-2.jpg",
-      "/images/professional-woman-3.jpg",
       "/images/professional-woman-4.jpg",
+      "/images/professional-woman-5.jpg",
     ],
   },
   {
@@ -91,13 +91,13 @@ Na 15 min ontvang je 40 professionele portretfoto's in je dashboard </p>
               <div className="grid grid-cols-2 gap-6">
                 {profile.afterImages.map((image, index) => (
                   <div key={index} className="relative group cursor-pointer" onClick={() => openLightbox(image)}>
-                    <div className="aspect-[3/4] rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow">
+                    <div className="aspect-[9/7] rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow">
                       <Image
                         src={image || "/placeholder.svg"}
                         alt={`Professional headshot ${index + 1}`}
-                        width={400}
-                        height={533}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        width={1152}
+                        height={896}
+                        className="w-full h-full object-contain bg-gray-50 group-hover:scale-105 transition-transform duration-300"
                       />
                     </div>
                     {/* AI Generated badge */}

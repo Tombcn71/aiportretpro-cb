@@ -28,6 +28,9 @@ export default function FloatingCTAButton() {
   // De animatie (opacity, translate) is HIER WEGGEHAald.
   className="fixed bottom-0 left-0 right-0 bg-white px-4 py-4 z-[9999] md:hidden"
 >
+      <p className="text-center text-sm font-medium text-gray-800 mb-3">
+        Doe direct jouw LinkedIn fotoshoot online! Ontvang je 40 foto's in 15 minuten!
+      </p>
 
       <Button
         asChild
