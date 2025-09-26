@@ -511,6 +511,9 @@ export default function LinkedInProfielFotoPage() {
                 <Link href="/" className="text-gray-300 hover:text-white transition-colors duration-200 text-sm">
                   Homepage
                 </Link>
+                <Link href="/fotografen" className="text-gray-300 hover:text-white transition-colors duration-200 text-sm">
+                  Lokale Fotografen
+                </Link>
               </div>
             </div>
 

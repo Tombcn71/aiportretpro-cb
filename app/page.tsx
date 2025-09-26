@@ -351,6 +351,12 @@ export default function HomePage() {
                 <Link href="/linkedin-foto-laten-maken" className="text-gray-300 hover:text-white transition-colors duration-200 text-sm">
                   LinkedIn Foto's
                 </Link>
+                <Link href="/fotografen" className="text-gray-300 hover:text-white transition-colors duration-200 text-sm">
+                  Lokale Fotografen
+                </Link>
+                <Link href="/blog" className="text-gray-300 hover:text-white transition-colors duration-200 text-sm">
+                  Blog & Gidsen
+                </Link>
               </div>
             </div>
 
