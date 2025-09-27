@@ -158,7 +158,7 @@ export default function LinkedInTilburgPage() {
         >
           <Link href="/login?source=linkedin">
             <LinkedinIcon className="mr-2 h-5 md:h-6 w-5 md:w-6" />
-            Start je LinkedIn fotoshoot - € 29 <ArrowRight className="ml-2 h-6 md:h-7 w-6 md:w-7" />
+            Start je LinkedIn fotoshoot tilburg - € 29 <ArrowRight className="ml-2 h-6 md:h-7 w-6 md:w-7" />
           </Link>
         </Button>
 
@@ -518,20 +518,20 @@ export default function LinkedInTilburgPage() {
       {/* SEO Content Section - Tilburg Specific */}
       <section className="container mx-auto px-4 py-16 bg-white">
         <div className="max-w-4xl mx-auto prose prose-lg">
-          <h2 className="text-3xl font-bold text-gray-900 mb-6">LinkedIn foto laten maken in Tilburg: De moderne manier</h2>
+          <h2 className="text-3xl font-bold text-gray-900 mb-6">LinkedIn foto laten maken Tilburg: Professionele fotoshoot textielstad</h2>
           
           <p className="text-gray-700 leading-relaxed mb-6">
-            Tilburg staat bekend als het economische hart van Nederland, waar dagelijks duizenden professionals werken aan hun carrière. In deze dynamische zakelijke omgeving is je LinkedIn profiel cruciaal voor netwerken, carrièrekansen en bedrijfsgroei. Een professionele LinkedIn foto kan het verschil maken tussen opvallen of onderbelicht blijven in de Tilburgse zakenwereld.
+            Tilburg staat bekend als het belangrijke Nederlandse stad, waar dagelijks duizenden professionals werken aan hun carrière. In deze dynamische zakelijke omgeving is je LinkedIn profiel cruciaal voor netwerken, carrièrekansen en bedrijfsgroei. Een professionele LinkedIn foto kan het verschil maken tussen opvallen of onderbelicht blijven in de Tilburgse zakenwereld.
           </p>
 
           <h3 className="text-2xl font-bold text-gray-900 mb-4">Waarom een professionele LinkedIn foto essentieel is in Tilburg</h3>
           
           <p className="text-gray-700 leading-relaxed mb-6">
-            Tilburg herbergt belangrijke bedrijven en organisaties. In deze competitieve markt is je eerste indruk op LinkedIn vaak beslissend. Onderzoek toont aan dat LinkedIn profielen met professionele foto's 14 keer meer bekeken worden en 36 keer meer berichten van recruiters ontvangen.
+            Tilburg is een Brabantse stad met een sterke industriële geschiedenis en een moderne zakelijke omgeving rond Tilburg University. Als voormalige textielstad heeft Tilburg zich ontwikkeld tot een centrum voor onderwijs, logistiek en moderne industrie. In deze competitieve markt is je eerste indruk op LinkedIn vaak beslissend voor zakelijke en academische carrièrekansen.
           </p>
 
           <p className="text-gray-700 leading-relaxed mb-6">
-            Voor Tilburgse professionals betekent dit concreet: meer zichtbaarheid bij headhunters op de Zuidas, betere kansen in de creatieve sector rondom de Jordaan, en sterker netwerken in de tech-scene van Tilburg Noord. Je LinkedIn foto is je digitale handdruk in een stad waar netwerken essentieel is.
+            Voor Tilburgse professionals betekent dit concreet: meer zichtbaarheid bij headhunters op de lokale zakelijke gemeenschap, en sterker netwerken in de tech-scene van Tilburg Noord. Je LinkedIn foto is je digitale handdruk in een stad waar netwerken essentieel is.
           </p>
 
           <h3 className="text-2xl font-bold text-gray-900 mb-4">AI fotografie: De toekomst van LinkedIn foto's</h3>
@@ -541,7 +541,7 @@ export default function LinkedInTilburgPage() {
           </p>
 
           <p className="text-gray-700 leading-relaxed mb-6">
-            Met AI fotografie upload je gewoon 6 selfies vanuit je huis in Tilburg - of het nu in de Pijp, Oud-Zuid, of Tilburg Noord is - en ontvang je binnen 15 minuten 40 professionele LinkedIn foto's. Geen parkeerkosten, geen reistijd, geen wachten op de fotograaf. Perfect voor de snelle levensstijl van Tilburg.
+            Met AI fotografie upload je gewoon 6 selfies vanuit je huis in Tilburg - of het nu in het centrum, Tilburg Noord, of Tilburg Noord is - en ontvang je binnen 15 minuten 40 professionele LinkedIn foto's. Geen parkeerkosten, geen reistijd, geen wachten op de fotograaf. Perfect voor de snelle levensstijl van Tilburg.
           </p>
 
           <h3 className="text-2xl font-bold text-gray-900 mb-4">Voordelen voor Tilburgse professionals</h3>
@@ -571,11 +571,11 @@ export default function LinkedInTilburgPage() {
           <h3 className="text-2xl font-bold text-gray-900 mb-4">Perfect voor alle Tilburgse sectoren</h3>
           
           <p className="text-gray-700 leading-relaxed mb-6">
-            Of je nu werkt in de financiële sector op de Zuidas, de creatieve industrie in de Jordaan, tech in Tilburg Noord, of de logistieke sector bij Schiphol - onze AI leert je unieke kenmerken en creëert foto's die passen bij jouw professionele omgeving. Van corporate tot startup, van consultant tot ondernemer.
+            Of je nu werkt in het bedrijfsleven, de tech sector, de zorg, of logistiek - onze AI leert je unieke kenmerken en creëert foto's die passen bij jouw professionele omgeving in Tilburg. Van corporate tot startup, van consultant tot ondernemer.
           </p>
 
           <p className="text-gray-700 leading-relaxed mb-6">
-            Tilburg is een internationale stad waar veel wordt gecommuniceerd via LinkedIn. Een professionele foto toont niet alleen je competentie, maar ook dat je up-to-date bent met moderne technologieën - een eigenschap die in Tilburg's innovatieve zakelijke klimaat zeer gewaardeerd wordt.
+            Tilburg is een Brabantse stad waar academici en ondernemers netwerken via LinkedIn. Een professionele foto toont niet alleen je competentie, maar ook dat je up-to-date bent met moderne technologieën - een eigenschap die in Tilburg's Brabantse zakelijke cultuur zeer gewaardeerd wordt.
           </p>
 
           <h3 className="text-2xl font-bold text-gray-900 mb-4">Klaar voor je LinkedIn succes in Tilburg?</h3>
@@ -591,7 +591,7 @@ export default function LinkedInTilburgPage() {
             </p>
             <Button asChild className="bg-[#0077B5] hover:bg-[#005885]">
               <Link href="/login?source=linkedin">
-                Begin nu je LinkedIn fotoshoot →
+                Begin nu je LinkedIn fotoshoot tilburg →
               </Link>
             </Button>
           </div>
@@ -666,7 +666,7 @@ export default function LinkedInTilburgPage() {
             <div className="flex flex-col space-y-4">
               <h4 className="text-white font-semibold text-sm uppercase tracking-wide">LinkedIn Foto per Stad</h4>
               <div className="flex flex-col space-y-2">
-                <Link href="/linkedin-foto-laten-maken-amsterdam" className="text-gray-300 hover:text-white transition-colors duration-200 text-sm">
+                <Link href="/linkedin-foto-laten-maken-tilburg" className="text-gray-300 hover:text-white transition-colors duration-200 text-sm">
                   Tilburg
                 </Link>
                 <Link href="/linkedin-foto-laten-maken-rotterdam" className="text-gray-300 hover:text-white transition-colors duration-200 text-sm">
@@ -710,7 +710,7 @@ export default function LinkedInTilburgPage() {
         <div className="fixed bottom-4 left-4 right-4 z-[2147483647] md:hidden">
           <div className="bg-white rounded-lg shadow-lg border border-gray-200 p-3">
             <p className="text-center text-md font-bold text-gray-800 mb-4 mt-4">
-              Doe direct jouw LinkedIn fotoshoot online, makkelijk vanuit thuis zonder gedoe, voor slechts €29,-!
+              Doe direct jouw LinkedIn fotoshoot tilburg online, makkelijk vanuit thuis zonder gedoe, voor slechts €29,-!
             </p>
             <Button
               asChild
@@ -719,7 +719,7 @@ export default function LinkedInTilburgPage() {
             >
               <Link href="/login?source=linkedin">
                 <LinkedinIcon className="mr-2 h-5 w-5" />
-                LinkedIn fotoshoot - € 29 <ArrowRight className="ml-2 h-6 md:h-7 w-6 md:w-7" />
+                LinkedIn fotoshoot tilburg - € 29 <ArrowRight className="ml-2 h-6 md:h-7 w-6 md:w-7" />
               </Link>
             </Button>
           </div>

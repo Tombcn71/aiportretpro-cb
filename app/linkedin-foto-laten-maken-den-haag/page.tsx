@@ -518,76 +518,72 @@ export default function LinkedInDenHaagPage() {
       {/* SEO Content Section - Den Haag Specific */}
       <section className="container mx-auto px-4 py-16 bg-white">
         <div className="max-w-4xl mx-auto prose prose-lg">
-          <h2 className="text-3xl font-bold text-gray-900 mb-6">LinkedIn foto laten maken in Den Haag: De moderne manier</h2>
+          <h2 className="text-3xl font-bold text-gray-900 mb-6">LinkedIn foto laten maken Den Haag: Professioneel en internationaal</h2>
           
           <p className="text-gray-700 leading-relaxed mb-6">
-            Den Haag staat bekend als het economische hart van Nederland, waar dagelijks duizenden professionals werken aan hun carrière. In deze dynamische zakelijke omgeving is je LinkedIn profiel cruciaal voor netwerken, carrièrekansen en bedrijfsgroei. Een professionele LinkedIn foto kan het verschil maken tussen opvallen of onderbelicht blijven in de Den Haagse zakenwereld.
+            Den Haag staat bekend als de politieke hoofdstad van Nederland en het internationale centrum van recht en diplomatie. Hier werken dagelijks duizenden professionals bij ministeries, het Internationale Gerechtshof, en talloze internationale organisaties. In deze formele zakelijke omgeving is je LinkedIn profiel cruciaal voor diplomatieke netwerken en bestuurlijke carrièrekansen.
           </p>
 
-          <h3 className="text-2xl font-bold text-gray-900 mb-4">Waarom een professionele LinkedIn foto essentieel is in Den Haag</h3>
+          <h3 className="text-2xl font-bold text-gray-900 mb-4">Waarom LinkedIn foto's essentieel zijn in Den Haag's internationale wereld</h3>
           
           <p className="text-gray-700 leading-relaxed mb-6">
-            Den Haag herbergt belangrijke bedrijven en organisaties. In deze competitieve markt is je eerste indruk op LinkedIn vaak beslissend. Onderzoek toont aan dat LinkedIn profielen met professionele foto's 14 keer meer bekeken worden en 36 keer meer berichten van recruiters ontvangen.
+            Den Haag herbergt het Internationale Gerechtshof, alle Nederlandse ministeries, en honderden internationale organisaties. In deze diplomatieke en bestuurlijke wereld is je eerste indruk op LinkedIn vaak beslissend voor je professionele netwerk. Onderzoek toont aan dat LinkedIn profielen met professionele foto's 14 keer meer bekeken worden en 36% meer berichten van recruiters ontvangen.
           </p>
 
-          <p className="text-gray-700 leading-relaxed mb-6">
-            Voor Den Haagse professionals betekent dit concreet: meer zichtbaarheid bij headhunters op de Zuidas, betere kansen in de creatieve sector rondom de Jordaan, en sterker netwerken in de tech-scene van Den Haag Noord. Je LinkedIn foto is je digitale handdruk in een stad waar netwerken essentieel is.
-          </p>
-
-          <h3 className="text-2xl font-bold text-gray-900 mb-4">AI fotografie: De toekomst van LinkedIn foto's</h3>
+          <h3 className="text-2xl font-bold text-gray-900 mb-4">AI fotografie: Perfect voor Den Haag professionals</h3>
           
           <p className="text-gray-700 leading-relaxed mb-6">
-            Traditioneel betekende een professionele LinkedIn foto maken in Den Haag: een fotograaf zoeken, een afspraak inplannen (vaak weken later), door de stad reizen, en €200-300 betalen voor enkele foto's. Onze AI-technologie verandert dit volledig.
+            Traditioneel betekende een professionele LinkedIn foto maken in Den Haag: een fotograaf zoeken, een afspraak inplannen, reizen door de drukke binnenstad, en €210+ betalen voor enkele foto's. Onze AI-technologie verandert dit volledig.
           </p>
 
           <p className="text-gray-700 leading-relaxed mb-6">
-            Met AI fotografie upload je gewoon 6 selfies vanuit je huis in Den Haag - of het nu in de Pijp, Oud-Zuid, of Den Haag Noord is - en ontvang je binnen 15 minuten 40 professionele LinkedIn foto's. Geen parkeerkosten, geen reistijd, geen wachten op de fotograaf. Perfect voor de snelle levensstijl van Den Haag.
+            Met AI fotografie upload je gewoon 6 selfies vanuit je huis in Den Haag - of het nu in Bezuidenhout, Scheveningen, of het centrum is - en ontvang je binnen 15 minuten 40 professionele LinkedIn foto's. Geen reistijd door de drukke regering, geen gedoe met parkeren bij de ministeries. Perfect voor de professionele werkstijl van Den Haag.
           </p>
 
-          <h3 className="text-2xl font-bold text-gray-900 mb-4">Voordelen voor Den Haagse professionals</h3>
+          <h3 className="text-2xl font-bold text-gray-900 mb-4">Voordelen voor Den Haag professionals</h3>
           
           <div className="grid md:grid-cols-2 gap-6 mb-6">
             <div>
               <h4 className="text-xl font-semibold text-gray-900 mb-3">Tijdsbesparing</h4>
-              <p className="text-gray-700">Geen reistijd door Den Haag, geen parkeergedoe, geen wachten in fotostudio's. Maak je foto's tussen twee meetings door.</p>
+              <p className="text-gray-700">Geen reistijd door Den Haag, geen gedoe met parkeren bij ministeries. Maak je foto's tussen diplomatieke meetings door.</p>
             </div>
             
             <div>
               <h4 className="text-xl font-semibold text-gray-900 mb-3">Kostenbesparing</h4>
-              <p className="text-gray-700">€29 voor 40 foto's versus €225 gemiddeld bij Den Haagse fotografen. Ideaal voor startups en freelancers.</p>
+              <p className="text-gray-700">€29 voor 40 foto's versus €210 gemiddeld bij Den Haag fotografen. Ideaal voor ambtenaren en consultants.</p>
             </div>
             
             <div>
-              <h4 className="text-xl font-semibold text-gray-900 mb-3">Flexibiliteit</h4>
-              <p className="text-gray-700">24/7 beschikbaar, perfect voor de flexibele werkstijl van moderne Den Haagse professionals.</p>
+              <h4 className="text-xl font-semibold text-gray-900 mb-3">Internationale standaard</h4>
+              <p className="text-gray-700">24/7 beschikbaar, perfect voor de internationale werkstijl van moderne Den Haag professionals.</p>
             </div>
             
             <div>
-              <h4 className="text-xl font-semibold text-gray-900 mb-3">Variatie</h4>
-              <p className="text-gray-700">40 verschillende foto's om uit te kiezen, verschillende stijlen en achtergronden voor diverse doeleinden.</p>
+              <h4 className="text-xl font-semibold text-gray-900 mb-3">Diplomatieke kwaliteit</h4>
+              <p className="text-gray-700">40 verschillende foto's die voldoen aan formele en internationale zakelijke standaarden.</p>
             </div>
           </div>
 
-          <h3 className="text-2xl font-bold text-gray-900 mb-4">Perfect voor alle Den Haagse sectoren</h3>
+          <h3 className="text-2xl font-bold text-gray-900 mb-4">Perfect voor alle Den Haag sectoren</h3>
           
           <p className="text-gray-700 leading-relaxed mb-6">
-            Of je nu werkt in de financiële sector op de Zuidas, de creatieve industrie in de Jordaan, tech in Den Haag Noord, of de logistieke sector bij Schiphol - onze AI leert je unieke kenmerken en creëert foto's die passen bij jouw professionele omgeving. Van corporate tot startup, van consultant tot ondernemer.
+            Of je nu werkt bij een ministerie, een internationale organisatie, het Internationale Gerechtshof, of in de diplomatieke wereld - onze AI leert je unieke kenmerken en creëert foto's die passen bij jouw professionele omgeving in Den Haag. Van ambtenaar tot diplomaat, van consultant tot internationaal adviseur.
           </p>
 
           <p className="text-gray-700 leading-relaxed mb-6">
-            Den Haag is een internationale stad waar veel wordt gecommuniceerd via LinkedIn. Een professionele foto toont niet alleen je competentie, maar ook dat je up-to-date bent met moderne technologieën - een eigenschap die in Den Haag's innovatieve zakelijke klimaat zeer gewaardeerd wordt.
+            Den Haag is het internationale centrum van Nederland waar diplomatiek contact en formele communicatie via LinkedIn essentieel zijn. Een professionele foto toont niet alleen je competentie, maar ook dat je past bij de formele en internationale standaarden - een eigenschap die in Den Haag's diplomatieke en bestuurlijke wereld zeer gewaardeerd wordt.
           </p>
 
           <h3 className="text-2xl font-bold text-gray-900 mb-4">Klaar voor je LinkedIn succes in Den Haag?</h3>
           
           <p className="text-gray-700 leading-relaxed mb-6">
-            Doe wat vele professionals al deden: upgrade je LinkedIn profiel met AI-gegenereerde foto's. In een stad als Den Haag, waar innovatie en efficiëntie centraal staan, is dit de logische volgende stap voor je professionele ontwikkeling.
+            Doe wat vele professionals al deden: upgrade je LinkedIn profiel met AI-gegenereerde foto's. Den Haag verdient een moderne aanpak van professionele fotografie die past bij de internationale en formele zakelijke cultuur.
           </p>
 
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mt-8">
             <h4 className="text-xl font-semibold text-gray-900 mb-3">Start vandaag nog</h4>
             <p className="text-gray-700 mb-4">
-              Sluit je aan bij Den Haagse professionals die de voordelen van AI fotografie al ontdekten. Krijg binnen 15 minuten 40 professionele LinkedIn foto's voor slechts €29.
+              Sluit je aan bij Den Haag professionals die de voordelen van AI fotografie al ontdekten. Krijg binnen 15 minuten 40 professionele LinkedIn foto's voor slechts €29.
             </p>
             <Button asChild className="bg-[#0077B5] hover:bg-[#005885]">
               <Link href="/login?source=linkedin">
@@ -667,7 +663,7 @@ export default function LinkedInDenHaagPage() {
               <h4 className="text-white font-semibold text-sm uppercase tracking-wide">LinkedIn Foto per Stad</h4>
               <div className="flex flex-col space-y-2">
                 <Link href="/linkedin-foto-laten-maken-amsterdam" className="text-gray-300 hover:text-white transition-colors duration-200 text-sm">
-                  Den Haag
+                  Amsterdam
                 </Link>
                 <Link href="/linkedin-foto-laten-maken-rotterdam" className="text-gray-300 hover:text-white transition-colors duration-200 text-sm">
                   Rotterdam

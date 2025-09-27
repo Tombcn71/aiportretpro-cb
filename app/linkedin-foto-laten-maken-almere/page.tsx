@@ -158,7 +158,7 @@ export default function LinkedInAlmerePage() {
         >
           <Link href="/login?source=linkedin">
             <LinkedinIcon className="mr-2 h-5 md:h-6 w-5 md:w-6" />
-            Start je LinkedIn fotoshoot - € 29 <ArrowRight className="ml-2 h-6 md:h-7 w-6 md:w-7" />
+            Start je LinkedIn fotoshoot almere - € 29 <ArrowRight className="ml-2 h-6 md:h-7 w-6 md:w-7" />
           </Link>
         </Button>
 
@@ -518,20 +518,20 @@ export default function LinkedInAlmerePage() {
       {/* SEO Content Section - Almere Specific */}
       <section className="container mx-auto px-4 py-16 bg-white">
         <div className="max-w-4xl mx-auto prose prose-lg">
-          <h2 className="text-3xl font-bold text-gray-900 mb-6">LinkedIn foto laten maken in Almere: De moderne manier</h2>
+          <h2 className="text-3xl font-bold text-gray-900 mb-6">LinkedIn foto laten maken Almere: Professionele fotoshoot moderne stad</h2>
           
           <p className="text-gray-700 leading-relaxed mb-6">
-            Almere staat bekend als het economische hart van Nederland, waar dagelijks duizenden professionals werken aan hun carrière. In deze dynamische zakelijke omgeving is je LinkedIn profiel cruciaal voor netwerken, carrièrekansen en bedrijfsgroei. Een professionele LinkedIn foto kan het verschil maken tussen opvallen of onderbelicht blijven in de Almerese zakenwereld.
+            Zoek je een professionele LinkedIn foto Almere? Als Nederland's nieuwste en snelst groeiende stad heeft Almere duizenden jonge professionals die een sterke LinkedIn aanwezigheid nodig hebben. Een zakelijk portret Almere is essentieel voor je carrière in deze moderne, dynamische omgeving. Onze LinkedIn fotoshoot Almere service helpt professionals hun vooruitstrevende mentaliteit tonen.
           </p>
 
-          <h3 className="text-2xl font-bold text-gray-900 mb-4">Waarom een professionele LinkedIn foto essentieel is in Almere</h3>
+          <h3 className="text-2xl font-bold text-gray-900 mb-4">Profielfoto LinkedIn Almere: Waarom het cruciaal is</h3>
           
           <p className="text-gray-700 leading-relaxed mb-6">
-            Almere herbergt belangrijke bedrijven en organisaties. In deze competitieve markt is je eerste indruk op LinkedIn vaak beslissend. Onderzoek toont aan dat LinkedIn profielen met professionele foto's 14 keer meer bekeken worden en 36 keer meer berichten van recruiters ontvangen.
+            In Almere's groeiende zakenwereld is een goede LinkedIn foto laten maken Almere essentieel. Recruiters zoeken naar talent in deze moderne stad, en je profielfoto LinkedIn Almere is vaak de eerste indruk. Een professionele portretfotografie Almere sessie kan het verschil maken tussen opvallen of onderbelicht blijven bij moderne bedrijven en startups.
           </p>
 
           <p className="text-gray-700 leading-relaxed mb-6">
-            Voor Almerese professionals betekent dit concreet: meer zichtbaarheid bij headhunters op de Zuidas, betere kansen in de creatieve sector rondom de Jordaan, en sterker netwerken in de tech-scene van Almere Noord. Je LinkedIn foto is je digitale handdruk in een stad waar netwerken essentieel is.
+            Voor Almere professionals betekent dit concreet: meer zichtbaarheid bij recruiters in de regio, betere kansen in Almere's moderne zakelijke gemeenschap, en sterker netwerken in Flevoland. Je LinkedIn foto is je digitale handdruk in een stad waar netwerken essentieel is.
           </p>
 
           <h3 className="text-2xl font-bold text-gray-900 mb-4">AI fotografie: De toekomst van LinkedIn foto's</h3>
@@ -541,10 +541,10 @@ export default function LinkedInAlmerePage() {
           </p>
 
           <p className="text-gray-700 leading-relaxed mb-6">
-            Met AI fotografie upload je gewoon 6 selfies vanuit je huis in Almere - of het nu in de Pijp, Oud-Zuid, of Almere Noord is - en ontvang je binnen 15 minuten 40 professionele LinkedIn foto's. Geen parkeerkosten, geen reistijd, geen wachten op de fotograaf. Perfect voor de snelle levensstijl van Almere.
+            Met AI fotografie upload je gewoon 6 selfies vanuit je huis in Almere - of het nu in Almere Centrum, Almere Haven, of Almere Poort is - en ontvang je binnen 15 minuten 40 professionele LinkedIn foto's. Geen parkeerkosten, geen reistijd, geen wachten op de fotograaf. Perfect voor de moderne levensstijl van Almere.
           </p>
 
-          <h3 className="text-2xl font-bold text-gray-900 mb-4">Voordelen voor Almerese professionals</h3>
+          <h3 className="text-2xl font-bold text-gray-900 mb-4">Voordelen voor Almere professionals</h3>
           
           <div className="grid md:grid-cols-2 gap-6 mb-6">
             <div>
@@ -554,12 +554,12 @@ export default function LinkedInAlmerePage() {
             
             <div>
               <h4 className="text-xl font-semibold text-gray-900 mb-3">Kostenbesparing</h4>
-              <p className="text-gray-700">€29 voor 40 foto's versus €225 gemiddeld bij Almerese fotografen. Ideaal voor startups en freelancers.</p>
+              <p className="text-gray-700">€29 voor 40 foto's versus €225 gemiddeld bij Almere fotografen. Ideaal voor startups en freelancers.</p>
             </div>
             
             <div>
               <h4 className="text-xl font-semibold text-gray-900 mb-3">Flexibiliteit</h4>
-              <p className="text-gray-700">24/7 beschikbaar, perfect voor de flexibele werkstijl van moderne Almerese professionals.</p>
+              <p className="text-gray-700">24/7 beschikbaar, perfect voor de flexibele werkstijl van moderne Almere professionals.</p>
             </div>
             
             <div>
@@ -568,14 +568,14 @@ export default function LinkedInAlmerePage() {
             </div>
           </div>
 
-          <h3 className="text-2xl font-bold text-gray-900 mb-4">Perfect voor alle Almerese sectoren</h3>
+          <h3 className="text-2xl font-bold text-gray-900 mb-4">Perfect voor alle Almere sectoren</h3>
           
           <p className="text-gray-700 leading-relaxed mb-6">
-            Of je nu werkt in de financiële sector op de Zuidas, de creatieve industrie in de Jordaan, tech in Almere Noord, of de logistieke sector bij Schiphol - onze AI leert je unieke kenmerken en creëert foto's die passen bij jouw professionele omgeving. Van corporate tot startup, van consultant tot ondernemer.
+            Of je nu werkt in het bedrijfsleven, de tech sector, de zorg, of logistiek - onze AI leert je unieke kenmerken en creëert foto's die passen bij jouw professionele omgeving in Almere. Van corporate tot startup, van consultant tot ondernemer.
           </p>
 
           <p className="text-gray-700 leading-relaxed mb-6">
-            Almere is een internationale stad waar veel wordt gecommuniceerd via LinkedIn. Een professionele foto toont niet alleen je competentie, maar ook dat je up-to-date bent met moderne technologieën - een eigenschap die in Almere's innovatieve zakelijke klimaat zeer gewaardeerd wordt.
+            Almere is een moderne stad waar jonge professionals hun netwerk uitbouwen via LinkedIn. Een professionele foto toont niet alleen je competentie, maar ook dat je up-to-date bent met moderne technologieën - een eigenschap die in Almere's vooruitstrevende zakelijke cultuur zeer gewaardeerd wordt.
           </p>
 
           <h3 className="text-2xl font-bold text-gray-900 mb-4">Klaar voor je LinkedIn succes in Almere?</h3>
@@ -587,11 +587,11 @@ export default function LinkedInAlmerePage() {
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mt-8">
             <h4 className="text-xl font-semibold text-gray-900 mb-3">Start vandaag nog</h4>
             <p className="text-gray-700 mb-4">
-              Sluit je aan bij Almerese professionals die de voordelen van AI fotografie al ontdekten. Krijg binnen 15 minuten 40 professionele LinkedIn foto's voor slechts €29.
+              Sluit je aan bij Almere professionals die de voordelen van AI fotografie al ontdekten. Krijg binnen 15 minuten 40 professionele LinkedIn foto's voor slechts €29.
             </p>
             <Button asChild className="bg-[#0077B5] hover:bg-[#005885]">
               <Link href="/login?source=linkedin">
-                Begin nu je LinkedIn fotoshoot →
+                Begin nu je LinkedIn fotoshoot almere →
               </Link>
             </Button>
           </div>
@@ -666,7 +666,7 @@ export default function LinkedInAlmerePage() {
             <div className="flex flex-col space-y-4">
               <h4 className="text-white font-semibold text-sm uppercase tracking-wide">LinkedIn Foto per Stad</h4>
               <div className="flex flex-col space-y-2">
-                <Link href="/linkedin-foto-laten-maken-amsterdam" className="text-gray-300 hover:text-white transition-colors duration-200 text-sm">
+                <Link href="/linkedin-foto-laten-maken-almere" className="text-gray-300 hover:text-white transition-colors duration-200 text-sm">
                   Almere
                 </Link>
                 <Link href="/linkedin-foto-laten-maken-rotterdam" className="text-gray-300 hover:text-white transition-colors duration-200 text-sm">
@@ -710,7 +710,7 @@ export default function LinkedInAlmerePage() {
         <div className="fixed bottom-4 left-4 right-4 z-[2147483647] md:hidden">
           <div className="bg-white rounded-lg shadow-lg border border-gray-200 p-3">
             <p className="text-center text-md font-bold text-gray-800 mb-4 mt-4">
-              Doe direct jouw LinkedIn fotoshoot online, makkelijk vanuit thuis zonder gedoe, voor slechts €29,-!
+              Doe direct jouw LinkedIn fotoshoot almere online, makkelijk vanuit thuis zonder gedoe, voor slechts €29,-!
             </p>
             <Button
               asChild
@@ -719,7 +719,7 @@ export default function LinkedInAlmerePage() {
             >
               <Link href="/login?source=linkedin">
                 <LinkedinIcon className="mr-2 h-5 w-5" />
-                LinkedIn fotoshoot - € 29 <ArrowRight className="ml-2 h-6 md:h-7 w-6 md:w-7" />
+                LinkedIn fotoshoot almere - € 29 <ArrowRight className="ml-2 h-6 md:h-7 w-6 md:w-7" />
               </Link>
             </Button>
           </div>

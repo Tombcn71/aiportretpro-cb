@@ -81,7 +81,7 @@ const faqData = [
   }
 ]
 
-export default function LinkedInBredaPage() {
+export default function LinkedInAmsterdamPage() {
   const [isClient, setIsClient] = useState(false)
   const [selectedImage, setSelectedImage] = useState<string | null>(null)
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null)
@@ -130,10 +130,10 @@ export default function LinkedInBredaPage() {
     <div className="min-h-screen pt-20">
       <Header />
 
-      {/* Hero Section - Breda Specific */}
+      {/* Hero Section - Amsterdam Specific */}
       <section className="container mx-auto px-4 py-6 text-center">
         <h1 className="tracking-tight text-xl md:text-4xl font-bold mb-6 leading-tight">
-          <span className="block">Professionele foto voor LinkedIn laten maken in Breda? </span>
+          <span className="block">Professionele foto voor LinkedIn laten maken in Amsterdam? </span>
           <span className="text-[#0077B5] block">Dit kan nu ook online zonder fotograaf!</span>
         </h1>
         <p className="text-gray-500 text-lg mb-6 font-light italic">Even wat foto's uploaden, dat is alles.
@@ -158,7 +158,7 @@ export default function LinkedInBredaPage() {
         >
           <Link href="/login?source=linkedin">
             <LinkedinIcon className="mr-2 h-5 md:h-6 w-5 md:w-6" />
-            Start je LinkedIn fotoshoot breda - € 29 <ArrowRight className="ml-2 h-6 md:h-7 w-6 md:w-7" />
+            Start je LinkedIn fotoshoot - € 29 <ArrowRight className="ml-2 h-6 md:h-7 w-6 md:w-7" />
           </Link>
         </Button>
 
@@ -515,51 +515,51 @@ export default function LinkedInBredaPage() {
         </div>
       </section>
 
-      {/* SEO Content Section - Breda Specific */}
+      {/* SEO Content Section - Amsterdam Specific */}
       <section className="container mx-auto px-4 py-16 bg-white">
         <div className="max-w-4xl mx-auto prose prose-lg">
-          <h2 className="text-3xl font-bold text-gray-900 mb-6">LinkedIn foto laten maken Breda: Professionele fotoshoot Parel van het Zuiden</h2>
+          <h2 className="text-3xl font-bold text-gray-900 mb-6">LinkedIn foto laten maken in Amsterdam: De moderne manier</h2>
           
           <p className="text-gray-700 leading-relaxed mb-6">
-            Zoek je een professionele LinkedIn foto Breda? Als Parel van het Zuiden heeft Breda duizenden professionals die Brabantse gastvrijheid combineren met zakelijk ondernemerschap. Een zakelijk portret Breda is essentieel voor je carrière in deze warme maar professionele omgeving. Onze LinkedIn fotoshoot Breda service helpt professionals hun Brabantse ondernemersgeest tonen.
+            Amsterdam staat bekend als het economische hart van Nederland, waar dagelijks duizenden professionals werken aan hun carrière. In deze dynamische zakelijke omgeving is je LinkedIn profiel cruciaal voor netwerken, carrièrekansen en bedrijfsgroei. Een professionele LinkedIn foto kan het verschil maken tussen opvallen of onderbelicht blijven in de Amsterdamse zakenwereld.
           </p>
 
-          <h3 className="text-2xl font-bold text-gray-900 mb-4">Profielfoto LinkedIn Breda: Waarom het cruciaal is</h3>
+          <h3 className="text-2xl font-bold text-gray-900 mb-4">Waarom een professionele LinkedIn foto essentieel is in Amsterdam</h3>
           
           <p className="text-gray-700 leading-relaxed mb-6">
-            In Breda's rijke zakelijke cultuur is een goede LinkedIn foto laten maken Breda essentieel. Met veel midden- en kleinbedrijf en internationale hoofdkantoren zoeken recruiters dagelijks naar talent, en je profielfoto LinkedIn Breda is vaak de eerste indruk. Een professionele portretfotografie Breda sessie kan het verschil maken tussen opvallen of onderbelicht blijven.
+            Amsterdam herbergt het hoofdkantoor van vele internationale bedrijven, van ING en Philips tot Booking.com en Adyen. In deze competitieve markt is je eerste indruk op LinkedIn vaak beslissend. Onderzoek toont aan dat LinkedIn profielen met professionele foto's 14 keer meer bekeken worden en 36 keer meer berichten van recruiters ontvangen.
           </p>
 
           <p className="text-gray-700 leading-relaxed mb-6">
-            Voor Bredase professionals betekent dit concreet: meer zichtbaarheid bij recruiters in de regio, betere kansen in de lokale zakelijke gemeenschap, en sterker netwerken in Noord-Brabant. Je LinkedIn foto is je digitale handdruk in een stad waar persoonlijke contacten en vertrouwen essentieel zijn.
+            Voor Amsterdamse professionals betekent dit concreet: meer zichtbaarheid bij headhunters op de Zuidas, betere kansen in de creatieve sector rondom de Jordaan, en sterker netwerken in de tech-scene van Amsterdam Noord. Je LinkedIn foto is je digitale handdruk in een stad waar netwerken essentieel is.
           </p>
 
           <h3 className="text-2xl font-bold text-gray-900 mb-4">AI fotografie: De toekomst van LinkedIn foto's</h3>
           
           <p className="text-gray-700 leading-relaxed mb-6">
-            Traditioneel betekende een professionele LinkedIn foto maken in Breda: een fotograaf zoeken, een afspraak inplannen (vaak weken later), door de stad reizen, en €200-300 betalen voor enkele foto's. Onze AI-technologie verandert dit volledig.
+            Traditioneel betekende een professionele LinkedIn foto maken in Amsterdam: een fotograaf zoeken, een afspraak inplannen (vaak weken later), door de stad reizen, en €200-300 betalen voor enkele foto's. Onze AI-technologie verandert dit volledig.
           </p>
 
           <p className="text-gray-700 leading-relaxed mb-6">
-            Met AI fotografie upload je gewoon 6 selfies vanuit je huis in Breda - of het nu in het centrum, Breda Noord, of de Haagse Beemden is - en ontvang je binnen 15 minuten 40 professionele LinkedIn foto's. Geen parkeerkosten, geen reistijd, geen wachten op de fotograaf. Perfect voor de Brabantse levensstijl van Breda.
+            Met AI fotografie upload je gewoon 6 selfies vanuit je huis in Amsterdam - of het nu in de Pijp, Oud-Zuid, of Amsterdam Noord is - en ontvang je binnen 15 minuten 40 professionele LinkedIn foto's. Geen parkeerkosten, geen reistijd, geen wachten op de fotograaf. Perfect voor de snelle levensstijl van Amsterdam.
           </p>
 
-          <h3 className="text-2xl font-bold text-gray-900 mb-4">Voordelen voor Bredase professionals</h3>
+          <h3 className="text-2xl font-bold text-gray-900 mb-4">Voordelen voor Amsterdamse professionals</h3>
           
           <div className="grid md:grid-cols-2 gap-6 mb-6">
             <div>
               <h4 className="text-xl font-semibold text-gray-900 mb-3">Tijdsbesparing</h4>
-              <p className="text-gray-700">Geen reistijd door Breda, geen parkeergedoe, geen wachten in fotostudio's. Maak je foto's tussen twee meetings door.</p>
+              <p className="text-gray-700">Geen reistijd door Amsterdam, geen parkeergedoe, geen wachten in fotostudio's. Maak je foto's tussen twee meetings door.</p>
             </div>
             
             <div>
               <h4 className="text-xl font-semibold text-gray-900 mb-3">Kostenbesparing</h4>
-              <p className="text-gray-700">€29 voor 40 foto's versus €225 gemiddeld bij Bredase fotografen. Ideaal voor startups en freelancers.</p>
+              <p className="text-gray-700">€29 voor 40 foto's versus €225 gemiddeld bij Amsterdamse fotografen. Ideaal voor startups en freelancers.</p>
             </div>
             
             <div>
               <h4 className="text-xl font-semibold text-gray-900 mb-3">Flexibiliteit</h4>
-              <p className="text-gray-700">24/7 beschikbaar, perfect voor de flexibele werkstijl van moderne Bredase professionals.</p>
+              <p className="text-gray-700">24/7 beschikbaar, perfect voor de flexibele werkstijl van moderne Amsterdamse professionals.</p>
             </div>
             
             <div>
@@ -568,30 +568,30 @@ export default function LinkedInBredaPage() {
             </div>
           </div>
 
-          <h3 className="text-2xl font-bold text-gray-900 mb-4">Perfect voor alle Bredase sectoren</h3>
+          <h3 className="text-2xl font-bold text-gray-900 mb-4">Perfect voor alle Amsterdamse sectoren</h3>
           
           <p className="text-gray-700 leading-relaxed mb-6">
-            Of je nu werkt in het bedrijfsleven, de tech sector, de zorg, of logistiek - onze AI leert je unieke kenmerken en creëert foto's die passen bij jouw professionele omgeving in Breda. Van corporate tot startup, van consultant tot ondernemer.
+            Of je nu werkt in de financiële sector op de Zuidas, de creatieve industrie in de Jordaan, tech in Amsterdam Noord, of de logistieke sector bij Schiphol - onze AI leert je unieke kenmerken en creëert foto's die passen bij jouw professionele omgeving. Van corporate tot startup, van consultant tot ondernemer.
           </p>
 
           <p className="text-gray-700 leading-relaxed mb-6">
-            Breda is een Brabantse stad waar professionals hun warme netwerk combineren met LinkedIn. Een professionele foto toont niet alleen je competentie, maar ook dat je up-to-date bent met moderne technologieën - een eigenschap die in Breda's Brabantse ondernemersgeest zeer gewaardeerd wordt.
+            Amsterdam is een internationale stad waar veel wordt gecommuniceerd via LinkedIn. Een professionele foto toont niet alleen je competentie, maar ook dat je up-to-date bent met moderne technologieën - een eigenschap die in Amsterdam's innovatieve zakelijke klimaat zeer gewaardeerd wordt.
           </p>
 
-          <h3 className="text-2xl font-bold text-gray-900 mb-4">Klaar voor je LinkedIn succes in Breda?</h3>
+          <h3 className="text-2xl font-bold text-gray-900 mb-4">Klaar voor je LinkedIn succes in Amsterdam?</h3>
           
           <p className="text-gray-700 leading-relaxed mb-6">
-            Doe wat vele professionals al deden: upgrade je LinkedIn profiel met AI-gegenereerde foto's. In een stad als Breda, waar innovatie en efficiëntie centraal staan, is dit de logische volgende stap voor je professionele ontwikkeling.
+            Doe wat vele professionals al deden: upgrade je LinkedIn profiel met AI-gegenereerde foto's. In een stad als Amsterdam, waar innovatie en efficiëntie centraal staan, is dit de logische volgende stap voor je professionele ontwikkeling.
           </p>
 
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mt-8">
             <h4 className="text-xl font-semibold text-gray-900 mb-3">Start vandaag nog</h4>
             <p className="text-gray-700 mb-4">
-              Sluit je aan bij Bredase professionals die de voordelen van AI fotografie al ontdekten. Krijg binnen 15 minuten 40 professionele LinkedIn foto's voor slechts €29.
+              Sluit je aan bij Amsterdamse professionals die de voordelen van AI fotografie al ontdekten. Krijg binnen 15 minuten 40 professionele LinkedIn foto's voor slechts €29.
             </p>
             <Button asChild className="bg-[#0077B5] hover:bg-[#005885]">
               <Link href="/login?source=linkedin">
-                Begin nu je LinkedIn fotoshoot breda →
+                Begin nu je LinkedIn fotoshoot →
               </Link>
             </Button>
           </div>
@@ -636,7 +636,7 @@ export default function LinkedInBredaPage() {
                 <span className="text-xl font-bold">AI Portret Pro</span>
               </div>
               <p className="text-gray-300 text-sm leading-relaxed max-w-xs">
-                Professionele AI LinkedIn foto's voor Breda professionals.
+                Professionele AI LinkedIn foto's voor Amsterdam professionals.
               </p>
             </div>
 
@@ -666,8 +666,8 @@ export default function LinkedInBredaPage() {
             <div className="flex flex-col space-y-4">
               <h4 className="text-white font-semibold text-sm uppercase tracking-wide">LinkedIn Foto per Stad</h4>
               <div className="flex flex-col space-y-2">
-                <Link href="/linkedin-foto-laten-maken-breda" className="text-gray-300 hover:text-white transition-colors duration-200 text-sm">
-                  Breda
+                <Link href="/linkedin-foto-laten-maken-amsterdam" className="text-gray-300 hover:text-white transition-colors duration-200 text-sm">
+                  Amsterdam
                 </Link>
                 <Link href="/linkedin-foto-laten-maken-rotterdam" className="text-gray-300 hover:text-white transition-colors duration-200 text-sm">
                   Rotterdam
@@ -710,7 +710,7 @@ export default function LinkedInBredaPage() {
         <div className="fixed bottom-4 left-4 right-4 z-[2147483647] md:hidden">
           <div className="bg-white rounded-lg shadow-lg border border-gray-200 p-3">
             <p className="text-center text-md font-bold text-gray-800 mb-4 mt-4">
-              Doe direct jouw LinkedIn fotoshoot breda online, makkelijk vanuit thuis zonder gedoe, voor slechts €29,-!
+              Doe direct jouw LinkedIn fotoshoot online, makkelijk vanuit thuis zonder gedoe, voor slechts €29,-!
             </p>
             <Button
               asChild
@@ -719,7 +719,7 @@ export default function LinkedInBredaPage() {
             >
               <Link href="/login?source=linkedin">
                 <LinkedinIcon className="mr-2 h-5 w-5" />
-                LinkedIn fotoshoot breda - € 29 <ArrowRight className="ml-2 h-6 md:h-7 w-6 md:w-7" />
+                LinkedIn fotoshoot - € 29 <ArrowRight className="ml-2 h-6 md:h-7 w-6 md:w-7" />
               </Link>
             </Button>
           </div>

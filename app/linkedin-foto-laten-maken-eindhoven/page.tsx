@@ -518,20 +518,20 @@ export default function LinkedInEindhovenPage() {
       {/* SEO Content Section - Eindhoven Specific */}
       <section className="container mx-auto px-4 py-16 bg-white">
         <div className="max-w-4xl mx-auto prose prose-lg">
-          <h2 className="text-3xl font-bold text-gray-900 mb-6">LinkedIn foto laten maken in Eindhoven: De moderne manier</h2>
+          <h2 className="text-3xl font-bold text-gray-900 mb-6">LinkedIn foto laten maken Eindhoven: Professionele fotoshoot voor tech professionals</h2>
           
           <p className="text-gray-700 leading-relaxed mb-6">
-            Eindhoven staat bekend als het economische hart van Nederland, waar dagelijks duizenden professionals werken aan hun carrière. In deze dynamische zakelijke omgeving is je LinkedIn profiel cruciaal voor netwerken, carrièrekansen en bedrijfsgroei. Een professionele LinkedIn foto kan het verschil maken tussen opvallen of onderbelicht blijven in de Eindhovense zakenwereld.
+            Zoek je een professionele LinkedIn foto Eindhoven? Als tech hoofdstad van Europa heeft Eindhoven duizenden professionals die een sterke LinkedIn aanwezigheid nodig hebben. Van ASML engineers tot Philips innovators - een zakelijk portret Eindhoven is essentieel voor je carrière in Brainport. Onze LinkedIn fotoshoot Eindhoven service helpt tech professionals hun beste professionele kant tonen.
           </p>
 
-          <h3 className="text-2xl font-bold text-gray-900 mb-4">Waarom een professionele LinkedIn foto essentieel is in Eindhoven</h3>
+          <h3 className="text-2xl font-bold text-gray-900 mb-4">Profielfoto LinkedIn Eindhoven: Waarom het belangrijk is</h3>
           
           <p className="text-gray-700 leading-relaxed mb-6">
-            Eindhoven herbergt belangrijke bedrijven en organisaties. In deze competitieve markt is je eerste indruk op LinkedIn vaak beslissend. Onderzoek toont aan dat LinkedIn profielen met professionele foto's 14 keer meer bekeken worden en 36 keer meer berichten van recruiters ontvangen.
+            In Eindhoven's competitieve tech-omgeving is een goede LinkedIn foto laten maken Eindhoven cruciaal. Recruiters zoeken dagelijks naar talent op LinkedIn, en je profielfoto LinkedIn Eindhoven is vaak de eerste indruk. Een professionele portretfotografie Eindhoven sessie kan het verschil maken tussen opvallen of onderbelicht blijven bij bedrijven zoals NXP, ASML en de vele startups op de High Tech Campus.
           </p>
 
           <p className="text-gray-700 leading-relaxed mb-6">
-            Voor Eindhovense professionals betekent dit concreet: meer zichtbaarheid bij headhunters op de Zuidas, betere kansen in de creatieve sector rondom de Jordaan, en sterker netwerken in de tech-scene van Eindhoven Noord. Je LinkedIn foto is je digitale handdruk in een stad waar netwerken essentieel is.
+            Voor Eindhovense professionals betekent dit concreet: meer zichtbaarheid bij headhunters op de lokale zakelijke gemeenschap, en sterker netwerken in de tech-scene van Eindhoven Noord. Je LinkedIn foto is je digitale handdruk in een stad waar netwerken essentieel is.
           </p>
 
           <h3 className="text-2xl font-bold text-gray-900 mb-4">AI fotografie: De toekomst van LinkedIn foto's</h3>
@@ -541,7 +541,7 @@ export default function LinkedInEindhovenPage() {
           </p>
 
           <p className="text-gray-700 leading-relaxed mb-6">
-            Met AI fotografie upload je gewoon 6 selfies vanuit je huis in Eindhoven - of het nu in de Pijp, Oud-Zuid, of Eindhoven Noord is - en ontvang je binnen 15 minuten 40 professionele LinkedIn foto's. Geen parkeerkosten, geen reistijd, geen wachten op de fotograaf. Perfect voor de snelle levensstijl van Eindhoven.
+            Met AI fotografie upload je gewoon 6 selfies vanuit je huis in Eindhoven - of het nu in Strijp, het centrum, of Eindhoven Noord is - en ontvang je binnen 15 minuten 40 professionele LinkedIn foto's. Geen parkeerkosten, geen reistijd, geen wachten op de fotograaf. Perfect voor de snelle levensstijl van Eindhoven.
           </p>
 
           <h3 className="text-2xl font-bold text-gray-900 mb-4">Voordelen voor Eindhovense professionals</h3>
@@ -571,11 +571,11 @@ export default function LinkedInEindhovenPage() {
           <h3 className="text-2xl font-bold text-gray-900 mb-4">Perfect voor alle Eindhovense sectoren</h3>
           
           <p className="text-gray-700 leading-relaxed mb-6">
-            Of je nu werkt in de financiële sector op de Zuidas, de creatieve industrie in de Jordaan, tech in Eindhoven Noord, of de logistieke sector bij Schiphol - onze AI leert je unieke kenmerken en creëert foto's die passen bij jouw professionele omgeving. Van corporate tot startup, van consultant tot ondernemer.
+            Of je nu werkt in het bedrijfsleven, de tech sector, de zorg, of logistiek - onze AI leert je unieke kenmerken en creëert foto's die passen bij jouw professionele omgeving in Eindhoven. Van corporate tot startup, van consultant tot ondernemer.
           </p>
 
           <p className="text-gray-700 leading-relaxed mb-6">
-            Eindhoven is een internationale stad waar veel wordt gecommuniceerd via LinkedIn. Een professionele foto toont niet alleen je competentie, maar ook dat je up-to-date bent met moderne technologieën - een eigenschap die in Eindhoven's innovatieve zakelijke klimaat zeer gewaardeerd wordt.
+            Eindhoven is een tech hoofdstad waar innovators wereldwijd connecten via LinkedIn. Een professionele foto toont niet alleen je competentie, maar ook dat je up-to-date bent met moderne technologieën - een eigenschap die in Eindhoven's Brainport tech ecosysteem zeer gewaardeerd wordt.
           </p>
 
           <h3 className="text-2xl font-bold text-gray-900 mb-4">Klaar voor je LinkedIn succes in Eindhoven?</h3>
@@ -666,7 +666,7 @@ export default function LinkedInEindhovenPage() {
             <div className="flex flex-col space-y-4">
               <h4 className="text-white font-semibold text-sm uppercase tracking-wide">LinkedIn Foto per Stad</h4>
               <div className="flex flex-col space-y-2">
-                <Link href="/linkedin-foto-laten-maken-amsterdam" className="text-gray-300 hover:text-white transition-colors duration-200 text-sm">
+                <Link href="/linkedin-foto-laten-maken-eindhoven" className="text-gray-300 hover:text-white transition-colors duration-200 text-sm">
                   Eindhoven
                 </Link>
                 <Link href="/linkedin-foto-laten-maken-rotterdam" className="text-gray-300 hover:text-white transition-colors duration-200 text-sm">
