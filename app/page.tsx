@@ -360,6 +360,43 @@ export default function HomePage() {
               </div>
             </div>
 
+            {/* LinkedIn per stad */}
+            <div className="flex flex-col space-y-4">
+              <h4 className="text-white font-semibold text-sm uppercase tracking-wide">LinkedIn Foto per Stad</h4>
+              <div className="flex flex-col space-y-2">
+                <Link href="/linkedin-foto-laten-maken-amsterdam" className="text-gray-300 hover:text-white transition-colors duration-200 text-sm">
+                  Amsterdam
+                </Link>
+                <Link href="/linkedin-foto-laten-maken-rotterdam" className="text-gray-300 hover:text-white transition-colors duration-200 text-sm">
+                  Rotterdam
+                </Link>
+                <Link href="/linkedin-foto-laten-maken-den-haag" className="text-gray-300 hover:text-white transition-colors duration-200 text-sm">
+                  Den Haag
+                </Link>
+                <Link href="/linkedin-foto-laten-maken-utrecht" className="text-gray-300 hover:text-white transition-colors duration-200 text-sm">
+                  Utrecht
+                </Link>
+                <Link href="/linkedin-foto-laten-maken-eindhoven" className="text-gray-300 hover:text-white transition-colors duration-200 text-sm">
+                  Eindhoven
+                </Link>
+                <Link href="/linkedin-foto-laten-maken-tilburg" className="text-gray-300 hover:text-white transition-colors duration-200 text-sm">
+                  Tilburg
+                </Link>
+                <Link href="/linkedin-foto-laten-maken-groningen" className="text-gray-300 hover:text-white transition-colors duration-200 text-sm">
+                  Groningen
+                </Link>
+                <Link href="/linkedin-foto-laten-maken-almere" className="text-gray-300 hover:text-white transition-colors duration-200 text-sm">
+                  Almere
+                </Link>
+                <Link href="/linkedin-foto-laten-maken-breda" className="text-gray-300 hover:text-white transition-colors duration-200 text-sm">
+                  Breda
+                </Link>
+                <Link href="/linkedin-foto-laten-maken-nijmegen" className="text-gray-300 hover:text-white transition-colors duration-200 text-sm">
+                  Nijmegen
+                </Link>
+              </div>
+            </div>
+
             {/* Legal Links */}
             <div className="flex flex-col space-y-4">
               <h4 className="text-white font-semibold text-sm uppercase tracking-wide">Juridisch</h4>
