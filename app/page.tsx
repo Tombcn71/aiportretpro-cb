@@ -152,7 +152,7 @@ export default function HomePage() {
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-6 text-center">
         <h1 className="tracking-tight text-xl md:text-4xl font-bold mb-6 leading-tight">
-          <span className="block">Professionele foto voor LinkedIn laten maken?</span>
+          <span className="block">Professionele zakelijke foto's laten maken?</span>
           <span className="text-[#0077B5] block">Dit kan nu ook online zonder fotograaf!</span>
         </h1>
         <p className="text-gray-500 text-lg mb-6 font-light italic">Even wat foto's uploaden, dat is alles.</p>
@@ -272,6 +272,164 @@ export default function HomePage() {
           >
             <Link href="/contact">Neem Contact Op</Link>
           </Button>
+        </div>
+      </section>
+
+      {/* SEO Content Section */}
+      <section className="py-12 md:py-16 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto">
+            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6 text-center">
+              Professionele Zakelijke Foto's Laten Maken Online - De Slimme Keuze voor Professionals
+            </h2>
+            
+            <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed space-y-6">
+              <p className="text-lg">
+                Wil je <strong>professionele zakelijke foto's laten maken</strong> zonder de hoge kosten van een traditionele fotograaf? 
+                Met onze revolutionaire AI-technologie krijg je <strong>40 professionele foto's in slechts 15 minuten</strong> voor 
+                slechts €29. Perfect voor LinkedIn, CV, website, visitekaartjes en alle zakelijke doeleinden.
+              </p>
+
+              <div className="grid md:grid-cols-2 gap-8 my-8">
+                <div>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-4">Waarom Kiezen voor AI Portretfotografie?</h3>
+                  <ul className="space-y-2 text-gray-700">
+                    <li className="flex items-start gap-2">
+                      <span className="text-green-600 mt-1">✓</span>
+                      <span><strong>6x goedkoper</strong> dan traditionele fotoshoots</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-green-600 mt-1">✓</span>
+                      <span><strong>Geen afspraak nodig</strong> - start direct vanuit huis</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-green-600 mt-1">✓</span>
+                      <span><strong>40 verschillende poses</strong> en achtergronden</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-green-600 mt-1">✓</span>
+                      <span><strong>Professionele kwaliteit</strong> gegarandeerd</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-green-600 mt-1">✓</span>
+                      <span><strong>14-dagen geld terug garantie</strong></span>
+                    </li>
+                  </ul>
+                </div>
+
+                <div>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-4">Perfect Voor Elk Doel</h3>
+                  <ul className="space-y-2 text-gray-700">
+                    <li className="flex items-start gap-2">
+                      <span className="text-blue-600 mt-1">📸</span>
+                      <span><strong>LinkedIn profielfoto's</strong> die opvallen</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-blue-600 mt-1">💼</span>
+                      <span><strong>CV en sollicitatie foto's</strong></span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-blue-600 mt-1">🌐</span>
+                      <span><strong>Website en bedrijfsprofiel</strong></span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-blue-600 mt-1">📧</span>
+                      <span><strong>E-mail handtekening</strong> en visitekaartjes</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-blue-600 mt-1">📱</span>
+                      <span><strong>Social media profielen</strong></span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              <p>
+                Of je nu een <strong>zakelijke foto nodig hebt</strong> voor je startup, een <strong>headshot voor je corporate functie</strong>, 
+                of <strong>professionele foto's voor je bedrijfsprofiel</strong> - onze AI fotografie service biedt de perfecte oplossing. 
+                Geen gedoe met studio afspraken, dure fotograaf tarieven, of lange wachttijden.
+              </p>
+
+              <div className="bg-blue-50 p-6 rounded-lg my-8">
+                <h3 className="text-xl font-semibold text-gray-900 mb-3">Hoe Werkt Het?</h3>
+                <div className="space-y-3 text-gray-700">
+                  <div className="flex items-start gap-3">
+                    <span className="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold flex-shrink-0 mt-0.5">1</span>
+                    <span><strong>Upload 6-12 foto's</strong> van jezelf (verschillende hoeken en kleding)</span>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <span className="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold flex-shrink-0 mt-0.5">2</span>
+                    <span><strong>AI analyseert je gezicht</strong> en leert je unieke kenmerken</span>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <span className="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold flex-shrink-0 mt-0.5">3</span>
+                    <span><strong>15 minuten wachten</strong> terwijl de magie gebeurt</span>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <span className="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold flex-shrink-0 mt-0.5">4</span>
+                    <span><strong>Download 40 professionele foto's</strong> in hoge resolutie</span>
+                  </div>
+                </div>
+              </div>
+
+              <p>
+                Onze <strong>AI portretfotografie</strong> gebruikt de nieuwste technologie om foto's te creëren die 
+                onmogelijk te onderscheiden zijn van echte studio foto's. Met professionele belichting, 
+                zakelijke achtergronden en perfect gepositioneerde shots, krijg je het beste van beide werelden: 
+                <strong>professionele kwaliteit tegen een fractie van de kosten</strong>.
+              </p>
+
+              <p>
+                Sluit je aan bij duizenden tevreden professionals die al hun <strong>zakelijke foto's lieten maken</strong> 
+                met onze service. Van startende ondernemers tot C-level executives - iedereen kan profiteren van 
+                een krachtige, professionele uitstraling die de juiste indruk maakt.
+              </p>
+
+              <div className="bg-gray-50 p-6 rounded-lg my-8">
+                <h3 className="text-xl font-semibold text-gray-900 mb-4">Populaire Zoektermen & Services</h3>
+                <div className="grid md:grid-cols-3 gap-4 text-sm text-gray-600">
+                  <div>
+                    <h4 className="font-semibold text-gray-800 mb-2">Fotografie Services</h4>
+                    <ul className="space-y-1">
+                      <li>• Profielfoto laten maken</li>
+                      <li>• Zakelijke portretfoto</li>
+                      <li>• Corporate headshots</li>
+                      <li>• Business foto's online</li>
+                      <li>• CV foto professioneel</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-800 mb-2">Platform Specifiek</h4>
+                    <ul className="space-y-1">
+                      <li>• LinkedIn profielfoto maken</li>
+                      <li>• Instagram business profiel</li>
+                      <li>• Website about page foto</li>
+                      <li>• Social media headshot</li>
+                      <li>• Online dating profielfoto</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-800 mb-2">Technologie</h4>
+                    <ul className="space-y-1">
+                      <li>• AI fotografie Nederland</li>
+                      <li>• Kunstmatige intelligentie foto</li>
+                      <li>• Online fotoshoot thuis</li>
+                      <li>• Virtuele fotostudio</li>
+                      <li>• Automatische achtergrond</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              <p>
+                <strong>Waarom AI Portret Pro de beste keuze is voor jouw zakelijke foto's:</strong> 
+                We combineren geavanceerde AI-technologie met jarenlange ervaring in professionele fotografie. 
+                Onze algoritmes zijn getraind op duizenden zakelijke portretten, waardoor we de perfecte balans 
+                vinden tussen natuurlijkheid en professionaliteit. Of je nu werkt in tech, finance, marketing, 
+                consulting, of welke sector dan ook - wij zorgen ervoor dat je de juiste indruk maakt.
+              </p>
+            </div>
+          </div>
         </div>
       </section>
 
