@@ -82,7 +82,7 @@ export default function RootLayout({
         {/* Critical CSS - Above the fold styles */}
         <style dangerouslySetInnerHTML={{
           __html: `
-            body{margin:0;font-family:Inter,sans-serif}
+            body{margin:0;font-family:Inter,sans-serif;line-height:1.6}
             .container{max-width:1200px;margin:0 auto;padding:0 1rem}
             h1{font-size:1.25rem;font-weight:700;line-height:1.2;margin:0 0 1.5rem}
             @media(min-width:768px){h1{font-size:2.25rem}}
@@ -98,6 +98,20 @@ export default function RootLayout({
             .mb-6{margin-bottom:1.5rem}
             .px-4{padding-left:1rem;padding-right:1rem}
             .py-6{padding-top:1.5rem;padding-bottom:1.5rem}
+            .font-bold{font-weight:700}
+            .text-lg{font-size:1.125rem}
+            .text-gray-500{color:#6b7280}
+            .italic{font-style:italic}
+            .font-light{font-weight:300}
+            .tracking-tight{letter-spacing:-0.025em}
+            .leading-tight{line-height:1.25}
+            .block{display:block}
+            .inline-grid{display:inline-grid}
+            .grid-cols-\\[auto_1fr\\]{grid-template-columns:auto 1fr}
+            .gap-x-2{column-gap:0.5rem}
+            .items-start{align-items:flex-start}
+            .text-start{text-align:start}
+            .justify-center{justify-content:center}
           `
         }} />
       </head>
