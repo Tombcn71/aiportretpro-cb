@@ -27,19 +27,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 1,
     },
     {
-      url: `${baseUrl}/pricing`,
-      lastModified: currentDate,
-      changeFrequency: 'weekly' as const,
-      priority: 0.9,
-    },
-    {
-      url: `${baseUrl}/contact`,
-      lastModified: currentDate,
-      changeFrequency: 'monthly' as const,
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/linkedin-profielfoto`,
+      url: `${baseUrl}/linkedin-foto-laten-maken`,
       lastModified: currentDate,
       changeFrequency: 'weekly' as const,
       priority: 0.9,
@@ -54,27 +42,5 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.95, // Zeer hoge prioriteit voor lokale SEO
   }))
 
-  // Blog pagina's
-  const blogPages = [
-    {
-      url: `${baseUrl}/blog`,
-      lastModified: currentDate,
-      changeFrequency: 'weekly' as const,
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/blog/linkedin-profielfoto-gids-2024`,
-      lastModified: currentDate,
-      changeFrequency: 'monthly' as const,
-      priority: 0.6,
-    },
-    {
-      url: `${baseUrl}/blog/ai-vs-traditionele-fotografie`,
-      lastModified: currentDate,
-      changeFrequency: 'monthly' as const,
-      priority: 0.6,
-    }
-  ]
-
-  return [...mainPages, ...cityPages, ...blogPages]
+  return [...mainPages, ...cityPages]
 }
