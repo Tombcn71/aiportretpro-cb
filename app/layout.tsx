@@ -22,7 +22,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Professionele zakelijke foto's laten maken kan nu online - AI Portret Pro €29",
     description: "Professionele zakelijke foto's laten maken kan nu zonder fotograaf. 6x goedkoper dan traditionele fotoshoots. 40 AI portretfoto's in 15 minuten voor LinkedIn, CV, website.",
-    url: "https://aiportretpro.com",
+    url: "https://aiportretpro.nl",
     siteName: "AI Portret Pro",
     type: "website",
     locale: "nl_NL",
@@ -33,7 +33,7 @@ export const metadata: Metadata = {
     description: "Professionele zakelijke foto's laten maken kan nu zonder fotograaf. 6x goedkoper dan traditionele fotoshoots. 40 AI portretfoto's in 15 minuten voor LinkedIn, CV, website.",
   },
   alternates: {
-    canonical: "https://aiportretpro.com",
+    canonical: "https://aiportretpro.nl",
   },
   robots: {
     index: true,
@@ -78,6 +78,28 @@ export default function RootLayout({
         {/* Performance Budget */}
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
         <meta name="theme-color" content="#0077B5" />
+        
+        {/* Critical CSS - Above the fold styles */}
+        <style dangerouslySetInnerHTML={{
+          __html: `
+            body{margin:0;font-family:Inter,sans-serif}
+            .container{max-width:1200px;margin:0 auto;padding:0 1rem}
+            h1{font-size:1.25rem;font-weight:700;line-height:1.2;margin:0 0 1.5rem}
+            @media(min-width:768px){h1{font-size:2.25rem}}
+            .text-\\[\\#0077B5\\]{color:#0077B5}
+            .bg-\\[\\#FF8C00\\]{background-color:#FF8C00}
+            .hover\\:bg-\\[\\#FFA500\\]:hover{background-color:#FFA500}
+            .carousel-container{width:100%;overflow:hidden;position:relative}
+            .carousel-track{display:flex;width:fit-content;animation:carousel 140s linear infinite}
+            .carousel-item{flex-shrink:0;margin:0 0.5rem}
+            @keyframes carousel{0%{transform:translateX(calc(-100%/2))}100%{transform:translateX(0)}}
+            .pt-20{padding-top:5rem}
+            .text-center{text-align:center}
+            .mb-6{margin-bottom:1.5rem}
+            .px-4{padding-left:1rem;padding-right:1rem}
+            .py-6{padding-top:1.5rem;padding-bottom:1.5rem}
+          `
+        }} />
       </head>
       <body className={inter.className}>
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>

@@ -10,6 +10,9 @@ const nextConfig = {
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
   },
+  experimental: {
+    optimizeCss: true,
+  },
   images: {
     unoptimized: false,
     formats: ['image/webp', 'image/avif'],

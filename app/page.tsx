@@ -493,6 +493,7 @@ export default function HomePage() {
                   width={30}
                   height={30}
                   className="rounded-lg"
+                  style={{ width: '30px', height: '30px' }}
                 />
                 <h3 className="text-xl font-bold text-white">AI Portret Pro</h3>
               </div>
