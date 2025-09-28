@@ -203,7 +203,8 @@ export default function HomePage() {
                         width={320}
                         height={240}
                         className="w-full h-full object-contain bg-gray-50 brightness-110 contrast-105"
-                        priority={index < 10}
+                        priority={index < 3}
+                        loading={index < 3 ? "eager" : "lazy"}
                         quality={75}
                         sizes="(max-width: 768px) 208px, 320px"
                       />
@@ -222,6 +223,7 @@ export default function HomePage() {
                         width={320}
                         height={240}
                         className="w-full h-full object-contain bg-gray-50 brightness-110 contrast-105"
+                        loading="lazy"
                         quality={75}
                         sizes="(max-width: 768px) 208px, 320px"
                       />
