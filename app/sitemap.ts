@@ -31,6 +31,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: currentDate,
       changeFrequency: 'weekly' as const,
       priority: 0.9,
+    },
+    {
+      url: `${baseUrl}/pricing`,
+      lastModified: currentDate,
+      changeFrequency: 'weekly' as const,
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/contact`,
+      lastModified: currentDate,
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
     }
   ]
 
@@ -42,5 +54,45 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.95, // Zeer hoge prioriteit voor lokale SEO
   }))
 
-  return [...mainPages, ...cityPages]
+  // Blog pagina's - ZEER BELANGRIJK voor SEO
+  const blogPages = [
+    {
+      url: `${baseUrl}/blog`,
+      lastModified: currentDate,
+      changeFrequency: 'weekly' as const,
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/blog/linkedin-profielfoto-gids-2024`,
+      lastModified: currentDate,
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/blog/ai-vs-traditionele-fotografie`,
+      lastModified: currentDate,
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/blog/ai-is-niet-eng`,
+      lastModified: currentDate,
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/blog/linkedin-foto-fouten-ai-voorkomt`,
+      lastModified: currentDate,
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/blog/wat-kost-zakelijke-fotoshoot-nederland`,
+      lastModified: currentDate,
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    }
+  ]
+
+  return [...mainPages, ...cityPages, ...blogPages]
 }
