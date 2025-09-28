@@ -173,7 +173,7 @@ export default function HomePage() {
           size="lg"
           className=" bg-[#FF8C00] hover:bg-[#FFA500] text-white px-6 md:px-10 py-8 md:py-8 text-base md:text-lg mb-3 md:max-w-sm"
         >
-          <Link href="/login?source=homepage">
+          <Link href="/pricing">
             Start jouw fotoshoot nu - € 29 <ArrowRight className="ml-2 h-6 md:h-7 w-6 md:w-7" />
           </Link>
         </Button>
@@ -200,10 +200,12 @@ export default function HomePage() {
                       <Image
                         src={photo || "/placeholder.svg"}
                         alt={`AI portret voorbeeld ${index + 1}`}
-                        width={1152}
-                        height={896}
+                        width={320}
+                        height={240}
                         className="w-full h-full object-contain bg-gray-50 brightness-110 contrast-105"
                         priority={index < 10}
+                        quality={75}
+                        sizes="(max-width: 768px) 208px, 320px"
                       />
                     </div>
                   </div>
@@ -217,9 +219,11 @@ export default function HomePage() {
                       <Image
                         src={photo || "/placeholder.svg"}
                         alt={`AI portret voorbeeld ${index + 1}`}
-                        width={1152}
-                        height={896}
+                        width={320}
+                        height={240}
                         className="w-full h-full object-contain bg-gray-50 brightness-110 contrast-105"
+                        quality={75}
+                        sizes="(max-width: 768px) 208px, 320px"
                       />
                     </div>
                   </div>
@@ -441,7 +445,7 @@ export default function HomePage() {
           </h2>
           <p className="text-xl text-gray-600 mb-8">Laat zien wie je bent met een krachtige, professionele foto</p>
           {isClient && (
-            <Link href="/login?source=homepage">
+            <Link href="/pricing">
               <Button size="lg" className="bg-[#FFA500] hover:bg-[#FF8C00] text-white px-8 py-4 text-lg">
                 Start jouw fotoshoot nu - € 29 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
@@ -630,7 +634,7 @@ export default function HomePage() {
               size="lg"
               className="w-full bg-[#FF8C00] hover:bg-[#FFA500] text-white px-6 py-8 text-base font-semibold"
             >
-              <Link href="/login?source=homepage">
+              <Link href="/pricing">
                 Start jouw fotoshoot nu - € 29 <ArrowRight className="ml-2 h-6 md:h-7 w-6 md:w-7" />
               </Link>
             </Button>
