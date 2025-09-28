@@ -296,6 +296,137 @@ export default function LinkedInProfielFotoPage() {
         </div>
       </section>
 
+      {/* Target Professionals Section */}
+      <section className="py-16 bg-gray-50">
+        <div className="container mx-auto px-4">
+          <div className="max-w-5xl mx-auto">
+            <h2 className="text-3xl md:text-4xl font-bold text-center mb-4">
+              Voor welke professionals is dit perfect?
+            </h2>
+            <p className="text-lg text-gray-600 text-center mb-12 max-w-2xl mx-auto">
+              Van ambitieuze starters tot ervaren leiders - onze AI helpt elke professional 
+              hun LinkedIn impact te maximaliseren
+            </p>
+
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow">
+                <div className="flex items-start gap-4">
+                  <div className="bg-[#0077B5] p-3 rounded-lg flex-shrink-0">
+                    <span className="text-white text-xl">🚀</span>
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold mb-2 text-[#0077B5]">ZZP'ers & Ondernemers</h3>
+                    <p className="text-gray-600 mb-3">
+                      Jij bent je eigen merk. Stop met amateuristische selfies en laat zien dat je serieus bent. 
+                      Onze AI creëert foto's die vertrouwen wekken bij potentiële klanten.
+                    </p>
+                    <div className="text-sm text-[#0077B5] font-semibold">
+                      → Meer klanten via LinkedIn DM's
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow">
+                <div className="flex items-start gap-4">
+                  <div className="bg-[#0077B5] p-3 rounded-lg flex-shrink-0">
+                    <span className="text-white text-xl">🎯</span>
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold mb-2 text-[#0077B5]">Sollicitanten & Carrièrestarters</h3>
+                    <p className="text-gray-600 mb-3">
+                      Recruiters scrollen door honderden profielen. Een sterke foto zorgt ervoor 
+                      dat je opvalt en uitgenodigd wordt voor gesprekken - geen wegkijken meer.
+                    </p>
+                    <div className="text-sm text-[#0077B5] font-semibold">
+                      → 3x meer recruiter berichten
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow">
+                <div className="flex items-start gap-4">
+                  <div className="bg-[#0077B5] p-3 rounded-lg flex-shrink-0">
+                    <span className="text-white text-xl">⚡</span>
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold mb-2 text-[#0077B5]">Young Professionals</h3>
+                    <p className="text-gray-600 mb-3">
+                      Jouw generatie snapt de kracht van social media. Zorg dat senior professionals 
+                      je willen connecten - niet wegklikken omdat je foto niet professioneel genoeg is.
+                    </p>
+                    <div className="text-sm text-[#0077B5] font-semibold">
+                      → Sneller senior netwerk opbouwen
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow">
+                <div className="flex items-start gap-4">
+                  <div className="bg-[#0077B5] p-3 rounded-lg flex-shrink-0">
+                    <span className="text-white text-xl">👑</span>
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold mb-2 text-[#0077B5]">Managers & Leidinggevenden</h3>
+                    <p className="text-gray-600 mb-3">
+                      Jouw leidinggevende positie verdient een foto die autoriteit uitstraalt. 
+                      Geen tijd voor fotoshoots? Onze AI begrijpt executive presence.
+                    </p>
+                    <div className="text-sm text-[#0077B5] font-semibold">
+                      → Meer thought leadership engagement
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ Section - LinkedIn Optimized */}
+      <section id="faq" className="container mx-auto px-4 py-12 md:py-16 bg-white">
+        <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-center mb-4">LinkedIn Profielfoto FAQ</h2>
+        <p className="text-lg text-gray-600 text-center mb-8 md:mb-12 max-w-2xl mx-auto">
+          Alles over professionele LinkedIn foto's en hoe ze je carrière kunnen boosten!
+        </p>
+        <div className="max-w-3xl mx-auto">
+          {faqData.map((faq, index) => (
+            <div key={index} className="mb-4">
+              <button
+                onClick={() => toggleFaq(index)}
+                className="w-full bg-white rounded-lg p-4 md:p-6 text-left hover:shadow-md transition-shadow duration-200 border border-gray-200"
+              >
+                <div className="flex justify-between items-center">
+                  <h3 className="text-base md:text-lg font-semibold text-gray-900 pr-4">{faq.question}</h3>
+                  {openFaqIndex === index ? (
+                    <ChevronUp className="h-5 w-5 text-[#0077B5] flex-shrink-0" />
+                  ) : (
+                    <ChevronDown className="h-5 w-5 text-[#0077B5] flex-shrink-0" />
+                  )}
+                </div>
+                {openFaqIndex === index && (
+                  <div className="mt-4 text-gray-600 text-sm md:text-base leading-relaxed">{faq.answer}</div>
+                )}
+              </button>
+            </div>
+          ))}
+        </div>
+        <div className="text-center mt-8 md:mt-12">
+          <p className="text-gray-600 mb-4 text-sm md:text-base">Nog vragen? We helpen je graag!</p>
+          <Button
+            asChild
+            variant="outline"
+            className="border-[#0077B5] text-[#0077B5] hover:bg-[#0077B5] hover:text-white bg-transparent"
+          >
+            <Link href="/contact">Neem Contact Op</Link>
+          </Button>
+        </div>
+      </section>
+
       {/* SEO Content Section */}
       <section className="py-12 md:py-16 bg-white">
         <div className="container mx-auto px-4">
@@ -452,137 +583,6 @@ export default function LinkedInProfielFotoPage() {
               </p>
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* Target Professionals Section */}
-      <section className="py-16 bg-gray-50">
-        <div className="container mx-auto px-4">
-          <div className="max-w-5xl mx-auto">
-            <h2 className="text-3xl md:text-4xl font-bold text-center mb-4">
-              Voor welke professionals is dit perfect?
-            </h2>
-            <p className="text-lg text-gray-600 text-center mb-12 max-w-2xl mx-auto">
-              Van ambitieuze starters tot ervaren leiders - onze AI helpt elke professional 
-              hun LinkedIn impact te maximaliseren
-            </p>
-
-            <div className="grid md:grid-cols-2 gap-6">
-              <div className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow">
-                <div className="flex items-start gap-4">
-                  <div className="bg-[#0077B5] p-3 rounded-lg flex-shrink-0">
-                    <span className="text-white text-xl">🚀</span>
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-bold mb-2 text-[#0077B5]">ZZP'ers & Ondernemers</h3>
-                    <p className="text-gray-600 mb-3">
-                      Jij bent je eigen merk. Stop met amateuristische selfies en laat zien dat je serieus bent. 
-                      Onze AI creëert foto's die vertrouwen wekken bij potentiële klanten.
-                    </p>
-                    <div className="text-sm text-[#0077B5] font-semibold">
-                      → Meer klanten via LinkedIn DM's
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow">
-                <div className="flex items-start gap-4">
-                  <div className="bg-[#0077B5] p-3 rounded-lg flex-shrink-0">
-                    <span className="text-white text-xl">🎯</span>
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-bold mb-2 text-[#0077B5]">Sollicitanten & Carrièrestarters</h3>
-                    <p className="text-gray-600 mb-3">
-                      Recruiters scrollen door honderden profielen. Een sterke foto zorgt ervoor 
-                      dat je opvalt en uitgenodigd wordt voor gesprekken - geen wegkijken meer.
-                    </p>
-                    <div className="text-sm text-[#0077B5] font-semibold">
-                      → 3x meer recruiter berichten
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow">
-                <div className="flex items-start gap-4">
-                  <div className="bg-[#0077B5] p-3 rounded-lg flex-shrink-0">
-                    <span className="text-white text-xl">⚡</span>
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-bold mb-2 text-[#0077B5]">Young Professionals</h3>
-                    <p className="text-gray-600 mb-3">
-                      Jouw generatie snapt de kracht van social media. Zorg dat senior professionals 
-                      je willen connecten - niet wegklikken omdat je foto niet professioneel genoeg is.
-                    </p>
-                    <div className="text-sm text-[#0077B5] font-semibold">
-                      → Sneller senior netwerk opbouwen
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow">
-                <div className="flex items-start gap-4">
-                  <div className="bg-[#0077B5] p-3 rounded-lg flex-shrink-0">
-                    <span className="text-white text-xl">👑</span>
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-bold mb-2 text-[#0077B5]">Managers & Leidinggevenden</h3>
-                    <p className="text-gray-600 mb-3">
-                      Jouw leidinggevende positie verdient een foto die autoriteit uitstraalt. 
-                      Geen tijd voor fotoshoots? Onze AI begrijpt executive presence.
-                    </p>
-                    <div className="text-sm text-[#0077B5] font-semibold">
-                      → Meer thought leadership engagement
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            
-          </div>
-        </div>
-      </section>
-
-      {/* FAQ Section - LinkedIn Optimized */}
-      <section id="faq" className="container mx-auto px-4 py-12 md:py-16 bg-white">
-        <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-center mb-4">LinkedIn Profielfoto FAQ</h2>
-        <p className="text-lg text-gray-600 text-center mb-8 md:mb-12 max-w-2xl mx-auto">
-          Alles over professionele LinkedIn foto's en hoe ze je carrière kunnen boosten!
-        </p>
-        <div className="max-w-3xl mx-auto">
-          {faqData.map((faq, index) => (
-            <div key={index} className="mb-4">
-              <button
-                onClick={() => toggleFaq(index)}
-                className="w-full bg-white rounded-lg p-4 md:p-6 text-left hover:shadow-md transition-shadow duration-200 border border-gray-200"
-              >
-                <div className="flex justify-between items-center">
-                  <h3 className="text-base md:text-lg font-semibold text-gray-900 pr-4">{faq.question}</h3>
-                  {openFaqIndex === index ? (
-                    <ChevronUp className="h-5 w-5 text-[#0077B5] flex-shrink-0" />
-                  ) : (
-                    <ChevronDown className="h-5 w-5 text-[#0077B5] flex-shrink-0" />
-                  )}
-                </div>
-                {openFaqIndex === index && (
-                  <div className="mt-4 text-gray-600 text-sm md:text-base leading-relaxed">{faq.answer}</div>
-                )}
-              </button>
-            </div>
-          ))}
-        </div>
-        <div className="text-center mt-8 md:mt-12">
-          <p className="text-gray-600 mb-4 text-sm md:text-base">Nog vragen? We helpen je graag!</p>
-          <Button
-            asChild
-            variant="outline"
-            className="border-[#0077B5] text-[#0077B5] hover:bg-[#0077B5] hover:text-white bg-transparent"
-          >
-            <Link href="/contact">Neem Contact Op</Link>
-          </Button>
         </div>
       </section>
 
