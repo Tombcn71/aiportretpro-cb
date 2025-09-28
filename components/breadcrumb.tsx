@@ -35,39 +35,42 @@ export default function Breadcrumb({ items }: BreadcrumbProps) {
         }}
       />
       
-      {/* Visual Breadcrumb */}
-      <nav className="bg-gray-50 border-b border-gray-200" aria-label="Breadcrumb">
-        <div className="container mx-auto px-4 py-3">
-          <ol className="flex items-center space-x-2 text-sm">
-            <li>
-              <Link 
-                href="/" 
-                className="flex items-center text-gray-500 hover:text-[#0077B5] transition-colors"
-                aria-label="Homepage"
-              >
-                <Home className="h-4 w-4" />
-                <span className="sr-only">Home</span>
-              </Link>
-            </li>
-            
-            {items.map((item, index) => (
-              <li key={index} className="flex items-center">
-                <ChevronRight className="h-4 w-4 text-gray-400 mx-2" />
-                {item.href && index < items.length - 1 ? (
-                  <Link 
-                    href={item.href}
-                    className="text-gray-500 hover:text-[#0077B5] transition-colors"
-                  >
-                    {item.label}
-                  </Link>
-                ) : (
-                  <span className="text-gray-900 font-medium" aria-current="page">
-                    {item.label}
-                  </span>
-                )}
+      {/* Visual Breadcrumb - Footer Style */}
+      <nav className="bg-gray-50 border-t border-gray-200 mt-8" aria-label="Breadcrumb">
+        <div className="container mx-auto px-4 py-4">
+          <div className="text-center">
+            <p className="text-xs text-gray-500 mb-2">Navigatie</p>
+            <ol className="flex items-center justify-center space-x-2 text-sm">
+              <li>
+                <Link 
+                  href="/" 
+                  className="flex items-center text-gray-500 hover:text-[#0077B5] transition-colors"
+                  aria-label="Homepage"
+                >
+                  <Home className="h-4 w-4" />
+                  <span className="ml-1">Home</span>
+                </Link>
               </li>
-            ))}
-          </ol>
+              
+              {items.map((item, index) => (
+                <li key={index} className="flex items-center">
+                  <ChevronRight className="h-4 w-4 text-gray-400 mx-2" />
+                  {item.href && index < items.length - 1 ? (
+                    <Link 
+                      href={item.href}
+                      className="text-gray-500 hover:text-[#0077B5] transition-colors"
+                    >
+                      {item.label}
+                    </Link>
+                  ) : (
+                    <span className="text-gray-700 font-medium" aria-current="page">
+                      {item.label}
+                    </span>
+                  )}
+                </li>
+              ))}
+            </ol>
+          </div>
         </div>
       </nav>
     </>

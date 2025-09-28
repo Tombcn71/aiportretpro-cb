@@ -12,6 +12,7 @@ import HowItWorks from "@/components/how-it-works"
 import SchemaMarkup from "@/components/schema-markup"
 import SEOContentBlock from "@/components/seo-content-block"
 import ReviewSchema from "@/components/review-schema"
+import Breadcrumb from "@/components/breadcrumb"
 
 // Gallery photos: New 16 professional photos in man-woman alternating order
 const galleryPhotos = [
@@ -731,6 +732,13 @@ export default function LinkedInDenHaagPage() {
       )}
 
 {/* Inline Styles for Animation */}
+
+      {/* Footer Breadcrumb Navigation */}
+      <Breadcrumb items={[
+        { label: "LinkedIn Fotografie", href: "/linkedin-profielfoto" },
+        { label: "Den Haag" }
+      ]} />
+
 <style jsx>{`
   @keyframes slideUp {
     from {

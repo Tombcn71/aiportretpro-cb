@@ -11,6 +11,7 @@ import AIHeadshotsShowcase from "@/components/ai-headshots-showcase"
 import HowItWorks from "@/components/how-it-works"
 import SchemaMarkup from "@/components/schema-markup"
 import ReviewSchema from "@/components/review-schema"
+import Breadcrumb from "@/components/breadcrumb"
 import SEOContentBlock from "@/components/seo-content-block"
 
 // Gallery photos: New 16 professional photos in man-woman alternating order
@@ -734,6 +735,13 @@ export default function LinkedInAmsterdamPage() {
       )}
 
 {/* Inline Styles for Animation */}
+
+      {/* Footer Breadcrumb Navigation */}
+      <Breadcrumb items={[
+        { label: "LinkedIn Fotografie", href: "/linkedin-profielfoto" },
+        { label: "Amsterdam" }
+      ]} />
+
 <style jsx>{`
   @keyframes slideUp {
     from {
