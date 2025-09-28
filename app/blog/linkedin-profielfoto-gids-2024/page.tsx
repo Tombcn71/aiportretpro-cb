@@ -56,12 +56,12 @@ export default function LinkedinProfielfotoGidsPage() {
               LinkedIn & Professional
             </Badge>
             <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4 leading-tight">
-              LinkedIn profielfoto: Complete gids voor professionals [2024]
+              LinkedIn profielfoto: Complete gids voor professionals [2025]
             </h1>
             <div className="flex flex-wrap items-center gap-6 text-gray-600 text-sm">
               <div className="flex items-center gap-2">
                 <Calendar className="h-4 w-4" />
-                23 september 2024
+                23 september 2025
               </div>
               <div className="flex items-center gap-2">
                 <Clock className="h-4 w-4" />
