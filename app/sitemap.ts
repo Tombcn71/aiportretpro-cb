@@ -63,7 +63,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.8,
     },
     {
-      url: `${baseUrl}/blog/linkedin-profielfoto-gids-2024`,
+      url: `${baseUrl}/blog/linkedin-profielfoto-gids-2025`,
       lastModified: currentDate,
       changeFrequency: 'monthly' as const,
       priority: 0.7,

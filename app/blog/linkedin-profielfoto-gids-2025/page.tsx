@@ -350,7 +350,7 @@ export default function LinkedinProfielfotoGidsPage() {
               Je LinkedIn profielfoto is een van de belangrijkste investeringen in je professionele carrière. Met 14x meer profielweergaven en 36x meer recruiter berichten kan een goede foto letterlijk je carrière veranderen.
             </p>
             <p className="text-gray-700 leading-relaxed mb-6">
-              Of je nu kiest voor een traditionele fotograaf of moderne AI-fotografie, het belangrijkste is dat je foto professioneel, actueel en passend bij je sector is. In 2024 zijn er meer opties dan ooit om snel en betaalbaar aan een perfecte LinkedIn foto te komen.
+              Of je nu kiest voor een traditionele fotograaf of moderne AI-fotografie, het belangrijkste is dat je foto professioneel, actueel en passend bij je sector is. In 2025 zijn er meer opties dan ooit om snel en betaalbaar aan een perfecte LinkedIn foto te komen.
             </p>
             
             <div className="bg-blue-50 border-l-4 border-[#0077B5] p-6 rounded-r-lg">
