@@ -148,7 +148,6 @@ export default function HomePage() {
       <SchemaMarkup type="home" />
       <FAQSchema faqs={faqData} />
       <Header />
-      <CityNavigation variant="header" />
 
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-6 text-center">
@@ -457,6 +456,9 @@ export default function HomePage() {
           </div>
         </div>
       </footer>
+
+      {/* City Navigation - Footer */}
+      <CityNavigation variant="footer" />
 
       {/* Floating CTA Button - Mobile Only */}
       {isVisible && (

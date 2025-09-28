@@ -55,32 +55,29 @@ export default function CityNavigation({ currentCity, showTitle = true, variant 
 
   if (variant === 'footer') {
     return (
-      <div className="bg-gray-100 py-8">
+      <div className="bg-gray-50 py-6 border-t border-gray-200">
         <div className="container mx-auto px-4">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-            <MapPin className="h-5 w-5 text-[#0077B5]" />
-            LinkedIn Foto Laten Maken per Stad
+          <h3 className="text-base font-medium text-gray-800 mb-3 flex items-center gap-2 justify-center">
+            <MapPin className="h-4 w-4 text-[#0077B5]" />
+            LinkedIn Foto Service beschikbaar in deze steden
           </h3>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+          <div className="flex flex-wrap justify-center gap-2 max-w-4xl mx-auto">
             {cities.map(city => (
               <Link
                 key={city.slug}
                 href={`/linkedin-foto-laten-maken-${city.slug}`}
-                className={`block p-3 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow border ${
-                  currentCity === city.name ? 'border-[#0077B5] bg-blue-50' : 'border-gray-200'
-                }`}
+                className="text-sm text-gray-600 hover:text-[#0077B5] hover:underline transition-colors px-2 py-1"
               >
-                <div className="text-sm font-medium text-gray-900">{city.name}</div>
-                <div className="text-xs text-gray-500">{city.province}</div>
+                {city.name}
               </Link>
             ))}
           </div>
-          <div className="mt-4 text-center">
+          <div className="mt-3 text-center">
             <Link 
               href="/linkedin-profielfoto" 
-              className="text-[#0077B5] hover:text-[#004182] hover:underline text-sm"
+              className="text-[#0077B5] hover:text-[#004182] hover:underline text-xs"
             >
-              Bekijk alle locaties →
+              Alle locaties bekijken
             </Link>
           </div>
         </div>
