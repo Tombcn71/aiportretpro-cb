@@ -12,8 +12,6 @@ import HowItWorks from "@/components/how-it-works"
 import SchemaMarkup from "@/components/schema-markup"
 import SEOContentBlock from "@/components/seo-content-block"
 import ReviewSchema from "@/components/review-schema"
-import Breadcrumb from "@/components/breadcrumb"
-
 // Gallery photos: New 16 professional photos in man-woman alternating order
 const galleryPhotos = [
   "/images/professional-man-1.jpg", // Position 1 - Man
@@ -135,11 +133,6 @@ export default function LinkedInEindhovenPage() {
       <ReviewSchema businessName="AI Portret Pro" city="Eindhoven" />
             <SchemaMarkup type="city" city="Eindhoven" url="https://aiportretpro.com/linkedin-foto-laten-maken-eindhoven" />
       <Header />
-      <Breadcrumb items={[
-        { label: "LinkedIn Fotografie", href: "/linkedin-profielfoto" },
-        { label: "Eindhoven" }
-      ]} />
-
       {/* Hero Section - Eindhoven Specific */}
       <section className="container mx-auto px-4 py-6 text-center">
         <h1 className="tracking-tight text-xl md:text-4xl font-bold mb-6 leading-tight">

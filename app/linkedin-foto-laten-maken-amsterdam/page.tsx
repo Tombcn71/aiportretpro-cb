@@ -10,7 +10,6 @@ import { Facebook, Instagram } from "lucide-react"
 import AIHeadshotsShowcase from "@/components/ai-headshots-showcase"
 import HowItWorks from "@/components/how-it-works"
 import SchemaMarkup from "@/components/schema-markup"
-import Breadcrumb from "@/components/breadcrumb"
 import ReviewSchema from "@/components/review-schema"
 import SEOContentBlock from "@/components/seo-content-block"
 
@@ -135,11 +134,6 @@ export default function LinkedInAmsterdamPage() {
       <SchemaMarkup type="city" city="Amsterdam" url="https://aiportretpro.com/linkedin-foto-laten-maken-amsterdam" />
       <ReviewSchema businessName="AI Portret Pro" city="Amsterdam" />
       <Header />
-      <Breadcrumb items={[
-        { label: "LinkedIn Fotografie", href: "/linkedin-profielfoto" },
-        { label: "Amsterdam" }
-      ]} />
-
       {/* Hero Section - Amsterdam Specific */}
       <section className="container mx-auto px-4 py-6 text-center">
         <h1 className="tracking-tight text-xl md:text-4xl font-bold mb-6 leading-tight">
