@@ -7,7 +7,7 @@ export default function FacebookPixel() {
     <>
       <Script
         id="facebook-pixel"
-        strategy="lazyOnload"
+        strategy="afterInteractive"
         dangerouslySetInnerHTML={{
           __html: `
             !function(f,b,e,v,n,t,s)
