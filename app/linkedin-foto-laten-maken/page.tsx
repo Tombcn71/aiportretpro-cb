@@ -296,7 +296,164 @@ export default function LinkedInProfielFotoPage() {
         </div>
       </section>
 
-     
+      {/* SEO Content Section */}
+      <section className="py-12 md:py-16 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto">
+            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6 text-center">
+              LinkedIn Foto Laten Maken - Professionele Profielfoto's Online
+            </h2>
+            
+            <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed space-y-6">
+              <p className="text-lg">
+                Een <strong>professionele LinkedIn foto laten maken</strong> is cruciaal voor je online aanwezigheid en carrière. 
+                Met onze AI-technologie krijg je <strong>40 LinkedIn-specifieke professionele foto's in slechts 15 minuten</strong> voor 
+                slechts €29. Perfect geoptimaliseerd voor LinkedIn's profielfoto guidelines en professionele uitstraling.
+              </p>
+
+              <div className="grid md:grid-cols-2 gap-8 my-8">
+                <div>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-4">Waarom een Professionele LinkedIn Foto Belangrijk Is</h3>
+                  <ul className="space-y-2 text-gray-700">
+                    <li className="flex items-start gap-2">
+                      <span className="text-blue-600 mt-1">📈</span>
+                      <span><strong>14x meer profielweergaven</strong> dan zonder foto</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-blue-600 mt-1">🎯</span>
+                      <span><strong>36% meer berichten</strong> van recruiters</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-blue-600 mt-1">💼</span>
+                      <span><strong>Betere netwerkmogelijkheden</strong> en connecties</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-blue-600 mt-1">🚀</span>
+                      <span><strong>Professionele uitstraling</strong> die vertrouwen wekt</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-blue-600 mt-1">⭐</span>
+                      <span><strong>Sta uit tussen duizenden</strong> LinkedIn profielen</span>
+                    </li>
+                  </ul>
+                </div>
+
+                <div>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-4">LinkedIn Foto Guidelines & Tips</h3>
+                  <ul className="space-y-2 text-gray-700">
+                    <li className="flex items-start gap-2">
+                      <span className="text-green-600 mt-1">✓</span>
+                      <span><strong>Professionele kleding</strong> (pak, blazer, overhemd)</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-green-600 mt-1">✓</span>
+                      <span><strong>Neutrale achtergrond</strong> die niet afleidt</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-green-600 mt-1">✓</span>
+                      <span><strong>Vriendelijke glimlach</strong> en zelfvertrouwen</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-green-600 mt-1">✓</span>
+                      <span><strong>Goede belichting</strong> op je gezicht</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-green-600 mt-1">✓</span>
+                      <span><strong>Square format</strong> perfect voor LinkedIn</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              <p>
+                Of je nu een <strong>LinkedIn profielfoto nodig hebt</strong> voor een nieuwe baan, een <strong>corporate LinkedIn foto</strong> voor je bedrijf, 
+                of gewoon je <strong>LinkedIn profiel wilt upgraden</strong> - onze AI fotografie service biedt de perfecte oplossing. 
+                Geen dure studio sessies, geen lange wachttijden, gewoon direct professionele resultaten.
+              </p>
+
+              <div className="bg-blue-50 p-6 rounded-lg my-8">
+                <h3 className="text-xl font-semibold text-gray-900 mb-3">Hoe Werkt LinkedIn Foto Maken?</h3>
+                <div className="space-y-3 text-gray-700">
+                  <div className="flex items-start gap-3">
+                    <span className="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold flex-shrink-0 mt-0.5">1</span>
+                    <span><strong>Upload 6-12 foto's</strong> van jezelf (verschillende hoeken en kleding)</span>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <span className="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold flex-shrink-0 mt-0.5">2</span>
+                    <span><strong>AI analyseert je gezicht</strong> en LinkedIn-specifieke stijl</span>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <span className="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold flex-shrink-0 mt-0.5">3</span>
+                    <span><strong>15 minuten wachten</strong> terwijl AI LinkedIn foto's genereert</span>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <span className="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold flex-shrink-0 mt-0.5">4</span>
+                    <span><strong>Download 40 LinkedIn foto's</strong> perfect geoptimaliseerd voor je profiel</span>
+                  </div>
+                </div>
+              </div>
+
+              <p>
+                Onze <strong>AI LinkedIn fotografie</strong> gebruikt geavanceerde algoritmes die specifiek getraind zijn op 
+                professionele LinkedIn profielfoto's. We zorgen voor de perfecte belichting, professionele achtergronden, 
+                en zakelijke uitstraling die recruiters en potentiële werkgevers verwachten. 
+                <strong>Het resultaat? Een LinkedIn profiel dat opvalt en vertrouwen wekt</strong>.
+              </p>
+
+              <div className="bg-gray-50 p-6 rounded-lg my-8">
+                <h3 className="text-xl font-semibold text-gray-900 mb-4">LinkedIn Specifieke Zoektermen</h3>
+                <div className="grid md:grid-cols-3 gap-4 text-sm text-gray-600">
+                  <div>
+                    <h4 className="font-semibold text-gray-800 mb-2">LinkedIn Foto Services</h4>
+                    <ul className="space-y-1">
+                      <li>• LinkedIn profielfoto maken</li>
+                      <li>• LinkedIn headshot fotografie</li>
+                      <li>• Corporate LinkedIn foto</li>
+                      <li>• LinkedIn profiel foto professional</li>
+                      <li>• Business LinkedIn headshot</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-800 mb-2">Online LinkedIn Foto</h4>
+                    <ul className="space-y-1">
+                      <li>• LinkedIn foto online maken</li>
+                      <li>• LinkedIn profielfoto thuis</li>
+                      <li>• Virtuele LinkedIn fotoshoot</li>
+                      <li>• LinkedIn foto AI Nederland</li>
+                      <li>• Online LinkedIn portret</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-800 mb-2">LinkedIn Optimalisatie</h4>
+                    <ul className="space-y-1">
+                      <li>• LinkedIn profiel verbeteren</li>
+                      <li>• LinkedIn uitstraling professional</li>
+                      <li>• LinkedIn netwerken foto</li>
+                      <li>• LinkedIn recruiter foto</li>
+                      <li>• LinkedIn business foto</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              <p>
+                <strong>Waarom AI Portret Pro de beste keuze is voor je LinkedIn foto:</strong> 
+                We begrijpen de unieke vereisten van LinkedIn profielfoto's. Onze AI is specifiek getraind op 
+                duizenden succesvolle LinkedIn profielen, waardoor we de perfecte balans vinden tussen 
+                professionaliteit en toegankelijkheid. Of je nu werkt in tech, finance, marketing, 
+                consulting, of welke sector dan ook - wij zorgen ervoor dat je LinkedIn profiel de juiste indruk maakt.
+              </p>
+
+              <p>
+                Sluit je aan bij duizenden professionals die hun <strong>LinkedIn profielfoto lieten maken</strong> 
+                met onze service. Van recent afgestudeerden tot C-level executives - iedereen kan profiteren van 
+                een krachtige, professionele LinkedIn foto die opvalt en vertrouwen wekt bij recruiters en 
+                potentiële zakenpartners.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* Target Professionals Section */}
       <section className="py-16 bg-gray-50">
