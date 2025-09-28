@@ -15,13 +15,13 @@ const inter = Inter({ subsets: ["latin"] })
 const CrispWithNoSSR = dynamic(() => import("../components/crisp"))
 
 export const metadata: Metadata = {
-  title: "Zakelijke Foto's Laten Maken Online | AI Fotoshoot €29 | 40 Professionele Foto's",
+  title: "Professionele zakelijke foto's laten maken kan nu online - AI Portret Pro €29",
   description:
-    "Professionele zakelijke foto's laten maken online zonder fotograaf? 6x goedkoper ✓ 40 professionele foto's in 15 min ✓ Perfect voor LinkedIn, CV, website & social media ✓ 14-dagen geld terug garantie",
+    "Professionele zakelijke foto's laten maken kan nu zonder fotograaf. 6x goedkoper dan traditionele fotoshoots. 40 AI portretfoto's in 15 minuten voor LinkedIn, CV, website.",
   keywords: "zakelijke foto's laten maken, professionele foto online, business headshots, corporate fotografie, LinkedIn foto, CV foto, website profielfoto, AI fotografie Nederland",
   openGraph: {
-    title: "Zakelijke Foto's Laten Maken Online | AI Fotoshoot €29",
-    description: "6x goedkoper dan fotograaf ✓ 40 professionele zakelijke foto's in 15 min ✓ Perfect voor LinkedIn, CV, website & social media",
+    title: "Professionele zakelijke foto's laten maken kan nu online - AI Portret Pro €29",
+    description: "Professionele zakelijke foto's laten maken kan nu zonder fotograaf. 6x goedkoper dan traditionele fotoshoots. 40 AI portretfoto's in 15 minuten voor LinkedIn, CV, website.",
     url: "https://aiportretpro.com",
     siteName: "AI Portret Pro",
     type: "website",
@@ -29,8 +29,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Zakelijke Foto's Laten Maken Online | AI Fotoshoot €29",
-    description: "6x goedkoper dan fotograaf ✓ 40 professionele zakelijke foto's in 15 min",
+    title: "Professionele zakelijke foto's laten maken kan nu online - AI Portret Pro €29",
+    description: "Professionele zakelijke foto's laten maken kan nu zonder fotograaf. 6x goedkoper dan traditionele fotoshoots. 40 AI portretfoto's in 15 minuten voor LinkedIn, CV, website.",
   },
   alternates: {
     canonical: "https://aiportretpro.com",

@@ -152,8 +152,8 @@ export default function HomePage() {
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-6 text-center">
         <h1 className="tracking-tight text-xl md:text-4xl font-bold mb-6 leading-tight">
-          <span className="block">Professionele zakelijke foto's laten maken?</span>
-          <span className="text-[#0077B5] block">Dit kan nu ook online zonder fotograaf!</span>
+          <span className="block">Professionele zakelijke fotoshoot nodig?</span>
+          <span className="text-[#0077B5] block">Dit kan nu online zonder fotograaf</span>
         </h1>
         <p className="text-gray-500 text-lg mb-6 font-light italic">Even wat foto's uploaden, dat is alles.</p>
 
