@@ -9,6 +9,9 @@ import Header from "@/components/header"
 import { Facebook, Instagram, Linkedin } from "lucide-react"
 import AIHeadshotsShowcase from "@/components/ai-headshots-showcase"
 import HowItWorks from "@/components/how-it-works"
+import SchemaMarkup from "@/components/schema-markup"
+import CityNavigation from "@/components/city-navigation"
+import FAQSchema from "@/components/faq-schema"
 
 // Gallery photos: New 16 professional photos in man-woman alternating order
 const galleryPhotos = [
@@ -142,13 +145,16 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen pt-20">
+      <SchemaMarkup type="home" />
+      <FAQSchema faqs={faqData} />
       <Header />
+      <CityNavigation variant="header" />
 
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-6 text-center">
         <h1 className="tracking-tight text-xl md:text-4xl font-bold mb-6 leading-tight">
-          <span className="block">Professionele fotoshoot nodig?</span>
-          <span className="text-[#0077B5] block">kan nu online zonder fotograaf</span>
+          <span className="block">LinkedIn Foto Laten Maken Online</span>
+          <span className="text-[#0077B5] block">40 Professionele Foto's in 15 Minuten</span>
         </h1>
         <p className="text-gray-500 text-lg mb-6 font-light italic">Even wat foto's uploaden, dat is alles.</p>
 

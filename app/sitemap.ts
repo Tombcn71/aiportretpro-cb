@@ -1,0 +1,80 @@
+import { MetadataRoute } from 'next'
+
+export default function sitemap(): MetadataRoute.Sitemap {
+  const baseUrl = 'https://aiportretpro.com'
+  const currentDate = new Date().toISOString()
+
+  // Hoofdsteden voor LinkedIn pagina's
+  const cities = [
+    'amsterdam',
+    'rotterdam', 
+    'den-haag',
+    'utrecht',
+    'eindhoven',
+    'groningen',
+    'tilburg',
+    'almere',
+    'breda',
+    'nijmegen'
+  ]
+
+  // Basis pagina's met hoge prioriteit
+  const mainPages = [
+    {
+      url: baseUrl,
+      lastModified: currentDate,
+      changeFrequency: 'daily' as const,
+      priority: 1,
+    },
+    {
+      url: `${baseUrl}/pricing`,
+      lastModified: currentDate,
+      changeFrequency: 'weekly' as const,
+      priority: 0.9,
+    },
+    {
+      url: `${baseUrl}/contact`,
+      lastModified: currentDate,
+      changeFrequency: 'monthly' as const,
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/linkedin-profielfoto`,
+      lastModified: currentDate,
+      changeFrequency: 'weekly' as const,
+      priority: 0.9,
+    }
+  ]
+
+  // LinkedIn stad pagina's - HOGE PRIORITEIT voor SEO
+  const cityPages = cities.map(city => ({
+    url: `${baseUrl}/linkedin-foto-laten-maken-${city}`,
+    lastModified: currentDate,
+    changeFrequency: 'weekly' as const,
+    priority: 0.95, // Zeer hoge prioriteit voor lokale SEO
+  }))
+
+  // Blog pagina's
+  const blogPages = [
+    {
+      url: `${baseUrl}/blog`,
+      lastModified: currentDate,
+      changeFrequency: 'weekly' as const,
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/blog/linkedin-profielfoto-gids-2024`,
+      lastModified: currentDate,
+      changeFrequency: 'monthly' as const,
+      priority: 0.6,
+    },
+    {
+      url: `${baseUrl}/blog/ai-vs-traditionele-fotografie`,
+      lastModified: currentDate,
+      changeFrequency: 'monthly' as const,
+      priority: 0.6,
+    }
+  ]
+
+  return [...mainPages, ...cityPages, ...blogPages]
+}

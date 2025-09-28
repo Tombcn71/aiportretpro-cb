@@ -15,9 +15,37 @@ const inter = Inter({ subsets: ["latin"] })
 const CrispWithNoSSR = dynamic(() => import("../components/crisp"))
 
 export const metadata: Metadata = {
-  title: "AI Portret Pro | Professionele fotoshoot nodig? kan nu online zonder fotograaf",
+  title: "LinkedIn Foto Laten Maken Online | AI Fotoshoot €29 | 40 Professionele Foto's",
   description:
-    "Even wat foto's uploaden dat is alles. 6 x goedkoper dan een traditionele fotograaf, 40 professionele foto's in slechts 15 minuten, perfecte maat voor linkedin, website en print",
+    "LinkedIn foto laten maken online? 6x goedkoper dan fotograaf ✓ 40 professionele LinkedIn foto's in 15 min ✓ Perfect voor CV, website & social media ✓ 14-dagen geld terug garantie",
+  keywords: "LinkedIn foto laten maken, profielfoto LinkedIn, online fotoshoot, professionele foto AI, LinkedIn profielfoto Nederland, zakelijke foto's online, headshot fotografie",
+  openGraph: {
+    title: "LinkedIn Foto Laten Maken Online | AI Fotoshoot €29",
+    description: "6x goedkoper dan fotograaf ✓ 40 professionele LinkedIn foto's in 15 min ✓ Perfect voor CV, website & social media",
+    url: "https://aiportretpro.com",
+    siteName: "AI Portret Pro",
+    type: "website",
+    locale: "nl_NL",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "LinkedIn Foto Laten Maken Online | AI Fotoshoot €29",
+    description: "6x goedkoper dan fotograaf ✓ 40 professionele LinkedIn foto's in 15 min",
+  },
+  alternates: {
+    canonical: "https://aiportretpro.com",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
   icons: {
     icon: [
       { url: "/favicon.ico" },
@@ -26,7 +54,6 @@ export const metadata: Metadata = {
     ],
     apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
   },
-  generator: "v0.dev",
 }
 
 export default function RootLayout({
@@ -35,7 +62,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="nl" suppressHydrationWarning>
       <head>
         <link rel="icon" href="/favicon.ico" />
         <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
