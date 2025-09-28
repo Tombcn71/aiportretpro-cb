@@ -1,26 +1,26 @@
-import { Metadata } from 'next'
+import type { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: 'LinkedIn foto laten maken Rotterdam - Online zonder fotograaf | AI Portret Pro',
-  description: 'Professionele LinkedIn foto laten maken in Rotterdam? Nu online zonder fotograaf! 40 foto\'s in 15 minuten voor €29. 6x goedkoper dan Rotterdamse fotografen.',
-  keywords: 'LinkedIn foto Rotterdam, professionele foto Rotterdam, zakelijke fotoshoot Rotterdam, LinkedIn fotograaf Rotterdam, profielfoto Rotterdam online',
+  title: "LinkedIn Foto Laten Maken Rotterdam | Professionele Fotoshoot €29 | 40 Foto's",
+  description: "LinkedIn foto laten maken Rotterdam? ✓ AI fotoshoot 6x goedkoper dan fotograaf ✓ 40 professionele LinkedIn foto's in 15 min ✓ Perfect voor Rotterdam professionals ✓ Gratis levering",
+  keywords: "LinkedIn foto laten maken Rotterdam, profielfoto LinkedIn Rotterdam, fotograaf LinkedIn Rotterdam, zakelijk portret Rotterdam, LinkedIn fotoshoot Rotterdam, professionele foto Rotterdam, headshot fotograaf Rotterdam",
   openGraph: {
-    title: 'LinkedIn foto laten maken Rotterdam - Online zonder fotograaf',
-    description: 'Professionele LinkedIn foto\'s voor Rotterdam professionals. 40 foto\'s in 15 minuten voor €29, geen reistijd door Rotterdam.',
-    type: 'website',
-    siteName: 'AI Portret Pro',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'LinkedIn foto laten maken Rotterdam - Online zonder fotograaf',
-    description: 'Professionele LinkedIn foto\'s voor Rotterdam professionals. 40 foto\'s in 15 minuten voor €29.',
+    title: "LinkedIn Foto Laten Maken Rotterdam | AI Fotoshoot €29",
+    description: "6x goedkoper dan fotograaf ✓ 40 professionele LinkedIn foto's in 15 min ✓ Perfect voor Rotterdam professionals",
+    url: "https://aiportretpro.com/linkedin-foto-laten-maken-rotterdam",
+    type: "website",
+    locale: "nl_NL",
   },
   alternates: {
-    canonical: 'https://aiportretpro.nl/linkedin-foto-laten-maken-rotterdam'
-  }
+    canonical: "https://aiportretpro.com/linkedin-foto-laten-maken-rotterdam",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 }
 
-export default function Layout({
+export default function RotterdamLayout({
   children,
 }: {
   children: React.ReactNode

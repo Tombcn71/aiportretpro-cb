@@ -1,26 +1,26 @@
-import { Metadata } from 'next'
+import type { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: 'LinkedIn foto laten maken Utrecht - Online zonder fotograaf | AI Portret Pro',
-  description: 'Professionele LinkedIn foto laten maken in Utrecht? Nu online zonder fotograaf! 40 foto\'s in 15 minuten voor €29. 6x goedkoper dan Utrecht fotografen.',
-  keywords: 'LinkedIn foto Utrecht, professionele foto Utrecht, zakelijke fotoshoot Utrecht, LinkedIn fotograaf Utrecht, profielfoto Utrecht online',
+  title: "LinkedIn Foto Laten Maken Utrecht | Professionele Fotoshoot €29 | 40 Foto's",
+  description: "LinkedIn foto laten maken Utrecht? ✓ AI fotoshoot 6x goedkoper dan fotograaf ✓ 40 professionele LinkedIn foto's in 15 min ✓ Perfect voor Utrecht professionals ✓ Gratis levering",
+  keywords: "LinkedIn foto laten maken Utrecht, profielfoto LinkedIn Utrecht, fotograaf LinkedIn Utrecht, zakelijk portret Utrecht, LinkedIn fotoshoot Utrecht, professionele foto Utrecht, headshot fotograaf Utrecht",
   openGraph: {
-    title: 'LinkedIn foto laten maken Utrecht - Online zonder fotograaf',
-    description: 'Professionele LinkedIn foto\'s voor Utrecht professionals. 40 foto\'s in 15 minuten voor €29, geen reistijd door Utrecht.',
-    type: 'website',
-    siteName: 'AI Portret Pro',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'LinkedIn foto laten maken Utrecht - Online zonder fotograaf',
-    description: 'Professionele LinkedIn foto\'s voor Utrecht professionals. 40 foto\'s in 15 minuten voor €29.',
+    title: "LinkedIn Foto Laten Maken Utrecht | AI Fotoshoot €29",
+    description: "6x goedkoper dan fotograaf ✓ 40 professionele LinkedIn foto's in 15 min ✓ Perfect voor Utrecht professionals",
+    url: "https://aiportretpro.com/linkedin-foto-laten-maken-utrecht",
+    type: "website",
+    locale: "nl_NL",
   },
   alternates: {
-    canonical: 'https://aiportretpro.nl/linkedin-foto-laten-maken-utrecht'
-  }
+    canonical: "https://aiportretpro.com/linkedin-foto-laten-maken-utrecht",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 }
 
-export default function Layout({
+export default function UtrechtLayout({
   children,
 }: {
   children: React.ReactNode

@@ -1,26 +1,26 @@
-import { Metadata } from 'next'
+import type { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: 'LinkedIn foto laten maken Almere - Online zonder fotograaf | AI Portret Pro',
-  description: 'Professionele LinkedIn foto laten maken in Almere? Nu online zonder fotograaf! 40 foto\'s in 15 minuten voor €29. 6x goedkoper dan Almere fotografen.',
-  keywords: 'LinkedIn foto Almere, professionele foto Almere, zakelijke fotoshoot Almere, LinkedIn fotograaf Almere, profielfoto Almere online',
+  title: "LinkedIn Foto Laten Maken Almere | Professionele Fotoshoot €29 | 40 Foto's",
+  description: "LinkedIn foto laten maken Almere? ✓ AI fotoshoot 6x goedkoper dan fotograaf ✓ 40 professionele LinkedIn foto's in 15 min ✓ Perfect voor Almere professionals ✓ Gratis levering",
+  keywords: "LinkedIn foto laten maken Almere, profielfoto LinkedIn Almere, fotograaf LinkedIn Almere, zakelijk portret Almere, LinkedIn fotoshoot Almere, professionele foto Almere, headshot fotograaf Almere",
   openGraph: {
-    title: 'LinkedIn foto laten maken Almere - Online zonder fotograaf',
-    description: 'Professionele LinkedIn foto\'s voor Almere professionals. 40 foto\'s in 15 minuten voor €29, geen reistijd door Almere.',
-    type: 'website',
-    siteName: 'AI Portret Pro',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'LinkedIn foto laten maken Almere - Online zonder fotograaf',
-    description: 'Professionele LinkedIn foto\'s voor Almere professionals. 40 foto\'s in 15 minuten voor €29.',
+    title: "LinkedIn Foto Laten Maken Almere | AI Fotoshoot €29",
+    description: "6x goedkoper dan fotograaf ✓ 40 professionele LinkedIn foto's in 15 min ✓ Perfect voor Almere professionals",
+    url: "https://aiportretpro.com/linkedin-foto-laten-maken-almere",
+    type: "website",
+    locale: "nl_NL",
   },
   alternates: {
-    canonical: 'https://aiportretpro.nl/linkedin-foto-laten-maken-almere'
-  }
+    canonical: "https://aiportretpro.com/linkedin-foto-laten-maken-almere",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 }
 
-export default function Layout({
+export default function AlmereLayout({
   children,
 }: {
   children: React.ReactNode

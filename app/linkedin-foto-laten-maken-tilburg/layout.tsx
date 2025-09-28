@@ -1,26 +1,26 @@
-import { Metadata } from 'next'
+import type { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: 'LinkedIn foto laten maken Tilburg - Online zonder fotograaf | AI Portret Pro',
-  description: 'Professionele LinkedIn foto laten maken in Tilburg? Nu online zonder fotograaf! 40 foto\'s in 15 minuten voor €29. 6x goedkoper dan Tilburg fotografen.',
-  keywords: 'LinkedIn foto Tilburg, professionele foto Tilburg, zakelijke fotoshoot Tilburg, LinkedIn fotograaf Tilburg, profielfoto Tilburg online',
+  title: "LinkedIn Foto Laten Maken Tilburg | Professionele Fotoshoot €29 | 40 Foto's",
+  description: "LinkedIn foto laten maken Tilburg? ✓ AI fotoshoot 6x goedkoper dan fotograaf ✓ 40 professionele LinkedIn foto's in 15 min ✓ Perfect voor Tilburg professionals ✓ Gratis levering",
+  keywords: "LinkedIn foto laten maken Tilburg, profielfoto LinkedIn Tilburg, fotograaf LinkedIn Tilburg, zakelijk portret Tilburg, LinkedIn fotoshoot Tilburg, professionele foto Tilburg, headshot fotograaf Tilburg",
   openGraph: {
-    title: 'LinkedIn foto laten maken Tilburg - Online zonder fotograaf',
-    description: 'Professionele LinkedIn foto\'s voor Tilburg professionals. 40 foto\'s in 15 minuten voor €29, geen reistijd door Tilburg.',
-    type: 'website',
-    siteName: 'AI Portret Pro',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'LinkedIn foto laten maken Tilburg - Online zonder fotograaf',
-    description: 'Professionele LinkedIn foto\'s voor Tilburg professionals. 40 foto\'s in 15 minuten voor €29.',
+    title: "LinkedIn Foto Laten Maken Tilburg | AI Fotoshoot €29",
+    description: "6x goedkoper dan fotograaf ✓ 40 professionele LinkedIn foto's in 15 min ✓ Perfect voor Tilburg professionals",
+    url: "https://aiportretpro.com/linkedin-foto-laten-maken-tilburg",
+    type: "website",
+    locale: "nl_NL",
   },
   alternates: {
-    canonical: 'https://aiportretpro.nl/linkedin-foto-laten-maken-tilburg'
-  }
+    canonical: "https://aiportretpro.com/linkedin-foto-laten-maken-tilburg",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 }
 
-export default function Layout({
+export default function TilburgLayout({
   children,
 }: {
   children: React.ReactNode

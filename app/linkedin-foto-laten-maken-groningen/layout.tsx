@@ -1,26 +1,26 @@
-import { Metadata } from 'next'
+import type { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: 'LinkedIn foto laten maken Groningen - Online zonder fotograaf | AI Portret Pro',
-  description: 'Professionele LinkedIn foto laten maken in Groningen? Nu online zonder fotograaf! 40 foto\'s in 15 minuten voor €29. 6x goedkoper dan Groningen fotografen.',
-  keywords: 'LinkedIn foto Groningen, professionele foto Groningen, zakelijke fotoshoot Groningen, LinkedIn fotograaf Groningen, profielfoto Groningen online',
+  title: "LinkedIn Foto Laten Maken Groningen | Professionele Fotoshoot €29 | 40 Foto's",
+  description: "LinkedIn foto laten maken Groningen? ✓ AI fotoshoot 6x goedkoper dan fotograaf ✓ 40 professionele LinkedIn foto's in 15 min ✓ Perfect voor Groningen professionals ✓ Gratis levering",
+  keywords: "LinkedIn foto laten maken Groningen, profielfoto LinkedIn Groningen, fotograaf LinkedIn Groningen, zakelijk portret Groningen, LinkedIn fotoshoot Groningen, professionele foto Groningen, headshot fotograaf Groningen",
   openGraph: {
-    title: 'LinkedIn foto laten maken Groningen - Online zonder fotograaf',
-    description: 'Professionele LinkedIn foto\'s voor Groningen professionals. 40 foto\'s in 15 minuten voor €29, geen reistijd door Groningen.',
-    type: 'website',
-    siteName: 'AI Portret Pro',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'LinkedIn foto laten maken Groningen - Online zonder fotograaf',
-    description: 'Professionele LinkedIn foto\'s voor Groningen professionals. 40 foto\'s in 15 minuten voor €29.',
+    title: "LinkedIn Foto Laten Maken Groningen | AI Fotoshoot €29",
+    description: "6x goedkoper dan fotograaf ✓ 40 professionele LinkedIn foto's in 15 min ✓ Perfect voor Groningen professionals",
+    url: "https://aiportretpro.com/linkedin-foto-laten-maken-groningen",
+    type: "website",
+    locale: "nl_NL",
   },
   alternates: {
-    canonical: 'https://aiportretpro.nl/linkedin-foto-laten-maken-groningen'
-  }
+    canonical: "https://aiportretpro.com/linkedin-foto-laten-maken-groningen",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 }
 
-export default function Layout({
+export default function GroningenLayout({
   children,
 }: {
   children: React.ReactNode

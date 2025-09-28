@@ -1,26 +1,26 @@
-import { Metadata } from 'next'
+import type { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: 'LinkedIn foto laten maken Nijmegen - Online zonder fotograaf | AI Portret Pro',
-  description: 'Professionele LinkedIn foto laten maken in Nijmegen? Nu online zonder fotograaf! 40 foto\'s in 15 minuten voor €29. 6x goedkoper dan Nijmegen fotografen.',
-  keywords: 'LinkedIn foto Nijmegen, professionele foto Nijmegen, zakelijke fotoshoot Nijmegen, LinkedIn fotograaf Nijmegen, profielfoto Nijmegen online',
+  title: "LinkedIn Foto Laten Maken Nijmegen | Professionele Fotoshoot €29 | 40 Foto's",
+  description: "LinkedIn foto laten maken Nijmegen? ✓ AI fotoshoot 6x goedkoper dan fotograaf ✓ 40 professionele LinkedIn foto's in 15 min ✓ Perfect voor Nijmegen professionals ✓ Gratis levering",
+  keywords: "LinkedIn foto laten maken Nijmegen, profielfoto LinkedIn Nijmegen, fotograaf LinkedIn Nijmegen, zakelijk portret Nijmegen, LinkedIn fotoshoot Nijmegen, professionele foto Nijmegen, headshot fotograaf Nijmegen",
   openGraph: {
-    title: 'LinkedIn foto laten maken Nijmegen - Online zonder fotograaf',
-    description: 'Professionele LinkedIn foto\'s voor Nijmegen professionals. 40 foto\'s in 15 minuten voor €29, geen reistijd door Nijmegen.',
-    type: 'website',
-    siteName: 'AI Portret Pro',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'LinkedIn foto laten maken Nijmegen - Online zonder fotograaf',
-    description: 'Professionele LinkedIn foto\'s voor Nijmegen professionals. 40 foto\'s in 15 minuten voor €29.',
+    title: "LinkedIn Foto Laten Maken Nijmegen | AI Fotoshoot €29",
+    description: "6x goedkoper dan fotograaf ✓ 40 professionele LinkedIn foto's in 15 min ✓ Perfect voor Nijmegen professionals",
+    url: "https://aiportretpro.com/linkedin-foto-laten-maken-nijmegen",
+    type: "website",
+    locale: "nl_NL",
   },
   alternates: {
-    canonical: 'https://aiportretpro.nl/linkedin-foto-laten-maken-nijmegen'
-  }
+    canonical: "https://aiportretpro.com/linkedin-foto-laten-maken-nijmegen",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 }
 
-export default function Layout({
+export default function NijmegenLayout({
   children,
 }: {
   children: React.ReactNode

@@ -1,26 +1,26 @@
-import { Metadata } from 'next'
+import type { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: 'LinkedIn foto laten maken Amsterdam - Online zonder fotograaf | AI Portret Pro',
-  description: 'Professionele LinkedIn foto laten maken in Amsterdam? Nu online zonder fotograaf! 40 foto\'s in 15 minuten voor €29. 6x goedkoper dan Amsterdamse fotografen.',
-  keywords: 'LinkedIn foto Amsterdam, professionele foto Amsterdam, zakelijke fotoshoot Amsterdam, LinkedIn fotograaf Amsterdam, profielfoto Amsterdam online',
+  title: "LinkedIn Foto Laten Maken Amsterdam | Professionele Fotoshoot €29 | 40 Foto's",
+  description: "LinkedIn foto laten maken Amsterdam? ✓ AI fotoshoot 6x goedkoper dan fotograaf ✓ 40 professionele LinkedIn foto's in 15 min ✓ Perfect voor Amsterdamse professionals ✓ Gratis levering",
+  keywords: "LinkedIn foto laten maken Amsterdam, profielfoto LinkedIn Amsterdam, fotograaf LinkedIn Amsterdam, zakelijk portret Amsterdam, LinkedIn fotoshoot Amsterdam, professionele foto Amsterdam, headshot fotograaf Amsterdam",
   openGraph: {
-    title: 'LinkedIn foto laten maken Amsterdam - Online zonder fotograaf',
-    description: 'Professionele LinkedIn foto\'s voor Amsterdam professionals. 40 foto\'s in 15 minuten voor €29, zonder reistijd door Amsterdam.',
-    type: 'website',
-    siteName: 'AI Portret Pro',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'LinkedIn foto laten maken Amsterdam - Online zonder fotograaf',
-    description: 'Professionele LinkedIn foto\'s voor Amsterdam professionals. 40 foto\'s in 15 minuten voor €29.',
+    title: "LinkedIn Foto Laten Maken Amsterdam | AI Fotoshoot €29",
+    description: "6x goedkoper dan fotograaf ✓ 40 professionele LinkedIn foto's in 15 min ✓ Perfect voor Amsterdamse professionals",
+    url: "https://aiportretpro.com/linkedin-foto-laten-maken-amsterdam",
+    type: "website",
+    locale: "nl_NL",
   },
   alternates: {
-    canonical: 'https://aiportretpro.nl/linkedin-foto-laten-maken-amsterdam'
-  }
+    canonical: "https://aiportretpro.com/linkedin-foto-laten-maken-amsterdam",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 }
 
-export default function Layout({
+export default function AmsterdamLayout({
   children,
 }: {
   children: React.ReactNode

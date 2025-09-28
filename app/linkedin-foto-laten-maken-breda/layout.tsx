@@ -1,26 +1,26 @@
-import { Metadata } from 'next'
+import type { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: 'LinkedIn foto laten maken Breda - Online zonder fotograaf | AI Portret Pro',
-  description: 'Professionele LinkedIn foto laten maken in Breda? Nu online zonder fotograaf! 40 foto\'s in 15 minuten voor €29. 6x goedkoper dan Breda fotografen.',
-  keywords: 'LinkedIn foto Breda, professionele foto Breda, zakelijke fotoshoot Breda, LinkedIn fotograaf Breda, profielfoto Breda online',
+  title: "LinkedIn Foto Laten Maken Breda | Professionele Fotoshoot €29 | 40 Foto's",
+  description: "LinkedIn foto laten maken Breda? ✓ AI fotoshoot 6x goedkoper dan fotograaf ✓ 40 professionele LinkedIn foto's in 15 min ✓ Perfect voor Breda professionals ✓ Gratis levering",
+  keywords: "LinkedIn foto laten maken Breda, profielfoto LinkedIn Breda, fotograaf LinkedIn Breda, zakelijk portret Breda, LinkedIn fotoshoot Breda, professionele foto Breda, headshot fotograaf Breda",
   openGraph: {
-    title: 'LinkedIn foto laten maken Breda - Online zonder fotograaf',
-    description: 'Professionele LinkedIn foto\'s voor Breda professionals. 40 foto\'s in 15 minuten voor €29, geen reistijd door Breda.',
-    type: 'website',
-    siteName: 'AI Portret Pro',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'LinkedIn foto laten maken Breda - Online zonder fotograaf',
-    description: 'Professionele LinkedIn foto\'s voor Breda professionals. 40 foto\'s in 15 minuten voor €29.',
+    title: "LinkedIn Foto Laten Maken Breda | AI Fotoshoot €29",
+    description: "6x goedkoper dan fotograaf ✓ 40 professionele LinkedIn foto's in 15 min ✓ Perfect voor Breda professionals",
+    url: "https://aiportretpro.com/linkedin-foto-laten-maken-breda",
+    type: "website",
+    locale: "nl_NL",
   },
   alternates: {
-    canonical: 'https://aiportretpro.nl/linkedin-foto-laten-maken-breda'
-  }
+    canonical: "https://aiportretpro.com/linkedin-foto-laten-maken-breda",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 }
 
-export default function Layout({
+export default function BredaLayout({
   children,
 }: {
   children: React.ReactNode
