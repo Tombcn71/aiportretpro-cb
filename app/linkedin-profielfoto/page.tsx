@@ -557,7 +557,7 @@ export default function LinkedInProfielFotoPage() {
               <div className="flex items-center space-x-3">
                 <Image
                   src="/images/logo-icon.png"
-                  alt="AI Portrait Pro Logo"
+                  alt="AI Portret Pro logo - LinkedIn foto laten maken"
                   width={30}
                   height={30}
                   className="rounded-lg"

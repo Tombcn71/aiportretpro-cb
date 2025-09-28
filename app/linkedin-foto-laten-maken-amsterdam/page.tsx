@@ -32,6 +32,9 @@ import { Facebook, Instagram } from "lucide-react"
 import AIHeadshotsShowcase from "@/components/ai-headshots-showcase"
 import HowItWorks from "@/components/how-it-works"
 import SchemaMarkup from "@/components/schema-markup"
+import Breadcrumb from "@/components/breadcrumb"
+import ReviewSchema from "@/components/review-schema"
+import SEOContentBlock from "@/components/seo-content-block"
 
 // Gallery photos: New 16 professional photos in man-woman alternating order
 const galleryPhotos = [
@@ -152,7 +155,12 @@ export default function LinkedInAmsterdamPage() {
   return (
     <div className="min-h-screen pt-20">
       <SchemaMarkup type="city" city="Amsterdam" url="https://aiportretpro.com/linkedin-foto-laten-maken-amsterdam" />
+      <ReviewSchema businessName="AI Portret Pro" city="Amsterdam" />
       <Header />
+      <Breadcrumb items={[
+        { label: "LinkedIn Fotografie", href: "/linkedin-profielfoto" },
+        { label: "Amsterdam" }
+      ]} />
 
       {/* Hero Section - Amsterdam Specific */}
       <section className="container mx-auto px-4 py-6 text-center">
@@ -622,6 +630,9 @@ export default function LinkedInAmsterdamPage() {
         </div>
       </section>
 
+      {/* SEO Content Enhancement */}
+      <SEOContentBlock city="Amsterdam" showLocalKeywords={true} />
+
       {/* Photo Lightbox */}
       {selectedImage && (
         <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
@@ -652,7 +663,7 @@ export default function LinkedInAmsterdamPage() {
               <div className="flex items-center space-x-3">
                 <Image
                   src="/images/logo-icon.png"
-                  alt="AI Portrait Pro Logo"
+                  alt="AI Portret Pro logo - LinkedIn foto laten maken"
                   width={30}
                   height={30}
                   className="w-8 h-8"
