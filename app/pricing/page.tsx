@@ -115,9 +115,9 @@ Je fotoshoot online doen via ons is            <span className="text-[#0077B5]">
         
         </div>
 
-        <div className="max-w-md mx-auto px-4">
+        <div className="max-w-md mx-auto px-4 md:px-0">
           <Card className="relative border-2 border-[#0077B5] shadow-xl">
-            <CardHeader className="text-center pt-6 px-4">
+            <CardHeader className="text-center pt-6 md:pt-8 px-4 md:px-6">
               <CardTitle className="text-xl md:text-2xl font-bold">Professional</CardTitle>
               <div className="mt-4">
                 <span className="text-2xl md:text-4xl font-bold text-[#0077B5]">€29</span>
@@ -125,7 +125,7 @@ Je fotoshoot online doen via ons is            <span className="text-[#0077B5]">
               <p className="text-gray-600 mt-2">40 professionele portretfoto's</p>
             </CardHeader>
 
-            <CardContent className="space-y-6 px-4 pb-6">
+            <CardContent className="space-y-6 px-4 md:px-6 pb-6 md:pb-8">
               <ul className="space-y-4">
                 {features.map((feature, index) => (
                   <li key={index} className="flex items-center">
