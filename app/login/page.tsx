@@ -132,15 +132,8 @@ export default function LoginPage() {
             
             {/* Main title */}
             <CardTitle className="text-xl md:text-2xl text-gray-900 mb-3 font-normal pl-0">
-              Een professionele fotoshoot,
-              <br />
-              <span className="text-[#0077B5]">kan nu online zonder fotograaf</span> 
+              Even registreren voor veilige betaling en toegang tot de app
             </CardTitle>
-            
-            {/* Subtitle */}
-            <p className="text-gray-600 text-base">
-              Maak een account aan of login
-            </p>
           </CardHeader>
           <CardContent className="space-y-4">
             {!showEmailForm ? (
