@@ -97,14 +97,16 @@ export default function PricingPage() {
       <Header />
       <div className="container mx-auto px-4 py-12 md:py-20">
         <div className="text-center mb-8 max-w-3xl mx-auto">
-          <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 mb-4 leading-tight">
-Je fotoshoot online doen via ons is            <span className="text-[#0077B5]"> 6x goedkoper</span> dan bij een fotograaf
+          <h1 className="text-xl md:text-3xl lg:text-4xl font-bold text-gray-900 mb-4 leading-tight">
+Professionele fotoshoot voor<span className="text-[#0077B5]"> 6x goedkoper</span> dan bij een fotograaf
           </h1>
-          <p className="text-base md:text-lg text-gray-600 leading-relaxed">
-            De prijzen van een zakelijke fotoshoot in Nederland zijn gemiddeld €175. 
-            <a href="/blog/wat-kost-zakelijke-fotoshoot-nederland" className="text-[#0077B5] hover:text-[#005885] underline font-medium">
-              We hebben hiervoor 387 fotografen onderzocht
-            </a> in de 10 grootste Nederlandse steden.
+
+          <p className="text-base md:text-lg text-gray-600 leading-relaxed">De prijs van een zakelijke fotoshoot in Nederland is
+            
+            
+             gemiddeld            <a href="/blog/wat-kost-zakelijke-fotoshoot-nederland" className="text-[#0077B5] hover:text-[#005885] underline font-medium">
+            €175.    </a> 
+            
           </p>
         </div>
 
