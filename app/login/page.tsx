@@ -132,10 +132,15 @@ export default function LoginPage() {
             
             {/* Main title */}
             <CardTitle className="text-xl md:text-2xl text-gray-900 mb-3 font-normal pl-0">
-              Even registreren voor veilige betaling en toegang tot de app.
+              Een professionele fotoshoot,
               <br />
-              <span className="text-[#0077B5]">Foto's klaar in 15 minuten!</span> 
+              <span className="text-[#0077B5]">kan nu online zonder fotograaf</span> 
             </CardTitle>
+            
+            {/* Subtitle */}
+            <p className="text-gray-600 text-base">
+              Maak een account aan of login
+            </p>
           </CardHeader>
           <CardContent className="space-y-4">
             {!showEmailForm ? (
@@ -273,7 +278,7 @@ export default function LoginPage() {
                   <svg className="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
-                  <span>Klaar in 15 minuten</span>
+                  <span>Foto's klaar in 15 minuten</span>
                 </div>
               </div>
             </div>
