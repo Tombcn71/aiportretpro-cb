@@ -30,7 +30,7 @@ export default function HowItWorks() {
             </div>
             <div>
               <h3 className="font-semibold text-gray-900 mb-1">Onze AI gaat aan het werk</h3>
-              <p className="text-gray-600 text-sm">De AI analyseert je foto's en start de training. Duur 15 min</p>
+              <p className="text-gray-600 text-sm">De AI analyseert je foto's en start de training. Foto's klaar in 15 minuten</p>
             </div>
           </div>
           
