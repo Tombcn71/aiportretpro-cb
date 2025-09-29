@@ -20,7 +20,7 @@ export default function HowItWorks() {
             </div>
             <div>
               <h3 className="font-semibold text-gray-900 mb-1">Upload een paar foto's</h3>
-              <p className="text-gray-600 text-sm">Recht in de camera kijkend met verschillende kleding en verschillende achtergronden.</p>
+              <p className="text-gray-600 text-sm">Foto's vanaf je bovenlichaam of vanaf je middel is ook goed, waarbij je naar de camera kijkt.</p>
             </div>
           </div>
           
@@ -54,7 +54,7 @@ export default function HowItWorks() {
             </div>
             <h3 className="text-xl font-semibold mb-2">Upload een paar foto's</h3>
             <p className="text-gray-600 text-sm">
-             Recht in de camera kijkend met verschillende kleding en verschillende achtergrondenden.
+              Foto's vanaf je bovenlichaam of vanaf je middel is ook goed, waarbij je naar de camera kijkt.
             </p>
           </div>
 
