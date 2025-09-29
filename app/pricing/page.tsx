@@ -101,7 +101,7 @@ export default function PricingPage() {
             Professionele fotoshoot voor<span className="text-[#0077B5]"> 6x goedkoper</span> dan bij een fotograaf
           </h1>
           <p className="text-sm md:text-base lg:text-lg text-gray-600 leading-relaxed">
-            De prijs van een zakelijke fotoshoot in Nederland is gemiddeld 
+            De prijs van een zakelijke fotoshoot in Nederland is gemiddeld{" "}
             <a href="/blog/wat-kost-zakelijke-fotoshoot-nederland" className="text-[#0077B5] hover:text-[#005885] underline font-medium">
               €175
             </a>.
