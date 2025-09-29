@@ -591,7 +591,7 @@ export default function LinkedInGroningenPage() {
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mt-8">
             <h4 className="text-xl font-semibold text-gray-900 mb-3">Start vandaag nog</h4>
             <p className="text-gray-700 mb-4">
-              Sluit je aan bij Groningense professionals die de voordelen van AI fotografie al ontdekten. Krijg binnen 15 minuten 40 professionele LinkedIn foto's voor slechts €29.
+              Sluit je aan bij Groningense professionals die de voordelen van AI fotografie al ontdekten. Krijg binnen 15 minuten 40 professionele LinkedIn foto's.
             </p>
             <Button asChild className="bg-[#0077B5] hover:bg-[#005885]">
               <Link href="/pricing">
@@ -717,7 +717,7 @@ export default function LinkedInGroningenPage() {
         <div className="fixed bottom-4 left-4 right-4 z-[2147483647] md:hidden">
           <div className="bg-white rounded-lg shadow-lg border border-gray-200 p-3">
             <p className="text-center text-md font-bold text-gray-800 mb-4 mt-4">
-              Doe direct jouw LinkedIn fotoshoot groningen online, makkelijk vanuit thuis zonder gedoe, voor slechts €29,-!
+              Doe direct jouw LinkedIn fotoshoot groningen online, makkelijk vanuit thuis zonder gedoe!
             </p>
             <Button
               asChild

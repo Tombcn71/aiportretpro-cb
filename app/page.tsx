@@ -630,7 +630,7 @@ export default function HomePage() {
         <div className="fixed bottom-4 left-4 right-4 z-[2147483647] md:hidden">
           <div className="bg-white rounded-lg shadow-lg border border-gray-200 p-3">
             <p className="text-center text-md font-bold text-gray-800 mb-4 mt-4">
-              Doe direct jouw professionele fotoshoot online, makkelijk vanuit thuis zonder gedoe, voor slechts €29,-
+              Doe direct jouw professionele fotoshoot online, makkelijk vanuit thuis zonder gedoe
             </p>
             <Button
               asChild
