@@ -132,7 +132,9 @@ export default function LoginPage() {
             
             {/* Main title */}
             <CardTitle className="text-xl md:text-2xl text-gray-900 mb-3 font-normal pl-0">
-              Even registreren voor veilige betaling en toegang tot de app
+              Even registreren voor veilige betaling en toegang tot de app.
+              <br />
+              <span className="text-[#0077B5]">Foto's klaar in 15 minuten!</span> 
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
