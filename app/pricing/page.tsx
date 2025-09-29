@@ -105,25 +105,27 @@ export default function PricingPage() {
 Je fotoshoot online doen via ons is            <span className="text-[#0077B5]"> 6x goedkoper</span> dan bij een fotograaf
           </h1>
           <p className="text-base md:text-lg text-gray-600 leading-relaxed">
-            De prijzen van professionele zakelijke portretfoto's in Nederland liggen tussen de 
-            <span className="font-semibold text-gray-800"> €100-€250</span>
+            De prijzen van een zakelijke fotoshoot in Nederland zijn gemiddeld €175. 
+            <a href="/blog/zakelijke-fotoshoot-kosten-nederland" className="text-[#0077B5] hover:text-[#005885] underline font-medium">
+              We hebben hiervoor 387 fotografen onderzocht
+            </a> in de 10 grootste Nederlandse steden.
           </p>
         </div>
             
         
         </div>
 
-        <div className="max-w-md mx-auto">
+        <div className="max-w-md mx-auto px-4">
           <Card className="relative border-2 border-[#0077B5] shadow-xl">
-            <CardHeader className="text-center pt-8">
-              <CardTitle className="text-2xl font-bold">Professional</CardTitle>
+            <CardHeader className="text-center pt-6 px-4">
+              <CardTitle className="text-xl md:text-2xl font-bold">Professional</CardTitle>
               <div className="mt-4">
                 <span className="text-2xl md:text-4xl font-bold text-[#0077B5]">€29</span>
               </div>
               <p className="text-gray-600 mt-2">40 professionele portretfoto's</p>
             </CardHeader>
 
-            <CardContent className="space-y-6">
+            <CardContent className="space-y-6 px-4 pb-6">
               <ul className="space-y-4">
                 {features.map((feature, index) => (
                   <li key={index} className="flex items-center">
@@ -136,7 +138,7 @@ Je fotoshoot online doen via ons is            <span className="text-[#0077B5]">
               <Button
                 onClick={handlePlanSelect}
                 disabled={loading}
-                className="w-full bg-[#0077B5] hover:bg-[#004182] text-white py-4 text-lg font-semibold"
+                className="w-full bg-[#0077B5] hover:bg-[#004182] text-white py-3 md:py-4 text-base md:text-lg font-semibold"
               >
                 {loading ? "Laden..." : "Betaal Veilig & Start Direct"}
               </Button>

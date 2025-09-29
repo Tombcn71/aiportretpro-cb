@@ -160,7 +160,7 @@ export default function LinkedInGroningenPage() {
           size="lg"
           className=" bg-[#FF8C00] hover:bg-[#FFA500] text-white px-6 md:px-10 py-8 md:py-8 text-base md:text-lg mb-3 md:max-w-sm"
         >
-          <Link href="/login?source=linkedin">
+          <Link href="/pricing">
             <LinkedinIcon className="mr-2 h-5 md:h-6 w-5 md:w-6" />
             Start je LinkedIn fotoshoot groningen - € 29 <ArrowRight className="ml-2 h-6 md:h-7 w-6 md:w-7" />
           </Link>
@@ -509,7 +509,7 @@ export default function LinkedInGroningenPage() {
             size="lg"
             className="bg-white text-[#0077B5] hover:bg-gray-100 text-lg px-8 py-4 mr-4 mb-4 md:mb-0"
           >
-            <Link href="/login?source=linkedin">
+            <Link href="/pricing">
               <LinkedinIcon className="mr-2 h-5 w-5" />
               Start nu voor €29
             </Link>
@@ -594,7 +594,7 @@ export default function LinkedInGroningenPage() {
               Sluit je aan bij Groningense professionals die de voordelen van AI fotografie al ontdekten. Krijg binnen 15 minuten 40 professionele LinkedIn foto's voor slechts €29.
             </p>
             <Button asChild className="bg-[#0077B5] hover:bg-[#005885]">
-              <Link href="/login?source=linkedin">
+              <Link href="/pricing">
                 Begin nu je LinkedIn fotoshoot groningen →
               </Link>
             </Button>
@@ -724,7 +724,7 @@ export default function LinkedInGroningenPage() {
               size="lg"
               className="w-full bg-[#FF8C00] hover:bg-[#FFA500] text-white px-6 py-8 text-base font-semibold"
             >
-              <Link href="/login?source=linkedin">
+              <Link href="/pricing">
                 <LinkedinIcon className="mr-2 h-5 w-5" />
                 LinkedIn fotoshoot groningen - € 29 <ArrowRight className="ml-2 h-6 md:h-7 w-6 md:w-7" />
               </Link>
