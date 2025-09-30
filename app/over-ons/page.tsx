@@ -21,7 +21,7 @@ export default function OverOnsPage() {
                     Hoi, ik ben <span className="text-blue-600">Tom van Reijn</span>
                   </h1>
                   <p className="text-xl text-gray-600 leading-relaxed">
-                    Developer, startup-veteraan en AI-enthusiast met een missie: 
+                    Developer, startup-ondernemer en AI-enthusiast met een missie: 
                     <strong className="text-gray-900"> professionele fotografie voor iedereen bereikbaar maken.</strong>
                   </p>
                 </div>
