@@ -28,19 +28,6 @@ export default function OverOnsPage() {
 
                 <div className="space-y-6">
                   <div className="flex items-start gap-4">
-                    <div className="bg-blue-100 p-3 rounded-full">
-                      <Camera className="h-6 w-6 text-blue-600" />
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900 mb-2">Ervaring in de startup scene</h3>
-                      <p className="text-gray-600">
-                        Door mijn jarenlange ervaring in de startup-wereld weet ik hoe belangrijk een sterke 
-                        professionele uitstraling is voor ondernemers en professionals.
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-4">
                     <div className="bg-purple-100 p-3 rounded-full">
                       <Lightbulb className="h-6 w-6 text-purple-600" />
                     </div>
@@ -49,6 +36,19 @@ export default function OverOnsPage() {
                       <p className="text-gray-600">
                         Als developer en AI-enthusiast combineer ik de nieuwste technologie met fotografische expertise 
                         om ongelooflijke resultaten te bereiken.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-4">
+                    <div className="bg-blue-100 p-3 rounded-full">
+                      <Camera className="h-6 w-6 text-blue-600" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">Ervaring in de startup scene</h3>
+                      <p className="text-gray-600">
+                        Door mijn jarenlange ervaring in de startup-wereld weet ik hoe belangrijk een sterke 
+                        professionele uitstraling is voor ondernemers en professionals.
                       </p>
                     </div>
                   </div>
