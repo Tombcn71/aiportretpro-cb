@@ -15,13 +15,13 @@ const inter = Inter({ subsets: ["latin"] })
 const CrispWithNoSSR = dynamic(() => import("../components/crisp"))
 
 export const metadata: Metadata = {
-  title: "Professionele zakelijke foto's laten maken kan nu online - AI Portret Pro €29",
+  title: "Professionele zakelijke foto's laten maken? - AI Portret Pro €29",
   description:
-    "Professionele zakelijke foto's laten maken kan nu zonder fotograaf. 6x goedkoper dan traditionele fotoshoots. 40 AI portretfoto's in 15 minuten voor LinkedIn, CV, website.",
+    "Probeer onze online AI fotoshoot: 40 professionele foto's in 15 min. 6x goedkoper dan een traditionele fotograaf!",
   keywords: "zakelijke foto's laten maken, professionele foto online, business headshots, corporate fotografie, LinkedIn foto, CV foto, website profielfoto, AI fotografie Nederland",
   openGraph: {
-    title: "Professionele zakelijke foto's laten maken kan nu online - AI Portret Pro €29",
-    description: "Professionele zakelijke foto's laten maken kan nu zonder fotograaf. 6x goedkoper dan traditionele fotoshoots. 40 AI portretfoto's in 15 minuten voor LinkedIn, CV, website.",
+    title: "Professionele zakelijke foto's laten maken? - AI Portret Pro €29",
+    description: "Probeer onze online AI fotoshoot: 40 professionele foto's in 15 min. 6x goedkoper dan een traditionele fotograaf!",
     url: "https://aiportretpro.nl",
     siteName: "AI Portret Pro",
     type: "website",
@@ -29,8 +29,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Professionele zakelijke foto's laten maken kan nu online - AI Portret Pro €29",
-    description: "Professionele zakelijke foto's laten maken kan nu zonder fotograaf. 6x goedkoper dan traditionele fotoshoots. 40 AI portretfoto's in 15 minuten voor LinkedIn, CV, website.",
+    title: "Professionele zakelijke foto's laten maken? - AI Portret Pro €29",
+    description: "Probeer onze online AI fotoshoot: 40 professionele foto's in 15 min. 6x goedkoper dan een traditionele fotograaf!",
   },
   alternates: {
     canonical: "https://aiportretpro.nl",
