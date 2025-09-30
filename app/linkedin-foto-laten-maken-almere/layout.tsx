@@ -1,22 +1,34 @@
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: "LinkedIn Foto Laten Maken Almere | Professionele Fotoshoot €29 | 40 Foto's",
-  description: "LinkedIn foto laten maken Almere? ✓ AI fotoshoot 6x goedkoper dan fotograaf ✓ 40 professionele LinkedIn foto's in 15 min ✓ Perfect voor Almere professionals ✓ Gratis levering",
-  keywords: "LinkedIn foto laten maken Almere, profielfoto LinkedIn Almere, fotograaf LinkedIn Almere, zakelijk portret Almere, LinkedIn fotoshoot Almere, professionele foto Almere, headshot fotograaf Almere",
+  title: "LinkedIn Foto Laten Maken Almere | AI Fotoshoot €29 | 40 Professionele Foto's",
+  description: "LinkedIn foto laten maken Almere? ✓ AI fotoshoot 6x goedkoper dan fotograaf ✓ 40 professionele LinkedIn foto's in 15 min ✓ Perfect voor Almere professionals ✓ Binnen 15 minuten klaar",
+  keywords: "LinkedIn foto laten maken Almere, profielfoto LinkedIn Almere, fotograaf LinkedIn Almere, zakelijk portret Almere, LinkedIn fotoshoot Almere, professionele foto Almere, headshot fotograaf Almere, AI fotografie Almere",
   openGraph: {
     title: "LinkedIn Foto Laten Maken Almere | AI Fotoshoot €29",
-    description: "6x goedkoper dan fotograaf ✓ 40 professionele LinkedIn foto's in 15 min ✓ Perfect voor Almere professionals",
-    url: "https://aiportretpro.com/linkedin-foto-laten-maken-almere",
+    description: "6x goedkoper dan fotograaf ✓ 40 professionele LinkedIn foto's in 15 min ✓ Perfect voor Almere professionals ✓ Binnen 15 minuten klaar",
+    url: "https://aiportretpro.nl/linkedin-foto-laten-maken-almere",
     type: "website",
     locale: "nl_NL",
   },
+  twitter: {
+    card: "summary_large_image",
+    title: "LinkedIn Foto Laten Maken Almere | AI Fotoshoot €29",
+    description: "6x goedkoper dan fotograaf ✓ 40 professionele LinkedIn foto's in 15 min ✓ Perfect voor Almere professionals",
+  },
   alternates: {
-    canonical: "https://aiportretpro.com/linkedin-foto-laten-maken-almere",
+    canonical: "https://aiportretpro.nl/linkedin-foto-laten-maken-almere",
   },
   robots: {
     index: true,
     follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
   },
 }
 

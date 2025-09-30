@@ -1,22 +1,34 @@
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: "LinkedIn Foto Laten Maken Utrecht | Professionele Fotoshoot €29 | 40 Foto's",
-  description: "LinkedIn foto laten maken Utrecht? ✓ AI fotoshoot 6x goedkoper dan fotograaf ✓ 40 professionele LinkedIn foto's in 15 min ✓ Perfect voor Utrecht professionals ✓ Gratis levering",
-  keywords: "LinkedIn foto laten maken Utrecht, profielfoto LinkedIn Utrecht, fotograaf LinkedIn Utrecht, zakelijk portret Utrecht, LinkedIn fotoshoot Utrecht, professionele foto Utrecht, headshot fotograaf Utrecht",
+  title: "LinkedIn Foto Laten Maken Utrecht | AI Fotoshoot €29 | 40 Professionele Foto's",
+  description: "LinkedIn foto laten maken Utrecht? ✓ AI fotoshoot 6x goedkoper dan fotograaf ✓ 40 professionele LinkedIn foto's in 15 min ✓ Perfect voor Utrechtse professionals ✓ Binnen 15 minuten klaar",
+  keywords: "LinkedIn foto laten maken Utrecht, profielfoto LinkedIn Utrecht, fotograaf LinkedIn Utrecht, zakelijk portret Utrecht, LinkedIn fotoshoot Utrecht, professionele foto Utrecht, headshot fotograaf Utrecht, AI fotografie Utrecht",
   openGraph: {
     title: "LinkedIn Foto Laten Maken Utrecht | AI Fotoshoot €29",
-    description: "6x goedkoper dan fotograaf ✓ 40 professionele LinkedIn foto's in 15 min ✓ Perfect voor Utrecht professionals",
-    url: "https://aiportretpro.com/linkedin-foto-laten-maken-utrecht",
+    description: "6x goedkoper dan fotograaf ✓ 40 professionele LinkedIn foto's in 15 min ✓ Perfect voor Utrechtse professionals ✓ Binnen 15 minuten klaar",
+    url: "https://aiportretpro.nl/linkedin-foto-laten-maken-utrecht",
     type: "website",
     locale: "nl_NL",
   },
+  twitter: {
+    card: "summary_large_image",
+    title: "LinkedIn Foto Laten Maken Utrecht | AI Fotoshoot €29",
+    description: "6x goedkoper dan fotograaf ✓ 40 professionele LinkedIn foto's in 15 min ✓ Perfect voor Utrechtse professionals",
+  },
   alternates: {
-    canonical: "https://aiportretpro.com/linkedin-foto-laten-maken-utrecht",
+    canonical: "https://aiportretpro.nl/linkedin-foto-laten-maken-utrecht",
   },
   robots: {
     index: true,
     follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
   },
 }
 

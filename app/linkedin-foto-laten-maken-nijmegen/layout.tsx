@@ -1,22 +1,34 @@
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: "LinkedIn Foto Laten Maken Nijmegen | Professionele Fotoshoot €29 | 40 Foto's",
-  description: "LinkedIn foto laten maken Nijmegen? ✓ AI fotoshoot 6x goedkoper dan fotograaf ✓ 40 professionele LinkedIn foto's in 15 min ✓ Perfect voor Nijmegen professionals ✓ Gratis levering",
-  keywords: "LinkedIn foto laten maken Nijmegen, profielfoto LinkedIn Nijmegen, fotograaf LinkedIn Nijmegen, zakelijk portret Nijmegen, LinkedIn fotoshoot Nijmegen, professionele foto Nijmegen, headshot fotograaf Nijmegen",
+  title: "LinkedIn Foto Laten Maken Nijmegen | AI Fotoshoot €29 | 40 Professionele Foto's",
+  description: "LinkedIn foto laten maken Nijmegen? ✓ AI fotoshoot 6x goedkoper dan fotograaf ✓ 40 professionele LinkedIn foto's in 15 min ✓ Perfect voor Nijmeegse professionals ✓ Binnen 15 minuten klaar",
+  keywords: "LinkedIn foto laten maken Nijmegen, profielfoto LinkedIn Nijmegen, fotograaf LinkedIn Nijmegen, zakelijk portret Nijmegen, LinkedIn fotoshoot Nijmegen, professionele foto Nijmegen, headshot fotograaf Nijmegen, AI fotografie Nijmegen",
   openGraph: {
     title: "LinkedIn Foto Laten Maken Nijmegen | AI Fotoshoot €29",
-    description: "6x goedkoper dan fotograaf ✓ 40 professionele LinkedIn foto's in 15 min ✓ Perfect voor Nijmegen professionals",
-    url: "https://aiportretpro.com/linkedin-foto-laten-maken-nijmegen",
+    description: "6x goedkoper dan fotograaf ✓ 40 professionele LinkedIn foto's in 15 min ✓ Perfect voor Nijmeegse professionals ✓ Binnen 15 minuten klaar",
+    url: "https://aiportretpro.nl/linkedin-foto-laten-maken-nijmegen",
     type: "website",
     locale: "nl_NL",
   },
+  twitter: {
+    card: "summary_large_image",
+    title: "LinkedIn Foto Laten Maken Nijmegen | AI Fotoshoot €29",
+    description: "6x goedkoper dan fotograaf ✓ 40 professionele LinkedIn foto's in 15 min ✓ Perfect voor Nijmeegse professionals",
+  },
   alternates: {
-    canonical: "https://aiportretpro.com/linkedin-foto-laten-maken-nijmegen",
+    canonical: "https://aiportretpro.nl/linkedin-foto-laten-maken-nijmegen",
   },
   robots: {
     index: true,
     follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
   },
 }
 
