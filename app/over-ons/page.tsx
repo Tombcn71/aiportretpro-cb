@@ -21,7 +21,7 @@ export default function OverOnsPage() {
                     Hoi, ik ben <span className="text-blue-600">Tom van Reijn</span>
                   </h1>
                   <p className="text-xl text-gray-600 leading-relaxed">
-                    Developer, fotografie-liefhebber en AI-enthusiast met een missie: 
+                    Developer, startup-veteraan en AI-enthusiast met een missie: 
                     <strong className="text-gray-900"> professionele fotografie voor iedereen bereikbaar maken.</strong>
                   </p>
                 </div>
@@ -32,10 +32,10 @@ export default function OverOnsPage() {
                       <Camera className="h-6 w-6 text-blue-600" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-semibold text-gray-900 mb-2">Jaren ervaring in stockfotografie</h3>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">Ervaring in de startup scene</h3>
                       <p className="text-gray-600">
-                        Door mijn jarenlange ervaring in de stockfotografie-industrie weet ik precies wat een 
-                        professionele foto moet hebben om écht impact te maken.
+                        Door mijn jarenlange ervaring in de startup-wereld weet ik hoe belangrijk een sterke 
+                        professionele uitstraling is voor ondernemers en professionals.
                       </p>
                     </div>
                   </div>
@@ -69,16 +69,16 @@ export default function OverOnsPage() {
               </div>
 
               {/* Photo */}
-              <div className="relative">
-                <div className="relative mx-auto w-80 h-80 lg:w-96 lg:h-96">
-                  <div className="absolute inset-0 bg-gradient-to-br from-blue-400 to-purple-500 rounded-3xl transform rotate-6"></div>
-                  <div className="relative bg-white p-4 rounded-3xl shadow-2xl">
+              <div className="relative flex justify-center">
+                <div className="relative w-48 h-48 lg:w-56 lg:h-56">
+                  <div className="absolute inset-0 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full transform rotate-6"></div>
+                  <div className="relative bg-white p-3 rounded-full shadow-2xl">
                     <Image
                       src="/images/me.jpg"
                       alt="Tom van Reijn - Oprichter van AI Portret Pro"
-                      width={400}
-                      height={400}
-                      className="w-full h-full object-cover rounded-2xl"
+                      width={224}
+                      height={224}
+                      className="w-full h-full object-cover rounded-full"
                       priority
                     />
                   </div>
@@ -100,7 +100,7 @@ export default function OverOnsPage() {
                 Met AI Portret Pro democratiseer ik professionele fotografie."
               </p>
               <p className="text-lg text-gray-600 leading-relaxed">
-                Door mijn achtergrond in stockfotografie en passie voor AI-technologie, 
+                Door mijn achtergrond in de startup-wereld en passie voor AI-technologie, 
                 kan ik nu iedereen helpen om binnen 15 minuten professionele foto's te krijgen 
                 die perfect zijn voor LinkedIn, CV's, websites en meer.
               </p>

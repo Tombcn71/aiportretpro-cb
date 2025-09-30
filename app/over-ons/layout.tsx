@@ -2,11 +2,11 @@ import { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: "Over Ons - Tom van Reijn | AI Portret Pro",
-  description: "Ontmoet Tom van Reijn, developer en AI-enthusiast achter AI Portret Pro. Met jaren ervaring in stockfotografie maakt hij professionele fotografie voor iedereen bereikbaar.",
-  keywords: "Tom van Reijn, AI Portret Pro oprichter, stockfotografie expert, AI fotografie, developer, professionele foto's, over ons",
+  description: "Ontmoet Tom van Reijn, developer en AI-enthusiast achter AI Portret Pro. Met ervaring in de startup-wereld maakt hij professionele fotografie voor iedereen bereikbaar.",
+  keywords: "Tom van Reijn, AI Portret Pro oprichter, startup ervaring, AI fotografie, developer, professionele foto's, over ons",
   openGraph: {
     title: "Over Ons - Tom van Reijn | AI Portret Pro",
-    description: "Ontmoet Tom van Reijn, developer en AI-enthusiast achter AI Portret Pro. Met jaren ervaring in stockfotografie maakt hij professionele fotografie voor iedereen bereikbaar.",
+    description: "Ontmoet Tom van Reijn, developer en AI-enthusiast achter AI Portret Pro. Met ervaring in de startup-wereld maakt hij professionele fotografie voor iedereen bereikbaar.",
     url: "https://aiportretpro.nl/over-ons",
     siteName: "AI Portret Pro",
     images: [
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Over Ons - Tom van Reijn | AI Portret Pro",
-    description: "Ontmoet Tom van Reijn, developer en AI-enthusiast achter AI Portret Pro. Met jaren ervaring in stockfotografie maakt hij professionele fotografie voor iedereen bereikbaar.",
+    description: "Ontmoet Tom van Reijn, developer en AI-enthusiast achter AI Portret Pro. Met ervaring in de startup-wereld maakt hij professionele fotografie voor iedereen bereikbaar.",
     images: ["https://aiportretpro.nl/images/me.jpg"],
   },
   alternates: {
