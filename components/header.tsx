@@ -71,6 +71,9 @@ export function Header() {
             <Link href="/pricing" className="text-gray-600 hover:text-gray-900">
               Prijzen
             </Link>
+            <Link href="/over-ons" className="text-gray-600 hover:text-gray-900">
+              Over ons
+            </Link>
             <Link href="/#faq" className="text-gray-600 hover:text-gray-900">
               FAQ
             </Link>
@@ -173,6 +176,13 @@ export function Header() {
               onClick={closeMobileMenu}
             >
               Prijzen
+            </Link>
+            <Link
+              href="/over-ons"
+              className="block text-gray-600 hover:text-gray-900 py-2 text-lg"
+              onClick={closeMobileMenu}
+            >
+              Over ons
             </Link>
             <Link
               href="/#faq"
