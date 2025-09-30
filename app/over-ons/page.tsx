@@ -122,7 +122,7 @@ export default function OverOnsPage() {
               </div>
               <div className="bg-white p-8 rounded-2xl shadow-lg">
                 <div className="text-4xl font-bold text-green-600 mb-2">15 min</div>
-                <div className="text-gray-600">Van upload tot resultaat</div>
+                <div className="text-gray-600">Van training tot resultaat</div>
               </div>
             </div>
           </div>
