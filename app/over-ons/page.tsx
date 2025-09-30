@@ -113,7 +113,7 @@ export default function OverOnsPage() {
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid md:grid-cols-3 gap-8 text-center">
               <div className="bg-white p-8 rounded-2xl shadow-lg">
-                <div className="text-4xl font-bold text-blue-600 mb-2">10.000+</div>
+                <div className="text-4xl font-bold text-blue-600 mb-2">500+</div>
                 <div className="text-gray-600">Tevreden klanten</div>
               </div>
               <div className="bg-white p-8 rounded-2xl shadow-lg">
