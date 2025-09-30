@@ -97,10 +97,10 @@ export default function PricingPage() {
       <Header />
       <div className="container mx-auto px-4 py-12 md:py-20">
         <div className="text-center mb-4 md:mb-8 max-w-3xl mx-auto">
-          <h1 className="text-lg md:text-5xl lg:text-6xl font-bold text-gray-900 mb-2 md:mb-6 leading-tight">
+          <h1 className="text-2xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-4 md:mb-8 leading-tight">
             Professionele fotoshoot voor<span className="text-[#0077B5]"> 6x goedkoper</span> dan bij een fotograaf
           </h1>
-          <p className="text-sm md:text-xl lg:text-2xl text-gray-600 leading-relaxed">
+          <p className="text-base md:text-lg lg:text-xl text-gray-600 leading-relaxed">
             De prijs van een zakelijke fotoshoot in Nederland is gemiddeld{" "}
             <a href="/blog/wat-kost-zakelijke-fotoshoot-nederland" className="text-[#0077B5] hover:text-[#005885] underline font-medium">
               €175
