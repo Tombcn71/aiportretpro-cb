@@ -1,12 +1,12 @@
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: "AI Portret Pro | LinkedIn foto's laten maken? kan nu online zonder fotograaf",
-  description: "Even wat foto's uploaden dat is alles. 6 x goedkoper dan een traditionele fotograaf, 40 professionele foto's in slechts 15 minuten, perfecte maat voor linkedin, website en print",
+  title: "LinkedIn Foto Laten Maken | AI Fotoshoot €29 | 40 Professionele Foto's in 15 Min",
+  description: "LinkedIn foto laten maken? ✓ AI fotoshoot 6x goedkoper dan fotograaf ✓ 40 professionele LinkedIn foto's in 15 min ✓ Perfect voor professionals ✓ Binnen 15 minuten klaar",
   keywords: "LinkedIn profielfoto, LinkedIn foto, professionele profielfoto, LinkedIn headshot, AI profielfoto, LinkedIn zichtbaarheid, recruiters LinkedIn, zakelijke portretfoto",
   openGraph: {
-    title: "AI Portret Pro | LinkedIn foto's laten maken? kan nu online zonder fotograaf",
-    description: "Even wat foto's uploaden dat is alles. 6 x goedkoper dan een traditionele fotograaf, 40 professionele foto's in slechts 15 minuten, perfecte maat voor linkedin, website en print",
+    title: "LinkedIn Foto Laten Maken | AI Fotoshoot €29",
+    description: "6x goedkoper dan fotograaf ✓ 40 professionele LinkedIn foto's in 15 min ✓ Perfect voor professionals ✓ Binnen 15 minuten klaar",
     url: "https://aiportretpro.nl/linkedin-foto-laten-maken",
     siteName: "AI Portret Pro",
     images: [
@@ -22,8 +22,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "LinkedIn Profielfoto | 14x Meer Zichtbaarheid",
-    description: "Professionele LinkedIn foto's met AI. 40 foto's in 15 minuten voor €29.",
+    title: "LinkedIn Foto Laten Maken | AI Fotoshoot €29",
+    description: "6x goedkoper dan fotograaf ✓ 40 professionele LinkedIn foto's in 15 min ✓ Perfect voor professionals",
     images: ["https://aiportretpro.nl/images/professional-woman-1.jpg"],
   },
   alternates: {
