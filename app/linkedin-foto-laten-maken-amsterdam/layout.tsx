@@ -6,15 +6,15 @@ export const metadata: Metadata = {
   keywords: "LinkedIn foto laten maken Amsterdam, profielfoto LinkedIn Amsterdam, fotograaf LinkedIn Amsterdam, zakelijk portret Amsterdam, LinkedIn fotoshoot Amsterdam, professionele foto Amsterdam, headshot fotograaf Amsterdam, AI fotografie Amsterdam",
   openGraph: {
     title: "LinkedIn Foto Laten Maken Amsterdam | AI Fotoshoot €29",
-    description: "6x goedkoper dan fotograaf ✓ 40 professionele LinkedIn foto's in 15 min ✓ Perfect voor Amsterdamse professionals ✓ Binnen 15 minuten klaar",
+    description: "Probeer onze online AI fotoshoot: 40 professionele foto's in 15 min. 6x goedkoper dan een traditionele fotograaf!",
     url: "https://aiportretpro.nl/linkedin-foto-laten-maken-amsterdam",
     type: "website",
     locale: "nl_NL",
   },
   twitter: {
     card: "summary_large_image",
-    title: "LinkedIn Foto Laten Maken Amsterdam | AI Fotoshoot €29",
-    description: "6x goedkoper dan fotograaf ✓ 40 professionele LinkedIn foto's in 15 min ✓ Perfect voor Amsterdamse professionals",
+    title: "LinkedIn Foto Laten Maken Amsterdam? | AI Portret Pro €29",
+    description: "Probeer onze online AI fotoshoot: 40 professionele foto's in 15 min. 6x goedkoper dan een traditionele fotograaf!",
   },
   alternates: {
     canonical: "https://aiportretpro.nl/linkedin-foto-laten-maken-amsterdam",

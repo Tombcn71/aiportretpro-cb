@@ -6,15 +6,15 @@ export const metadata: Metadata = {
   keywords: "LinkedIn foto laten maken Tilburg, profielfoto LinkedIn Tilburg, fotograaf LinkedIn Tilburg, zakelijk portret Tilburg, LinkedIn fotoshoot Tilburg, professionele foto Tilburg, headshot fotograaf Tilburg, AI fotografie Tilburg",
   openGraph: {
     title: "LinkedIn Foto Laten Maken Tilburg | AI Fotoshoot €29",
-    description: "6x goedkoper dan fotograaf ✓ 40 professionele LinkedIn foto's in 15 min ✓ Perfect voor Tilburgse professionals ✓ Binnen 15 minuten klaar",
+    description: "Probeer onze online AI fotoshoot: 40 professionele foto's in 15 min. 6x goedkoper dan een traditionele fotograaf!",
     url: "https://aiportretpro.nl/linkedin-foto-laten-maken-tilburg",
     type: "website",
     locale: "nl_NL",
   },
   twitter: {
     card: "summary_large_image",
-    title: "LinkedIn Foto Laten Maken Tilburg | AI Fotoshoot €29",
-    description: "6x goedkoper dan fotograaf ✓ 40 professionele LinkedIn foto's in 15 min ✓ Perfect voor Tilburgse professionals",
+    title: "LinkedIn Foto Laten Maken Tilburg? | AI Portret Pro €29",
+    description: "Probeer onze online AI fotoshoot: 40 professionele foto's in 15 min. 6x goedkoper dan een traditionele fotograaf!",
   },
   alternates: {
     canonical: "https://aiportretpro.nl/linkedin-foto-laten-maken-tilburg",

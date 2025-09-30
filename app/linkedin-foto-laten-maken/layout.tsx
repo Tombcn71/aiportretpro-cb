@@ -5,8 +5,8 @@ export const metadata: Metadata = {
   description: "Probeer onze online AI fotoshoot: 40 professionele foto's in 15 min. 6x goedkoper dan een traditionele fotograaf!",
   keywords: "LinkedIn profielfoto, LinkedIn foto, professionele profielfoto, LinkedIn headshot, AI profielfoto, LinkedIn zichtbaarheid, recruiters LinkedIn, zakelijke portretfoto",
   openGraph: {
-    title: "LinkedIn Foto Laten Maken | AI Fotoshoot €29",
-    description: "6x goedkoper dan fotograaf ✓ 40 professionele LinkedIn foto's in 15 min ✓ Perfect voor professionals ✓ Binnen 15 minuten klaar",
+    title: "LinkedIn Foto Laten Maken? | AI Portret Pro €29",
+    description: "Probeer onze online AI fotoshoot: 40 professionele foto's in 15 min. 6x goedkoper dan een traditionele fotograaf!",
     url: "https://aiportretpro.nl/linkedin-foto-laten-maken",
     siteName: "AI Portret Pro",
     images: [
@@ -22,8 +22,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "LinkedIn Foto Laten Maken | AI Fotoshoot €29",
-    description: "6x goedkoper dan fotograaf ✓ 40 professionele LinkedIn foto's in 15 min ✓ Perfect voor professionals",
+    title: "LinkedIn Foto Laten Maken? | AI Portret Pro €29",
+    description: "Probeer onze online AI fotoshoot: 40 professionele foto's in 15 min. 6x goedkoper dan een traditionele fotograaf!",
     images: ["https://aiportretpro.nl/images/professional-woman-1.jpg"],
   },
   alternates: {
