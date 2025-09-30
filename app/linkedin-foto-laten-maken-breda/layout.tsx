@@ -1,8 +1,8 @@
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: "LinkedIn Foto Laten Maken Breda | AI Fotoshoot €29 | 40 Professionele Foto's",
-  description: "LinkedIn foto laten maken Breda? ✓ AI fotoshoot 6x goedkoper dan fotograaf ✓ 40 professionele LinkedIn foto's in 15 min ✓ Perfect voor Bredase professionals ✓ Binnen 15 minuten klaar",
+  title: "LinkedIn Foto Laten Maken Breda? | Kan nu online!",
+  description: "Professionele foto's, 6x goedkoper dan een fotograaf. 40 foto's in 15 min, ideaal voor LinkedIn, website en print. Begin nu!",
   keywords: "LinkedIn foto laten maken Breda, profielfoto LinkedIn Breda, fotograaf LinkedIn Breda, zakelijk portret Breda, LinkedIn fotoshoot Breda, professionele foto Breda, headshot fotograaf Breda, AI fotografie Breda",
   openGraph: {
     title: "LinkedIn Foto Laten Maken Breda | AI Fotoshoot €29",

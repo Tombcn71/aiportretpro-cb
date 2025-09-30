@@ -1,8 +1,8 @@
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: "LinkedIn Foto Laten Maken Eindhoven | AI Fotoshoot €29 | 40 Professionele Foto's",
-  description: "LinkedIn foto laten maken Eindhoven? ✓ AI fotoshoot 6x goedkoper dan fotograaf ✓ 40 professionele LinkedIn foto's in 15 min ✓ Perfect voor Eindhovense professionals ✓ Binnen 15 minuten klaar",
+  title: "LinkedIn Foto Laten Maken Eindhoven? | Kan nu online!",
+  description: "Professionele foto's, 6x goedkoper dan een fotograaf. 40 foto's in 15 min, ideaal voor LinkedIn, website en print. Begin nu!",
   keywords: "LinkedIn foto laten maken Eindhoven, profielfoto LinkedIn Eindhoven, fotograaf LinkedIn Eindhoven, zakelijk portret Eindhoven, LinkedIn fotoshoot Eindhoven, professionele foto Eindhoven, headshot fotograaf Eindhoven, AI fotografie Eindhoven",
   openGraph: {
     title: "LinkedIn Foto Laten Maken Eindhoven | AI Fotoshoot €29",

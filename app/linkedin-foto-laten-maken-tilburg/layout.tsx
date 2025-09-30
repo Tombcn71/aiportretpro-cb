@@ -1,8 +1,8 @@
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: "LinkedIn Foto Laten Maken Tilburg | AI Fotoshoot €29 | 40 Professionele Foto's",
-  description: "LinkedIn foto laten maken Tilburg? ✓ AI fotoshoot 6x goedkoper dan fotograaf ✓ 40 professionele LinkedIn foto's in 15 min ✓ Perfect voor Tilburgse professionals ✓ Binnen 15 minuten klaar",
+  title: "LinkedIn Foto Laten Maken Tilburg? | Kan nu online!",
+  description: "Professionele foto's, 6x goedkoper dan een fotograaf. 40 foto's in 15 min, ideaal voor LinkedIn, website en print. Begin nu!",
   keywords: "LinkedIn foto laten maken Tilburg, profielfoto LinkedIn Tilburg, fotograaf LinkedIn Tilburg, zakelijk portret Tilburg, LinkedIn fotoshoot Tilburg, professionele foto Tilburg, headshot fotograaf Tilburg, AI fotografie Tilburg",
   openGraph: {
     title: "LinkedIn Foto Laten Maken Tilburg | AI Fotoshoot €29",

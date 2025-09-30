@@ -1,8 +1,8 @@
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: "LinkedIn Foto Laten Maken Nijmegen | AI Fotoshoot €29 | 40 Professionele Foto's",
-  description: "LinkedIn foto laten maken Nijmegen? ✓ AI fotoshoot 6x goedkoper dan fotograaf ✓ 40 professionele LinkedIn foto's in 15 min ✓ Perfect voor Nijmeegse professionals ✓ Binnen 15 minuten klaar",
+  title: "LinkedIn Foto Laten Maken Nijmegen? | Kan nu online!",
+  description: "Professionele foto's, 6x goedkoper dan een fotograaf. 40 foto's in 15 min, ideaal voor LinkedIn, website en print. Begin nu!",
   keywords: "LinkedIn foto laten maken Nijmegen, profielfoto LinkedIn Nijmegen, fotograaf LinkedIn Nijmegen, zakelijk portret Nijmegen, LinkedIn fotoshoot Nijmegen, professionele foto Nijmegen, headshot fotograaf Nijmegen, AI fotografie Nijmegen",
   openGraph: {
     title: "LinkedIn Foto Laten Maken Nijmegen | AI Fotoshoot €29",

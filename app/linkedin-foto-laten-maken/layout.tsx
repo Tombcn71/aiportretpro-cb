@@ -1,8 +1,8 @@
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: "LinkedIn Foto Laten Maken | AI Fotoshoot €29 | 40 Professionele Foto's in 15 Min",
-  description: "LinkedIn foto laten maken? ✓ AI fotoshoot 6x goedkoper dan fotograaf ✓ 40 professionele LinkedIn foto's in 15 min ✓ Perfect voor professionals ✓ Binnen 15 minuten klaar",
+  title: "LinkedIn Foto Laten Maken? | Kan nu online!",
+  description: "Professionele foto's, 6x goedkoper dan een fotograaf. 40 foto's in 15 min, ideaal voor LinkedIn, website en print. Begin nu!",
   keywords: "LinkedIn profielfoto, LinkedIn foto, professionele profielfoto, LinkedIn headshot, AI profielfoto, LinkedIn zichtbaarheid, recruiters LinkedIn, zakelijke portretfoto",
   openGraph: {
     title: "LinkedIn Foto Laten Maken | AI Fotoshoot €29",
