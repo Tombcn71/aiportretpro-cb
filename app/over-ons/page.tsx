@@ -1,7 +1,7 @@
 import Image from "next/image"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { ArrowRight, Camera, Heart, Lightbulb } from "lucide-react"
+import { ArrowRight, Camera, Heart, Lightbulb, Rocket } from "lucide-react"
 import Header from "@/components/header"
 
 export default function OverOnsPage() {
@@ -42,7 +42,7 @@ export default function OverOnsPage() {
 
                   <div className="flex items-start gap-4">
                     <div className="bg-blue-100 p-3 rounded-full">
-                      <Camera className="h-6 w-6 text-blue-600" />
+                      <Rocket className="h-6 w-6 text-blue-600" />
                     </div>
                     <div>
                       <h3 className="text-lg font-semibold text-gray-900 mb-2">Ervaring in de startup scene</h3>
