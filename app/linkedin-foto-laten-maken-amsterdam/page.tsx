@@ -147,8 +147,9 @@ export default function LinkedInAmsterdamPage() {
         
         <div className="bg-blue-50 p-4 rounded-lg mb-6 max-w-2xl mx-auto">
           <p className="text-gray-700 text-sm">
-            <strong>Speciaal voor Amsterdam:</strong> Als professional in de hoofdstad weet je hoe belangrijk netwerken is. 
-            Van de Zuidas tot het Centrum - jouw LinkedIn profiel is je digitale visitekaartje in Nederland's zakelijke hoofdstad.
+            <strong>Speciaal voor Amsterdam:</strong> Of je nu werkt in de Zuidas, het Centrum, Noord, Oost of West - 
+            als professional in de hoofdstad weet je hoe cruciaal een sterke LinkedIn aanwezigheid is. 
+            Jouw LinkedIn profiel is je digitale visitekaartje in heel Amsterdam.
           </p>
         </div>
 
