@@ -530,9 +530,9 @@ export default function LinkedInAmsterdamPage() {
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
             <h4 className="text-xl font-semibold text-gray-900 mb-3">Speciaal voor Amsterdam</h4>
             <p className="text-gray-700">
-              Of je nu werkt in de Zuidas, het Centrum, Noord of Oost - 
-              als professional in de hoofdstad weet je hoe cruciaal een sterke LinkedIn aanwezigheid is. 
-              Jouw LinkedIn profiel is je digitale visitekaartje in heel Amsterdam.
+              Als professional in Amsterdam weet je dat een sterke LinkedIn aanwezigheid essentieel is. 
+              Of je nu een nieuwe baan zoekt, als zzp'er werkt, of gewoon je netwerk wilt uitbreiden - 
+              een professionele foto helpt je om op te vallen bij recruiters en nieuwe opdrachten binnen te halen.
             </p>
           </div>
 

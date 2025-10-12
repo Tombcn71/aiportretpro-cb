@@ -531,10 +531,9 @@ export default function LinkedInBredaPage() {
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
             <h4 className="text-xl font-semibold text-gray-900 mb-3">Speciaal voor Breda</h4>
             <p className="text-gray-700">
-              Of je nu werkt in het historische centrum, bij bedrijven in Breda-Noord, of in een van de vele groeiende sectoren - 
-              als professional in de Parel van het Zuiden combineer je Brabantse gastvrijheid met zakelijk professionalisme. 
-              In Breda's warme maar ambitieuze zakelijke klimaat waar persoonlijk contact en vertrouwen centraal staan, 
-              is je LinkedIn profiel je digitale introductie voordat je elkaar persoonlijk ontmoet.
+              Als Bredanaar weet je dat persoonlijk contact belangrijk is, maar online beginnen steeds meer connecties. 
+              Of je nu solliciteert, als ondernemer nieuwe klanten zoekt, of je netwerk uitbreidt - 
+              een professionele LinkedIn foto maakt een goede eerste indruk voordat je iemand ontmoet.
             </p>
           </div>
 

@@ -531,10 +531,9 @@ export default function LinkedInNijmegenPage() {
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
             <h4 className="text-xl font-semibold text-gray-900 mb-3">Speciaal voor Nijmegen</h4>
             <p className="text-gray-700">
-              Of je nu werkt bij de Radboud Universiteit, in de zorg, bij NovioTech Campus of in de culturele sector - 
-              als professional in Nederland's oudste stad combineer je historisch bewustzijn met moderne innovatie. 
-              In Nijmegen's academische en progressieve zakelijke omgeving waar kennis en samenwerking centraal staan, 
-              is je LinkedIn profiel essentieel voor zichtbaarheid in de regio Arnhem-Nijmegen en daarbuiten.
+              Als professional uit Nijmegen weet je dat LinkedIn steeds belangrijker wordt voor je carrière. 
+              Of je nu een nieuwe baan zoekt, als zzp'er werkt, of gewoon professioneler over wilt komen - 
+              een goede profielfoto helpt je om op te vallen bij werkgevers en opdrachtgevers.
             </p>
           </div>
 

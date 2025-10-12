@@ -533,9 +533,9 @@ export default function LinkedInDenHaagPage() {
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
             <h4 className="text-xl font-semibold text-gray-900 mb-3">Speciaal voor Den Haag</h4>
             <p className="text-gray-700">
-              Of je nu werkt bij de ministeries, het Internationale Gerechtshof, in Bezuidenhout of aan de internationale corridor - 
-              als professional in de hofstad weet je hoe cruciaal een formele en professionele LinkedIn aanwezigheid is. 
-              In de diplomatieke en bestuurlijke wereld van Den Haag telt je eerste indruk extra zwaar.
+              Of je nu freelancer bent, bij een mkb-bedrijf werkt, of ambities hebt in je carrière - 
+              als professional uit Den Haag weet je dat een sterke LinkedIn aanwezigheid essentieel is. 
+              Een professionele profielfoto kan het verschil maken bij sollicitaties, netwerken en nieuwe opdrachten.
             </p>
           </div>
 

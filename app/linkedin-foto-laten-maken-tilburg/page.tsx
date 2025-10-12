@@ -531,10 +531,9 @@ export default function LinkedInTilburgPage() {
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
             <h4 className="text-xl font-semibold text-gray-900 mb-3">Speciaal voor Tilburg</h4>
             <p className="text-gray-700">
-              Of je nu werkt bij Tilburg University, in de logistieke sector, bij een modern industriebedrijf of als ondernemer - 
-              als professional in Brabant's derde stad weet je dat een sterke LinkedIn aanwezigheid cruciaal is. 
-              In Tilburg's groeiende zakelijke ecosysteem met focus op onderwijs, logistiek en innovatie, 
-              is je LinkedIn profiel de sleutel tot nieuwe kansen in Zuid-Nederland.
+              Als professional uit Tilburg weet je dat een goede eerste indruk belangrijk is. 
+              Of je nu solliciteert, freelance werk doet, of je netwerk uitbreidt - 
+              een professionele LinkedIn foto helpt je om serieus genomen te worden en op te vallen.
             </p>
           </div>
 

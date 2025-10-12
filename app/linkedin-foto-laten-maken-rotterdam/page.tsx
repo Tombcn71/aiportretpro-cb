@@ -531,10 +531,9 @@ export default function LinkedInRotterdamPage() {
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
             <h4 className="text-xl font-semibold text-gray-900 mb-3">Speciaal voor Rotterdam</h4>
             <p className="text-gray-700">
-              Of je nu werkt in de haven, bij het Weena, in Rotterdam Noord of aan de Coolsingel - 
-              als professional in de havenstad weet je dat een sterke LinkedIn aanwezigheid essentieel is. 
-              In Rotterdam's no-nonsense zakenwereld waarin netwerken en zichtbaarheid cruciaal zijn, 
-              is je LinkedIn foto vaak je eerste kans om indruk te maken.
+              Als Rotterdammer weet je: geen gezeur, gewoon doen. 
+              Of je nu freelancer bent, zzp'er, of werkt bij een bedrijf - een professionele LinkedIn foto 
+              helpt je om op te vallen bij werkgevers en nieuwe klanten. Snel geregeld, geen gedoe.
             </p>
           </div>
 

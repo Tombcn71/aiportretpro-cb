@@ -531,10 +531,9 @@ export default function LinkedInEindhovenPage() {
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
             <h4 className="text-xl font-semibold text-gray-900 mb-3">Speciaal voor Eindhoven</h4>
             <p className="text-gray-700">
-              Of je nu werkt op de High Tech Campus, bij ASML, Philips, in Strijp-S of het centrum - 
-              als professional in de Brainport regio weet je dat innovatie en netwerken hand in hand gaan. 
-              In Eindhoven's tech-ecosysteem waar internationale bedrijven en startups samenkomen, 
-              is je LinkedIn profiel je visitekaartje in de innovatieve wereld.
+              Of je nu in de tech werkt, als zzp'er aan de slag bent, of gewoon een betere baan zoekt - 
+              in Eindhoven draait alles om netwerken en zichtbaar zijn. 
+              Een professionele LinkedIn foto helpt je om op te vallen bij recruiters en potentiële klanten.
             </p>
           </div>
 

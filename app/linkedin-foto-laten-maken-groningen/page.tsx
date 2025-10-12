@@ -531,10 +531,9 @@ export default function LinkedInGroningenPage() {
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
             <h4 className="text-xl font-semibold text-gray-900 mb-3">Speciaal voor Groningen</h4>
             <p className="text-gray-700">
-              Of je nu werkt bij de Rijksuniversiteit, in de energie-sector, bij een startup in de stad of in de groeiende tech-community - 
-              als professional in de noordelijke hoofdstad weet je dat netwerken en zichtbaarheid essentieel zijn. 
-              In Groningen's internationale en innovatieve zakelijke klimaat is je LinkedIn profiel 
-              je digitale visitekaartje voor contacten in heel Noord-Nederland en daarbuiten.
+              Als professional in Groningen weet je dat een sterke LinkedIn aanwezigheid belangrijk is voor je carrière. 
+              Of je nu een nieuwe baan zoekt, als zzp'er werkt, of gewoon je netwerk wilt uitbreiden - 
+              een professionele profielfoto maakt het verschil bij sollicitaties en nieuwe opdrachten.
             </p>
           </div>
 

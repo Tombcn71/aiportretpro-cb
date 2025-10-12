@@ -529,9 +529,9 @@ export default function LinkedInUtrechtPage() {
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
             <h4 className="text-xl font-semibold text-gray-900 mb-3">Speciaal voor Utrecht</h4>
             <p className="text-gray-700">
-              Of je nu werkt in het centrum, Leidsche Rijn, Noord of Oost - 
-              als professional in het hart van Nederland weet je hoe cruciaal een sterke LinkedIn aanwezigheid is. 
-              Jouw LinkedIn profiel is je digitale visitekaartje in heel Utrecht en de Randstad.
+              Als professional uit Utrecht weet je dat LinkedIn belangrijk is voor je carrière. 
+              Of je nu solliciteert, als freelancer werkt, of gewoon meer zichtbaarheid wilt - 
+              een professionele profielfoto zorgt dat je serieus genomen wordt door werkgevers en klanten.
             </p>
           </div>
 
