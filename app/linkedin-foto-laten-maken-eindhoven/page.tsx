@@ -528,6 +528,16 @@ export default function LinkedInEindhovenPage() {
             Zoek je een professionele LinkedIn foto Eindhoven? Als tech hoofdstad van Europa heeft Eindhoven duizenden professionals die een sterke LinkedIn aanwezigheid nodig hebben. Van ASML engineers tot Philips innovators - een zakelijk portret Eindhoven is essentieel voor je carrière in Brainport. Onze LinkedIn fotoshoot Eindhoven service helpt tech professionals hun beste professionele kant tonen.
           </p>
 
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
+            <h4 className="text-xl font-semibold text-gray-900 mb-3">Speciaal voor Eindhoven</h4>
+            <p className="text-gray-700">
+              Of je nu werkt op de High Tech Campus, bij ASML, Philips, in Strijp-S of het centrum - 
+              als professional in de Brainport regio weet je dat innovatie en netwerken hand in hand gaan. 
+              In Eindhoven's tech-ecosysteem waar internationale bedrijven en startups samenkomen, 
+              is je LinkedIn profiel je visitekaartje in de innovatieve wereld.
+            </p>
+          </div>
+
           <h3 className="text-2xl font-bold text-gray-900 mb-4">Profielfoto LinkedIn Eindhoven: Waarom het belangrijk is</h3>
           
           <p className="text-gray-700 leading-relaxed mb-6">

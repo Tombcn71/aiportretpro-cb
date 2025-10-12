@@ -528,6 +528,16 @@ export default function LinkedInGroningenPage() {
             Groningen staat bekend als het belangrijke Nederlandse stad, waar dagelijks duizenden professionals werken aan hun carrière. In deze dynamische zakelijke omgeving is je LinkedIn profiel cruciaal voor netwerken, carrièrekansen en bedrijfsgroei. Een professionele LinkedIn foto kan het verschil maken tussen opvallen of onderbelicht blijven in de Groningense zakenwereld.
           </p>
 
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
+            <h4 className="text-xl font-semibold text-gray-900 mb-3">Speciaal voor Groningen</h4>
+            <p className="text-gray-700">
+              Of je nu werkt bij de Rijksuniversiteit, in de energie-sector, bij een startup in de stad of in de groeiende tech-community - 
+              als professional in de noordelijke hoofdstad weet je dat netwerken en zichtbaarheid essentieel zijn. 
+              In Groningen's internationale en innovatieve zakelijke klimaat is je LinkedIn profiel 
+              je digitale visitekaartje voor contacten in heel Noord-Nederland en daarbuiten.
+            </p>
+          </div>
+
           <h3 className="text-2xl font-bold text-gray-900 mb-4">Waarom een professionele LinkedIn foto essentieel is in Groningen</h3>
           
           <p className="text-gray-700 leading-relaxed mb-6">

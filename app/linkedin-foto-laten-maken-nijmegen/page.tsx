@@ -528,6 +528,16 @@ export default function LinkedInNijmegenPage() {
             Nijmegen staat bekend als het belangrijke Nederlandse stad, waar dagelijks duizenden professionals werken aan hun carrière. In deze dynamische zakelijke omgeving is je LinkedIn profiel cruciaal voor netwerken, carrièrekansen en bedrijfsgroei. Een professionele LinkedIn foto kan het verschil maken tussen opvallen of onderbelicht blijven in de Nijmegense zakenwereld.
           </p>
 
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
+            <h4 className="text-xl font-semibold text-gray-900 mb-3">Speciaal voor Nijmegen</h4>
+            <p className="text-gray-700">
+              Of je nu werkt bij de Radboud Universiteit, in de zorg, bij NovioTech Campus of in de culturele sector - 
+              als professional in Nederland's oudste stad combineer je historisch bewustzijn met moderne innovatie. 
+              In Nijmegen's academische en progressieve zakelijke omgeving waar kennis en samenwerking centraal staan, 
+              is je LinkedIn profiel essentieel voor zichtbaarheid in de regio Arnhem-Nijmegen en daarbuiten.
+            </p>
+          </div>
+
           <h3 className="text-2xl font-bold text-gray-900 mb-4">Waarom een professionele LinkedIn foto essentieel is in Nijmegen</h3>
           
           <p className="text-gray-700 leading-relaxed mb-6">

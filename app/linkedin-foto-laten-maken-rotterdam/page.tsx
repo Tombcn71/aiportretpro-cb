@@ -528,6 +528,16 @@ export default function LinkedInRotterdamPage() {
             Zoek je een professionele LinkedIn foto Rotterdam? Als Europa's grootste havenstad heeft Rotterdam duizenden professionals in maritiem, logistiek en financiën die een sterke LinkedIn aanwezigheid nodig hebben. Een zakelijk portret Rotterdam is essentieel voor je carrière in deze internationale handelsmetropool. Onze LinkedIn fotoshoot Rotterdam service helpt professionals hun no-nonsense mentaliteit tonen.
           </p>
 
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
+            <h4 className="text-xl font-semibold text-gray-900 mb-3">Speciaal voor Rotterdam</h4>
+            <p className="text-gray-700">
+              Of je nu werkt in de haven, bij het Weena, in Rotterdam Noord of aan de Coolsingel - 
+              als professional in de havenstad weet je dat een sterke LinkedIn aanwezigheid essentieel is. 
+              In Rotterdam's no-nonsense zakenwereld waarin netwerken en zichtbaarheid cruciaal zijn, 
+              is je LinkedIn foto vaak je eerste kans om indruk te maken.
+            </p>
+          </div>
+
           <h3 className="text-2xl font-bold text-gray-900 mb-4">Profielfoto LinkedIn Rotterdam: Waarom het cruciaal is</h3>
           
           <p className="text-gray-700 leading-relaxed mb-6">

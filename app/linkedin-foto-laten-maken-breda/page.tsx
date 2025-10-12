@@ -528,6 +528,16 @@ export default function LinkedInBredaPage() {
             Zoek je een professionele LinkedIn foto Breda? Als Parel van het Zuiden heeft Breda duizenden professionals die Brabantse gastvrijheid combineren met zakelijk ondernemerschap. Een zakelijk portret Breda is essentieel voor je carrière in deze warme maar professionele omgeving. Onze LinkedIn fotoshoot Breda service helpt professionals hun Brabantse ondernemersgeest tonen.
           </p>
 
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
+            <h4 className="text-xl font-semibold text-gray-900 mb-3">Speciaal voor Breda</h4>
+            <p className="text-gray-700">
+              Of je nu werkt in het historische centrum, bij bedrijven in Breda-Noord, of in een van de vele groeiende sectoren - 
+              als professional in de Parel van het Zuiden combineer je Brabantse gastvrijheid met zakelijk professionalisme. 
+              In Breda's warme maar ambitieuze zakelijke klimaat waar persoonlijk contact en vertrouwen centraal staan, 
+              is je LinkedIn profiel je digitale introductie voordat je elkaar persoonlijk ontmoet.
+            </p>
+          </div>
+
           <h3 className="text-2xl font-bold text-gray-900 mb-4">Profielfoto LinkedIn Breda: Waarom het cruciaal is</h3>
           
           <p className="text-gray-700 leading-relaxed mb-6">

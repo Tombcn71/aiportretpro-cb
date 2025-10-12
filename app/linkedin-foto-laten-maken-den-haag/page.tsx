@@ -530,6 +530,15 @@ export default function LinkedInDenHaagPage() {
             Den Haag staat bekend als de politieke hoofdstad van Nederland en het internationale centrum van recht en diplomatie. Hier werken dagelijks duizenden professionals bij ministeries, het Internationale Gerechtshof, en talloze internationale organisaties. In deze formele zakelijke omgeving is je LinkedIn profiel cruciaal voor diplomatieke netwerken en bestuurlijke carrièrekansen.
           </p>
 
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
+            <h4 className="text-xl font-semibold text-gray-900 mb-3">Speciaal voor Den Haag</h4>
+            <p className="text-gray-700">
+              Of je nu werkt bij de ministeries, het Internationale Gerechtshof, in Bezuidenhout of aan de internationale corridor - 
+              als professional in de hofstad weet je hoe cruciaal een formele en professionele LinkedIn aanwezigheid is. 
+              In de diplomatieke en bestuurlijke wereld van Den Haag telt je eerste indruk extra zwaar.
+            </p>
+          </div>
+
           <h3 className="text-2xl font-bold text-gray-900 mb-4">Waarom LinkedIn foto's essentieel zijn in Den Haag's internationale wereld</h3>
           
           <p className="text-gray-700 leading-relaxed mb-6">

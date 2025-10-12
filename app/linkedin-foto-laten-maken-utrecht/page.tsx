@@ -140,9 +140,7 @@ export default function LinkedInUtrechtPage() {
           <span className="block">LinkedIn Foto Laten Maken Utrecht? </span>
           <span className="text-[#0077B5] block">Dit kan nu ook online zonder fotograaf!</span>
         </h1>
-        <p className="text-gray-500 text-lg mb-6 font-light italic">Ideaal voor professionals in Utrecht's centrale zakendistrict - van CS tot Papendorp.
-
-</p>
+        <p className="text-gray-500 text-lg mb-6 font-light italic">Even wat foto uploaden, dat is alles.</p>
 
         <div className="text-md md:text-lg text-gray-600 mb-8 max-w-2xl mx-auto text-center">
           <div className="inline-grid grid-cols-[auto_1fr] gap-x-2 items-start text-start justify-center">
@@ -527,6 +525,15 @@ export default function LinkedInUtrechtPage() {
           <p className="text-gray-700 leading-relaxed mb-6">
             Zoek je een professionele LinkedIn foto Utrecht? Als hart van Nederland heeft Utrecht duizenden professionals in media, financiën en consultancy die een sterke LinkedIn aanwezigheid nodig hebben. Een zakelijk portret Utrecht is essentieel voor je carrière in deze centrale netwerkstad. Onze LinkedIn fotoshoot Utrecht service helpt professionals hun connectiviteit en toegankelijkheid tonen.
           </p>
+
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
+            <h4 className="text-xl font-semibold text-gray-900 mb-3">Speciaal voor Utrecht</h4>
+            <p className="text-gray-700">
+              Of je nu werkt in het centrum, Leidsche Rijn, Noord of Oost - 
+              als professional in het hart van Nederland weet je hoe cruciaal een sterke LinkedIn aanwezigheid is. 
+              Jouw LinkedIn profiel is je digitale visitekaartje in heel Utrecht en de Randstad.
+            </p>
+          </div>
 
           <h3 className="text-2xl font-bold text-gray-900 mb-4">Profielfoto LinkedIn Utrecht: Waarom het belangrijk is</h3>
           

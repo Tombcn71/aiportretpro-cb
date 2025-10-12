@@ -528,6 +528,16 @@ export default function LinkedInTilburgPage() {
             Tilburg staat bekend als het belangrijke Nederlandse stad, waar dagelijks duizenden professionals werken aan hun carrière. In deze dynamische zakelijke omgeving is je LinkedIn profiel cruciaal voor netwerken, carrièrekansen en bedrijfsgroei. Een professionele LinkedIn foto kan het verschil maken tussen opvallen of onderbelicht blijven in de Tilburgse zakenwereld.
           </p>
 
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
+            <h4 className="text-xl font-semibold text-gray-900 mb-3">Speciaal voor Tilburg</h4>
+            <p className="text-gray-700">
+              Of je nu werkt bij Tilburg University, in de logistieke sector, bij een modern industriebedrijf of als ondernemer - 
+              als professional in Brabant's derde stad weet je dat een sterke LinkedIn aanwezigheid cruciaal is. 
+              In Tilburg's groeiende zakelijke ecosysteem met focus op onderwijs, logistiek en innovatie, 
+              is je LinkedIn profiel de sleutel tot nieuwe kansen in Zuid-Nederland.
+            </p>
+          </div>
+
           <h3 className="text-2xl font-bold text-gray-900 mb-4">Waarom een professionele LinkedIn foto essentieel is in Tilburg</h3>
           
           <p className="text-gray-700 leading-relaxed mb-6">

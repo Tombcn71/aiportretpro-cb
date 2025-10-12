@@ -141,17 +141,7 @@ export default function LinkedInAmsterdamPage() {
           <span className="block">LinkedIn Foto Laten Maken Amsterdam? </span>
           <span className="text-[#0077B5] block">Dit kan nu ook online zonder fotograaf!</span>
         </h1>
-        <p className="text-gray-500 text-lg mb-6 font-light italic">Perfect voor professionals in Amsterdam's zakelijke hart - van Zuidas tot Centrum.
-
-</p>
-        
-        <div className="bg-blue-50 p-4 rounded-lg mb-6 max-w-2xl mx-auto">
-          <p className="text-gray-700 text-sm">
-            <strong>Speciaal voor Amsterdam:</strong> Of je nu werkt in de Zuidas, het Centrum, Noord of Oost - 
-            als professional in de hoofdstad weet je hoe cruciaal een sterke LinkedIn aanwezigheid is. 
-            Jouw LinkedIn profiel is je digitale visitekaartje in heel Amsterdam.
-          </p>
-        </div>
+        <p className="text-gray-500 text-lg mb-6 font-light italic">Even wat foto uploaden, dat is alles.</p>
 
         <div className="text-md md:text-lg text-gray-600 mb-8 max-w-2xl mx-auto text-center">
           <div className="inline-grid grid-cols-[auto_1fr] gap-x-2 items-start text-start justify-center">
@@ -536,6 +526,15 @@ export default function LinkedInAmsterdamPage() {
           <p className="text-gray-700 leading-relaxed mb-6">
             Amsterdam staat bekend als het economische hart van Nederland, waar dagelijks duizenden professionals werken aan hun carrière. In deze dynamische zakelijke omgeving is je LinkedIn profiel cruciaal voor netwerken, carrièrekansen en bedrijfsgroei. Een professionele LinkedIn foto kan het verschil maken tussen opvallen of onderbelicht blijven in de Amsterdamse zakenwereld.
           </p>
+
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
+            <h4 className="text-xl font-semibold text-gray-900 mb-3">Speciaal voor Amsterdam</h4>
+            <p className="text-gray-700">
+              Of je nu werkt in de Zuidas, het Centrum, Noord of Oost - 
+              als professional in de hoofdstad weet je hoe cruciaal een sterke LinkedIn aanwezigheid is. 
+              Jouw LinkedIn profiel is je digitale visitekaartje in heel Amsterdam.
+            </p>
+          </div>
 
           <h3 className="text-2xl font-bold text-gray-900 mb-4">Waarom een professionele LinkedIn foto essentieel is in Amsterdam</h3>
           
