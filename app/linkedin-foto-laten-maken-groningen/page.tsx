@@ -537,6 +537,12 @@ export default function LinkedInGroningenPage() {
             </p>
           </div>
 
+          <h3 className="text-2xl font-bold text-gray-900 mb-4">LinkedIn foto Groningen: Slimme keuze voor Noord-Nederlandse professionals</h3>
+          
+          <p className="text-gray-700 leading-relaxed mb-6">
+            Groningen telt ruim 120.000 actieve LinkedIn gebruikers in onderwijs, energie en zorg. Als noordelijke professional weet je dat je soms harder moet werken voor zichtbaarheid dan Randstad-collega's. Een professionele LinkedIn foto is je eerste kans om indruk te maken op recruiters uit heel Nederland. Met AI fotografie betaal je €29 in plaats van de €165-200 die Groningse fotografen vragen, en je hebt binnen 15 minuten resultaat. Praktisch, betaalbaar, professioneel - typisch Gronings eigenlijk.
+          </p>
+
           <h3 className="text-2xl font-bold text-gray-900 mb-4">Waarom een professionele LinkedIn foto essentieel is in Groningen</h3>
           
           <p className="text-gray-700 leading-relaxed mb-6">

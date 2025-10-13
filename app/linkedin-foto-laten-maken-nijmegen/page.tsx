@@ -537,6 +537,12 @@ export default function LinkedInNijmegenPage() {
             </p>
           </div>
 
+          <h3 className="text-2xl font-bold text-gray-900 mb-4">Nijmegen LinkedIn foto: Slimme investering voor je professionele toekomst</h3>
+          
+          <p className="text-gray-700 leading-relaxed mb-6">
+            Nijmegen heeft ongeveer 90.000 actieve LinkedIn gebruikers in onderwijs, zorg en technologie. Als oudste stad van Nederland combineert Nijmegen traditie met vooruitstrevendheid - perfect voor AI fotografie. Waar je bij traditionele Nijmeegse fotografen €160-185 kwijt bent voor een sessie, krijg je met AI voor €29 direct toegang tot 40 professionele foto's. Upload thuis je foto's, wacht een kwartiertje tijdens je koffiepauze, en je bent klaar. Ideaal voor professionals die hun tijd liever besteden aan hun vakgebied dan aan fotoshoots.
+          </p>
+
           <h3 className="text-2xl font-bold text-gray-900 mb-4">Waarom een professionele LinkedIn foto essentieel is in Nijmegen</h3>
           
           <p className="text-gray-700 leading-relaxed mb-6">

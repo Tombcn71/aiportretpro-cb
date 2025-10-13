@@ -537,6 +537,12 @@ export default function LinkedInEindhovenPage() {
             </p>
           </div>
 
+          <h3 className="text-2xl font-bold text-gray-900 mb-4">Eindhoven LinkedIn fotoshoot: Innovatie in portretfotografie</h3>
+          
+          <p className="text-gray-700 leading-relaxed mb-6">
+            Eindhoven's 180.000+ LinkedIn professionals in tech, engineering en design begrijpen innovatie. Daarom omarmen ze AI fotografie: moderne technologie die tijd en geld bespaart. Waar traditionele fotografen in Eindhoven €170-210 rekenen voor een fotoshoot, krijg je met AI voor €29 direct 40 professionele foto's. Perfect voor Eindhovenaren die waarde hechten aan efficiëntie en resultaat. Upload je foto's tussen twee projecten door en focus op wat je écht goed kunt.
+          </p>
+
           <h3 className="text-2xl font-bold text-gray-900 mb-4">Profielfoto LinkedIn Eindhoven: Waarom het belangrijk is</h3>
           
           <p className="text-gray-700 leading-relaxed mb-6">

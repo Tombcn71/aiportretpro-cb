@@ -537,6 +537,12 @@ export default function LinkedInAlmerePage() {
             </p>
           </div>
 
+          <h3 className="text-2xl font-bold text-gray-900 mb-4">Almere LinkedIn fotoshoot: Moderne oplossing voor een moderne stad</h3>
+          
+          <p className="text-gray-700 leading-relaxed mb-6">
+            Almere's 85.000 LinkedIn professionals zijn vaak jong, ambitieus en tech-savvy. Als een van Nederlands modernste steden past AI fotografie perfect bij Almere: vooruitstrevend, efficiënt en betaalbaar. Voor €29 krijg je 40 professionele foto's - vergelijk dat met de €155-185 die traditionele fotografen rekenen. Geen reis naar Amsterdam of Utrecht nodig, gewoon thuis je foto's uploaden en binnen een kwartier klaar. Perfect voor Almeerders die hun tijd en geld slim willen besteden.
+          </p>
+
           <h3 className="text-2xl font-bold text-gray-900 mb-4">Profielfoto LinkedIn Almere: Waarom het cruciaal is</h3>
           
           <p className="text-gray-700 leading-relaxed mb-6">

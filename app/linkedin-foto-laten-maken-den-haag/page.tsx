@@ -539,6 +539,12 @@ export default function LinkedInDenHaagPage() {
             </p>
           </div>
 
+          <h3 className="text-2xl font-bold text-gray-900 mb-4">LinkedIn foto Den Haag: Professionele uitstraling voor ambitieuze Hagenaars</h3>
+          
+          <p className="text-gray-700 leading-relaxed mb-6">
+            Met meer dan 250.000 professionals op LinkedIn is Den Haag een belangrijke zakelijke stad voor overheid, consultancy en internationale organisaties. Haagse professionals waarderen kwaliteit en professionaliteit. AI fotografie biedt beide: studio-kwaliteit foto's zonder de €185-220 die traditionele Haagse fotografen vragen. Upload je foto's, ontvang binnen 15 minuten 40 professionele variaties, en investeer je tijd in wat echt belangrijk is: je carrière opbouwen.
+          </p>
+
           <h3 className="text-2xl font-bold text-gray-900 mb-4">Waarom LinkedIn foto's essentieel zijn in Den Haag's internationale wereld</h3>
           
           <p className="text-gray-700 leading-relaxed mb-6">

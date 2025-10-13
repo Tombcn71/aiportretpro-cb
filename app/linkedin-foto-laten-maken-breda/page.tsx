@@ -537,6 +537,12 @@ export default function LinkedInBredaPage() {
             </p>
           </div>
 
+          <h3 className="text-2xl font-bold text-gray-900 mb-4">LinkedIn foto Breda: Brabantse gastvrijheid meets moderne technologie</h3>
+          
+          <p className="text-gray-700 leading-relaxed mb-6">
+            Breda's 95.000 LinkedIn professionals combineren Brabantse warmte met zakelijk professionalisme. In een stad waar persoonlijke relaties tellen, begint die connectie vaak online. Met AI fotografie krijg je voor €29 meteen 40 professionele foto's - een fractie van de €165-190 die Bredase fotografen vragen. Upload je foto's als het jou uitkomt, ontvang binnen 15 minuten resultaat, en investeer de rest van je tijd in het opbouwen van échte connecties. Dat is toch waar het in Breda om draait?
+          </p>
+
           <h3 className="text-2xl font-bold text-gray-900 mb-4">Profielfoto LinkedIn Breda: Waarom het cruciaal is</h3>
           
           <p className="text-gray-700 leading-relaxed mb-6">

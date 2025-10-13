@@ -537,6 +537,12 @@ export default function LinkedInTilburgPage() {
             </p>
           </div>
 
+          <h3 className="text-2xl font-bold text-gray-900 mb-4">Tilburg LinkedIn foto: Betaalbare kwaliteit voor Brabantse professionals</h3>
+          
+          <p className="text-gray-700 leading-relaxed mb-6">
+            Met ongeveer 100.000 LinkedIn professionals in logistiek, onderwijs en productie kent Tilburg een groeiende zakelijke community. Tilburgers waarderen kwaliteit voor een eerlijke prijs. AI fotografie levert precies dat: professionele studio-kwaliteit voor €29, terwijl traditionele fotografen in Tilburg €160-195 vragen. Je uploadt 6 foto's, wacht 15 minuten, en ontvangt 40 professionele variaties. Ideaal voor drukke professionals die niet de hele dag kwijt willen zijn aan een fotoshoot.
+          </p>
+
           <h3 className="text-2xl font-bold text-gray-900 mb-4">Waarom een professionele LinkedIn foto essentieel is in Tilburg</h3>
           
           <p className="text-gray-700 leading-relaxed mb-6">
