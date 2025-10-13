@@ -387,6 +387,138 @@ export default function LinkedInProfielFotoPage() {
         </div>
       </section>
 
+      {/* City Pages Section - Internal Links for SEO */}
+      <section className="py-12 md:py-16 bg-gray-50">
+        <div className="container mx-auto px-4">
+          <div className="max-w-6xl mx-auto">
+            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4 text-center">
+              LinkedIn Foto Laten Maken in Jouw Stad
+            </h2>
+            <p className="text-center text-gray-600 mb-8 max-w-2xl mx-auto">
+              Vind lokale informatie, prijzen en tips voor jouw stad. Elke stad heeft unieke LinkedIn professionals met specifieke behoeften.
+            </p>
+            
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+              <Link 
+                href="/linkedin-foto-laten-maken-amsterdam" 
+                className="group bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-all hover:scale-105 border border-gray-200"
+              >
+                <div className="text-center">
+                  <div className="text-2xl mb-2">🏛️</div>
+                  <h3 className="font-semibold text-gray-900 group-hover:text-[#0077B5]">Amsterdam</h3>
+                  <p className="text-sm text-gray-500 mt-1">450k+ professionals</p>
+                </div>
+              </Link>
+
+              <Link 
+                href="/linkedin-foto-laten-maken-rotterdam" 
+                className="group bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-all hover:scale-105 border border-gray-200"
+              >
+                <div className="text-center">
+                  <div className="text-2xl mb-2">⚓</div>
+                  <h3 className="font-semibold text-gray-900 group-hover:text-[#0077B5]">Rotterdam</h3>
+                  <p className="text-sm text-gray-500 mt-1">300k+ professionals</p>
+                </div>
+              </Link>
+
+              <Link 
+                href="/linkedin-foto-laten-maken-den-haag" 
+                className="group bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-all hover:scale-105 border border-gray-200"
+              >
+                <div className="text-center">
+                  <div className="text-2xl mb-2">🏛️</div>
+                  <h3 className="font-semibold text-gray-900 group-hover:text-[#0077B5]">Den Haag</h3>
+                  <p className="text-sm text-gray-500 mt-1">250k+ professionals</p>
+                </div>
+              </Link>
+
+              <Link 
+                href="/linkedin-foto-laten-maken-utrecht" 
+                className="group bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-all hover:scale-105 border border-gray-200"
+              >
+                <div className="text-center">
+                  <div className="text-2xl mb-2">🚂</div>
+                  <h3 className="font-semibold text-gray-900 group-hover:text-[#0077B5]">Utrecht</h3>
+                  <p className="text-sm text-gray-500 mt-1">200k+ professionals</p>
+                </div>
+              </Link>
+
+              <Link 
+                href="/linkedin-foto-laten-maken-eindhoven" 
+                className="group bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-all hover:scale-105 border border-gray-200"
+              >
+                <div className="text-center">
+                  <div className="text-2xl mb-2">💡</div>
+                  <h3 className="font-semibold text-gray-900 group-hover:text-[#0077B5]">Eindhoven</h3>
+                  <p className="text-sm text-gray-500 mt-1">180k+ professionals</p>
+                </div>
+              </Link>
+
+              <Link 
+                href="/linkedin-foto-laten-maken-groningen" 
+                className="group bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-all hover:scale-105 border border-gray-200"
+              >
+                <div className="text-center">
+                  <div className="text-2xl mb-2">🌾</div>
+                  <h3 className="font-semibold text-gray-900 group-hover:text-[#0077B5]">Groningen</h3>
+                  <p className="text-sm text-gray-500 mt-1">120k+ professionals</p>
+                </div>
+              </Link>
+
+              <Link 
+                href="/linkedin-foto-laten-maken-tilburg" 
+                className="group bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-all hover:scale-105 border border-gray-200"
+              >
+                <div className="text-center">
+                  <div className="text-2xl mb-2">🏭</div>
+                  <h3 className="font-semibold text-gray-900 group-hover:text-[#0077B5]">Tilburg</h3>
+                  <p className="text-sm text-gray-500 mt-1">100k+ professionals</p>
+                </div>
+              </Link>
+
+              <Link 
+                href="/linkedin-foto-laten-maken-breda" 
+                className="group bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-all hover:scale-105 border border-gray-200"
+              >
+                <div className="text-center">
+                  <div className="text-2xl mb-2">🎭</div>
+                  <h3 className="font-semibold text-gray-900 group-hover:text-[#0077B5]">Breda</h3>
+                  <p className="text-sm text-gray-500 mt-1">95k+ professionals</p>
+                </div>
+              </Link>
+
+              <Link 
+                href="/linkedin-foto-laten-maken-nijmegen" 
+                className="group bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-all hover:scale-105 border border-gray-200"
+              >
+                <div className="text-center">
+                  <div className="text-2xl mb-2">🏰</div>
+                  <h3 className="font-semibold text-gray-900 group-hover:text-[#0077B5]">Nijmegen</h3>
+                  <p className="text-sm text-gray-500 mt-1">90k+ professionals</p>
+                </div>
+              </Link>
+
+              <Link 
+                href="/linkedin-foto-laten-maken-almere" 
+                className="group bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-all hover:scale-105 border border-gray-200"
+              >
+                <div className="text-center">
+                  <div className="text-2xl mb-2">🏙️</div>
+                  <h3 className="font-semibold text-gray-900 group-hover:text-[#0077B5]">Almere</h3>
+                  <p className="text-sm text-gray-500 mt-1">85k+ professionals</p>
+                </div>
+              </Link>
+            </div>
+
+            <div className="mt-8 text-center">
+              <p className="text-gray-600 text-sm">
+                Elke stad heeft unieke LinkedIn professionals. Bekijk stad-specifieke prijzen, statistieken en tips.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* FAQ Section - LinkedIn Optimized */}
       <section id="faq" className="container mx-auto px-4 py-12 md:py-16 bg-white">
         <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-center mb-4">LinkedIn Profielfoto FAQ</h2>
