@@ -536,6 +536,12 @@ export default function LinkedInAmsterdamPage() {
             </p>
           </div>
 
+          <h3 className="text-2xl font-bold text-gray-900 mb-4">LinkedIn foto Amsterdam: Waarom duizenden Amsterdammers AI kiezen</h3>
+          
+          <p className="text-gray-700 leading-relaxed mb-6">
+            Meer dan 450.000 professionals in Amsterdam gebruiken LinkedIn actief voor hun carrière. Met zoveel concurrentie is een professionele profielfoto niet langer optioneel - het is essentieel. Traditionele fotoshoots in Amsterdam kosten gemiddeld €175-250 en vereisen reistijd door de drukke stad. Daarom kiezen steeds meer Amsterdamse professionals voor AI fotografie: binnen 15 minuten professionele resultaten, voor een fractie van de prijs.
+          </p>
+
           <h3 className="text-2xl font-bold text-gray-900 mb-4">Waarom een professionele LinkedIn foto essentieel is in Amsterdam</h3>
           
           <p className="text-gray-700 leading-relaxed mb-6">

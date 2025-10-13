@@ -535,6 +535,12 @@ export default function LinkedInUtrechtPage() {
             </p>
           </div>
 
+          <h3 className="text-2xl font-bold text-gray-900 mb-4">LinkedIn fotoshoot Utrecht: Centraal gelegen, online bereikbaar</h3>
+          
+          <p className="text-gray-700 leading-relaxed mb-6">
+            Utrecht, als hart van Nederland met meer dan 200.000 LinkedIn professionals, is een knooppunt voor consultancy, financiën en media. Utrechters waarderen gemak en bereikbaarheid - precies waarom AI fotografie zo populair is geworden. Geen parkeerperikelen bij Utrecht CS, geen reizen door de drukke binnenstad. Gewoon thuis je foto's maken en binnen 15 minuten 40 professionele LinkedIn foto's ontvangen. Perfect voor professionals die hun tijd nuttig willen besteden.
+          </p>
+
           <h3 className="text-2xl font-bold text-gray-900 mb-4">Profielfoto LinkedIn Utrecht: Waarom het belangrijk is</h3>
           
           <p className="text-gray-700 leading-relaxed mb-6">

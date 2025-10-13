@@ -537,6 +537,12 @@ export default function LinkedInRotterdamPage() {
             </p>
           </div>
 
+          <h3 className="text-2xl font-bold text-gray-900 mb-4">Rotterdam LinkedIn foto: No-nonsense oplossing voor drukke professionals</h3>
+          
+          <p className="text-gray-700 leading-relaxed mb-6">
+            Rotterdam telt meer dan 300.000 actieve LinkedIn gebruikers in logistiek, maritiem en zakelijke dienstverlening. De Rotterdamse mentaliteit is duidelijk: niet lullen maar poetsen. Daarom werkt AI fotografie perfect voor Rotterdammers - upload 6 foto's, 15 minuten wachten, klaar. Geen gedoe met fotostudio's of afspraken plannen. Voor €29 krijg je 40 professionele foto's, 6x goedkoper dan traditionele fotografen die €175-225 vragen.
+          </p>
+
           <h3 className="text-2xl font-bold text-gray-900 mb-4">Profielfoto LinkedIn Rotterdam: Waarom het cruciaal is</h3>
           
           <p className="text-gray-700 leading-relaxed mb-6">
