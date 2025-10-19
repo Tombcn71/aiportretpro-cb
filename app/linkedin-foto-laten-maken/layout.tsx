@@ -26,8 +26,9 @@ export const metadata: Metadata = {
     description: "Probeer onze online AI fotoshoot: 40 professionele foto's in 15 min. 6x goedkoper dan een traditionele fotograaf!",
     images: ["https://aiportretpro.nl/images/professional-woman-1.jpg"],
   },
-  alternates: {
-    canonical: "https://aiportretpro.nl/linkedin-foto-laten-maken",
+  robots: {
+    index: true,
+    follow: true,
   },
 }
 
