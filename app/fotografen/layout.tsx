@@ -15,6 +15,9 @@ export const metadata: Metadata = {
     title: 'Lokale Fotografen in Nederland - 10 Grootste Steden',
     description: 'Vind geverifieerde fotografen in de grootste Nederlandse steden.',
   },
+  alternates: {
+    canonical: 'https://aiportretpro.nl/fotografen'
+  }
 }
 
 export default function Layout({

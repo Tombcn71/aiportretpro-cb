@@ -17,6 +17,9 @@ export const metadata: Metadata = {
     title: "Prijzen - Professionele zakelijke foto's voor €29 | AI Portret Pro",
     description: "Zakelijke fotoshoot voor slechts €29. 6x goedkoper dan traditionele fotografen. 40 professionele AI portretfoto's in 15 minuten.",
   },
+  alternates: {
+    canonical: "https://aiportretpro.nl/pricing",
+  },
   robots: {
     index: true,
     follow: true,

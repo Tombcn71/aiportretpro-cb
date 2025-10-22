@@ -1,20 +1,53 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-  typescript: {
-    ignoreBuildErrors: true,
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'sdbooth2-production.s3.amazonaws.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'www.aiheadshots.nl',
+      },
+    ],
   },
   swcMinify: true,
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
   },
-  images: {
-    unoptimized: false,
-    formats: ['image/webp', 'image/avif'],
-    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
-    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+  async redirects() {
+    return [
+      {
+        source: '/linkedin-profielfoto',
+        destination: '/linkedin-foto-laten-maken',
+        permanent: true, // 301 redirect
+      },
+      {
+        source: '/pricing',
+        has: [
+          {
+            type: 'query',
+            key: 'source',
+          },
+        ],
+        destination: '/pricing',
+        permanent: false, // Keep query params but don't index separately
+      },
+    ]
+  },
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: [
+          {
+            key: 'X-Robots-Tag',
+            value: 'index, follow',
+          },
+        ],
+      },
+    ]
   },
 }
 

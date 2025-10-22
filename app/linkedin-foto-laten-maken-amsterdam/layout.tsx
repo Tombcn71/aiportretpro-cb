@@ -16,6 +16,9 @@ export const metadata: Metadata = {
     title: "LinkedIn Foto Laten Maken Amsterdam? | AI Portret Pro €29",
     description: "Probeer onze online AI fotoshoot: 40 professionele foto's in 15 min. 6x goedkoper dan een traditionele fotograaf!",
   },
+  alternates: {
+    canonical: "https://aiportretpro.nl/linkedin-foto-laten-maken-amsterdam",
+  },
   robots: {
     index: true,
     follow: true,

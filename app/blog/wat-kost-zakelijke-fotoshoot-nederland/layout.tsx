@@ -17,6 +17,9 @@ export const metadata: Metadata = {
     title: 'Wat kost een zakelijke fotoshoot in Nederland? [Complete Prijsgids 2025]',
     description: 'Onderzoek van 387 Nederlandse fotografen toont gemiddelde kosten van €175 voor zakelijke fotoshoots.',
   },
+  alternates: {
+    canonical: 'https://aiportretpro.nl/blog/wat-kost-zakelijke-fotoshoot-nederland'
+  }
 }
 
 export default function Layout({

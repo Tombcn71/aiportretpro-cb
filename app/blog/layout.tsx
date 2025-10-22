@@ -15,6 +15,9 @@ export const metadata: Metadata = {
     title: 'Blog & Fotografie Gidsen | AI Portret Pro',
     description: 'Praktische fotografie tips en gidsen voor professionals.',
   },
+  alternates: {
+    canonical: 'https://aiportretpro.nl/blog'
+  }
 }
 
 export default function Layout({
