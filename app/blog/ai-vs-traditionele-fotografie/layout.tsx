@@ -17,9 +17,6 @@ export const metadata: Metadata = {
     title: 'AI fotografie vs traditionele fotografie: De eerlijke vergelijking',
     description: 'Objectieve vergelijking tussen AI-fotografie en traditionele fotoshoots.',
   },
-  alternates: {
-    canonical: 'https://aiportretpro.nl/blog/ai-vs-traditionele-fotografie'
-  }
 }
 
 export default function Layout({

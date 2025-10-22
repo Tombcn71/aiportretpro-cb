@@ -26,9 +26,6 @@ export const metadata: Metadata = {
     description: "Ontmoet Tom van Reijn, developer en AI-enthusiast achter AI Portret Pro. Met ervaring in de startup-wereld maakt hij professionele fotografie voor iedereen bereikbaar.",
     images: ["https://aiportretpro.nl/images/me.jpg"],
   },
-  alternates: {
-    canonical: "https://aiportretpro.nl/over-ons",
-  },
 }
 
 export default function OverOnsLayout({
