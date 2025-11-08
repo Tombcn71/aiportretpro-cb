@@ -67,6 +67,6 @@ export async function GET() {
     })
   } catch (error) {
     console.error("Debug astria flow error:", error)
-    return NextResponse.json({ error: "Failed to fetch debug data", details: error.message }, { status: 500 })
+    return NextResponse.json({ error: "Failed to fetch debug data", details: error instanceof Error ? error.message : String(error) }, { status: 500 })
   }
 }

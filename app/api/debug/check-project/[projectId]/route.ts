@@ -55,7 +55,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
           astriaStatus = { error: `HTTP ${response.status}` }
         }
       } catch (error) {
-        astriaStatus = { error: error.message }
+        astriaStatus = { error: error instanceof Error ? error.message : String(error) }
       }
     }
 
@@ -78,6 +78,6 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     })
   } catch (error) {
     console.error("Check project error:", error)
-    return NextResponse.json({ error: "Failed to check project", details: error.message }, { status: 500 })
+    return NextResponse.json({ error: "Failed to check project", details: error instanceof Error ? error.message : String(error) }, { status: 500 })
   }
 }

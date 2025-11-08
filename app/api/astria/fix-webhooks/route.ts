@@ -47,7 +47,7 @@ export async function POST() {
         text: await response.text(),
       }
     } catch (error) {
-      trainTest = { error: error.message }
+      trainTest = { error: error instanceof Error ? error.message : String(error) }
     }
 
     // Test prompt webhook
@@ -68,7 +68,7 @@ export async function POST() {
         text: await response.text(),
       }
     } catch (error) {
-      promptTest = { error: error.message }
+      promptTest = { error: error instanceof Error ? error.message : String(error) }
     }
 
     // Check recent webhook calls in logs (if we had a webhook_logs table)

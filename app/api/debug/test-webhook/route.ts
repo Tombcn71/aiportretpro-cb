@@ -29,6 +29,6 @@ export async function POST() {
     })
   } catch (error) {
     console.error("Test webhook error:", error)
-    return NextResponse.json({ error: "Failed to test webhook", details: error.message }, { status: 500 })
+    return NextResponse.json({ error: "Failed to test webhook", details: error instanceof Error ? error.message : String(error) }, { status: 500 })
   }
 }

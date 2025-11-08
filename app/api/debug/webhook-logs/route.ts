@@ -16,6 +16,6 @@ export async function GET() {
     })
   } catch (error) {
     console.error("Error fetching webhook logs:", error)
-    return NextResponse.json({ error: "Failed to fetch logs", details: error.message }, { status: 500 })
+    return NextResponse.json({ error: "Failed to fetch logs", details: error instanceof Error ? error.message : String(error) }, { status: 500 })
   }
 }

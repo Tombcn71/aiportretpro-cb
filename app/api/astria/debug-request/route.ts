@@ -81,7 +81,7 @@ export async function GET() {
           status: error.response?.status,
           statusText: error.response?.statusText,
           data: error.response?.data,
-          message: error.message,
+          message: error instanceof Error ? error.message : String(error),
           requestData: error.config?.data,
         },
         { status: 500 },

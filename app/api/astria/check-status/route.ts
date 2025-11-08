@@ -110,7 +110,7 @@ export async function POST() {
           astria_id: project.prediction_id,
           error: axios.isAxiosError(error)
             ? `${error.response?.status}: ${error.response?.statusText || error.message}`
-            : error.message,
+            : error instanceof Error ? error.message : String(error),
         })
       }
     }
