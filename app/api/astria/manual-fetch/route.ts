@@ -150,7 +150,7 @@ export async function POST(request: NextRequest) {
       {
         error: "Internal server error",
         details: error instanceof Error ? error.message : String(error),
-        stack: error.stack,
+        stack: error instanceof Error ? error.stack : undefined,
       },
       { status: 500 },
     )
