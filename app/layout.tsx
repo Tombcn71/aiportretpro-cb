@@ -32,9 +32,6 @@ export const metadata: Metadata = {
     title: "Professionele zakelijke foto's laten maken? - AI Portret Pro €29",
     description: "Probeer onze online AI fotoshoot: 40 professionele foto's in 15 min. 6x goedkoper dan een traditionele fotograaf!",
   },
-  alternates: {
-    canonical: "https://aiportretpro.nl",
-  },
   robots: {
     index: true,
     follow: true,
