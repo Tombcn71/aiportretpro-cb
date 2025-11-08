@@ -1,9 +1,9 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { sql } from "@/lib/db"
 
-export async function GET(request: NextRequest, { params }: { params: { projectId: string } }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ projectId: string }> }) {
   try {
-    const projectId = params.projectId
+    const { projectId } = await params
 
     // Get project details
     const projects = await sql`
