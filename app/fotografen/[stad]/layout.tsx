@@ -30,11 +30,11 @@ const photographerCounts: { [key: string]: number } = {
 }
 
 type Props = {
-  params: { stad: string }
+  params: Promise<{ stad: string }>
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const stad = params.stad
+  const { stad } = await params
   const cityName = cityNames[stad]
   const photographerCount = photographerCounts[stad]
   
