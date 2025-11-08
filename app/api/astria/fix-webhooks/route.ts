@@ -72,7 +72,7 @@ export async function POST() {
     }
 
     // Check recent webhook calls in logs (if we had a webhook_logs table)
-    let recentWebhookCalls = []
+    let recentWebhookCalls: any[] = []
     try {
       const webhookLogs = await sql`
         SELECT table_name FROM information_schema.tables 

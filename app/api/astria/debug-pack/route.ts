@@ -40,7 +40,7 @@ export async function GET() {
     }
 
     // 2. List your tunes to find the correct ID
-    let yourTunes = []
+    let yourTunes: any[] = []
     try {
       const tunesResponse = await axios.get(`${ASTRIA_DOMAIN}/tunes`, {
         headers: {

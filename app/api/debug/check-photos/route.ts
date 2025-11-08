@@ -29,12 +29,12 @@ export async function GET() {
     // Analyze each project's photos
     const analysis = projects.map((project) => {
       let photoCount = 0
-      let photoSample = []
+      let photoSample: any[] = []
       let parseError = null
 
       if (project.generated_photos) {
         try {
-          let photos = []
+          let photos: any[] = []
 
           if (typeof project.generated_photos === "string") {
             // Handle JSON string

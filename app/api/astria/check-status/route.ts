@@ -55,7 +55,7 @@ export async function POST() {
         }
 
         // Check prompts for this tune
-        let prompts = []
+        let prompts: any[] = []
         try {
           const promptsResponse = await axios.get(`https://api.astria.ai/tunes/${project.prediction_id}/prompts`, {
             headers: {

@@ -28,7 +28,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     }
 
     // Get webhook logs for this project's tune_id
-    let webhookLogs = []
+    let webhookLogs: any[] = []
     if (project.tune_id) {
       webhookLogs = await sql`
         SELECT * FROM webhook_logs 
