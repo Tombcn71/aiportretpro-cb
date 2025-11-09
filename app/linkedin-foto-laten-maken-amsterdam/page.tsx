@@ -751,7 +751,7 @@ export default function LinkedInAmsterdamPage() {
 
       {/* Footer Breadcrumb Navigation */}
       <Breadcrumb items={[
-        { label: "LinkedIn Fotografie", href: "/linkedin-profielfoto" },
+        { label: "LinkedIn Fotografie", href: "/linkedin-foto-laten-maken" },
         { label: "Amsterdam" }
       ]} />
 

@@ -752,7 +752,7 @@ export default function LinkedInAlmerePage() {
 
       {/* Footer Breadcrumb Navigation */}
       <Breadcrumb items={[
-        { label: "LinkedIn Fotografie", href: "/linkedin-profielfoto" },
+        { label: "LinkedIn Fotografie", href: "/linkedin-foto-laten-maken" },
         { label: "Almere" }
       ]} />
 
