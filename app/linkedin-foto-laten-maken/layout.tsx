@@ -30,6 +30,9 @@ export const metadata: Metadata = {
     index: true,
     follow: true,
   },
+  alternates: {
+    canonical: "https://aiportretpro.nl/linkedin-foto-laten-maken",
+  },
 }
 
 export default function LinkedInProfielFotoLayout({
