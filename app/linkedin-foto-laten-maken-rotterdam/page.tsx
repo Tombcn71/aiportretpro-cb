@@ -47,9 +47,9 @@ const companies = [
 // LinkedIn-specific FAQ data with SEO keywords - Rotterdam specific
 const faqData = [
   {
-    question: "Waarom kiezen zoveel Rotterdammers voor AI LinkedIn foto's?",
+    question: "Waarom zijn AI LinkedIn foto's een goede keuze voor Rotterdammers?",
     answer:
-      "Rotterdam is de grootste havenstad van Europa met meer dan 320.000 LinkedIn professionals in logistiek, maritieme sector, en innovatie. Traditionele fotostudio's in Rotterdam vragen €150-€350 per sessie, terwijl onze AI service slechts €29 kost. Daarom kiezen steeds meer Rotterdamse zakenmensen voor onze efficiënte, no-nonsense aanpak.",
+      "Rotterdam is de grootste havenstad van Europa met meer dan 320.000 LinkedIn professionals in logistiek, maritieme sector, en innovatie. Traditionele fotostudio's in Rotterdam vragen €150-€350 per sessie, terwijl onze AI service slechts €29 kost. Voor Rotterdamse zakenmensen past dit perfect bij de efficiënte, no-nonsense mentaliteit van de stad.",
   },
   {
     question: "Wat maakt een perfecte LinkedIn profielfoto?",

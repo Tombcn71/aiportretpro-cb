@@ -48,7 +48,7 @@ const companies = [
 // Tilburg-specific FAQ data
 const faqData = [
   {
-    question: "Waarom kiezen zoveel Tilburgers voor AI LinkedIn foto's?",
+    question: "Waarom zijn AI LinkedIn foto's een goede keuze voor Tilburgers?",
     answer:
       "Tilburg heeft meer dan 110.000 LinkedIn professionals in onderwijs, logistiek, en zakelijke dienstverlening. Als universiteitss stad met een groeiende zakelijke sector is een professionele LinkedIn foto essentieel. Onze AI service voor €29 biedt Tilburgse professionals een betaalbare, snelle oplossing zonder in te leveren op kwaliteit.",
   },

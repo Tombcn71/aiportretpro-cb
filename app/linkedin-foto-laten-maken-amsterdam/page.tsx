@@ -48,9 +48,9 @@ const companies = [
 // LinkedIn-specific FAQ data with SEO keywords - Amsterdam specific
 const faqData = [
   {
-    question: "Waarom kiezen zoveel Amsterdammers voor AI LinkedIn foto's?",
+    question: "Waarom zijn AI LinkedIn foto's een goede keuze voor Amsterdammers?",
     answer:
-      "Amsterdam heeft meer dan 450.000 LinkedIn professionals die actief zijn in tech, finance, en creatieve sectoren. Traditionele fotograaf tarieven in Amsterdam liggen tussen €150-€400, terwijl onze AI service slechts €29 kost. Daarom kiezen steeds meer Amsterdamse professionals voor onze snelle, betaalbare oplossing zonder in te leveren op kwaliteit.",
+      "Amsterdam heeft meer dan 450.000 LinkedIn professionals die actief zijn in tech, finance, en creatieve sectoren. Traditionele fotograaf tarieven in Amsterdam liggen tussen €150-€400, terwijl onze AI service slechts €29 kost. Voor drukke Amsterdamse professionals is dit een snelle, betaalbare oplossing zonder in te leveren op kwaliteit.",
   },
   {
     question: "Wat maakt een perfecte LinkedIn profielfoto?",

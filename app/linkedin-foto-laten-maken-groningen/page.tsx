@@ -48,7 +48,7 @@ const companies = [
 // Groningen-specific FAQ data
 const faqData = [
   {
-    question: "Waarom kiezen zoveel Groningers voor AI LinkedIn foto's?",
+    question: "Waarom zijn AI LinkedIn foto's een goede keuze voor Groningers?",
     answer:
       "Groningen heeft meer dan 100.000 LinkedIn professionals, vooral in energie, onderwijs, en gezondheidszorg. Als noordelijke kennisstad met de RUG en UMCG is een professionele online aanwezigheid belangrijk. Onze AI service voor €29 is perfect voor Groningse professionals - praktisch, betaalbaar, en zonder gedoe.",
   },

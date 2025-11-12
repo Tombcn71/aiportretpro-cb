@@ -48,7 +48,7 @@ const companies = [
 // Eindhoven-specific FAQ data
 const faqData = [
   {
-    question: "Waarom kiezen zoveel Eindhovenaren voor AI LinkedIn foto's?",
+    question: "Waarom zijn AI LinkedIn foto's een goede keuze voor Eindhovenaren?",
     answer:
       "Eindhoven is de tech-hoofdstad van Nederland met meer dan 120.000 LinkedIn professionals in hightech, design, en innovatie. Als Brainport-regio met bedrijven zoals ASML, Philips, en NXP is een sterke online aanwezigheid cruciaal. Onze AI service voor €29 past perfect bij de innovatieve mindset van Eindhoven - modern, efficiënt, en toekomstgericht.",
   },

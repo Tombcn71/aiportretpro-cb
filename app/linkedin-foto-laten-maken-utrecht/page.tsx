@@ -48,7 +48,7 @@ const companies = [
 // Utrecht-specific FAQ data
 const faqData = [
   {
-    question: "Waarom kiezen zoveel Utrechters voor AI LinkedIn foto's?",
+    question: "Waarom zijn AI LinkedIn foto's een goede keuze voor Utrechters?",
     answer:
       "Utrecht heeft meer dan 180.000 LinkedIn professionals, vooral in de zakelijke dienstverlening, onderwijs, en gezondheidszorg. Als vierde stad van Nederland combineert Utrecht historie met moderne business. Onze AI service voor €29 is perfect voor Utrechtse professionals die kwaliteit willen zonder de hoge kosten (€150-€350) van traditionele fotostudio's.",
   },

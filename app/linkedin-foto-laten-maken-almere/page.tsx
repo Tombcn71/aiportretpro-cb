@@ -48,7 +48,7 @@ const companies = [
 // Almere-specific FAQ data
 const faqData = [
   {
-    question: "Waarom kiezen zoveel Almeerders voor AI LinkedIn foto's?",
+    question: "Waarom zijn AI LinkedIn foto's een goede keuze voor Almeerders?",
     answer:
       "Almere heeft meer dan 95.000 LinkedIn professionals in diverse sectoren. Als jonge, dynamische stad met goede verbindingen naar Amsterdam is een sterke online aanwezigheid belangrijk. Onze AI service voor €29 is perfect voor Almere's moderne, pragmatische professionals - snel, betaalbaar, en zonder gedoe.",
   },

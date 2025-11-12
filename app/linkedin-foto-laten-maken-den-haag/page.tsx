@@ -49,7 +49,7 @@ const companies = [
 // Den Haag-specific FAQ data
 const faqData = [
   {
-    question: "Waarom kiezen zoveel Hagenaars voor AI LinkedIn foto's?",
+    question: "Waarom zijn AI LinkedIn foto's een goede keuze voor Hagenaars?",
     answer:
       "Den Haag is de regeringsstad met meer dan 280.000 LinkedIn professionals in overheid, internationale organisaties, en juridische sector. Als centrum van politiek en diplomatie is een professionele uitstraling essentieel. Onze AI service voor €29 biedt dezelfde kwaliteit als dure Haagse fotostudio's (€150-€400) maar dan sneller en betaalbaarder.",
   },

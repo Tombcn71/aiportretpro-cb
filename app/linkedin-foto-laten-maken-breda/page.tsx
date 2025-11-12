@@ -48,7 +48,7 @@ const companies = [
 // Breda-specific FAQ data
 const faqData = [
   {
-    question: "Waarom kiezen zoveel Bredanaars voor AI LinkedIn foto's?",
+    question: "Waarom zijn AI LinkedIn foto's een goede keuze voor Bredanaars?",
     answer:
       "Breda heeft meer dan 90.000 LinkedIn professionals in logistiek, maakindustrie, en zakelijke dienstverlening. Als belangrijke stad in Noord-Brabant met bedrijven zoals Bavaria en vele internationale bedrijven is een professionele LinkedIn foto cruciaal. Onze AI service voor €29 biedt Bredase professionals een moderne, betaalbare oplossing.",
   },

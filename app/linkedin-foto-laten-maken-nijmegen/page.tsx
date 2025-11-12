@@ -48,7 +48,7 @@ const companies = [
 // Nijmegen-specific FAQ data
 const faqData = [
   {
-    question: "Waarom kiezen zoveel Nijmegenaren voor AI LinkedIn foto's?",
+    question: "Waarom zijn AI LinkedIn foto's een goede keuze voor Nijmegenaren?",
     answer:
       "Nijmegen heeft meer dan 85.000 LinkedIn professionals, vooral in onderwijs, gezondheidszorg, en tech. Als oudste stad van Nederland met de Radboud Universiteit en UMC is een professionele LinkedIn foto belangrijk. Onze AI service voor €29 combineert Nijmeegse historie met moderne technologie - perfect voor de lokale professional.",
   },
