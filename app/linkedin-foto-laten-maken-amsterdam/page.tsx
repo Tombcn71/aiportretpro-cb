@@ -45,19 +45,23 @@ const companies = [
   { name: "Spotify", logo: "/placeholder.svg?height=40&width=120&text=Spotify" },
 ]
 
-// LinkedIn-specific FAQ data with SEO keywords
+// LinkedIn-specific FAQ data with SEO keywords - Amsterdam specific
 const faqData = [
   {
-    question: "Waarom is een LinkedIn profielfoto zo belangrijk voor mijn carrière?",
+    question: "Waarom kiezen zoveel Amsterdammers voor AI LinkedIn foto's?",
     answer:
-      "Je LinkedIn profielfoto is vaak het eerste wat potentiële werkgevers, recruiters en zakelijke contacten van je zien. Onderzoek toont aan dat profielen met professionele LinkedIn foto's 14x meer profielweergaves krijgen en 36% meer berichten ontvangen. Een krachtige LinkedIn profielfoto verhoogt je zichtbaarheid, vertrouwen en professionele uitstraling aanzienlijk.",
+      "Amsterdam heeft meer dan 450.000 LinkedIn professionals die actief zijn in tech, finance, en creatieve sectoren. Traditionele fotograaf tarieven in Amsterdam liggen tussen €150-€400, terwijl onze AI service slechts €29 kost. Daarom kiezen steeds meer Amsterdamse professionals voor onze snelle, betaalbare oplossing zonder in te leveren op kwaliteit.",
   },
   {
     question: "Wat maakt een perfecte LinkedIn profielfoto?",
     answer:
       "De perfecte LinkedIn profielfoto is professioneel, helder en vertrouwenwekkend. Key elementen zijn: gezicht vult 60% van de foto, professionele kleding, neutrale achtergrond, natuurlijke glimlach, en goede belichting. Onze AI genereert automatisch LinkedIn-geoptimaliseerde foto's die voldoen aan alle LinkedIn richtlijnen en best practices.",
   },
-  
+  {
+    question: "Kan ik mijn LinkedIn foto laten maken zonder naar een fotostudio in Amsterdam te gaan?",
+    answer:
+      "Ja! Dat is precies waar onze service voor is. Geen afspraak maken, geen reizen door Amsterdam, geen wachttijden. Upload gewoon je foto's vanuit huis of kantoor, en binnen 15 minuten heb je 40 professionele LinkedIn foto's klaar. Perfect voor drukke Amsterdamse professionals die geen tijd hebben voor een fysieke fotoshoot.",
+  },
   {
     question: "Hoeveel LinkedIn foto's krijg ik en hoe snel zijn ze klaar?",
     answer:
@@ -69,19 +73,14 @@ const faqData = [
       "Absoluut! Onze AI is gespecialiseerd in het creëren van studio-kwaliteit LinkedIn profielfoto's. Ze zijn onherkenbaar van traditionele fotograaf foto's maar dan 6 x goedkoper en binnen 15 minuten klaar. Perfect voor professionals die snel een professionele LinkedIn foto nodig hebben zonder de hoge kosten van een fotostudio.",
   },
   {
-    question: "Voldoen de foto's aan alle LinkedIn richtlijnen en specificaties?",
+    question: "Werken jullie LinkedIn foto's goed voor de Amsterdamse zakelijke markt?",
     answer:
-      "Ja, alle LinkedIn foto's voldoen volledig aan LinkedIn's community richtlijnen en technische specificaties. Ze zijn professioneel, passend gekleed, en geoptimaliseerd voor maximale impact op het LinkedIn platform. Je kunt ze direct uploaden als LinkedIn profielfoto zonder zorgen over policy violations.",
+      "Zeker! Amsterdam is een internationale business hub met professionals uit tech (Booking.com, TomTom), finance (ING, ABN AMRO), en startups. Onze LinkedIn foto's zijn perfect geschikt voor deze diverse zakelijke omgeving. Of je nu werkt in de Zuidas, het centrum, of Amsterdam Noord - onze foto's maken de juiste professionele indruk.",
   },
   {
     question: "Kan ik de LinkedIn foto's ook gebruiken voor andere professionele doeleinden?",
     answer:
       "Zeker! Hoewel geoptimaliseerd voor LinkedIn, zijn alle foto's perfect bruikbaar voor je zakelijke website, email handtekening, corporate presentaties, persberichten, en andere professionele toepassingen. Je hebt volledige commerciële rechten op alle foto's.",
-  },
-  {
-    question: "Hoe verhoogt een professionele LinkedIn foto mijn carrièrekansen?",
-    answer:
-      "Een sterke LinkedIn profielfoto verhoogt significant je zichtbaarheid bij recruiters en potentiële werkgevers. Studies tonen aan dat professionals met professionele LinkedIn foto's meer wordt benaderd voor jobs, hebben hogere klik-through rates op hun profiel, en worden gezien als betrouwbaarder en competenter. Het is een investering in je professionele brand.",
   }
 ]
 

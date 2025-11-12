@@ -44,19 +44,23 @@ const companies = [
   { name: "Spotify", logo: "/placeholder.svg?height=40&width=120&text=Spotify" },
 ]
 
-// LinkedIn-specific FAQ data with SEO keywords
+// LinkedIn-specific FAQ data with SEO keywords - Rotterdam specific
 const faqData = [
   {
-    question: "Waarom is een LinkedIn profielfoto zo belangrijk voor mijn carrière?",
+    question: "Waarom kiezen zoveel Rotterdammers voor AI LinkedIn foto's?",
     answer:
-      "Je LinkedIn profielfoto is vaak het eerste wat potentiële werkgevers, recruiters en zakelijke contacten van je zien. Onderzoek toont aan dat profielen met professionele LinkedIn foto's 14x meer profielweergaves krijgen en 36% meer berichten ontvangen. Een krachtige LinkedIn profielfoto verhoogt je zichtbaarheid, vertrouwen en professionele uitstraling aanzienlijk.",
+      "Rotterdam is de grootste havenstad van Europa met meer dan 320.000 LinkedIn professionals in logistiek, maritieme sector, en innovatie. Traditionele fotostudio's in Rotterdam vragen €150-€350 per sessie, terwijl onze AI service slechts €29 kost. Daarom kiezen steeds meer Rotterdamse zakenmensen voor onze efficiënte, no-nonsense aanpak.",
   },
   {
     question: "Wat maakt een perfecte LinkedIn profielfoto?",
     answer:
       "De perfecte LinkedIn profielfoto is professioneel, helder en vertrouwenwekkend. Key elementen zijn: gezicht vult 60% van de foto, professionele kleding, neutrale achtergrond, natuurlijke glimlach, en goede belichting. Onze AI genereert automatisch LinkedIn-geoptimaliseerde foto's die voldoen aan alle LinkedIn richtlijnen en best practices.",
   },
-  
+  {
+    question: "Past een AI LinkedIn foto bij de Rotterdamse zakelijke cultuur?",
+    answer:
+      "Absoluut! Rotterdam staat bekend om zijn pragmatische, no-nonsense mentaliteit. Onze AI LinkedIn foto's passen perfect bij deze cultuur: efficiënt, betaalbaar, en professioneel. Of je nu werkt in de haven, bij Unilever, Coolblue, of een startup - onze foto's maken de juiste zakelijke indruk zonder poespas.",
+  },
   {
     question: "Hoeveel LinkedIn foto's krijg ik en hoe snel zijn ze klaar?",
     answer:
@@ -76,11 +80,6 @@ const faqData = [
     question: "Kan ik de LinkedIn foto's ook gebruiken voor andere professionele doeleinden?",
     answer:
       "Zeker! Hoewel geoptimaliseerd voor LinkedIn, zijn alle foto's perfect bruikbaar voor je zakelijke website, email handtekening, corporate presentaties, persberichten, en andere professionele toepassingen. Je hebt volledige commerciële rechten op alle foto's.",
-  },
-  {
-    question: "Hoe verhoogt een professionele LinkedIn foto mijn carrièrekansen?",
-    answer:
-      "Een sterke LinkedIn profielfoto verhoogt significant je zichtbaarheid bij recruiters en potentiële werkgevers. Studies tonen aan dat professionals met professionele LinkedIn foto's meer wordt benaderd voor jobs, hebben hogere klik-through rates op hun profiel, en worden gezien als betrouwbaarder en competenter. Het is een investering in je professionele brand.",
   }
 ]
 

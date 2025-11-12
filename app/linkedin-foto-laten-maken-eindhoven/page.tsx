@@ -45,18 +45,23 @@ const companies = [
 ]
 
 // LinkedIn-specific FAQ data with SEO keywords
+// Eindhoven-specific FAQ data
 const faqData = [
   {
-    question: "Waarom is een LinkedIn profielfoto zo belangrijk voor mijn carrière?",
+    question: "Waarom kiezen zoveel Eindhovenaren voor AI LinkedIn foto's?",
     answer:
-      "Je LinkedIn profielfoto is vaak het eerste wat potentiële werkgevers, recruiters en zakelijke contacten van je zien. Onderzoek toont aan dat profielen met professionele LinkedIn foto's 14x meer profielweergaves krijgen en 36% meer berichten ontvangen. Een krachtige LinkedIn profielfoto verhoogt je zichtbaarheid, vertrouwen en professionele uitstraling aanzienlijk.",
+      "Eindhoven is de tech-hoofdstad van Nederland met meer dan 120.000 LinkedIn professionals in hightech, design, en innovatie. Als Brainport-regio met bedrijven zoals ASML, Philips, en NXP is een sterke online aanwezigheid cruciaal. Onze AI service voor €29 past perfect bij de innovatieve mindset van Eindhoven - modern, efficiënt, en toekomstgericht.",
   },
   {
     question: "Wat maakt een perfecte LinkedIn profielfoto?",
     answer:
       "De perfecte LinkedIn profielfoto is professioneel, helder en vertrouwenwekkend. Key elementen zijn: gezicht vult 60% van de foto, professionele kleding, neutrale achtergrond, natuurlijke glimlach, en goede belichting. Onze AI genereert automatisch LinkedIn-geoptimaliseerde foto's die voldoen aan alle LinkedIn richtlijnen en best practices.",
   },
-  
+  {
+    question: "Past AI fotografie bij de tech-cultuur van Eindhoven?",
+    answer:
+      "Perfect! Eindhoven staat voor innovatie en technologie. Onze AI LinkedIn foto's passen naadloos bij deze cultuur. Of je nu werkt in de Brainport-regio, bij een startup op Strijp-S, of in de hightech sector - onze moderne aanpak sluit aan bij de vooruitstrevende mentaliteit van Eindhoven.",
+  },
   {
     question: "Hoeveel LinkedIn foto's krijg ik en hoe snel zijn ze klaar?",
     answer:
@@ -76,11 +81,6 @@ const faqData = [
     question: "Kan ik de LinkedIn foto's ook gebruiken voor andere professionele doeleinden?",
     answer:
       "Zeker! Hoewel geoptimaliseerd voor LinkedIn, zijn alle foto's perfect bruikbaar voor je zakelijke website, email handtekening, corporate presentaties, persberichten, en andere professionele toepassingen. Je hebt volledige commerciële rechten op alle foto's.",
-  },
-  {
-    question: "Hoe verhoogt een professionele LinkedIn foto mijn carrièrekansen?",
-    answer:
-      "Een sterke LinkedIn profielfoto verhoogt significant je zichtbaarheid bij recruiters en potentiële werkgevers. Studies tonen aan dat professionals met professionele LinkedIn foto's meer wordt benaderd voor jobs, hebben hogere klik-through rates op hun profiel, en worden gezien als betrouwbaarder en competenter. Het is een investering in je professionele brand.",
   }
 ]
 
