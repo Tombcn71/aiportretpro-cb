@@ -74,7 +74,7 @@ export default function CityNavigation({ currentCity, showTitle = true, variant 
           </div>
           <div className="mt-3 text-center">
             <Link 
-              href="/linkedin-profielfoto" 
+              href="/linkedin-foto-laten-maken" 
               className="text-[#0077B5] hover:text-[#004182] hover:underline text-xs"
             >
               Alle locaties bekijken
