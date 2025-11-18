@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     description: 'Complete gids voor de perfecte LinkedIn profielfoto. Krijg 14x meer profielweergaven.',
   },
   alternates: {
-    canonical: 'https://aiportretpro.nl/blog/linkedin-profielfoto-gids-2024'
+    canonical: 'https://aiportretpro.nl/blog/linkedin-profielfoto-gids-2025'
   }
 }
 
