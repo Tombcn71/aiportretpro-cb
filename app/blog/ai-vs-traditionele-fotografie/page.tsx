@@ -607,7 +607,7 @@ export default function AIVsTraditioneleFotografiePage() {
                 <h3 className="font-bold text-gray-900 mb-2">LinkedIn profielfoto: Complete gids voor professionals</h3>
                 <p className="text-gray-600 text-sm mb-4">Alles wat je moet weten over de perfecte LinkedIn profielfoto.</p>
                 <Button asChild size="sm" variant="outline">
-                  <Link href="/blog/linkedin-profielfoto-gids-2024">
+                  <Link href="/blog/linkedin-profielfoto-gids-2025">
                     Lees meer →
                   </Link>
                 </Button>

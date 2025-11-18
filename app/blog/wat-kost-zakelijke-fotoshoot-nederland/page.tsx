@@ -415,7 +415,7 @@ export default function ZakelijkeFotoshootKostenPage() {
                 <h3 className="font-bold text-gray-900 mb-2">LinkedIn profielfoto: Complete gids voor professionals [2025]</h3>
                 <p className="text-gray-600 text-sm mb-4">Een perfecte LinkedIn foto kan je carrière een boost geven. Ontdek de do's en don'ts.</p>
                 <Button asChild size="sm" variant="outline">
-                  <Link href="/blog/linkedin-profielfoto-gids-2024">
+                  <Link href="/blog/linkedin-profielfoto-gids-2025">
                     Lees meer →
                   </Link>
                 </Button>

@@ -19,7 +19,7 @@ const blogPosts = [
     featured: true
   },
   {
-    id: "linkedin-profielfoto-gids-2024",
+    id: "linkedin-profielfoto-gids-2025",
     title: "LinkedIn profielfoto: Complete gids voor professionals [2025]",
     excerpt: "Een perfecte LinkedIn foto kan je carrière een boost geven. Ontdek de do's en don'ts voor een professionele profielfoto die opvalt.",
     readTime: "6 min leestijd", 
