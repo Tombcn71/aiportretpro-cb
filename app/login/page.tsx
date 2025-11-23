@@ -130,8 +130,11 @@ export default function LoginPage() {
   // If user is already authenticated, redirect them
   useEffect(() => {
     if (status === "authenticated" && session) {
+      // Check for callbackUrl first (from pricing page), then source, then default to dashboard
+      const callbackUrl = searchParams.get("callbackUrl")
       const isHomepageCTA = searchParams.get("source") === "homepage"
-      const redirectUrl = isHomepageCTA ? "/pricing" : "/dashboard"
+      const redirectUrl = callbackUrl || (isHomepageCTA ? "/pricing" : "/dashboard")
+      console.log("Already authenticated, redirecting to:", redirectUrl)
       router.push(redirectUrl)
     }
     // Return undefined (no cleanup function needed)
