@@ -29,10 +29,13 @@ export async function POST(request: Request) {
     const passwordHash = await bcrypt.hash(password, saltRounds)
 
     // Create new user with password_hash
+    // Extract name from email (before @) as default
+    const defaultName = email.split('@')[0]
+    
     const newUser = await sql`
-      INSERT INTO users (email, password_hash, created_at, updated_at)
-      VALUES (${email}, ${passwordHash}, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-      RETURNING id, email, created_at
+      INSERT INTO users (email, name, image, password_hash, created_at, updated_at)
+      VALUES (${email}, ${defaultName}, '', ${passwordHash}, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+      RETURNING id, email, name, created_at
     `
 
     if (newUser.length === 0) {
