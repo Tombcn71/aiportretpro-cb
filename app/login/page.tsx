@@ -93,9 +93,11 @@ export default function LoginPage() {
           setError("Account aangemaakt, maar inloggen mislukt. Probeer handmatig in te loggen.")
           setIsSignUp(false) // Switch to login mode
         } else if (signInResult?.ok) {
-          // Successfully signed in, redirect to appropriate page
-          const redirectUrl = data.redirectUrl || "/dashboard"
-          console.log("✅ Signed in successfully, redirecting to:", redirectUrl)
+          // After SIGNUP: always go to pricing (new customers need to pay)
+          // Check if there's a callbackUrl (from pricing page redirect)
+          const callbackUrl = searchParams.get("callbackUrl")
+          const redirectUrl = callbackUrl || "/pricing"
+          console.log("✅ Signup + Sign in successful, redirecting to:", redirectUrl)
           router.push(redirectUrl)
           return
         }
@@ -110,10 +112,11 @@ export default function LoginPage() {
         if (result?.error) {
           setError("Ongeldige email of wachtwoord")
         } else if (result?.ok) {
-          // Check if this is a homepage CTA login
-          const isHomepageCTA = searchParams.get("source") === "homepage"
-          const callbackUrl = isHomepageCTA ? "/pricing" : "/dashboard"
-          router.push(callbackUrl)
+          // After LOGIN: go to callbackUrl or dashboard (existing customers see their photos)
+          const callbackUrl = searchParams.get("callbackUrl")
+          const redirectUrl = callbackUrl || "/dashboard"
+          console.log("✅ Login successful, redirecting to:", redirectUrl)
+          router.push(redirectUrl)
         }
       }
     } catch (error) {

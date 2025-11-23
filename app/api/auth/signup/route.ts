@@ -42,8 +42,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Fout bij het aanmaken van account" }, { status: 500 })
     }
 
-    // Determine redirect URL based on source
-    const redirectUrl = source === "homepage" ? "/pricing" : "/dashboard"
+    // All new signups should go to pricing (they need to pay)
+    const redirectUrl = "/pricing"
 
     return NextResponse.json({ 
       message: "Account succesvol aangemaakt",
