@@ -26,7 +26,6 @@ export async function POST(request: NextRequest) {
     }
 
     const data = await request.json()
-    const timestamp = new Date().toISOString()
     console.log(`[${timestamp}] 📦 Project data received:`, {
       projectName: data.projectName,
       gender: data.gender,
