@@ -10,7 +10,7 @@ import { useRouter } from "next/navigation"
 import { trackViewContent, trackInitiateCheckout } from "@/lib/facebook-pixel"
 
 export default function PricingPage() {
-  const { data: session } = useSession()
+  const { data: session, status } = useSession()
   const [loading, setLoading] = useState(false)
   const [projectData, setProjectData] = useState<any>(null)
   const [hasExistingProject, setHasExistingProject] = useState(false)
@@ -45,6 +45,12 @@ export default function PricingPage() {
   const handlePlanSelect = () => {
     // Track checkout initiation
     trackInitiateCheckout(29)
+
+    // Wait for session to load
+    if (status === "loading") {
+      console.log("Session still loading, please wait...")
+      return
+    }
 
     if (!session) {
       // Redirect to login with callback to payment page
@@ -91,6 +97,18 @@ export default function PricingPage() {
     "Klaar binnen 15 minuten",
     "Perfect voor LinkedIn, Social Media, CV, Website en Print",
   ]
+
+  // Show loading while checking session
+  if (status === "loading") {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#0077B5] mx-auto mb-4"></div>
+          <p className="text-gray-600">Laden...</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen pt-20">
