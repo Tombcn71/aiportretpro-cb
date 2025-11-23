@@ -52,6 +52,28 @@ export default function LoginPage() {
           body: JSON.stringify({ email, password, source }),
         })
 
+        // If account already exists (409), try to sign in instead
+        if (response.status === 409) {
+          console.log("Account already exists, attempting to sign in instead...")
+          const signInResult = await signIn("credentials", {
+            email,
+            password,
+            redirect: false,
+          })
+
+          if (signInResult?.error) {
+            setError("Dit email adres is al in gebruik. Probeer in te loggen.")
+            setIsSignUp(false) // Switch to login mode
+            return
+          } else if (signInResult?.ok) {
+            const isHomepageCTA = searchParams.get("source") === "homepage"
+            const redirectUrl = isHomepageCTA ? "/pricing" : "/dashboard"
+            console.log("✅ Signed in successfully, redirecting to:", redirectUrl)
+            router.push(redirectUrl)
+            return
+          }
+        }
+
         if (!response.ok) {
           const data = await response.json()
           throw new Error(data.error || "Registratie mislukt")

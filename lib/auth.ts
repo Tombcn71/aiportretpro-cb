@@ -45,11 +45,24 @@ export const authOptions: NextAuthOptions = {
             return null
           }
 
+          // FIX: If name is NULL/empty (old email signup users), set it to email prefix
+          let userName = userData.name
+          if (!userName || userName.trim() === '') {
+            userName = userData.email.split('@')[0]
+            // Update in database
+            await sql`
+              UPDATE users 
+              SET name = ${userName}, image = COALESCE(image, ''), updated_at = CURRENT_TIMESTAMP
+              WHERE id = ${userData.id}
+            `
+            console.log(`✅ Fixed NULL name for user ${userData.id}: ${userName}`)
+          }
+
           return {
             id: userData.id.toString(),
             email: userData.email,
-            name: userData.name,
-            image: userData.image,
+            name: userName,
+            image: userData.image || '',
           }
 
         } catch (error) {
