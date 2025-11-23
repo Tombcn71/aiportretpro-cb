@@ -57,10 +57,24 @@ export default function LoginPage() {
           throw new Error(data.error || "Registratie mislukt")
         }
 
-        // Get the redirect URL from the signup response
         const data = await response.json()
-        if (data.redirectUrl) {
-          router.push(data.redirectUrl)
+        
+        // CRITICAL FIX: After successful signup, automatically sign in the user
+        console.log("✅ Signup successful, now signing in...")
+        const signInResult = await signIn("credentials", {
+          email,
+          password,
+          redirect: false,
+        })
+
+        if (signInResult?.error) {
+          setError("Account aangemaakt, maar inloggen mislukt. Probeer handmatig in te loggen.")
+          setIsSignUp(false) // Switch to login mode
+        } else if (signInResult?.ok) {
+          // Successfully signed in, redirect to appropriate page
+          const redirectUrl = data.redirectUrl || "/dashboard"
+          console.log("✅ Signed in successfully, redirecting to:", redirectUrl)
+          router.push(redirectUrl)
           return
         }
       } else {

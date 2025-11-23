@@ -6,22 +6,35 @@ import { generateWithSelectedPack } from "@/lib/astria"
 
 export async function POST(request: NextRequest) {
   try {
-    console.log("Creating new project with Astria...")
+    const timestamp = new Date().toISOString()
+    console.log(`[${timestamp}] 🚀 Creating new project with Astria...`)
 
     const session = await getServerSession(authOptions)
+    console.log(`[${timestamp}] 🔐 Session check:`, {
+      hasSession: !!session,
+      hasUser: !!session?.user,
+      hasEmail: !!session?.user?.email,
+      email: session?.user?.email,
+    })
+
     if (!session?.user?.email) {
-      console.log("No session found")
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      console.error(`[${timestamp}] ❌ NO SESSION FOUND - User not authenticated`)
+      return NextResponse.json({ 
+        error: "Je sessie is verlopen. Log opnieuw in en probeer het nogmaals.",
+        code: "SESSION_EXPIRED"
+      }, { status: 401 })
     }
 
     const data = await request.json()
-    console.log("Project data received:", {
+    const timestamp = new Date().toISOString()
+    console.log(`[${timestamp}] 📦 Project data received:`, {
       projectName: data.projectName,
       gender: data.gender,
       outfits: data.outfits,
       backgrounds: data.backgrounds,
       photoCount: data.uploadedPhotos?.length,
       firstPhotoPreview: data.uploadedPhotos?.[0]?.substring(0, 50) + "...",
+      userEmail: session.user.email,
     })
 
     const { projectName, gender, outfits, backgrounds, uploadedPhotos } = data
@@ -51,13 +64,17 @@ export async function POST(request: NextRequest) {
 
     const user = await getUserByEmail(session.user.email)
     if (!user) {
-      console.log("User not found:", session.user.email)
-      return NextResponse.json({ error: "User not found" }, { status: 404 })
+      console.error(`[${timestamp}] ❌ USER NOT FOUND in database:`, session.user.email)
+      return NextResponse.json({ 
+        error: "Je account is niet gevonden. Log opnieuw in en probeer het nogmaals.",
+        code: "USER_NOT_FOUND"
+      }, { status: 404 })
     }
 
-    console.log("Found user:", user.id)
+    console.log(`[${timestamp}] ✅ Found user:`, user.id, user.email)
 
     // Create project in database
+    console.log(`[${timestamp}] 📝 Creating project in database...`)
     const project = await createProject({
       userId: user.id,
       purchaseId: 1, // You might want to get this from the session or purchase
@@ -68,11 +85,11 @@ export async function POST(request: NextRequest) {
       uploadedPhotos,
     })
 
-    console.log("Created project:", project.id)
+    console.log(`[${timestamp}] ✅ Created project:`, project.id)
 
     // Start Astria generation with pack 928
     try {
-      console.log("Starting Astria generation...")
+      console.log(`[${timestamp}] 🎨 Starting Astria generation...`)
       const astriaResponse = await generateWithSelectedPack({
         packId: "928", // Default pack
         images: uploadedPhotos,
@@ -81,7 +98,7 @@ export async function POST(request: NextRequest) {
         projectId: project.id,
       })
 
-      console.log("Astria generation started successfully:", {
+      console.log(`[${timestamp}] ✅ Astria generation started successfully:`, {
         tuneId: astriaResponse.id,
         status: astriaResponse.status,
         projectId: project.id,
@@ -90,11 +107,13 @@ export async function POST(request: NextRequest) {
       // Update project with Astria tune ID
       await sql`
         UPDATE projects 
-        SET prediction_id = ${astriaResponse.id.toString()}, status = 'training'
+        SET tune_id = ${astriaResponse.id.toString()}, 
+            prediction_id = ${astriaResponse.id.toString()}, 
+            status = 'training'
         WHERE id = ${project.id}
       `
 
-      console.log("Updated project with Astria tune ID")
+      console.log(`[${timestamp}] ✅ Updated project ${project.id} with Astria tune_id: ${astriaResponse.id}`)
 
       return NextResponse.json({
         projectId: project.id,
@@ -102,7 +121,10 @@ export async function POST(request: NextRequest) {
         status: "training",
       })
     } catch (trainingError) {
-      console.error("Failed to start Astria generation:", trainingError)
+      console.error(`[${timestamp}] ❌ ASTRIA GENERATION FAILED:`, trainingError)
+      console.error(`[${timestamp}] ❌ Project ID: ${project.id}`)
+      console.error(`[${timestamp}] ❌ User ID: ${user.id}`)
+      console.error(`[${timestamp}] ❌ Error details:`, trainingError instanceof Error ? trainingError.stack : trainingError)
 
       // Update project status to failed
       await sql`
@@ -112,7 +134,7 @@ export async function POST(request: NextRequest) {
       `
 
       // Provide more specific error message
-      let errorMessage = "Failed to start AI generation"
+      let errorMessage = "De AI foto generatie kon niet worden gestart. Probeer het opnieuw of neem contact op met support."
       if (trainingError instanceof Error) {
         errorMessage = trainingError.message
       }
@@ -121,6 +143,7 @@ export async function POST(request: NextRequest) {
         {
           error: errorMessage,
           projectId: project.id,
+          code: "ASTRIA_GENERATION_FAILED",
           details: trainingError instanceof Error ? trainingError.message : "Unknown error",
         },
         { status: 500 },
