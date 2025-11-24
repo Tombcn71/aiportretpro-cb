@@ -179,19 +179,11 @@ export default function LoginPage() {
             {/* Main title - Dynamic based on signup/login mode */}
             <CardTitle className="text-xl md:text-2xl text-gray-900 mb-3 font-normal pl-0">
               {!showEmailForm ? (
-                isFromCTA ? (
-                  <>
-                    Even registreren voor veilige betaling en toegang tot de app.
-                    <br />
-                    <span className="text-[#0077B5]">Binnen 2 minuten klaar!</span>
-                  </>
-                ) : (
-                  <>
-                    Welkom bij AIPortretPro
-                    <br />
-                    <span className="text-[#0077B5]">Log in of maak een account aan.</span>
-                  </>
-                )
+                <>
+                  Even registreren voor veilige betaling en toegang tot de app.
+                  <br />
+                  <span className="text-[#0077B5]">Binnen 2 minuten klaar!</span>
+                </>
               ) : isSignUp ? (
                 <>
                   Maak je account aan voor toegang tot de app.
