@@ -173,11 +173,27 @@ export default function LoginPage() {
               <span className="text-lg text-gray-900">AIPortretPro</span>
             </div>
             
-            {/* Main title */}
+            {/* Main title - Dynamic based on signup/login mode */}
             <CardTitle className="text-xl md:text-2xl text-gray-900 mb-3 font-normal pl-0">
-              Even registreren voor veilige betaling en toegang tot de app.
-              <br />
-              <span className="text-[#0077B5]">Binnen 2 minuten klaar!</span> 
+              {!showEmailForm ? (
+                <>
+                  Even registreren voor veilige betaling en toegang tot de app.
+                  <br />
+                  <span className="text-[#0077B5]">Binnen 2 minuten klaar!</span>
+                </>
+              ) : isSignUp ? (
+                <>
+                  Maak je account aan voor toegang tot de app.
+                  <br />
+                  <span className="text-[#0077B5]">Binnen 2 minuten klaar!</span>
+                </>
+              ) : (
+                <>
+                  Welkom terug!
+                  <br />
+                  <span className="text-[#0077B5]">Log in om verder te gaan.</span>
+                </>
+              )}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -274,7 +290,7 @@ export default function LoginPage() {
                     disabled={loading || !email || !password}
                     className="w-full bg-[#0077B5] hover:bg-[#005885] text-white py-6 text-lg font-semibold"
                   >
-                    {loading ? "Bezig..." : (isSignUp ? "Account aanmaken" : "Inloggen")}
+                    {loading ? "Bezig..." : (isSignUp ? "Account aanmaken en doorgaan" : "Inloggen")}
                   </Button>
                 </form>
 
@@ -282,10 +298,10 @@ export default function LoginPage() {
                   <Button
                     variant="ghost"
                     onClick={() => setIsSignUp(!isSignUp)}
-                    className="text-sm text-gray-600"
+                    className="text-sm text-gray-600 hover:text-[#0077B5]"
                     disabled={loading}
                   >
-                    {isSignUp ? "Al een account? Log in" : "Geen account? Maak er een aan"}
+                    {isSignUp ? "Heb je al een account? Log hier in" : "Nieuw hier? Maak een account aan"}
                   </Button>
                 </div>
               </>
