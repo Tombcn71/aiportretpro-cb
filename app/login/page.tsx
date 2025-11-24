@@ -14,14 +14,11 @@ export default function LoginPage() {
   const [showEmailForm, setShowEmailForm] = useState(false)
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  
-  // Default to signup ONLY if coming from homepage/pricing, otherwise login
-  const isFromCTA = searchParams.get("source") === "homepage" || searchParams.get("source") === "pricing"
-  const [isSignUp, setIsSignUp] = useState(isFromCTA) // Smart default based on source
+  const [isSignUp, setIsSignUp] = useState(true) // Default to signup - nieuwe gebruikers
   const [error, setError] = useState("")
   const [isProcessingSignup, setIsProcessingSignup] = useState(false) // Prevent useEffect redirect during signup
+  const router = useRouter()
+  const searchParams = useSearchParams()
 
   const handleGoogleSignIn = async () => {
     setLoading(true)
@@ -176,28 +173,20 @@ export default function LoginPage() {
               <span className="text-lg text-gray-900">AIPortretPro</span>
             </div>
             
-            {/* Main title - Dynamic based on signup/login mode */}
-            <CardTitle className="text-xl md:text-2xl text-gray-900 mb-3 font-normal pl-0">
-              {!showEmailForm ? (
-                <>
-                  Even registreren voor veilige betaling en toegang tot de app.
-                  <br />
-                  <span className="text-[#0077B5]">Binnen 2 minuten klaar!</span>
-                </>
-              ) : isSignUp ? (
-                <>
-                  Maak je account aan voor toegang tot de app.
-                  <br />
-                  <span className="text-[#0077B5]">Binnen 2 minuten klaar!</span>
-                </>
-              ) : (
-                <>
-                  Welkom terug!
-                  <br />
-                  <span className="text-[#0077B5]">Log in om verder te gaan.</span>
-                </>
-              )}
-            </CardTitle>
+            {/* Main title - Show on buttons screen or login mode only */}
+            {!showEmailForm ? (
+              <CardTitle className="text-xl md:text-2xl text-gray-900 mb-3 font-normal pl-0">
+                Even registreren voor veilige betaling en toegang tot de app.
+                <br />
+                <span className="text-[#0077B5]">Binnen 2 minuten klaar!</span>
+              </CardTitle>
+            ) : !isSignUp ? (
+              <CardTitle className="text-xl md:text-2xl text-gray-900 mb-3 font-normal pl-0">
+                Welkom terug!
+                <br />
+                <span className="text-[#0077B5]">Log in om verder te gaan.</span>
+              </CardTitle>
+            ) : null}
           </CardHeader>
           <CardContent className="space-y-4">
             {!showEmailForm ? (
