@@ -16,6 +16,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("")
   const [isSignUp, setIsSignUp] = useState(true) // Default to signup for CTA users
   const [error, setError] = useState("")
+  const [isProcessingSignup, setIsProcessingSignup] = useState(false) // Prevent useEffect redirect during signup
   const router = useRouter()
   const searchParams = useSearchParams()
 

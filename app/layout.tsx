@@ -7,6 +7,7 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { Providers } from "./providers"
 import { Toaster } from "@/components/ui/toaster"
 import FacebookPixel from "@/components/facebook-pixel"
+import GoogleAnalytics from "@/components/google-analytics"
 import { Analytics } from "@vercel/analytics/next"
 import { Suspense } from "react"
 
@@ -113,6 +114,7 @@ export default function RootLayout({
         }} />
       </head>
       <body className={inter.className}>
+        <GoogleAnalytics />
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
           <Providers>
             <Suspense fallback={null}>
