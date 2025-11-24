@@ -239,7 +239,17 @@ export default function LoginPage() {
                   </div>
                   
                   <div className="space-y-2">
-                    <label htmlFor="password" className="text-sm font-medium text-gray-700">Wachtwoord</label>
+                    <div className="flex items-center justify-between">
+                      <label htmlFor="password" className="text-sm font-medium text-gray-700">Wachtwoord</label>
+                      {!isSignUp && (
+                        <a 
+                          href="/forgot-password" 
+                          className="text-xs text-[#0077B5] hover:underline"
+                        >
+                          Wachtwoord vergeten?
+                        </a>
+                      )}
+                    </div>
                     <input
                       id="password"
                       type="password"
