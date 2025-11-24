@@ -22,8 +22,8 @@ export function Header() {
   }, [])
 
   const handleSignIn = () => {
-    // Go to custom login page for new users to follow the flow
-    window.location.href = "/login"
+    // Go directly to login form (not signup buttons)
+    window.location.href = "/login?mode=login"
   }
 
   const toggleMobileMenu = () => {

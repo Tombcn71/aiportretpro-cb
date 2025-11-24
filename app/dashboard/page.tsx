@@ -512,7 +512,7 @@ export default function DashboardPage() {
         {/* Photos Gallery */}
         <div>
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
-            <h2 className="text-2xl font-semibold">Jouw Portetfotos</h2>
+            <h2 className="text-2xl font-semibold">Jouw Portretfotos</h2>
             {validPhotos.length > 0 && (
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-4 w-full sm:w-auto">
                 {/* Main Download Button - Always visible when not in delete mode */}
@@ -645,11 +645,11 @@ export default function DashboardPage() {
           {validPhotos.length === 0 ? (
             <div className="text-center py-20">
               <Camera className="h-16 w-16 text-gray-400 mx-auto mb-6" />
-              <h3 className="text-xl font-semibold mb-4">Nog geen portetfotos</h3>
+              <h3 className="text-xl font-semibold mb-4">Nog geen portretfotos</h3>
               <p className="text-gray-600 mb-8">
                 {credits.credits > 0
                   ? "Je hebt tegoed! Start je eerste project."
-                  : "Koop tegoed om je eerste professionele portetfotos te maken."}
+                  : "Koop tegoed om je eerste professionele portretfotos te maken."}
               </p>
               {credits.credits > 0 ? (
                 <Link href="/use-credit">
@@ -657,7 +657,7 @@ export default function DashboardPage() {
                 </Link>
               ) : (
                 <Link href="/pricing">
-                  <Button className="bg-[#0077B5] hover:bg-[#004182] text-white px-8 py-3">Portetfotos maken</Button>
+                  <Button className="bg-[#0077B5] hover:bg-[#004182] text-white px-8 py-3">Portretfotos maken</Button>
                 </Link>
               )}
             </div>
@@ -742,7 +742,7 @@ export default function DashboardPage() {
             <div className="flex items-center">
               <CheckCircle className="h-5 w-5 text-green-600 mr-2" />
               <p className="text-green-800 font-medium">
-                Geweldig! Je hebt {validPhotos.length} professionele portetfotos klaar voor download.
+                Geweldig! Je hebt {validPhotos.length} professionele portretfotos klaar voor download.
               </p>
             </div>
           </div>

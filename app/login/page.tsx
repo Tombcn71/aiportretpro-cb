@@ -10,15 +10,19 @@ import Image from "next/image"
 
 export default function LoginPage() {
   const { data: session, status } = useSession()
-  const [loading, setLoading] = useState(false)
-  const [showEmailForm, setShowEmailForm] = useState(false)
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [isSignUp, setIsSignUp] = useState(true) // Default to signup - nieuwe gebruikers
-  const [error, setError] = useState("")
-  const [isProcessingSignup, setIsProcessingSignup] = useState(false) // Prevent useEffect redirect during signup
   const router = useRouter()
   const searchParams = useSearchParams()
+  
+  // Check if user came from login button (header) - go directly to login form
+  const isDirectLogin = searchParams.get("mode") === "login"
+  
+  const [loading, setLoading] = useState(false)
+  const [showEmailForm, setShowEmailForm] = useState(isDirectLogin) // Show form immediately if direct login
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [isSignUp, setIsSignUp] = useState(!isDirectLogin) // If direct login, start in login mode
+  const [error, setError] = useState("")
+  const [isProcessingSignup, setIsProcessingSignup] = useState(false) // Prevent useEffect redirect during signup
 
   const handleGoogleSignIn = async () => {
     setLoading(true)
